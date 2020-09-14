@@ -11,6 +11,13 @@ namespace MicrosoftStore
         /// Get all the page details for the given product
         /// </summary>
         [Get("/pages/pdp")]
-        Task<List<StorefrontResponseItem>> GetPage(string productId, string market, string locale, string appversion);
+        Task<List<ResponseItem>> GetPage(string productId, string market, string locale, string appversion);
+
+
+        /// <summary>
+        /// Gets the details for the product with the given product ID
+        /// </summary>
+        [Get("/products/{productId}")]
+        Task<ResponseItem> GetProduct(string productId, string market, string locale);
     }
 }

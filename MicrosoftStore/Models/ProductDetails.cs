@@ -11,7 +11,7 @@ namespace MicrosoftStore.Models
         public string Title { get; set; }
         public string PublisherName { get; set; }
         public DateTimeOffset ReleaseDate { get; set; }
-        public string WhatsNew { get; set; }
+        public List<string> Notes { get; set; }
         public List<string> Features { get; set; }
         public List<string> Categories { get; set; }
         public string PrivacryUrl { get; set; }
@@ -19,7 +19,6 @@ namespace MicrosoftStore.Models
         public bool Accessible { get; set; }
         public bool IsDeviceCompanionApp { get; set; }
         public List<SupportUri> SupportUris { get; set; }
-        public List<string> Notes { get; set; }
         public List<string> SupportedLanguages { get; set; }
         public string PublisherCopyrightInformation { get; set; }
         public string AdditionalLicenseTerms { get; set; }

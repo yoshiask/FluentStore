@@ -1,5 +1,6 @@
 ﻿using AdGuard.Models;
 using Microsoft.Toolkit.Uwp.Notifications;
+using MicrosoftStore.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,7 +20,7 @@ namespace FluentStore
             ".appx", ".appxbundle", ".msix", ".msixbundle"
         };
 
-        public static async Task<bool> InstallPackage(Package package, MicrosoftStore.Models.ProductDetails product)
+        public static async Task<bool> InstallPackage(Package package, ProductDetails product)
         {
             try
             {
@@ -68,11 +69,13 @@ namespace FluentStore
             }
         }
 
-        public static Package GetLatestDesktopPackage(List<Package> packages, MicrosoftStore.Models.ProductDetails product)
+        public static Package GetLatestDesktopPackage(List<Package> packages, ProductDetails product)
         {
             List<Package> installables = packages.FindAll(p => {
                 return IsFiletype(p.Name, INSTALLABLE_EXTS) && (p.PackageFamily != null) && (p.PackageFamily == product.PackageFamilyNames?.First().Split("_")[0]);
             });
+            if (installables.Count <= 0)
+                return null;
             // TODO: Limit to only app packages, not dependencies
             Package latestPack = installables[0];
             foreach (Package p in installables.Skip(1))
@@ -93,7 +96,7 @@ namespace FluentStore
             return false;
         }
 
-        public static ToastNotification GenerateDonwloadProgressToast(Package package, MicrosoftStore.Models.ProductDetails product)
+        public static ToastNotification GenerateDonwloadProgressToast(Package package, ProductDetails product)
         {
             var content = new ToastContent()
             {
@@ -103,10 +106,6 @@ namespace FluentStore
                     {
                         Children =
                         {
-                            new AdaptiveText()
-                            {
-                                Text = "Fluent Store"
-                            },
                             new AdaptiveProgressBar()
                             {
                                 Value = new BindableProgressBarValue("progressValue"),
@@ -148,7 +147,7 @@ namespace FluentStore
             return notif;
         }
         
-        public static ToastNotification GenerateDonwloadSuccessToast(Package package, MicrosoftStore.Models.ProductDetails product)
+        public static ToastNotification GenerateDonwloadSuccessToast(Package package, ProductDetails product)
         {
             var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
                 .AddToastActivationInfo($"action=viewEvent&eventId={package.Name}", ToastActivationType.Foreground)
@@ -159,7 +158,7 @@ namespace FluentStore
             return new ToastNotification(content.GetXml());
         }
 
-        public static ToastNotification GenerateDonwloadFailureToast(Package package, MicrosoftStore.Models.ProductDetails product)
+        public static ToastNotification GenerateDonwloadFailureToast(Package package, ProductDetails product)
         {
             var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
                 .AddToastActivationInfo($"action=viewEvent&eventId={package.Name}", ToastActivationType.Foreground)

@@ -3,7 +3,7 @@ using System;
 
 namespace MicrosoftStore.Responses
 {
-    public class StorefrontResponseItem
+    public class ResponseItem
     {
         [JsonProperty(PropertyName = "$type")]
         public string TypeName { get; set; }

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace MicrosoftStore.Models
 {
@@ -53,6 +54,11 @@ namespace MicrosoftStore.Models
                 }
                 catch { return null; }
             }
+        }
+
+        public BitmapImage GetSource()
+        {
+            return string.IsNullOrWhiteSpace(Url) ? new BitmapImage() : new BitmapImage(new Uri(Url));
         }
     }
 }
