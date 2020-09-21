@@ -1,9 +1,6 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Uwp.UI.Controls.TextToolbarSymbols;
 using MicrosoftStore.Models;
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace FluentStore.Models
 {
@@ -48,10 +45,10 @@ namespace FluentStore.Models
             get => details.AverageRating;
             set => SetProperty(() => details.AverageRating, value);
         }
-        public ObservableCollection<string> AllowedPlatforms
+        public List<string> AllowedPlatforms
         {
-            get => new ObservableCollection<string>(details.AllowedPlatforms);
-            set => SetProperty(() => new ObservableCollection<string>(details.AllowedPlatforms), value);
+            get => details.AllowedPlatforms;
+            set => SetProperty(() => details.AllowedPlatforms, value);
         }
         public List<ImageItem> Images
         {

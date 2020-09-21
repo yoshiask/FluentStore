@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using MicrosoftStore.Models;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace MicrosoftStore.Responses
 {
@@ -18,5 +20,6 @@ namespace MicrosoftStore.Responses
         public string AlgoName { get; set; }
         public int TotalItems { get; set; }
         public int PageSize { get; set; }
+        public List<ProductDetails> Products { get; set; }
     }
 }
