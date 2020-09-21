@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using MicrosoftStore.Enums;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using Windows.UI.Xaml.Media.Imaging;
 
@@ -34,7 +36,8 @@ namespace MicrosoftStore.Models
 
     public class ImageItem
     {
-        public string ImageType { get; set; }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ImageType ImageType { get; set; }
         public string Url { get; set; }
         public int Height { get; set; }
         public int Width { get; set; }

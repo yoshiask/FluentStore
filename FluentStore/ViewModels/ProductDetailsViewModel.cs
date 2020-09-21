@@ -19,7 +19,7 @@ namespace FluentStore.ViewModels
         {
             string url = "https://cdn.wallpaperhub.app/cloudcache/b/f/7/d/d/b/bf7ddbfb925701167ce8060cac808f88c641a16a.jpg";
             int width = 0;
-            foreach (ImageItem image in Product.Images.FindAll(i => i.ImageType == "logo"))
+            foreach (ImageItem image in Product.Images.FindAll(i => i.ImageType == MicrosoftStore.Enums.ImageType.Logo))
             {
                 if (image.Width > width)
                     url = image.Url;
@@ -31,7 +31,7 @@ namespace FluentStore.ViewModels
         {
             string url = "";
             int width = 0;
-            foreach (ImageItem image in Product.Images.FindAll(i => i.ImageType == "hero"))
+            foreach (ImageItem image in Product.Images.FindAll(i => i.ImageType == MicrosoftStore.Enums.ImageType.Hero))
             {
                 if (image.Width > width)
                     url = image.Url;
@@ -46,7 +46,7 @@ namespace FluentStore.ViewModels
 
         public List<ImageItem> GetScreenshots()
         {
-            return Product.Images.FindAll(i => i.ImageType == "screenshot");
+            return Product.Images.FindAll(i => i.ImageType == MicrosoftStore.Enums.ImageType.Screenshot);
         }
 
         public string GetAverageRatingString()
