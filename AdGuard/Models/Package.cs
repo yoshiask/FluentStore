@@ -2,7 +2,7 @@
 
 namespace AdGuard.Models
 {
-    public class Package
+    public class Package : IComparable<Package>
     {
         public string Name { get; set; }
 
@@ -67,10 +67,16 @@ namespace AdGuard.Models
             {
                 try
                 {
-                    return Name.Split('_')[4];
+                    var parts = Name.Split('_', '.');
+                    return parts[parts.Length - 2];
                 }
                 catch { return null; }
             }
         }
-    }
+
+		public int CompareTo(Package other)
+		{
+            return Version.CompareTo(other.Version);
+		}
+	}
 }

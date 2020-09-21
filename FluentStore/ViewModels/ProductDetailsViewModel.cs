@@ -12,7 +12,7 @@ namespace FluentStore.ViewModels
         public ObservableProductDetails Product
         {
             get => product;
-            set => Set(ref product, value);
+            set => SetProperty(ref product, value);
         }
 
         public BitmapImage GetAppIcon()

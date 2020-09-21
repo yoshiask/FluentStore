@@ -75,10 +75,24 @@ namespace FluentStore.Views
             );
 
             dialog.Hide();
-            if (packs != null)
+            if (packs != null)// && packs.Count > 0)
             {
                 var package = Utils.GetLatestDesktopPackage(packs, ViewModel.Product.GetRaw());
-                await Utils.InstallPackage(package, ViewModel.Product.GetRaw());
+                if (package == null)
+				{
+                    var noPackagesDialog = new ContentDialog()
+                    {
+                        Title = ViewModel.Product.Title,
+                        Content = "No available packages for this product.",
+                        PrimaryButtonText = "Ok"
+                    };
+                    await noPackagesDialog.ShowAsync();
+                    return;
+                }
+                else
+				{
+                    await Utils.InstallPackage(package, ViewModel.Product.GetRaw());
+                }
             }
 
             InstallButton.IsEnabled = true;

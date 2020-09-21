@@ -121,6 +121,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ProductCard.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -159,6 +160,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Themes\Generic.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\ProductDetailsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -173,19 +178,19 @@
       <Version>6.2.10</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Mvvm">
-      <Version>7.0.0-build.132.g7ad545cadd</Version>
+      <Version>7.0.0-preview2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications">
-      <Version>6.1.0</Version>
+      <Version>6.1.1</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Controls">
-      <Version>6.1.0</Version>
+      <Version>6.1.1</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.UI.Xaml">
-      <Version>2.4.2</Version>
+      <Version>2.4.3</Version>
     </PackageReference>
     <PackageReference Include="Refit">
-      <Version>5.1.67</Version>
+      <Version>5.2.1</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
