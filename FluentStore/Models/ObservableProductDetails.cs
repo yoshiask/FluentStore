@@ -16,52 +16,52 @@ namespace FluentStore.Models
         public string Title
         {
             get => details.Title;
-            set => Set(() => details.Title, value);
+            set => SetProperty(() => details.Title, value);
         }
         public string Description
         {
             get => details.Description;
-            set => Set(() => details.Description, value);
+            set => SetProperty(() => details.Description, value);
         }
         public string PublisherName
         {
             get => details.PublisherName;
-            set => Set(() => details.PublisherName, value);
+            set => SetProperty(() => details.PublisherName, value);
         }
         public List<string> Notes
         {
             get => details.Notes;
-            set => Set(() => details.Notes, value);
+            set => SetProperty(() => details.Notes, value);
         }
         public string ProductId
         {
             get => details.ProductId;
-            set => Set(() => details.ProductId, value);
+            set => SetProperty(() => details.ProductId, value);
         }
         public string MediaType
         {
             get => details.MediaType;
-            set => Set(() => details.MediaType, value);
+            set => SetProperty(() => details.MediaType, value);
         }
         public double AverageRating
         {
             get => details.AverageRating;
-            set => Set(() => details.AverageRating, value);
+            set => SetProperty(() => details.AverageRating, value);
         }
         public ObservableCollection<string> AllowedPlatforms
         {
             get => new ObservableCollection<string>(details.AllowedPlatforms);
-            set => Set(() => new ObservableCollection<string>(details.AllowedPlatforms), value);
+            set => SetProperty(() => new ObservableCollection<string>(details.AllowedPlatforms), value);
         }
         public List<ImageItem> Images
         {
             get => details.Images;
-            set => Set(() => details.Images, value);
+            set => SetProperty(() => details.Images, value);
         }
         public List<string> Features
         {
             get => details.Features;
-            set => Set(() => details.Features, value);
+            set => SetProperty(() => details.Features, value);
         }
 
         public ProductDetails GetRaw()
