@@ -146,7 +146,7 @@ namespace FluentStore
                         },
                         AppLogoOverride = new ToastGenericAppLogo()
                         {
-                            Source = product.Images.FindLast(i => i.ImageType == "logo").Url
+                            Source = product.Images.FindLast(i => i.ImageType == MicrosoftStore.Enums.ImageType.Logo).Url
                         }
                     }
                 },
@@ -186,7 +186,7 @@ namespace FluentStore
                 .AddToastActivationInfo($"action=viewEvent&eventId={package.Name}", ToastActivationType.Foreground)
                 .AddText(product.Title)
                 .AddText(product.Title + " is ready to install")
-                .AddAppLogoOverride(product.Images.FindLast(i => i.ImageType == "logo").Uri, addImageQuery: false)
+                .AddAppLogoOverride(product.Images.FindLast(i => i.ImageType == MicrosoftStore.Enums.ImageType.Logo).Uri, addImageQuery: false)
                 .Content;
             return new ToastNotification(content.GetXml());
         }
@@ -197,7 +197,7 @@ namespace FluentStore
                 .AddToastActivationInfo($"action=viewEvent&eventId={package.Name}", ToastActivationType.Foreground)
                 .AddText(product.Title)
                 .AddText("Failed to download, please try again later")
-                .AddAppLogoOverride(product.Images.FindLast(i => i.ImageType == "logo").Uri, addImageQuery: false)
+                .AddAppLogoOverride(product.Images.FindLast(i => i.ImageType == MicrosoftStore.Enums.ImageType.Logo).Uri, addImageQuery: false)
                 .Content;
             return new ToastNotification(content.GetXml());
         }
@@ -208,7 +208,7 @@ namespace FluentStore
                 .AddToastActivationInfo($"action=viewEvent&eventId={package.Name}", ToastActivationType.Foreground)
                 .AddText(product.Title)
                 .AddText(product.Title + " just got installed.")
-                .AddAppLogoOverride(product.Images.FindLast(i => i.ImageType == "logo").Uri, addImageQuery: false)
+                .AddAppLogoOverride(product.Images.FindLast(i => i.ImageType == MicrosoftStore.Enums.ImageType.Logo).Uri, addImageQuery: false)
                 .Content;
             return new ToastNotification(content.GetXml());
         }

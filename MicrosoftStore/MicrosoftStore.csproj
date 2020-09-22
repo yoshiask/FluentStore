@@ -122,17 +122,21 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="Enums\ImageType.cs" />
+    <Compile Include="Enums\TileLayout.cs" />
     <Compile Include="IMSStoreApi.cs" />
     <Compile Include="IStorefrontApi.cs" />
     <Compile Include="Models\ActionOverride.cs" />
     <Compile Include="Models\AlternateId.cs" />
     <Compile Include="Models\Availability.cs" />
+    <Compile Include="Models\Card.cs" />
     <Compile Include="Models\PackageRequirements.cs" />
     <Compile Include="Models\ProductDetails.cs" />
     <Compile Include="Models\Meta.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Models\ProductRating.cs" />
     <Compile Include="Models\RatingSummary.cs" />
+    <Compile Include="Models\RecommendationsPayload.cs" />
     <Compile Include="Models\Review.cs" />
     <Compile Include="Models\Sku.cs" />
     <Compile Include="Models\SpecificationCollection.cs" />
