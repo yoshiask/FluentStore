@@ -90,7 +90,7 @@ namespace FluentStore
 
                     // Get the full product details
                     var item = await Apis.StorefrontApi.GetProduct(productId, region.TwoLetterISORegionName, culture.Name);
-                    var candidate = (item.Payload as Newtonsoft.Json.Linq.JObject).ToObject<MicrosoftStore.Models.ProductDetails>();
+                    var candidate = item.Convert<MicrosoftStore.Models.ProductDetails>().Payload;
                     if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
                     {
                         CurrentProduct = candidate;

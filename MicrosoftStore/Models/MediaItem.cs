@@ -36,7 +36,6 @@ namespace MicrosoftStore.Models
 
     public class ImageItem
     {
-        [JsonConverter(typeof(StringEnumConverter))]
         public ImageType ImageType { get; set; }
         public string Url { get; set; }
         public int Height { get; set; }

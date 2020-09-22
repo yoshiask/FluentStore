@@ -25,6 +25,6 @@ namespace MicrosoftStore
         /// Gets trending recommendation cards of home page
         /// </summary>
         [Get("/recommendations/collections/Collection/TrendingHomeColl1?market={market}&locale={locale}&deviceFamily=Windows.Desktop&appVersion={appversion}&pageSize={pageSize}&cardsEnabled=true")]
-        Task<Recommendations> GetHomeRecommendations(string market = "US", string locale = "en-US", string appversion = "11905.1001.0.0", int pageSize = 15);
+        Task<ResponseItem<RecommendationsPayload>> GetHomeRecommendations(string market = "US", string locale = "en-US", string appversion = "11905.1001.0.0", int pageSize = 15);
     }
 }

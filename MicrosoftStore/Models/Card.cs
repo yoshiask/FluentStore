@@ -12,7 +12,6 @@ namespace MicrosoftStore.Models
     public class Card
     {
         public string ProductId { get; set; }
-        [JsonConverter(typeof(StringEnumConverter))]
         public TileLayout TileLayout { get; set; }
         public string Title { get; set; }
         public List<ImageItem> Images { get; set; }
