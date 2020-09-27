@@ -14,11 +14,14 @@
                         BorderThickness="{TemplateBinding BorderThickness}">
                         <Grid>
                             <Grid.RowDefinitions>
-                                <RowDefinition/>
-                                <RowDefinition/>
-                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                        </Grid>
+							<TextBlock Text="{Binding Details.ShortTitle}" FontWeight="SemiBold"/>
+							<TextBlock Text="{Binding Details.Subtitle}" Grid.Row="1"/>
+							<TextBlock Text="{Binding Details.Description}" Grid.Row="2"/>
+						</Grid>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using StoreLib.Models;
+using StoreLib.Services;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;

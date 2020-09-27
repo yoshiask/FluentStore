@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Windows.Management.Deployment;
 using Windows.Networking.BackgroundTransfer;
 using Windows.Storage;
+using Windows.System;
 using Windows.UI.Notifications;
 
 namespace FluentStore
@@ -64,35 +65,37 @@ namespace FluentStore
                 });
 
                 // Attempt to install the downloaded package
-                var result = await pkgManager.AddPackageAsync(new Uri(filepath), new Uri[] { }, DeploymentOptions.ForceTargetApplicationShutdown).AsTask(progressCallback);
-                
-                if (result.IsRegistered)
-				{
-                    // Remove the progress notifcation
-                    ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
+                //var result = await pkgManager.AddPackageAsync(new Uri(filepath), new Uri[] { }, DeploymentOptions.ForceTargetApplicationShutdown).AsTask(progressCallback);
 
-                    // Show the success notification
-                    ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateInstallSuccessToast(package, product));
-                    return true;
-                }
-                else
-				{
-                    return false;
-				}
+                //if (result.IsRegistered)
+                //{
+                //    // Remove the progress notifcation
+                //    ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
+
+                //    // Show the success notification
+                //    ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateInstallSuccessToast(package, product));
+                //    return true;
+                //}
+                //else
+                //{
+                //    GenerateInstallFailureToast(package, product, new Exception("An unknown error occured."));
+                //    return false;
+                //}
 
                 // Pass the file to App Installer to install it
-                //Uri launchUri = new Uri("ms-appinstaller:?source=" + filepath);
-                //switch (await Launcher.QueryUriSupportAsync(launchUri, LaunchQuerySupportType.Uri))
-                //{
-                //    case LaunchQuerySupportStatus.Available:
-                //        return await Launcher.LaunchUriAsync(launchUri);
+                Uri launchUri = new Uri("ms-appinstaller:?source=" + filepath);
+                switch (await Launcher.QueryUriSupportAsync(launchUri, LaunchQuerySupportType.Uri))
+                {
+                    case LaunchQuerySupportStatus.Available:
+                        return await Launcher.LaunchUriAsync(launchUri);
 
-                //    default:
-                //        return false;
-                //}
+                    default:
+                        return false;
+                }
             }
-            catch
+            catch (Exception ex)
             {
+                ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateInstallFailureToast(package, product, ex));
                 return false;
             }
         }
@@ -123,7 +126,7 @@ namespace FluentStore
             return false;
         }
 
-		public static ToastNotification GenerateProgressToast(Package package, ProductDetails product)
+        public static ToastNotification GenerateProgressToast(Package package, ProductDetails product)
         {
             var content = new ToastContent()
             {
@@ -134,7 +137,7 @@ namespace FluentStore
                         Children =
                         {
                             new AdaptiveText()
-							{
+                            {
                                 Text = new BindableString("progressTitle")
                             },
                             new AdaptiveProgressBar()
@@ -208,6 +211,18 @@ namespace FluentStore
                 .AddToastActivationInfo($"action=viewEvent&eventId={package.Name}", ToastActivationType.Foreground)
                 .AddText(product.Title)
                 .AddText(product.Title + " just got installed.")
+                .AddAppLogoOverride(product.Images.FindLast(i => i.ImageType == MicrosoftStore.Enums.ImageType.Logo).Uri, addImageQuery: false)
+                .Content;
+            return new ToastNotification(content.GetXml());
+        }
+
+        public static ToastNotification GenerateInstallFailureToast(Package package, ProductDetails product, Exception ex)
+        {
+            var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
+                .AddToastActivationInfo($"action=viewEvent&eventId={package.Name}", ToastActivationType.Foreground)
+                .AddText(product.Title)
+                .AddText(product.Title + " failed to install.")
+                .AddText(ex.Message)
                 .AddAppLogoOverride(product.Images.FindLast(i => i.ImageType == MicrosoftStore.Enums.ImageType.Logo).Uri, addImageQuery: false)
                 .Content;
             return new ToastNotification(content.GetXml());

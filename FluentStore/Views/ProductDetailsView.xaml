@@ -193,9 +193,9 @@
                              StrokeThickness="0" VerticalAlignment="Center"/>
                     <TextBlock Text="Social" VerticalAlignment="Center"/>
                 </StackPanel>
-                <Button x:Name="MoreButton" Content="More" RelativePanel.Below="DescriptionBlock"
-                        Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Click="MoreButton_Click"
-                        Visibility="{Binding ElementName=DescriptionBlock, Path=IsTextTrimmed}"/>
+                <HyperlinkButton x:Name="MoreButton" Content="More" RelativePanel.Below="DescriptionBlock"
+								 Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Click="MoreButton_Click"
+								 Visibility="{Binding ElementName=DescriptionBlock, Path=IsTextTrimmed}"/>
             </Grid>
         </controls:DropShadowPanel>
 
