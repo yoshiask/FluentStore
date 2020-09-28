@@ -1,5 +1,4 @@
-﻿using StoreLib.Models;
-using StoreLib.Services;
+﻿using FluentStore.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,8 +7,10 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Automation;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -21,12 +22,27 @@ namespace FluentStore
     public sealed partial class MainPage : Page
     {
         public ObservableCollection<MicrosoftStore.Models.Product> Results { get; set; }
-        AdGuard.Models.Package CurrentPackage { get; set; }
         MicrosoftStore.Models.ProductDetails CurrentProduct { get; set; } = null;
 
         public MainPage()
         {
             this.InitializeComponent();
+
+            MainFrame.Navigated += MainFrame_Navigated;
+            NavigationHelper.PageFrame = MainFrame;
+
+            foreach(PageInfo page in NavigationHelper.Pages)
+            {
+                var item = new Microsoft.UI.Xaml.Controls.NavigationViewItem()
+                {
+                    Content = page.Title,
+                    Icon = page.Icon,
+                    Visibility = page.Visibility,
+                };
+                MainNav.MenuItems.Add(item);
+                AutomationProperties.SetName(item, page.Title);
+            }
+            MainNav.SelectedItem = MainNav.MenuItems[0];
         }
 
         private async void controlsSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
@@ -173,9 +189,51 @@ namespace FluentStore
             return suggs.ResultSets[0].Suggests;
         }
 
-        private async void InstallButton_Click(object sender, RoutedEventArgs e)
+        private void MainFrame_Navigated(object sender, NavigationEventArgs e)
         {
-            await Utils.InstallPackage(CurrentPackage, CurrentProduct);
+            MainNav.IsBackEnabled = MainFrame.CanGoBack;
+            try
+            {
+                // Update the NavView when the frame navigates on its own.
+                // This is in a try-catch block so that I don't have to do a dozen
+                // null checks.
+                var page = NavigationHelper.Pages.Find((info) => info.PageType == e.SourcePageType);
+                if (page == null)
+                {
+                    MainNav.SelectedItem = null;
+                    return;
+                }
+                MainNav.SelectedItem = MainNav.MenuItems.ToList().Find((obj) => (obj as Microsoft.UI.Xaml.Controls.NavigationViewItem).Content.ToString() == page.Title);
+            }
+            catch
+            {
+                MainNav.SelectedItem = null;
+            }
         }
-    }
+
+        private void NavigationView_SelectionChanged(Microsoft.UI.Xaml.Controls.NavigationView sender, Microsoft.UI.Xaml.Controls.NavigationViewSelectionChangedEventArgs args)
+        {
+            if (args.IsSettingsSelected)
+            {
+                NavigationHelper.NavigateToSettings();
+                return;
+            }
+
+            if (!(args.SelectedItem is Microsoft.UI.Xaml.Controls.NavigationViewItem navItem))
+            {
+                NavigationHelper.NavigateToHome();
+                return;
+            }
+
+            PageInfo pageInfo = NavigationHelper.Pages.Find((info) => info.Title == navItem.Content.ToString());
+            if (pageInfo == null)
+            {
+                NavigationHelper.NavigateToHome();
+                return;
+            }
+
+            if (pageInfo != null && pageInfo.PageType.BaseType == typeof(Page))
+                MainFrame.Navigate(pageInfo.PageType);
+        }
+	}
 }

@@ -28,7 +28,7 @@
         <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
               Grid.Row="2" Grid.RowSpan="2" Grid.ColumnSpan="2"/>
 
-        <Grid Grid.Column="1" Grid.Row="2" Grid.RowSpan="2" RowSpacing="10" Padding="0,15,15,0">
+        <!--<Grid Grid.Column="1" Grid.Row="2" Grid.RowSpan="2" RowSpacing="10" Padding="0,15,15,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -70,7 +70,7 @@
                     </Grid>
                 </StackPanel>
             </ScrollViewer>
-        </Grid>
+        </Grid>-->
 
         <ScrollViewer Grid.Column="0" Grid.Row="3" Margin="20,30,0,10">
             <StackPanel Spacing="30">
@@ -202,10 +202,8 @@
         <controls:DockPanel Height="32px" VerticalAlignment="Top" Background="{ThemeResource SystemControlAcrylicElementBrush}"
                             Grid.ColumnSpan="2">
             <StackPanel Orientation="Horizontal">
-                <Button x:Name="BackButton" Background="Transparent" CornerRadius="0" Padding="10" Click="BackButton_Click">
-                    <FontIcon Glyph="&#xE112;"/>
-                </Button>
-                <TextBlock Text="Fluent Store - " VerticalAlignment="Center" FontSize="12" Margin="0,0,3,0"/>
+				<Button x:Name="BackButton" Style="{StaticResource NavigationBackButtonNormalStyle}" Click="BackButton_Click"/>
+				<TextBlock Text="Fluent Store - " VerticalAlignment="Center" FontSize="12" Margin="0,0,3,0"/>
                 <TextBlock Text="{x:Bind ViewModel.Product.MediaType}" VerticalAlignment="Center" FontSize="12"/>
             </StackPanel>
             <Border Background="Transparent" x:Name="TitlebarDragTarget"/>

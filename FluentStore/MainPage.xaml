@@ -11,12 +11,12 @@
     mc:Ignorable="d"
     Background="{ThemeResource SystemControlAcrylicWindowBrush}">
 
-    <winui:NavigationView x:Name="MainNav" PaneDisplayMode="LeftCompact" IsSettingsVisible="False"
-                          IsTitleBarAutoPaddingEnabled="False">
-        <winui:NavigationView.MenuItems>
+    <winui:NavigationView x:Name="MainNav" PaneDisplayMode="LeftCompact" IsTitleBarAutoPaddingEnabled="False"
+						  SelectionChanged="NavigationView_SelectionChanged">
+        <!--<winui:NavigationView.MenuItems>
             <winui:NavigationViewItem Content="Home" Icon="Home"/>
             <winui:NavigationViewItem Content="My Apps" Icon="AllApps"/>
-        </winui:NavigationView.MenuItems>
+        </winui:NavigationView.MenuItems>-->
 
         <winui:NavigationView.PaneHeader>
             <StackPanel Orientation="Horizontal">
@@ -26,37 +26,11 @@
             </StackPanel>
         </winui:NavigationView.PaneHeader>
 
-        <Border Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-                Padding="10" Margin="0">
-            <Grid RowSpacing="5">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <winui:ProgressBar x:Name="LoadingIndicator" IsIndeterminate="True"
-                                   Grid.Row="1" Visibility="Collapsed" VerticalAlignment="Top"/>
-                <StackPanel Spacing="10" Orientation="Horizontal">
-                    <Border x:Name="ImageBackPanel">
-                        <Image x:Name="ImagePanel"/>
-                    </Border>
-                    <TextBlock x:Name="TitlePanel" VerticalAlignment="Center"
-                               Style="{ThemeResource TitleTextBlockStyle}" FontWeight="SemiBold"/>
-                </StackPanel>
-                <Button x:Name="InstallButton" Content="Install" Click="InstallButton_Click"
-                        Visibility="Collapsed" HorizontalAlignment="Right" Style="{ThemeResource AccentButtonStyle}"/>
-                <ListView x:Name="LinksView" Grid.Row="1">
-                    <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="adguard:Package">
-                            <StackPanel>
-                                <TextBlock Text="{x:Bind Name}"/>
-                                <TextBlock Text="{x:Bind Version.ToString()}"/>
-                                <TextBlock Text="{x:Bind Url}" Foreground="{ThemeResource ButtonDisabledForegroundThemeBrush}"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-            </Grid>
-        </Border>
+		<Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+			<winui:ProgressBar x:Name="LoadingIndicator" IsIndeterminate="True"
+							   Grid.Row="1" Visibility="Collapsed" VerticalAlignment="Top"/>
+			<Frame x:Name="MainFrame"/>
+		</Grid>
 
         <winui:NavigationView.AutoSuggestBox>
             <AutoSuggestBox x:Name="controlsSearchBox" VerticalAlignment="Center"

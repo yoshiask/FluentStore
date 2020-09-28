@@ -54,7 +54,7 @@ namespace FluentStore
 
             var coreTitleBar = CoreApplication.GetCurrentView().TitleBar;
             coreTitleBar.ExtendViewIntoTitleBar = true;
-            ApplicationView.GetForCurrentView().TitleBar.ButtonForegroundColor = (Color)App.Current.Resources["SystemAccentColor"];
+            ApplicationView.GetForCurrentView().TitleBar.ButtonForegroundColor = (Color)App.Current.Resources["SystemBaseHighColor"];
             ApplicationView.GetForCurrentView().TitleBar.ButtonBackgroundColor = Colors.Transparent;
 
             if (e.PrelaunchActivated == false)

@@ -1,4 +1,8 @@
-﻿using MicrosoftStore.Models;
+﻿using AdGuard.Models;
+using FluentStore.Helpers;
+using MicrosoftStore.Models;
+using StoreLib.Models;
+using StoreLib.Services;
 using System;
 using System.Globalization;
 using Windows.UI.Text;
@@ -70,14 +74,19 @@ namespace FluentStore.Views
             };
             dialog.ShowAsync();
 
-            var packs = await AdGuard.AdGuardApi.GetFilesFromProductId(
-                productId, culture.Name
-            );
+            DisplayCatalogHandler dcathandler = new DisplayCatalogHandler(DCatEndpoint.Production, new Locale(Market.US, Lang.en, true));
+            await dcathandler.QueryDCATAsync(productId);
+            await dcathandler.GetPackagesForProductAsync();
+            string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;
+			var packs = await AdGuard.AdGuardApi.GetFilesFromProductId(
+				productId, culture.Name
+			);
 
-            dialog.Hide();
+			dialog.Hide();
             if (packs != null)// && packs.Count > 0)
             {
-                var package = Utils.GetLatestDesktopPackage(packs, ViewModel.Product.GetRaw());
+				var package = PackageHelper.GetLatestDesktopPackage(packs, packageFamilyName, ViewModel.Product.GetRaw());
+				//AdGuard.Models.Package package = null;
                 if (package == null)
 				{
                     var noPackagesDialog = new ContentDialog()
@@ -91,7 +100,7 @@ namespace FluentStore.Views
                 }
                 else
 				{
-                    await Utils.InstallPackage(package, ViewModel.Product.GetRaw());
+                    await PackageHelper.InstallPackage(package, ViewModel.Product.GetRaw());
                 }
             }
 

@@ -12,9 +12,9 @@ using Windows.Storage;
 using Windows.System;
 using Windows.UI.Notifications;
 
-namespace FluentStore
+namespace FluentStore.Helpers
 {
-    public static class Utils
+    public static class PackageHelper
     {
         public static readonly string[] INSTALLABLE_EXTS = new string[]
         {
@@ -23,6 +23,8 @@ namespace FluentStore
 
         public static async Task<bool> InstallPackage(Package package, ProductDetails product)
         {
+            ToastNotification finalNotif = GenerateInstallSuccessToast(package, product);
+            bool isSuccess = true;
             try
             {
                 // Download the file to the app's temp directory
@@ -33,7 +35,6 @@ namespace FluentStore
                 StorageFile destinationFile = await ApplicationData.Current.TemporaryFolder.CreateFileAsync(
                     package.Name, CreationCollisionOption.ReplaceExisting);
                 BackgroundDownloader downloader = new BackgroundDownloader();
-                //downloader.SuccessToastNotification = GenerateDownloadSuccessToast(package, product);
                 downloader.FailureToastNotification = GenerateDownloadFailureToast(package, product);
                 var progressToast = GenerateProgressToast(package, product);
                 DownloadOperation download = downloader.CreateDownload(package.Uri, destinationFile);
@@ -64,34 +65,53 @@ namespace FluentStore
                     );
                 });
 
-                // Attempt to install the downloaded package
-                //var result = await pkgManager.AddPackageAsync(new Uri(filepath), new Uri[] { }, DeploymentOptions.ForceTargetApplicationShutdown).AsTask(progressCallback);
+                if (Settings.Default.UseAppInstaller)
+				{
+                    // Pass the file to App Installer to install it
+                    Uri launchUri = new Uri("ms-appinstaller:?source=" + filepath);
+                    switch (await Launcher.QueryUriSupportAsync(launchUri, LaunchQuerySupportType.Uri))
+                    {
+                        case LaunchQuerySupportStatus.Available:
+                            isSuccess = await Launcher.LaunchUriAsync(launchUri);
+                            if (!isSuccess)
+                                finalNotif = GenerateInstallFailureToast(package, product, new Exception("Failed to launch App Installer."));
+                            break;
 
-                //if (result.IsRegistered)
-                //{
-                //    // Remove the progress notifcation
-                //    ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
+                        case LaunchQuerySupportStatus.AppNotInstalled:
+                            finalNotif = GenerateInstallFailureToast(package, product, new Exception("App Installer is not available on this device."));
+                            isSuccess = false;
+                            break;
 
-                //    // Show the success notification
-                //    ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateInstallSuccessToast(package, product));
-                //    return true;
-                //}
-                //else
-                //{
-                //    GenerateInstallFailureToast(package, product, new Exception("An unknown error occured."));
-                //    return false;
-                //}
+                        case LaunchQuerySupportStatus.AppUnavailable:
+                            finalNotif = GenerateInstallFailureToast(package, product, new Exception("App Installer is not available right now, try again later."));
+                            isSuccess = false;
+                            break;
 
-                // Pass the file to App Installer to install it
-                Uri launchUri = new Uri("ms-appinstaller:?source=" + filepath);
-                switch (await Launcher.QueryUriSupportAsync(launchUri, LaunchQuerySupportType.Uri))
-                {
-                    case LaunchQuerySupportStatus.Available:
-                        return await Launcher.LaunchUriAsync(launchUri);
-
-                    default:
-                        return false;
+                        case LaunchQuerySupportStatus.Unknown:
+                        default:
+                            finalNotif = GenerateInstallFailureToast(package, product, new Exception("An unknown error occured."));
+                            isSuccess = false;
+                            break;
+                    }
                 }
+                else
+				{
+					// Attempt to install the downloaded package
+					var result = await pkgManager.AddPackageAsync(new Uri(filepath), new Uri[] { }, DeploymentOptions.ForceTargetApplicationShutdown).AsTask(progressCallback);
+
+					if (result.IsRegistered)
+                        finalNotif = GenerateInstallSuccessToast(package, product);
+					else
+						finalNotif = GenerateInstallFailureToast(package, product, new Exception("An unknown error occured."));
+                    isSuccess = result.IsRegistered;
+                }
+
+                // Remove the progress notifcation
+                ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
+                // Show the final notification
+                ToastNotificationManager.GetDefault().CreateToastNotifier().Show(finalNotif);
+
+                return true;
             }
             catch (Exception ex)
             {
@@ -100,12 +120,12 @@ namespace FluentStore
             }
         }
 
-        public static Package GetLatestDesktopPackage(List<Package> packages, ProductDetails product)
+        public static Package GetLatestDesktopPackage(List<Package> packages, string family, ProductDetails product)
         {
             List<Package> installables = packages.FindAll(p => {
                 return IsFiletype(p.Name, INSTALLABLE_EXTS)
-                    && (p.PackageFamily != null)
-                    && (p.PackageFamily == product.PackageFamilyNames?.First().Split("_")[0])
+                    && (p.PackageFamily != null) && ($"{p.PackageFamily}_{p.PublisherId}" == family)
+                    //&& (p.PackageFamily == product.PackageFamilyNames?.First().Split("_")[0])
                     && ((p.Architecture == "neutral") || (p.Architecture == "x64"));
             });
             if (installables.Count <= 0)
@@ -113,7 +133,6 @@ namespace FluentStore
             // TODO: Add addtional checks that might take longer that the user can enable 
             // if they are having issues
             return installables.OrderByDescending(p => p.Version).First();
-            // TODO: Limit to only app packages, not dependencies
         }
 
         public static bool IsFiletype(string file, params string[] exts)
@@ -182,7 +201,7 @@ namespace FluentStore
             //notif.Group = "App Downloads";
             return notif;
         }
-        
+
         public static ToastNotification GenerateDownloadSuccessToast(Package package, ProductDetails product)
         {
             var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
