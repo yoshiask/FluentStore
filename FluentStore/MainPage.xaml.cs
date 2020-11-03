@@ -115,52 +115,6 @@ namespace FluentStore
                         LoadingIndicator.Visibility = Visibility.Collapsed;
                         Frame.Navigate(typeof(Views.ProductDetailsView), CurrentProduct);
                     }
-
-                    //LoadingIndicator.Visibility = Visibility.Visible;
-
-                    //ImageBackPanel.Visibility = Visibility.Collapsed;
-                    //TitlePanel.Visibility = Visibility.Collapsed;
-                    //InstallButton.Visibility = Visibility.Collapsed;
-                    //ImagePanel.Source = new Windows.UI.Xaml.Media.Imaging.BitmapImage(product.ImageUri);
-                    //TitlePanel.Text = product.Title;
-                    //ImageBackPanel.Visibility = Visibility.Visible;
-                    //TitlePanel.Visibility = Visibility.Visible;
-
-                    //var culture = CultureInfo.CurrentUICulture;
-                    //var region = new RegionInfo(culture.LCID);
-
-                    //LinksView.Items.Clear();
-                    //string productId = product.Metas.First(m => m.Key == "BigCatalogId").Value;
-                    //var packs = await AdGuard.AdGuardApi.GetFilesFromProductId(
-                    //    productId, culture.Name
-                    //);
-                    //if (packs != null)
-                    //{
-                    //    // Get the full product details
-                    //    var page = await Apis.StorefrontApi.GetPage(productId, region.TwoLetterISORegionName, culture.Name, "0.0.0.0");
-                    //    foreach (var item in page)
-                    //    {
-                    //        var candidate = (item.Payload as Newtonsoft.Json.Linq.JObject).ToObject<MicrosoftStore.Models.ProductDetails>();
-                    //        if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
-                    //        {
-                    //            CurrentProduct = candidate;
-                    //            break;
-                    //        }
-                    //    }
-                    //    if (CurrentProduct == null)
-                    //        return;
-
-                    //    foreach (AdGuard.Models.Package package in packs)
-                    //        LinksView.Items.Add(package);
-                    //    CurrentPackage = Utils.GetLatestDesktopPackage(packs, CurrentProduct);
-
-                    //    InstallButton.Visibility = Visibility.Visible;
-                    //}
-                    //else
-                    //{
-                    //    //LinksView.Items.Add("No packages found");
-                    //}
-                    //LoadingIndicator.Visibility = Visibility.Collapsed;
                 }
                 catch (ArgumentNullException ex)
                 {
@@ -169,7 +123,7 @@ namespace FluentStore
             }
             else if (!string.IsNullOrEmpty(args.QueryText))
             {
-                //NavigationRootPage.RootFrame.Navigate(typeof(SearchResultsPage), args.QueryText);
+                //NavigationRootPage.RootFrame.Navigate(typeof(SearchResultsPage), controlsSearchBox.ItemsSource as IEnumerable<MicrosoftStore.Models.Product>);
             }
         }
         
