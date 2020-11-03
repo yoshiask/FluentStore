@@ -33,7 +33,7 @@ namespace FluentStore.Views
 
             if (e.Parameter is ProductDetails details)
             {
-                ViewModel.Product = new Models.ObservableProductDetails(details);
+                ViewModel.Product = details;
             }
 
             BackButton.IsEnabled = this.Frame.CanGoBack;
@@ -85,7 +85,7 @@ namespace FluentStore.Views
 			dialog.Hide();
             if (packs != null)// && packs.Count > 0)
             {
-				var package = PackageHelper.GetLatestDesktopPackage(packs, packageFamilyName, ViewModel.Product.GetRaw());
+				var package = PackageHelper.GetLatestDesktopPackage(packs, packageFamilyName, ViewModel.Product);
 				//AdGuard.Models.Package package = null;
                 if (package == null)
 				{
@@ -100,7 +100,7 @@ namespace FluentStore.Views
                 }
                 else
 				{
-                    await PackageHelper.InstallPackage(package, ViewModel.Product.GetRaw());
+                    await PackageHelper.InstallPackage(package, ViewModel.Product);
                 }
             }
 
