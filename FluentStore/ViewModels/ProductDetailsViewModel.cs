@@ -5,7 +5,7 @@ using Windows.UI.Xaml.Media.Imaging;
 
 namespace FluentStore.ViewModels
 {
-    public class ProductDetailsViewModel : ObservableRecipient
+    public class ProductDetailsViewModel : ObservableObject
     {
         private ProductDetails product;
         public ProductDetails Product

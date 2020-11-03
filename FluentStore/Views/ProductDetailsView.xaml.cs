@@ -1,10 +1,10 @@
-﻿using AdGuard.Models;
-using FluentStore.Helpers;
+﻿using FluentStore.Helpers;
 using MicrosoftStore.Models;
 using StoreLib.Models;
 using StoreLib.Services;
 using System;
 using System.Globalization;
+using System.Linq;
 using Windows.UI.Text;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -76,19 +76,15 @@ namespace FluentStore.Views
 
             DisplayCatalogHandler dcathandler = new DisplayCatalogHandler(DCatEndpoint.Production, new Locale(Market.US, Lang.en, true));
             await dcathandler.QueryDCATAsync(productId);
-            await dcathandler.GetPackagesForProductAsync();
+            var packs = await dcathandler.GetPackagesForProductAsync();
             string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;
-			var packs = await AdGuard.AdGuardApi.GetFilesFromProductId(
-				productId, culture.Name
-			);
 
-			dialog.Hide();
+            dialog.Hide();
             if (packs != null)// && packs.Count > 0)
             {
-				var package = PackageHelper.GetLatestDesktopPackage(packs, packageFamilyName, ViewModel.Product);
-				//AdGuard.Models.Package package = null;
+                var package = PackageHelper.GetLatestDesktopPackage(packs.ToList(), packageFamilyName, ViewModel.Product);
                 if (package == null)
-				{
+                {
                     var noPackagesDialog = new ContentDialog()
                     {
                         Title = ViewModel.Product.Title,
@@ -99,7 +95,7 @@ namespace FluentStore.Views
                     return;
                 }
                 else
-				{
+                {
                     await PackageHelper.InstallPackage(package, ViewModel.Product);
                 }
             }

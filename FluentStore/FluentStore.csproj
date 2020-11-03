@@ -201,7 +201,7 @@
       <Version>6.2.10</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Mvvm">
-      <Version>7.0.0-preview2</Version>
+      <Version>7.0.0-preview3</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications">
       <Version>6.1.1</Version>
@@ -217,10 +217,6 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AdGuard\AdGuard.csproj">
-      <Project>{28cd7dc1-df8d-4a8e-9bba-55beb89f7643}</Project>
-      <Name>AdGuard</Name>
-    </ProjectReference>
     <ProjectReference Include="..\MicrosoftStore\MicrosoftStore.csproj">
       <Project>{7fc21573-6b0f-4b5b-bae5-af80546c0d79}</Project>
       <Name>MicrosoftStore</Name>
