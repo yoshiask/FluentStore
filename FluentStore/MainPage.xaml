@@ -7,9 +7,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
-    xmlns:adguard="using:AdGuard.Models"
     mc:Ignorable="d"
-    Background="{ThemeResource SystemControlAcrylicWindowBrush}">
+    Background="{ThemeResource SystemControlAcrylicWindowBrush}"
+    RequestedTheme="Light">
 
     <winui:NavigationView x:Name="MainNav" PaneDisplayMode="LeftCompact" IsTitleBarAutoPaddingEnabled="False"
 						  SelectionChanged="NavigationView_SelectionChanged">

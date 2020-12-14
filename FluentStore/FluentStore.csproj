@@ -217,6 +217,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FluentStoreAPI\FluentStoreAPI.csproj">
+      <Project>{9918633d-4c2a-463d-a4ca-c8fc095a820c}</Project>
+      <Name>FluentStoreAPI</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MicrosoftStore\MicrosoftStore.csproj">
       <Project>{7fc21573-6b0f-4b5b-bae5-af80546c0d79}</Project>
       <Name>MicrosoftStore</Name>

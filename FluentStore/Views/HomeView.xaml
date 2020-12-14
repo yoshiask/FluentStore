@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:viewmodels="using:FluentStore.ViewModels"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -14,39 +15,46 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <controls:Carousel>
+        <controls:Carousel x:Name="FeaturedCarousel" ItemsSource="{x:Bind CarouselItems}" ItemMargin="16" ItemDepth="200">
             <controls:Carousel.EasingFunction>
                 <CubicEase EasingMode="EaseOut" />
             </controls:Carousel.EasingFunction>
 
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="1*"/>
-                </Grid.RowDefinitions>
-                <controls:ImageEx Source="http://www.technocrazed.com/wp-content/uploads/2015/12/Windows-XP-wallpaper-2.jpg"
-                                  Grid.RowSpan="2"/>
-                <Grid Grid.Row="1" Padding="5" ColumnSpacing="10">
-					<Grid.Background>
-						<AcrylicBrush BackgroundSource="Backdrop" Opacity=".50" />
-					</Grid.Background>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <!--<RowDefinition/>-->
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-					<Viewbox Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10">
-						<controls:ImageEx Source="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Windows_logo_2012-Black.svg/2000px-Windows_logo_2012-Black.svg.png"
-                                          Height="1200" Width="1200" Stretch="Uniform" />
-                    </Viewbox>
-                    <TextBlock Text="Microsoft To-Do" FontWeight="Bold" Grid.Column="1" FontSize="24"/>
-					<TextBlock Text="Lists, Tasks and Reminders" Grid.Column="1" Grid.Row="1"/>
-				</Grid>
-            </Grid>
+            <controls:Carousel.ItemTemplate>
+                <DataTemplate x:DataType="viewmodels:ProductDetailsViewModel">
+                    <Grid Padding="0,16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="3*"/>
+                            <RowDefinition Height="1*"/>
+                        </Grid.RowDefinitions>
+                        <controls:ImageEx Source="{x:Bind GetHeroImage()}" Grid.RowSpan="2"/>
+                        <Grid Grid.Row="1" Padding="5" ColumnSpacing="10" Background="{ThemeResource SystemControlBaseHighAcrylicElementBrush}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <!--<RowDefinition/>-->
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Viewbox MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="100"
+                                     Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                <Image Source="{x:Bind GetAppIcon()}" />
+                            </Viewbox>
+                            <TextBlock Text="{x:Bind Product.Title}" FontWeight="Bold" Grid.Column="1" FontSize="24"/>
+                            <TextBlock Text="{x:Bind Product.Subtitle}" Grid.Column="1" Grid.Row="1"/>
+                            <Button Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right"
+                                    Padding="6" Style="{ThemeResource AccentButtonStyle}">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <FontIcon Glyph="&#xE118;" />
+                                    <TextBlock Text="Download" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </DataTemplate>
+            </controls:Carousel.ItemTemplate>
         </controls:Carousel>
     </Grid>
 </Page>
