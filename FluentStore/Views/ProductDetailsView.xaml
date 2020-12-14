@@ -28,7 +28,8 @@
             <Border x:Name="TitlebarDragTarget" Background="Transparent" />
         </controls:DockPanel>
 
-        <Image x:Name="HeroImage" Grid.Row="1" Source="{x:Bind ViewModel.GetHeroImage()}" VerticalAlignment="Top"/>
+        <Image x:Name="HeroImage" Grid.Row="1" Source="{x:Bind ViewModel.GetHeroImage()}"
+               VerticalAlignment="Top" HorizontalAlignment="Stretch"/>
 
         <Grid Grid.Row="1" Grid.RowSpan="2">
             <Grid.ColumnDefinitions>
@@ -81,9 +82,9 @@
         </Grid>-->
 
             <ScrollViewer Grid.Column="0">
-                <StackPanel Spacing="30">
-                    <Border Height="400"/>
-                    <Grid Grid.Row="1" Padding="15" ColumnSpacing="10" Margin="20,0" MaxHeight="300"
+                <StackPanel Spacing="20">
+                    <Border Height="{Binding ElementName=HeroImage, Path=ActualHeight, Mode=OneWay}" Margin="0,0,0,-200"/>
+                    <Grid Grid.Row="1" Padding="20,0,20,20" ColumnSpacing="20" Margin="20,0" MaxHeight="300"
                           Background="{ThemeResource SystemControlAcrylicElementMediumHighBrush}">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -94,7 +95,8 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Viewbox MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="100" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <Viewbox MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="100"
+                                 Margin="0,20,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                             <Image Source="{x:Bind ViewModel.GetAppIcon()}" />
                         </Viewbox>
                         <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="30" FontWeight="Bold" Text="{x:Bind ViewModel.Product.Title}" />
@@ -112,20 +114,21 @@
                                 </StackPanel>
                             </Button>
                         </StackPanel>
-                        <TextBlock x:Name="DescriptionBlock" Grid.Row="1" Grid.Column="1" FontSize="16" Margin="0,-15,0,0"
+                        <TextBlock x:Name="DescriptionBlock" Grid.Row="1" Grid.Column="1" FontSize="16" Margin="0,-12,0,0"
                                    Foreground="{ThemeResource SystemBaseMediumHighColor}"
                                    Text="{x:Bind ViewModel.Product.Description}"
                                    TextTrimming="WordEllipsis" TextWrapping="Wrap" />
                         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="10">
                             <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.Product.PublisherName}" />
                             <Ellipse Width="3" Height="3" VerticalAlignment="Center" Fill="{ThemeResource SystemBaseHighColor}" StrokeThickness="0" />
-                            <TextBlock VerticalAlignment="Center" Text="Social" />
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.Product.Categories[0]}" />
                         </StackPanel>
                         <HyperlinkButton x:Name="MoreButton" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right"
                                          Click="MoreButton_Click" Content="More" RelativePanel.Below="DescriptionBlock"
                                          Visibility="{Binding ElementName=DescriptionBlock, Path=IsTextTrimmed}" />
                     </Grid>
-                    <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="20">
+                    <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                                Padding="20" Spacing="20">
                         <StackPanel Spacing="10">
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Available on" />
                             <StackPanel Orientation="Horizontal" Spacing="10">
