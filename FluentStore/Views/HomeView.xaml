@@ -5,10 +5,48 @@
     xmlns:local="using:FluentStore.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid Padding="5">
-		<TextBlock Text="Home" FontWeight="Bold" FontSize="16"/>
-	</Grid>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <controls:Carousel>
+            <controls:Carousel.EasingFunction>
+                <CubicEase EasingMode="EaseOut" />
+            </controls:Carousel.EasingFunction>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="3*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <controls:ImageEx Source="http://www.technocrazed.com/wp-content/uploads/2015/12/Windows-XP-wallpaper-2.jpg"
+                                  Grid.RowSpan="2"/>
+                <Grid Grid.Row="1" Padding="5" ColumnSpacing="10">
+					<Grid.Background>
+						<AcrylicBrush BackgroundSource="Backdrop" Opacity=".50" />
+					</Grid.Background>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <!--<RowDefinition/>-->
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+					<Viewbox Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10">
+						<controls:ImageEx Source="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Windows_logo_2012-Black.svg/2000px-Windows_logo_2012-Black.svg.png"
+                                          Height="1200" Width="1200" Stretch="Uniform" />
+                    </Viewbox>
+                    <TextBlock Text="Microsoft To-Do" FontWeight="Bold" Grid.Column="1" FontSize="24"/>
+					<TextBlock Text="Lists, Tasks and Reminders" Grid.Column="1" Grid.Row="1"/>
+				</Grid>
+            </Grid>
+        </controls:Carousel>
+    </Grid>
 </Page>

@@ -16,6 +16,7 @@ namespace MicrosoftStore.Enums
         Poster,
         Tile,
         Hero,
-        Screenshot
+        Screenshot,
+        Trailer
     };
 }
