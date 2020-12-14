@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Core;
@@ -23,6 +25,9 @@ namespace FluentStore
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+
+            Services = ConfigureServices();
+            Ioc.Default.ConfigureServices(Services);
         }
 
         /// <summary>
@@ -93,6 +98,37 @@ namespace FluentStore
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
             deferral.Complete();
+        }
+
+        /// <summary>
+        /// Gets the current <see cref="App"/> instance in use
+        /// </summary>
+        public new static App Current => (App)Application.Current;
+
+        /// <summary>
+        /// Gets the <see cref="IServiceProvider"/> instance to resolve application services.
+        /// </summary>
+        public IServiceProvider Services { get; }
+
+        /// <summary>
+        /// Configures the services for the application.
+        /// </summary>
+        private static IServiceProvider ConfigureServices()
+        {
+            var services = new ServiceCollection();
+
+            services.AddSingleton(Refit.RestService.For<MicrosoftStore.IMSStoreApi>(
+                MicrosoftStore.Constants.API_HOST,
+                new Refit.RefitSettings
+                {
+                    ContentSerializer = new Refit.XmlContentSerializer()
+                }
+            ));
+            services.AddSingleton(Refit.RestService.For<MicrosoftStore.IStorefrontApi>(
+                MicrosoftStore.Constants.STOREFRONT_API_HOST
+            ));
+
+            return services.BuildServiceProvider();
         }
     }
 }

@@ -7,15 +7,28 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:viewmodels="using:FluentStore.ViewModels"
+    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.Resources>
+        <viewmodels:HomeViewModel x:Name="ViewModel"/>
+    </Page.Resources>
+    
+    <interactivity:Interaction.Behaviors>
+        <core:EventTriggerBehavior EventName="Loading">
+            <core:InvokeCommandAction Command="{x:Bind ViewModel.LoadFeaturedCommand}"/>
+        </core:EventTriggerBehavior>
+    </interactivity:Interaction.Behaviors>
 
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <controls:Carousel x:Name="FeaturedCarousel" ItemsSource="{x:Bind CarouselItems}" ItemMargin="16" ItemDepth="200">
+        <controls:Carousel x:Name="FeaturedCarousel" ItemsSource="{x:Bind ViewModel.CarouselItems}"
+                           SelectedIndex="{x:Bind ViewModel.SelectedCarouselItemIndex, Mode=TwoWay}"
+                           ItemMargin="16" ItemDepth="200">
             <controls:Carousel.EasingFunction>
                 <CubicEase EasingMode="EaseOut" />
             </controls:Carousel.EasingFunction>

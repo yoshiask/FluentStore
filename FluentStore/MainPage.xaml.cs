@@ -1,4 +1,5 @@
 ﻿using FluentStore.Helpers;
+using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -107,7 +108,7 @@ namespace FluentStore
                     string productId = product.Metas.First(m => m.Key == "BigCatalogId").Value;
 
                     // Get the full product details
-                    var item = await Apis.StorefrontApi.GetProduct(productId, region.TwoLetterISORegionName, culture.Name);
+                    var item = await Ioc.Default.GetRequiredService<MicrosoftStore.IStorefrontApi>().GetProduct(productId, region.TwoLetterISORegionName, culture.Name);
                     var candidate = item.Convert<MicrosoftStore.Models.ProductDetails>().Payload;
                     if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
                     {
@@ -134,7 +135,7 @@ namespace FluentStore
 
         public async Task<List<MicrosoftStore.Models.Product>> GetSuggestions(string query)
         {
-            var suggs = await Apis.MicrosoftStoreApi.GetSuggestions(
+            var suggs = await Ioc.Default.GetRequiredService<MicrosoftStore.IMSStoreApi>().GetSuggestions(
                 query, "en-US", MicrosoftStore.Constants.CLIENT_ID,
                 new string[] { MicrosoftStore.Constants.CAT_ALL_PRODUCTS }, new int[] { 10, 0, 0 }
             );

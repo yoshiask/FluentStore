@@ -9,6 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FluentStoreAPI\FluentStoreAPI.csproj" />
     <ProjectReference Include="..\MicrosoftStore\MicrosoftStore.csproj" />
   </ItemGroup>
 
