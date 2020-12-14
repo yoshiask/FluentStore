@@ -9,25 +9,34 @@
     xmlns:storeModels="using:MicrosoftStore.Models"
     xmlns:viewModels="using:FluentStore.ViewModels"
     mc:Ignorable="d">
-    <Page.DataContext>
+    <Page.Resources>
         <viewModels:ProductDetailsViewModel x:Name="ViewModel" x:FieldModifier="public" />
-    </Page.DataContext>
+    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="12*" />
-            <RowDefinition Height="4*" />
-            <RowDefinition Height="7*" />
-            <RowDefinition Height="12*" />
+            <RowDefinition Height="32" />
+            <RowDefinition/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*" />
-            <ColumnDefinition Width="0*" />
-        </Grid.ColumnDefinitions>
-        <Image Grid.RowSpan="2" Grid.ColumnSpan="2" Source="{x:Bind ViewModel.GetHeroImage()}" Stretch="UniformToFill" />
-        <Grid Grid.Row="2" Grid.RowSpan="2" Grid.ColumnSpan="2" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" />
 
-        <!--<Grid Grid.Column="1" Grid.Row="2" Grid.RowSpan="2" RowSpacing="10" Padding="0,15,15,0">
+        <controls:DockPanel Background="{ThemeResource SystemControlAcrylicElementBrush}">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="BackButton" Click="BackButton_Click" Style="{StaticResource NavigationBackButtonNormalStyle}" />
+                <TextBlock Margin="0,0,3,0" VerticalAlignment="Center" FontSize="12" Text="Fluent Store - " />
+                <TextBlock VerticalAlignment="Center" FontSize="12" Text="{x:Bind ViewModel.Product.MediaType}" />
+            </StackPanel>
+            <Border x:Name="TitlebarDragTarget" Background="Transparent" />
+        </controls:DockPanel>
+
+        <Image x:Name="HeroImage" Grid.Row="1" Source="{x:Bind ViewModel.GetHeroImage()}" VerticalAlignment="Top"/>
+
+        <Grid Grid.Row="1" Grid.RowSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="0*" />
+            </Grid.ColumnDefinitions>
+
+            <!--<Grid Grid.Column="1" Grid.Row="2" Grid.RowSpan="2" RowSpacing="10" Padding="0,15,15,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -71,158 +80,127 @@
             </ScrollViewer>
         </Grid>-->
 
-        <ScrollViewer Grid.Row="3" Grid.Column="0" Margin="20,30,0,10">
-            <StackPanel Spacing="30">
-                <StackPanel Spacing="10">
-                    <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Available on" />
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <StackPanel Padding="10" Orientation="Horizontal" Spacing="10">
-                            <FontIcon Glyph="&#xE977;" />
-                            <TextBlock Text="PC" />
+            <ScrollViewer Grid.Column="0">
+                <StackPanel Spacing="30">
+                    <Border Height="400"/>
+                    <Grid Grid.Row="1" Padding="15" ColumnSpacing="10" Margin="20,0" MaxHeight="300"
+                          Background="{ThemeResource SystemControlAcrylicElementMediumHighBrush}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition x:Name="DescriptionRow" Height="4*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Viewbox MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="100" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <Image Source="{x:Bind ViewModel.GetAppIcon()}" />
+                        </Viewbox>
+                        <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="30" FontWeight="Bold" Text="{x:Bind ViewModel.Product.Title}" />
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
+                            <Button Padding="10" Background="{ThemeResource SystemChromeAltHighColor}">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <FontIcon Glyph="&#xEB51;" />
+                                    <TextBlock Text="Add to wishlist" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="InstallButton" Padding="10" Click="InstallButton_Click" Style="{ThemeResource AccentButtonStyle}">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <FontIcon Glyph="&#xE118;" />
+                                    <TextBlock Text="Download" />
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
-                        <StackPanel Padding="10" Orientation="Horizontal" Spacing="10">
-                            <FontIcon Glyph="&#xE990;" />
-                            <TextBlock Text="Xbox One" />
+                        <TextBlock x:Name="DescriptionBlock" Grid.Row="1" Grid.Column="1" FontSize="16" Margin="0,-15,0,0"
+                                   Foreground="{ThemeResource SystemBaseMediumHighColor}"
+                                   Text="{x:Bind ViewModel.Product.Description}"
+                                   TextTrimming="WordEllipsis" TextWrapping="Wrap" />
+                        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.Product.PublisherName}" />
+                            <Ellipse Width="3" Height="3" VerticalAlignment="Center" Fill="{ThemeResource SystemBaseHighColor}" StrokeThickness="0" />
+                            <TextBlock VerticalAlignment="Center" Text="Social" />
                         </StackPanel>
-                        <StackPanel Padding="10" Orientation="Horizontal" Spacing="10">
-                            <FontIcon FontFamily="Hololens MDL2 Assets" Glyph="&#xF132;" />
-                            <TextBlock Text="Hololens" />
+                        <HyperlinkButton x:Name="MoreButton" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right"
+                                         Click="MoreButton_Click" Content="More" RelativePanel.Below="DescriptionBlock"
+                                         Visibility="{Binding ElementName=DescriptionBlock, Path=IsTextTrimmed}" />
+                    </Grid>
+                    <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="20">
+                        <StackPanel Spacing="10">
+                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Available on" />
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <StackPanel Padding="10" Orientation="Horizontal" Spacing="10">
+                                    <FontIcon Glyph="&#xE977;" />
+                                    <TextBlock Text="PC" />
+                                </StackPanel>
+                                <StackPanel Padding="10" Orientation="Horizontal" Spacing="10">
+                                    <FontIcon Glyph="&#xE990;" />
+                                    <TextBlock Text="Xbox One" />
+                                </StackPanel>
+                                <StackPanel Padding="10" Orientation="Horizontal" Spacing="10">
+                                    <FontIcon FontFamily="Hololens MDL2 Assets" Glyph="&#xF132;" />
+                                    <TextBlock Text="Hololens" />
+                                </StackPanel>
+                                <StackPanel Padding="10" Orientation="Horizontal" Spacing="10">
+                                    <FontIcon Glyph="&#xE1C9;" />
+                                    <TextBlock Text="Mobile" />
+                                </StackPanel>
+                                <StackPanel Padding="10" Orientation="Horizontal" Spacing="10">
+                                    <FontIcon Glyph="&#xE8AE;" />
+                                    <TextBlock Text="Hub" />
+                                </StackPanel>
+                            </StackPanel>
                         </StackPanel>
-                        <StackPanel Padding="10" Orientation="Horizontal" Spacing="10">
-                            <FontIcon Glyph="&#xE1C9;" />
-                            <TextBlock Text="Mobile" />
+                        <StackPanel Spacing="10">
+                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Screenshots" />
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Enabled" IsHorizontalScrollChainingEnabled="True">
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.GetScreenshots()}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel MaxHeight="150" Orientation="Horizontal" Spacing="10" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="storeModels:ImageItem">
+                                            <Image Source="{x:Bind GetSource()}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
                         </StackPanel>
-                        <StackPanel Padding="10" Orientation="Horizontal" Spacing="10">
-                            <FontIcon Glyph="&#xE8AE;" />
-                            <TextBlock Text="Hub" />
+                        <StackPanel Spacing="10">
+                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Features" />
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.Product.Features}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="5" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="x:String">
+                                        <TextBlock Text="{x:Bind}" TextWrapping="Wrap" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                        <StackPanel Spacing="10">
+                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="What's new" />
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.Product.Notes}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="5" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="x:String">
+                                        <TextBlock Text="{x:Bind}" TextWrapping="Wrap" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
-                <StackPanel Spacing="10">
-                    <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Screenshots" />
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Enabled" IsHorizontalScrollChainingEnabled="True">
-                        <ItemsControl ItemsSource="{x:Bind ViewModel.GetScreenshots()}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel MaxHeight="150" Orientation="Horizontal" Spacing="10" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="storeModels:ImageItem">
-                                    <Image Source="{x:Bind GetSource()}" />
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </StackPanel>
-                <StackPanel Spacing="10">
-                    <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Features" />
-                    <ItemsControl ItemsSource="{x:Bind ViewModel.Product.Features}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Spacing="5" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="x:String">
-                                <TextBlock Text="{x:Bind}" TextWrapping="Wrap" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-                <StackPanel Spacing="10">
-                    <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="What's new" />
-                    <ItemsControl ItemsSource="{x:Bind ViewModel.Product.Notes}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Spacing="5" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="x:String">
-                                <TextBlock Text="{x:Bind}" TextWrapping="Wrap" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </StackPanel>
-        </ScrollViewer>
-
-        <!--  TODO: Get the shadow working with in-app acrylic  -->
-        <controls:DropShadowPanel
-            x:Name="ContentPanel"
-            Grid.Row="1"
-            Grid.RowSpan="2"
-            Margin="20,0"
-            HorizontalContentAlignment="Stretch"
-            ShadowOpacity="0">
-            <Grid
-                Padding="15"
-                Background="{ThemeResource SystemControlAcrylicElementMediumHighBrush}"
-                BorderBrush="{ThemeResource SystemBaseLowColor}"
-                BorderThickness="1"
-                ColumnSpacing="15"
-                CornerRadius="4">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition x:Name="DescriptionRow" Height="4*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Viewbox MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="100" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                    <Image Source="{x:Bind ViewModel.GetAppIcon()}" />
-                </Viewbox>
-                <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="30" FontWeight="Bold" Text="{x:Bind ViewModel.Product.Title}" />
-                <StackPanel Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
-                    <Button Padding="10" Background="{ThemeResource SystemChromeAltHighColor}">
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <FontIcon Glyph="&#xEB51;" />
-                            <TextBlock Text="Add to wishlist" />
-                        </StackPanel>
-                    </Button>
-                    <Button x:Name="InstallButton" Padding="10" Click="InstallButton_Click" Style="{ThemeResource AccentButtonStyle}">
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <FontIcon Glyph="&#xE118;" />
-                            <TextBlock Text="Download" />
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-                <TextBlock
-                    x:Name="DescriptionBlock"
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    FontSize="16"
-                    Foreground="{ThemeResource SystemBaseMediumHighColor}"
-                    Text="{x:Bind ViewModel.Product.Description}"
-                    TextTrimming="WordEllipsis"
-                    TextWrapping="Wrap" />
-                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="10">
-                    <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.Product.PublisherName}" />
-                    <Ellipse Width="3" Height="3" VerticalAlignment="Center" Fill="{ThemeResource SystemBaseHighColor}" StrokeThickness="0" />
-                    <TextBlock VerticalAlignment="Center" Text="Social" />
-                </StackPanel>
-                <HyperlinkButton
-                    x:Name="MoreButton"
-                    Grid.Row="2"
-                    Grid.Column="1"
-                    HorizontalAlignment="Right"
-                    Click="MoreButton_Click"
-                    Content="More"
-                    RelativePanel.Below="DescriptionBlock"
-                    Visibility="{Binding ElementName=DescriptionBlock, Path=IsTextTrimmed}" />
-            </Grid>
-        </controls:DropShadowPanel>
-
-        <controls:DockPanel Grid.ColumnSpan="2" Height="32px" VerticalAlignment="Top" Background="{ThemeResource SystemControlAcrylicElementBrush}">
-            <StackPanel Orientation="Horizontal">
-                <Button x:Name="BackButton" Click="BackButton_Click" Style="{StaticResource NavigationBackButtonNormalStyle}" />
-                <TextBlock Margin="0,0,3,0" VerticalAlignment="Center" FontSize="12" Text="Fluent Store - " />
-                <TextBlock VerticalAlignment="Center" FontSize="12" Text="{x:Bind ViewModel.Product.MediaType}" />
-            </StackPanel>
-            <Border x:Name="TitlebarDragTarget" Background="Transparent" />
-        </controls:DockPanel>
+            </ScrollViewer>
+        </Grid>
     </Grid>
 </Page>

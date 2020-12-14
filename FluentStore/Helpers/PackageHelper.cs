@@ -137,6 +137,13 @@ namespace FluentStore.Helpers
             return installables.OrderByDescending(p => p.Version).First();
         }
 
+        public static List<Windows.ApplicationModel.Package> GetInstalledPackages()
+        {
+            // TOOD: Always throws "access denied"
+            PackageManager pkgManager = new PackageManager();
+            return pkgManager.FindPackages().ToList();
+        }
+        
         public static bool IsFiletype(string file, params string[] exts)
         {
             foreach (string ext in exts)
