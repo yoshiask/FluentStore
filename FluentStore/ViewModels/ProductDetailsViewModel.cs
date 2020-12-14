@@ -1,15 +1,14 @@
-﻿using FluentStore.Models;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using MicrosoftStore.Models;
 using System.Collections.Generic;
 using Windows.UI.Xaml.Media.Imaging;
 
 namespace FluentStore.ViewModels
 {
-    public class ProductDetailsViewModel : ObservableRecipient
+    public class ProductDetailsViewModel : ObservableObject
     {
-        private ObservableProductDetails product;
-        public ObservableProductDetails Product
+        private ProductDetails product;
+        public ProductDetails Product
         {
             get => product;
             set => SetProperty(ref product, value);

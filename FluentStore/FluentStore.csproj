@@ -129,7 +129,6 @@
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Models\ObservableProductDetails.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\ProductDetailsViewModel.cs" />
     <Compile Include="Views\HomeView.xaml.cs">
@@ -202,7 +201,7 @@
       <Version>6.2.10</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Mvvm">
-      <Version>7.0.0-preview2</Version>
+      <Version>7.0.0-preview3</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications">
       <Version>6.1.1</Version>
@@ -218,19 +217,14 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AdGuard\AdGuard.csproj">
-      <Project>{28cd7dc1-df8d-4a8e-9bba-55beb89f7643}</Project>
-      <Name>AdGuard</Name>
-    </ProjectReference>
     <ProjectReference Include="..\MicrosoftStore\MicrosoftStore.csproj">
       <Project>{7fc21573-6b0f-4b5b-bae5-af80546c0d79}</Project>
       <Name>MicrosoftStore</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="StoreLib">
-      <HintPath>..\..\StoreLib\StoreLib\bin\Debug\netstandard1.4\StoreLib.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\StoreLib\StoreLib\StoreLib.csproj">
+      <Project>{e13711ff-3e53-4ca4-8043-63b92673567a}</Project>
+      <Name>StoreLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

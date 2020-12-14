@@ -1,8 +1,9 @@
-﻿using AdGuard.Models;
-using Microsoft.Toolkit.Uwp.Notifications;
+﻿using Microsoft.Toolkit.Uwp.Notifications;
 using MicrosoftStore.Models;
+using StoreLib.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ namespace FluentStore.Helpers
             ".appx", ".appxbundle", ".msix", ".msixbundle"
         };
 
-        public static async Task<bool> InstallPackage(Package package, ProductDetails product)
+        public static async Task<bool> InstallPackage(PackageInstance package, ProductDetails product)
         {
             ToastNotification finalNotif = GenerateInstallSuccessToast(package, product);
             bool isSuccess = true;
@@ -29,15 +30,16 @@ namespace FluentStore.Helpers
             {
                 // Download the file to the app's temp directory
                 //var client = new System.Net.WebClient();
-                string filepath = Path.Combine(ApplicationData.Current.TemporaryFolder.Path, package.Name);
+                string filepath = Path.Combine(ApplicationData.Current.TemporaryFolder.Path, package.PackageMoniker);
+                Debug.WriteLine(filepath);
                 //client.DownloadFile(package.Uri, filepath);
 
                 StorageFile destinationFile = await ApplicationData.Current.TemporaryFolder.CreateFileAsync(
-                    package.Name, CreationCollisionOption.ReplaceExisting);
+                    package.PackageMoniker, CreationCollisionOption.ReplaceExisting);
                 BackgroundDownloader downloader = new BackgroundDownloader();
                 downloader.FailureToastNotification = GenerateDownloadFailureToast(package, product);
                 var progressToast = GenerateProgressToast(package, product);
-                DownloadOperation download = downloader.CreateDownload(package.Uri, destinationFile);
+                DownloadOperation download = downloader.CreateDownload(package.PackageUri, destinationFile);
                 download.RangesDownloaded += (op, args) =>
                 {
                     ToastNotificationManager.GetDefault().CreateToastNotifier().Update(
@@ -120,13 +122,13 @@ namespace FluentStore.Helpers
             }
         }
 
-        public static Package GetLatestDesktopPackage(List<Package> packages, string family, ProductDetails product)
+        public static PackageInstance GetLatestDesktopPackage(List<PackageInstance> packages, string family, ProductDetails product)
         {
-            List<Package> installables = packages.FindAll(p => {
-                return IsFiletype(p.Name, INSTALLABLE_EXTS)
+            List<PackageInstance> installables = packages.FindAll(p => {
+                return p.PackageType != PackageType.Unknown
                     && (p.PackageFamily != null) && ($"{p.PackageFamily}_{p.PublisherId}" == family)
-                    //&& (p.PackageFamily == product.PackageFamilyNames?.First().Split("_")[0])
-                    && ((p.Architecture == "neutral") || (p.Architecture == "x64"));
+                    && ((p.Architecture == "neutral") || (p.Architecture == "x64"))
+                    && p.Version.Revision != 70;
             });
             if (installables.Count <= 0)
                 return null;
@@ -145,7 +147,7 @@ namespace FluentStore.Helpers
             return false;
         }
 
-        public static ToastNotification GenerateProgressToast(Package package, ProductDetails product)
+        public static ToastNotification GenerateProgressToast(PackageInstance package, ProductDetails product)
         {
             var content = new ToastContent()
             {
@@ -177,17 +179,17 @@ namespace FluentStore.Helpers
                 //{
                 //    Buttons =
                 //    {
-                //        new ToastButton("Pause", $"action=pauseDownload&packageName={package.Name}")
+                //        new ToastButton("Pause", $"action=pauseDownload&packageName={package.PackageMoniker}")
                 //        {
                 //            ActivationType = ToastActivationType.Background
                 //        },
-                //        new ToastButton("Cancel", $"action=cancelDownload&packageName={package.Name}")
+                //        new ToastButton("Cancel", $"action=cancelDownload&packageName={package.PackageMoniker}")
                 //        {
                 //            ActivationType = ToastActivationType.Background
                 //        }
                 //    }
                 //},
-                Launch = $"action=viewDownload&packageName={package.Name}",
+                Launch = $"action=viewDownload&packageName={package.PackageMoniker}",
             };
 
             var notif = new ToastNotification(content.GetXml());
@@ -202,10 +204,10 @@ namespace FluentStore.Helpers
             return notif;
         }
 
-        public static ToastNotification GenerateDownloadSuccessToast(Package package, ProductDetails product)
+        public static ToastNotification GenerateDownloadSuccessToast(PackageInstance package, ProductDetails product)
         {
             var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
-                .AddToastActivationInfo($"action=viewEvent&eventId={package.Name}", ToastActivationType.Foreground)
+                .AddToastActivationInfo($"action=viewEvent&eventId={package.PackageMoniker}", ToastActivationType.Foreground)
                 .AddText(product.Title)
                 .AddText(product.Title + " is ready to install")
                 .AddAppLogoOverride(product.Images.FindLast(i => i.ImageType == MicrosoftStore.Enums.ImageType.Logo).Uri, addImageQuery: false)
@@ -213,10 +215,10 @@ namespace FluentStore.Helpers
             return new ToastNotification(content.GetXml());
         }
 
-        public static ToastNotification GenerateDownloadFailureToast(Package package, ProductDetails product)
+        public static ToastNotification GenerateDownloadFailureToast(PackageInstance package, ProductDetails product)
         {
             var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
-                .AddToastActivationInfo($"action=viewEvent&eventId={package.Name}", ToastActivationType.Foreground)
+                .AddToastActivationInfo($"action=viewEvent&eventId={package.PackageMoniker}", ToastActivationType.Foreground)
                 .AddText(product.Title)
                 .AddText("Failed to download, please try again later")
                 .AddAppLogoOverride(product.Images.FindLast(i => i.ImageType == MicrosoftStore.Enums.ImageType.Logo).Uri, addImageQuery: false)
@@ -224,10 +226,10 @@ namespace FluentStore.Helpers
             return new ToastNotification(content.GetXml());
         }
 
-        public static ToastNotification GenerateInstallSuccessToast(Package package, ProductDetails product)
+        public static ToastNotification GenerateInstallSuccessToast(PackageInstance package, ProductDetails product)
         {
             var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
-                .AddToastActivationInfo($"action=viewEvent&eventId={package.Name}", ToastActivationType.Foreground)
+                .AddToastActivationInfo($"action=viewEvent&eventId={package.PackageMoniker}", ToastActivationType.Foreground)
                 .AddText(product.Title)
                 .AddText(product.Title + " just got installed.")
                 .AddAppLogoOverride(product.Images.FindLast(i => i.ImageType == MicrosoftStore.Enums.ImageType.Logo).Uri, addImageQuery: false)
@@ -235,10 +237,10 @@ namespace FluentStore.Helpers
             return new ToastNotification(content.GetXml());
         }
 
-        public static ToastNotification GenerateInstallFailureToast(Package package, ProductDetails product, Exception ex)
+        public static ToastNotification GenerateInstallFailureToast(PackageInstance package, ProductDetails product, Exception ex)
         {
             var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
-                .AddToastActivationInfo($"action=viewEvent&eventId={package.Name}", ToastActivationType.Foreground)
+                .AddToastActivationInfo($"action=viewEvent&eventId={package.PackageMoniker}", ToastActivationType.Foreground)
                 .AddText(product.Title)
                 .AddText(product.Title + " failed to install.")
                 .AddText(ex.Message)
