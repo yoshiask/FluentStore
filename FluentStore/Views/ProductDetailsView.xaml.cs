@@ -61,7 +61,7 @@ namespace FluentStore.Views
             args.Handled = true;
         }
 
-        private async void InstallButton_Click(object sender, RoutedEventArgs e)
+        private async void InstallButton_Click(SplitButton sender, SplitButtonClickEventArgs e)
         {
             InstallButton.IsEnabled = false;
             var culture = CultureInfo.CurrentUICulture;
@@ -126,6 +126,98 @@ namespace FluentStore.Views
             };
             await dialog.ShowAsync();
             return;
+        }
+
+        private void AddToCollection_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private async void Download_Click(object sender, RoutedEventArgs e)
+        {
+            InstallButton.IsEnabled = false;
+            var culture = CultureInfo.CurrentUICulture;
+            string productId = ViewModel.Product.ProductId;
+
+            var dialog = new ProgressDialog()
+            {
+                Title = ViewModel.Product.Title,
+                Body = "Fetching packages..."
+            };
+            dialog.ShowAsync();
+
+            DisplayCatalogHandler dcathandler = new DisplayCatalogHandler(DCatEndpoint.Production, new Locale(culture, true));
+            await dcathandler.QueryDCATAsync(productId);
+            var packs = await dcathandler.GetPackagesForProductAsync();
+            string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;
+
+            dialog.Hide();
+            if (packs != null)// && packs.Count > 0)
+            {
+                var package = PackageHelper.GetLatestDesktopPackage(packs.ToList(), packageFamilyName, ViewModel.Product);
+                if (package == null)
+                {
+                    var noPackagesDialog = new ContentDialog()
+                    {
+                        Title = ViewModel.Product.Title,
+                        Content = "No available packages for this product.",
+                        PrimaryButtonText = "Ok"
+                    };
+                    await noPackagesDialog.ShowAsync();
+                    return;
+                }
+                else
+                {
+                    var file = (await PackageHelper.DownloadPackage(package, ViewModel.Product)).Item1;
+
+                    var toast = PackageHelper.GenerateDownloadSuccessToast(package, ViewModel.Product, file);
+                    Windows.UI.Notifications.ToastNotificationManager.GetDefault().CreateToastNotifier().Show(toast);
+                }
+            }
+
+            InstallButton.IsEnabled = true;
+        }
+
+        private async void InstallUsingAppInstaller_Click(object sender, RoutedEventArgs e)
+        {
+            InstallButton.IsEnabled = false;
+            var culture = CultureInfo.CurrentUICulture;
+            string productId = ViewModel.Product.ProductId;
+
+            var dialog = new ProgressDialog()
+            {
+                Title = ViewModel.Product.Title,
+                Body = "Fetching packages..."
+            };
+            dialog.ShowAsync();
+
+            DisplayCatalogHandler dcathandler = new DisplayCatalogHandler(DCatEndpoint.Production, new Locale(Market.US, Lang.en, true));
+            await dcathandler.QueryDCATAsync(productId);
+            var packs = await dcathandler.GetPackagesForProductAsync();
+            string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;
+
+            dialog.Hide();
+            if (packs != null)// && packs.Count > 0)
+            {
+                var package = PackageHelper.GetLatestDesktopPackage(packs.ToList(), packageFamilyName, ViewModel.Product);
+                if (package == null)
+                {
+                    var noPackagesDialog = new ContentDialog()
+                    {
+                        Title = ViewModel.Product.Title,
+                        Content = "No available packages for this product.",
+                        PrimaryButtonText = "Ok"
+                    };
+                    await noPackagesDialog.ShowAsync();
+                    return;
+                }
+                else
+                {
+                    await PackageHelper.InstallPackage(package, ViewModel.Product, true);
+                }
+            }
+
+            InstallButton.IsEnabled = true;
         }
     }
 }

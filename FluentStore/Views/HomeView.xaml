@@ -44,13 +44,10 @@
                             </Viewbox>
                             <TextBlock Text="{x:Bind Product.ShortTitle}" FontWeight="Bold" Grid.Column="1" FontSize="24" TextTrimming="CharacterEllipsis"/>
                             <TextBlock Text="{x:Bind Product.Subtitle}" Grid.Column="1" Grid.Row="1"/>
-                            <Button Grid.Column="1" Grid.Row="1" HorizontalAlignment="Right"
-                                    Padding="6" Style="{ThemeResource AccentButtonStyle}">
-                                <StackPanel Orientation="Horizontal" Spacing="10">
-                                    <FontIcon Glyph="&#xE118;" />
-                                    <TextBlock Text="Download" />
-                                </StackPanel>
-                            </Button>
+                            <Button Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Right"
+                                    Style="{ThemeResource AccentButtonStyle}" FontWeight="SemiBold"
+                                    Padding="10" Margin="0,0,10,0"
+                                    Content="{Binding Product.DisplayPrice}"/>
                         </Grid>
                     </Grid>
                 </DataTemplate>

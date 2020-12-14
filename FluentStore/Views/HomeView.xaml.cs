@@ -36,7 +36,7 @@ namespace FluentStore.Views
 					.Convert<ProductDetails>().Payload;
 				CarouselItems.Add(new ProductDetailsViewModel() { Product = product });
 			}
-			FeaturedCarousel.SelectedIndex = CarouselItems.Count / 2;
+			FeaturedCarousel.SelectedIndex = 1;
 		}
     }
 }

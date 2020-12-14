@@ -19,7 +19,7 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <controls:DockPanel Background="{ThemeResource SystemControlAcrylicElementBrush}">
+        <controls:DockPanel Background="{ThemeResource SystemControlAcrylicWindowBrush}">
             <StackPanel Orientation="Horizontal">
                 <Button x:Name="BackButton" Click="BackButton_Click" Style="{StaticResource NavigationBackButtonNormalStyle}" />
                 <TextBlock Margin="0,0,3,0" VerticalAlignment="Center" FontSize="12" Text="Fluent Store - " />
@@ -28,8 +28,10 @@
             <Border x:Name="TitlebarDragTarget" Background="Transparent" />
         </controls:DockPanel>
 
-        <Image x:Name="HeroImage" Grid.Row="1" Source="{x:Bind ViewModel.GetHeroImage()}"
-               VerticalAlignment="Top" HorizontalAlignment="Stretch"/>
+        <ParallaxView Source="{x:Bind ContentScroller}" Grid.Row="1" VerticalShift="200" VerticalSourceOffsetKind="Absolute">
+            <Image x:Name="HeroImage" Source="{x:Bind ViewModel.GetHeroImage()}"
+                   VerticalAlignment="Top" HorizontalAlignment="Left" Stretch="Uniform"/>
+        </ParallaxView>
 
         <Grid Grid.Row="1" Grid.RowSpan="2">
             <Grid.ColumnDefinitions>
@@ -81,9 +83,9 @@
             </ScrollViewer>
         </Grid>-->
 
-            <ScrollViewer Grid.Column="0">
+            <ScrollViewer Grid.Column="0" x:Name="ContentScroller">
                 <StackPanel Spacing="20">
-                    <Border Height="{Binding ElementName=HeroImage, Path=ActualHeight, Mode=OneWay}" Margin="0,0,0,-200"/>
+                    <Border Height="{Binding ElementName=HeroImage, Path=ActualHeight, Mode=OneWay}" Margin="0,0,0,-250"/>
                     <Grid Grid.Row="1" Padding="20,0,20,20" ColumnSpacing="20" Margin="20,0" MaxHeight="300"
                           Background="{ThemeResource SystemControlAcrylicElementMediumHighBrush}">
                         <Grid.RowDefinitions>
@@ -101,18 +103,59 @@
                         </Viewbox>
                         <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="30" FontWeight="Bold" Text="{x:Bind ViewModel.Product.Title}" />
                         <StackPanel Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
-                            <Button Padding="10" Background="{ThemeResource SystemChromeAltHighColor}">
+                            <Button Click="AddToCollection_Click" Padding="10" Background="{ThemeResource SystemChromeAltHighColor}">
                                 <StackPanel Orientation="Horizontal" Spacing="10">
-                                    <FontIcon Glyph="&#xEB51;" />
-                                    <TextBlock Text="Add to wishlist" />
+                                    <FontIcon Glyph="&#xECCD;" />
+                                    <TextBlock Text="Add to collection" />
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="InstallButton" Padding="10" Click="InstallButton_Click" Style="{ThemeResource AccentButtonStyle}">
+                            <SplitButton x:Name="InstallButton" Padding="10,11" Click="InstallButton_Click" CornerRadius="2"
+                                         BorderThickness="0">
                                 <StackPanel Orientation="Horizontal" Spacing="10">
-                                    <FontIcon Glyph="&#xE118;" />
-                                    <TextBlock Text="Download" />
+                                    <FontIcon Glyph="&#xECAA;" />
+                                    <TextBlock Text="Install" />
                                 </StackPanel>
-                            </Button>
+                                <SplitButton.Flyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem Icon="Download" Text="Download installer" ToolTipService.ToolTip="Downloads the app without installing it"
+                                                        Click="Download_Click"/>
+                                        <MenuFlyoutItem Text="Install with App Installer" ToolTipService.ToolTip="Installs the app using Microsoft's App Installer"
+                                                        Click="InstallUsingAppInstaller_Click">
+                                            <MenuFlyoutItem.Icon>
+                                                <BitmapIcon UriSource="Assets/AppPackageAppList.png"/>
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
+                                    </MenuFlyout>
+                                </SplitButton.Flyout>
+                                <SplitButton.Resources>
+                                    <StaticResource x:Key="SplitButtonBackground" ResourceKey="AccentBackground" />
+                                    <StaticResource x:Key="SplitButtonBackgroundPointerOver" ResourceKey="AccentBackgroundPointerOver" />
+                                    <StaticResource x:Key="SplitButtonBackgroundPressed" ResourceKey="AccentBackgroundPressed" />
+                                    <StaticResource x:Key="SplitButtonBackgroundDisabled" ResourceKey="AccentBackgroundDisabled" />
+                                    <StaticResource x:Key="SplitButtonBackgroundChecked" ResourceKey="SystemAccentColorLight2" />
+                                    <StaticResource x:Key="SplitButtonBackgroundCheckedPointerOver" ResourceKey="SystemControlHighlightAccentBrush" />
+                                    <StaticResource x:Key="SplitButtonBackgroundCheckedPressed" ResourceKey="SystemControlHighlightBaseMediumLowBrush" />
+                                    <StaticResource x:Key="SplitButtonBackgroundCheckedDisabled" ResourceKey="SystemControlBackgroundBaseLowBrush" />
+                                    
+                                    <StaticResource x:Key="SplitButtonForeground" ResourceKey="AccentForeground" />
+                                    <StaticResource x:Key="SplitButtonForegroundPointerOver" ResourceKey="AccentForegroundPointerOver" />
+                                    <StaticResource x:Key="SplitButtonForegroundPressed" ResourceKey="AccentForegroundPressed" />
+                                    <StaticResource x:Key="SplitButtonForegroundDisabled" ResourceKey="AccentForegroundDisabled" />
+                                    <StaticResource x:Key="SplitButtonForegroundChecked" ResourceKey="SystemControlHighlightAltChromeWhiteBrush" />
+                                    <StaticResource x:Key="SplitButtonForegroundCheckedPointerOver" ResourceKey="SystemControlHighlightAltChromeWhiteBrush" />
+                                    <StaticResource x:Key="SplitButtonForegroundCheckedPressed" ResourceKey="SystemControlHighlightAltChromeWhiteBrush" />
+                                    <StaticResource x:Key="SplitButtonForegroundCheckedDisabled" ResourceKey="SystemControlDisabledBaseMediumLowBrush" />
+                                    
+                                    <StaticResource x:Key="SplitButtonBorderBrush" ResourceKey="AccentBorderBrush" />
+                                    <StaticResource x:Key="SplitButtonBorderBrushPointerOver" ResourceKey="AccentBorderBrushPointerOver" />
+                                    <StaticResource x:Key="SplitButtonBorderBrushPressed" ResourceKey="AccentBorderBrushPressed" />
+                                    <StaticResource x:Key="SplitButtonBorderBrushDisabled" ResourceKey="AccentBorderBrushDisabled" />
+                                    <StaticResource x:Key="SplitButtonBorderBrushChecked" ResourceKey="SystemControlHighlightAltTransparentBrush" />
+                                    <StaticResource x:Key="SplitButtonBorderBrushCheckedPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowBrush" />
+                                    <StaticResource x:Key="SplitButtonBorderBrushCheckedPressed" ResourceKey="SystemControlHighlightAltTransparentBrush" />
+                                    <StaticResource x:Key="SplitButtonBorderBrushCheckedDisabled" ResourceKey="SystemControlDisabledTransparentBrush" />
+                                </SplitButton.Resources>
+                            </SplitButton>
                         </StackPanel>
                         <TextBlock x:Name="DescriptionBlock" Grid.Row="1" Grid.Column="1" FontSize="16" Margin="0,-12,0,0"
                                    Foreground="{ThemeResource SystemBaseMediumHighColor}"

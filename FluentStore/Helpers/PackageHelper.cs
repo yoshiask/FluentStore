@@ -22,37 +22,13 @@ namespace FluentStore.Helpers
             ".appx", ".appxbundle", ".msix", ".msixbundle"
         };
 
-        public static async Task<bool> InstallPackage(PackageInstance package, ProductDetails product)
+        public static async Task<bool> InstallPackage(PackageInstance package, ProductDetails product, bool? useAppInstaller = null)
         {
             ToastNotification finalNotif = GenerateInstallSuccessToast(package, product);
             bool isSuccess = true;
             try
             {
-                // Download the file to the app's temp directory
-                //var client = new System.Net.WebClient();
-                string filepath = Path.Combine(ApplicationData.Current.TemporaryFolder.Path, package.PackageMoniker);
-                Debug.WriteLine(filepath);
-                //client.DownloadFile(package.Uri, filepath);
-
-                StorageFile destinationFile = await ApplicationData.Current.TemporaryFolder.CreateFileAsync(
-                    package.PackageMoniker, CreationCollisionOption.ReplaceExisting);
-                BackgroundDownloader downloader = new BackgroundDownloader();
-                downloader.FailureToastNotification = GenerateDownloadFailureToast(package, product);
-                var progressToast = GenerateProgressToast(package, product);
-                DownloadOperation download = downloader.CreateDownload(package.PackageUri, destinationFile);
-                download.RangesDownloaded += (op, args) =>
-                {
-                    ToastNotificationManager.GetDefault().CreateToastNotifier().Update(
-                        new NotificationData(new Dictionary<string, string>()
-                        {
-                            { "progressValue", ((double)op.Progress.BytesReceived / op.Progress.TotalBytesToReceive).ToString() },
-                            { "progressStatus", "Downloading..." }
-                        }),
-                        progressToast.Tag
-                    );
-                };
-                ToastNotificationManager.GetDefault().CreateToastNotifier().Show(progressToast);
-                await download.StartAsync();
+                (await DownloadPackage(package, product)).Deconstruct(out var installer, out var progressToast);
 
                 PackageManager pkgManager = new PackageManager();
                 Progress<DeploymentProgress> progressCallback = new Progress<DeploymentProgress>(prog =>
@@ -67,10 +43,10 @@ namespace FluentStore.Helpers
                     );
                 });
 
-                if (Settings.Default.UseAppInstaller)
+                if (Settings.Default.UseAppInstaller || (useAppInstaller.HasValue && useAppInstaller.Value))
 				{
                     // Pass the file to App Installer to install it
-                    Uri launchUri = new Uri("ms-appinstaller:?source=" + filepath);
+                    Uri launchUri = new Uri("ms-appinstaller:?source=" + installer.Path);
                     switch (await Launcher.QueryUriSupportAsync(launchUri, LaunchQuerySupportType.Uri))
                     {
                         case LaunchQuerySupportStatus.Available:
@@ -99,17 +75,15 @@ namespace FluentStore.Helpers
                 else
 				{
 					// Attempt to install the downloaded package
-					var result = await pkgManager.AddPackageAsync(new Uri(filepath), new Uri[] { }, DeploymentOptions.ForceTargetApplicationShutdown).AsTask(progressCallback);
+					var result = await pkgManager.AddPackageAsync(new Uri(installer.Path), new Uri[] { }, DeploymentOptions.ForceTargetApplicationShutdown).AsTask(progressCallback);
 
 					if (result.IsRegistered)
                         finalNotif = GenerateInstallSuccessToast(package, product);
 					else
-						finalNotif = GenerateInstallFailureToast(package, product, new Exception("An unknown error occured."));
+						finalNotif = GenerateInstallFailureToast(package, product, result.ExtendedErrorCode);
                     isSuccess = result.IsRegistered;
                 }
 
-                // Remove the progress notifcation
-                ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
                 // Show the final notification
                 ToastNotificationManager.GetDefault().CreateToastNotifier().Show(finalNotif);
 
@@ -120,6 +94,38 @@ namespace FluentStore.Helpers
                 ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateInstallFailureToast(package, product, ex));
                 return false;
             }
+        }
+
+        public static async Task<Tuple<StorageFile, ToastNotification>> DownloadPackage(PackageInstance package, ProductDetails product)
+        {
+            // Download the file to the app's temp directory
+            //var client = new System.Net.WebClient();
+            string filepath = Path.Combine(ApplicationData.Current.TemporaryFolder.Path, package.PackageMoniker);
+            Debug.WriteLine(filepath);
+            //client.DownloadFile(package.Uri, filepath);
+
+            StorageFile destinationFile = await ApplicationData.Current.TemporaryFolder.CreateFileAsync(
+                package.PackageMoniker, CreationCollisionOption.ReplaceExisting);
+            BackgroundDownloader downloader = new BackgroundDownloader();
+            downloader.FailureToastNotification = GenerateDownloadFailureToast(package, product);
+            var progressToast = GenerateProgressToast(package, product);
+            DownloadOperation download = downloader.CreateDownload(package.PackageUri, destinationFile);
+            download.RangesDownloaded += (op, args) =>
+            {
+                ToastNotificationManager.GetDefault().CreateToastNotifier().Update(
+                    new NotificationData(new Dictionary<string, string>()
+                    {
+                            { "progressValue", ((double)op.Progress.BytesReceived / op.Progress.TotalBytesToReceive).ToString() },
+                            { "progressStatus", "Downloading..." }
+                    }),
+                    progressToast.Tag
+                );
+            };
+            ToastNotificationManager.GetDefault().CreateToastNotifier().Show(progressToast);
+            await download.StartAsync();
+            ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
+
+            return (destinationFile, progressToast).ToTuple();
         }
 
         public static PackageInstance GetLatestDesktopPackage(List<PackageInstance> packages, string family, ProductDetails product)
@@ -211,10 +217,10 @@ namespace FluentStore.Helpers
             return notif;
         }
 
-        public static ToastNotification GenerateDownloadSuccessToast(PackageInstance package, ProductDetails product)
+        public static ToastNotification GenerateDownloadSuccessToast(PackageInstance package, ProductDetails product, StorageFile file)
         {
             var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
-                .AddToastActivationInfo($"action=viewEvent&eventId={package.PackageMoniker}", ToastActivationType.Foreground)
+                .AddToastActivationInfo($"action=viewEvent&eventId={package.PackageMoniker}&installerPath={file.Path}", ToastActivationType.Foreground)
                 .AddText(product.Title)
                 .AddText(product.Title + " is ready to install")
                 .AddAppLogoOverride(product.Images.FindLast(i => i.ImageType == MicrosoftStore.Enums.ImageType.Logo).Uri, addImageQuery: false)

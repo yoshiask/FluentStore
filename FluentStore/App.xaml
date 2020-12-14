@@ -12,6 +12,132 @@
             </ResourceDictionary.MergedDictionaries>
             <!--  Other app resources here  -->
             <helpers:Settings x:Key="settings" />
+
+            <StaticResource x:Key="AccentBackground" ResourceKey="SystemControlForegroundAccentBrush" />
+            <StaticResource x:Key="AccentBackgroundPointerOver" ResourceKey="SystemAccentColorLight1" />
+            <StaticResource x:Key="AccentBackgroundPressed" ResourceKey="SystemControlBackgroundBaseMediumLowBrush" />
+            <StaticResource x:Key="AccentBackgroundDisabled" ResourceKey="SystemControlBackgroundBaseLowBrush" />
+            <StaticResource x:Key="AccentForeground" ResourceKey="SystemControlBackgroundChromeWhiteBrush" />
+            <StaticResource x:Key="AccentForegroundPointerOver" ResourceKey="SystemControlBackgroundChromeWhiteBrush" />
+            <StaticResource x:Key="AccentForegroundPressed" ResourceKey="SystemControlHighlightBaseHighBrush" />
+            <StaticResource x:Key="AccentForegroundDisabled" ResourceKey="SystemControlDisabledBaseMediumLowBrush" />
+            <StaticResource x:Key="AccentBorderBrush" ResourceKey="SystemControlForegroundTransparentBrush" />
+            <StaticResource x:Key="AccentBorderBrushPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowBrush" />
+            <StaticResource x:Key="AccentBorderBrushPressed" ResourceKey="SystemControlHighlightTransparentBrush" />
+            <StaticResource x:Key="AccentBorderBrushDisabled" ResourceKey="SystemControlDisabledTransparentBrush" />
+
+            <Style x:Key="AccentDropDownButton" TargetType="DropDownButton">
+                <Setter Property="Background" Value="{ThemeResource AccentBackground}" />
+                <Setter Property="Foreground" Value="{ThemeResource AccentForeground}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource AccentBorderBrush}" />
+                <Setter Property="BorderThickness" Value="{ThemeResource ButtonBorderThemeThickness}" />
+                <Setter Property="Padding" Value="{StaticResource ButtonPadding}" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}" />
+                <Setter Property="FontWeight" Value="Normal" />
+                <Setter Property="FontSize" Value="{ThemeResource ControlContentThemeFontSize}" />
+                <Setter Property="UseSystemFocusVisuals" Value="{StaticResource UseSystemFocusVisuals}" />
+                <Setter Property="FocusVisualMargin" Value="-3" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Grid x:Name="RootGrid" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
+
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal">
+
+                                            <Storyboard>
+                                                <PointerUpThemeAnimation Storyboard.TargetName="RootGrid" />
+                                            </Storyboard>
+                                        </VisualState>
+
+                                        <VisualState x:Name="PointerOver">
+
+                                            <Storyboard>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="Background">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AccentBackgroundPointerOver}" />
+                                                </ObjectAnimationUsingKeyFrames>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="InnerGrid" Storyboard.TargetProperty="BorderBrush">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AccentBorderBrushPointerOver}" />
+                                                </ObjectAnimationUsingKeyFrames>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource SystemControlBackgroundChromeWhiteBrush}" />
+                                                </ObjectAnimationUsingKeyFrames>
+                                                <PointerUpThemeAnimation Storyboard.TargetName="RootGrid" />
+                                            </Storyboard>
+                                        </VisualState>
+
+                                        <VisualState x:Name="Pressed">
+
+                                            <Storyboard>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="Background">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AccentBackgroundPressed}" />
+                                                </ObjectAnimationUsingKeyFrames>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="InnerGrid" Storyboard.TargetProperty="BorderBrush">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AccentBorderBrushPressed}" />
+                                                </ObjectAnimationUsingKeyFrames>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AccentForegroundPressed}" />
+                                                </ObjectAnimationUsingKeyFrames>
+                                                <PointerDownThemeAnimation Storyboard.TargetName="RootGrid" />
+                                            </Storyboard>
+                                        </VisualState>
+
+                                        <VisualState x:Name="Disabled">
+
+                                            <Storyboard>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="Background">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AccentBackgroundDisabled}" />
+                                                </ObjectAnimationUsingKeyFrames>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="InnerGrid" Storyboard.TargetProperty="BorderBrush">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AccentBorderBrushDisabled}" />
+                                                </ObjectAnimationUsingKeyFrames>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
+                                                    <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AccentForegroundDisabled}" />
+                                                </ObjectAnimationUsingKeyFrames>
+                                            </Storyboard>
+                                        </VisualState>
+
+                                    </VisualStateGroup>
+
+                                </VisualStateManager.VisualStateGroups>
+                                <Grid x:Name="InnerGrid" Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
+
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <ContentPresenter x:Name="ContentPresenter"
+                                                      Content="{TemplateBinding Content}"
+                                                      ContentTransitions="{TemplateBinding ContentTransitions}"
+                                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                      HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                      VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                      AutomationProperties.AccessibilityView="Raw" />
+
+                                    <TextBlock x:Name="ChevronTextBlock"
+                                               Grid.Column="1" FontFamily="Segoe MDL2 Assets"
+                                               FontSize="12" Text="&#xE70D;" VerticalAlignment="Center"
+                                               Margin="6,0,0,0" AutomationProperties.AccessibilityView="Raw"/>
+
+                                </Grid>
+
+                            </Grid>
+
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="AccentSplitButton" TargetType="SplitButton" BasedOn="{StaticResource SplitButtonStyle}">
+                <Setter Property="Background" Value="{ThemeResource SplitButtonBackground}" />
+                <Setter Property="Foreground" Value="{ThemeResource SplitButtonForeground}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource SplitButtonBorderBrush}" />
+                <Setter Property="BorderThickness" Value="0"/>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
