@@ -219,5 +219,29 @@ namespace FluentStore.Views
 
             InstallButton.IsEnabled = true;
         }
+
+        private void HeroImage_ImageOpened(object sender, RoutedEventArgs e)
+        {
+            UpdateHeroImageSpacer();
+        }
+
+        private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateHeroImageSpacer();
+        }
+
+        private void UpdateHeroImageSpacer()
+        {
+            if (HeroImage.Source is Windows.UI.Xaml.Media.Imaging.BitmapImage bitmap && bitmap.UriSource.Host == "via.placeholder.com")
+            {
+                HeroImage.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                double offset = InfoCard.ActualHeight * 1.5
+                    + InfoCard.Margin.Top + InfoCard.Margin.Bottom;
+                HeroImageSpacer.Height = Math.Max(HeroImage.ActualHeight - offset, 0);
+            }
+        }
     }
 }

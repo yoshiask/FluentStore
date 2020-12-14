@@ -1,7 +1,7 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using MicrosoftStore.Models;
+using System;
 using System.Collections.Generic;
-using Windows.UI.Xaml.Media.Imaging;
 
 namespace FluentStore.ViewModels
 {
@@ -14,19 +14,19 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref product, value);
         }
 
-        public BitmapImage GetAppIcon()
+        public Uri GetAppIcon()
         {
-            string url = "https://cdn.wallpaperhub.app/cloudcache/b/f/7/d/d/b/bf7ddbfb925701167ce8060cac808f88c641a16a.jpg";
+            string url = "https://via.placeholder.com/1";
             int width = 0;
             foreach (ImageItem image in Product.Images.FindAll(i => i.ImageType == MicrosoftStore.Enums.ImageType.Logo))
             {
                 if (image.Width > width)
                     url = image.Url;
             }
-            return new BitmapImage(new System.Uri(url));
+            return new Uri(url);
         }
 
-        public BitmapImage GetHeroImage()
+        public Uri GetHeroImage()
         {
             string url = "";
             int width = 0;
@@ -37,10 +37,10 @@ namespace FluentStore.ViewModels
             }
             if (string.IsNullOrWhiteSpace(url))
             {
-                return new BitmapImage();
+                return new Uri("https://via.placeholder.com/1");
             }
 
-            return new BitmapImage(new System.Uri(url));
+            return new Uri(url);
         }
 
         public List<ImageItem> GetScreenshots()

@@ -40,7 +40,11 @@
                             </Grid.ColumnDefinitions>
                             <Viewbox MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="100"
                                      Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                                <Image Source="{x:Bind GetAppIcon()}" />
+                                <Image>
+                                    <Image.Source>
+                                        <BitmapImage UriSource="{x:Bind GetAppIcon()}"/>
+                                    </Image.Source>
+                                </Image>
                             </Viewbox>
                             <TextBlock Text="{x:Bind Product.ShortTitle}" FontWeight="Bold" Grid.Column="1" FontSize="24" TextTrimming="CharacterEllipsis"/>
                             <TextBlock Text="{x:Bind Product.Subtitle}" Grid.Column="1" Grid.Row="1"/>

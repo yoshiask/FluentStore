@@ -1,8 +1,6 @@
 ﻿using MicrosoftStore.Enums;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using System;
-using Windows.UI.Xaml.Media.Imaging;
 
 namespace MicrosoftStore.Models
 {
@@ -58,9 +56,9 @@ namespace MicrosoftStore.Models
             }
         }
 
-        public BitmapImage GetSource()
+        public Uri GetSource()
         {
-            return string.IsNullOrWhiteSpace(Url) ? new BitmapImage() : new BitmapImage(new Uri(Url));
+            return string.IsNullOrWhiteSpace(Url) ? new Uri("https://cdn.wallpaperhub.app/cloudcache/b/f/7/d/d/b/bf7ddbfb925701167ce8060cac808f88c641a16a.jpg") : new Uri(Url);
         }
     }
 }

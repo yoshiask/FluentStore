@@ -130,7 +130,6 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ViewModels\ProductDetailsViewModel.cs" />
     <Compile Include="Views\HomeView.xaml.cs">
       <DependentUpon>HomeView.xaml</DependentUpon>
     </Compile>
@@ -202,7 +201,7 @@
       <Version>6.2.11</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Mvvm">
-      <Version>7.0.0-preview3</Version>
+      <Version>7.0.0-preview4</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications">
       <Version>6.1.1</Version>
@@ -218,6 +217,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FluentStore.ViewModels\FluentStore.ViewModels.csproj">
+      <Project>{dc3ed84a-983c-42dd-9074-26d7c7e44f90}</Project>
+      <Name>FluentStore.ViewModels</Name>
+    </ProjectReference>
     <ProjectReference Include="..\FluentStoreAPI\FluentStoreAPI.csproj">
       <Project>{9918633d-4c2a-463d-a4ca-c8fc095a820c}</Project>
       <Name>FluentStoreAPI</Name>
