@@ -50,6 +50,7 @@ namespace FluentStore.Helpers
                     switch (await Launcher.QueryUriSupportAsync(launchUri, LaunchQuerySupportType.Uri))
                     {
                         case LaunchQuerySupportStatus.Available:
+                            // TODO: Somehow this is trying to install a .NET Framework installer. :/
                             isSuccess = await Launcher.LaunchUriAsync(launchUri);
                             if (!isSuccess)
                                 finalNotif = GenerateInstallFailureToast(package, product, new Exception("Failed to launch App Installer."));
