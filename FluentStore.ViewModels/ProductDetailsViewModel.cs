@@ -2,9 +2,11 @@
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
+using MicrosoftStore.Enums;
 using MicrosoftStore.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FluentStore.ViewModels
 {
@@ -13,6 +15,11 @@ namespace FluentStore.ViewModels
         public ProductDetailsViewModel()
         {
             ViewProductCommand = new RelayCommand<object>(ViewProduct);
+        }
+        public ProductDetailsViewModel(ProductDetails product)
+        {
+            ViewProductCommand = new RelayCommand<object>(ViewProduct);
+            Product = product;
         }
 
         private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
@@ -31,23 +38,25 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _ViewProductCommand, value);
         }
 
-        public Uri GetAppIcon()
+        private ImageItem _AppIcon;
+        public ImageItem AppIcon
         {
-            string url = "https://via.placeholder.com/1";
-            int width = 0;
-            foreach (ImageItem image in Product.Images.FindAll(i => i.ImageType == MicrosoftStore.Enums.ImageType.Logo))
+            get
             {
-                if (image.Width > width)
-                    url = image.Url;
+                if (_AppIcon == null)
+                    _AppIcon = Product.Images
+                        .FindAll(i => i.ImageType == ImageType.Logo || i.ImageType == ImageType.Tile)
+                        .OrderByDescending(i => i.Height * i.Width).First();
+                return _AppIcon;
             }
-            return new Uri(url);
+            set => SetProperty(ref _AppIcon, value);
         }
 
         public Uri GetHeroImage()
         {
             string url = "";
             int width = 0;
-            foreach (ImageItem image in Product.Images.FindAll(i => i.ImageType == MicrosoftStore.Enums.ImageType.Hero))
+            foreach (ImageItem image in Product.Images.FindAll(i => i.ImageType == ImageType.Hero))
             {
                 if (image.Width > width)
                     url = image.Url;

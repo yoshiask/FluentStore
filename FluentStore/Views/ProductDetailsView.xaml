@@ -93,7 +93,7 @@
                                  Margin="0,20,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                             <Image>
                                 <Image.Source>
-                                    <BitmapImage UriSource="{x:Bind ViewModel.GetAppIcon()}"/>
+                                    <BitmapImage UriSource="{x:Bind ViewModel.AppIcon.Uri}"/>
                                 </Image.Source>
                             </Image>
                         </Viewbox>

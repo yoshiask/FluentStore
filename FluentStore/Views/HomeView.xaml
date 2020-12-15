@@ -57,7 +57,7 @@
                                      Grid.RowSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                                 <Image>
                                     <Image.Source>
-                                        <BitmapImage UriSource="{x:Bind GetAppIcon()}"/>
+                                        <BitmapImage UriSource="{x:Bind AppIcon.Uri}"/>
                                     </Image.Source>
                                 </Image>
                             </Viewbox>

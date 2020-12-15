@@ -12,6 +12,7 @@
     <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
     <ProjectReference Include="..\FluentStoreAPI\FluentStoreAPI.csproj" />
     <ProjectReference Include="..\MicrosoftStore\MicrosoftStore.csproj" />
+    <ProjectReference Include="..\StoreLib\StoreLib\StoreLib.csproj" />
   </ItemGroup>
 
 </Project>

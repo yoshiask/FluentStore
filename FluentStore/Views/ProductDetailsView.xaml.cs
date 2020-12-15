@@ -25,13 +25,15 @@ namespace FluentStore.Views
             this.InitializeComponent();
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
 
             if (e.Parameter is ProductDetails details)
             {
                 ViewModel.Product = details;
+
+                await PackageHelper.IsAppInstalledAsync(ViewModel.Product.PackageFamilyNames[0]);
             }
         }
 
@@ -72,7 +74,7 @@ namespace FluentStore.Views
 
             DisplayCatalogHandler dcathandler = new DisplayCatalogHandler(DCatEndpoint.Production, new Locale(Market.US, Lang.en, true));
             await dcathandler.QueryDCATAsync(productId);
-            var packs = await dcathandler.GetPackagesForProductAsync();
+            var packs = await dcathandler.GetMainPackagesForProductAsync();
             string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;
 
             dialog.Hide();

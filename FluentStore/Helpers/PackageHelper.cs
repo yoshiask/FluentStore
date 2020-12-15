@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Windows.Management.Deployment;
 using Windows.Networking.BackgroundTransfer;
 using Windows.Storage;
@@ -28,7 +30,7 @@ namespace FluentStore.Helpers
             bool isSuccess = true;
             try
             {
-                (await DownloadPackage(package, product)).Deconstruct(out var installer, out var progressToast);
+                (await DownloadPackage(package, product, false)).Deconstruct(out var installer, out var progressToast);
 
                 PackageManager pkgManager = new PackageManager();
                 Progress<DeploymentProgress> progressCallback = new Progress<DeploymentProgress>(prog =>
@@ -44,7 +46,7 @@ namespace FluentStore.Helpers
                 });
 
                 if (Settings.Default.UseAppInstaller || (useAppInstaller.HasValue && useAppInstaller.Value))
-				{
+                {
                     // Pass the file to App Installer to install it
                     Uri launchUri = new Uri("ms-appinstaller:?source=" + installer.Path);
                     switch (await Launcher.QueryUriSupportAsync(launchUri, LaunchQuerySupportType.Uri))
@@ -74,19 +76,29 @@ namespace FluentStore.Helpers
                     }
                 }
                 else
-				{
-					// Attempt to install the downloaded package
-					var result = await pkgManager.AddPackageAsync(new Uri(installer.Path), new Uri[] { }, DeploymentOptions.ForceTargetApplicationShutdown).AsTask(progressCallback);
+                {
+                    // Attempt to install the downloaded package
+                    var result = await pkgManager.AddPackageByUriAsync(
+                        new Uri(installer.Path),
+                        new AddPackageOptions()
+                        {
+                            ForceAppShutdown = true
+                        }
+                    ).AsTask(progressCallback);
 
-					if (result.IsRegistered)
+                    if (result.IsRegistered)
                         finalNotif = GenerateInstallSuccessToast(package, product);
-					else
-						finalNotif = GenerateInstallFailureToast(package, product, result.ExtendedErrorCode);
+                    else
+                        finalNotif = GenerateInstallFailureToast(package, product, result.ExtendedErrorCode);
                     isSuccess = result.IsRegistered;
                 }
 
+                // Hide progress notification
+                ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
                 // Show the final notification
                 ToastNotificationManager.GetDefault().CreateToastNotifier().Show(finalNotif);
+
+                await installer.DeleteAsync();
 
                 return true;
             }
@@ -97,7 +109,7 @@ namespace FluentStore.Helpers
             }
         }
 
-        public static async Task<Tuple<StorageFile, ToastNotification>> DownloadPackage(PackageInstance package, ProductDetails product)
+        public static async Task<Tuple<StorageFile, ToastNotification>> DownloadPackage(PackageInstance package, ProductDetails product, bool hideProgressToastWhenDone = true)
         {
             // Download the file to the app's temp directory
             //var client = new System.Net.WebClient();
@@ -110,6 +122,7 @@ namespace FluentStore.Helpers
             BackgroundDownloader downloader = new BackgroundDownloader();
             downloader.FailureToastNotification = GenerateDownloadFailureToast(package, product);
             var progressToast = GenerateProgressToast(package, product);
+            Debug.WriteLine(package.PackageUri.AbsoluteUri);
             DownloadOperation download = downloader.CreateDownload(package.PackageUri, destinationFile);
             download.RangesDownloaded += (op, args) =>
             {
@@ -124,19 +137,45 @@ namespace FluentStore.Helpers
             };
             ToastNotificationManager.GetDefault().CreateToastNotifier().Show(progressToast);
             await download.StartAsync();
-            ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
+            if (hideProgressToastWhenDone)
+                ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
+
+            string extension = "";
+            string contentTypeFilepath = filepath + "_[Content_Types].xml";
+            using (var archive = ZipFile.OpenRead(filepath))
+            {
+                var entry = archive.GetEntry("[Content_Types].xml");
+                entry.ExtractToFile(contentTypeFilepath, true);
+                var ctypesXml = XDocument.Load(contentTypeFilepath);
+                var defaults = ctypesXml.Root.Elements().Where(e => e.Name.LocalName == "Default");
+                if (defaults.Any(d => d.Attribute("Extension").Value == "msix"))
+                {
+                    // Package contains one or more MSIX packages
+                    extension += ".msix";
+                }
+                else if (defaults.Any(d => d.Attribute("Extension").Value == "appx"))
+                {
+                    // Package contains one or more MSIX packages
+                    extension += ".appx";
+                }
+                if (defaults.Any(defaults => defaults.Attribute("ContentType").Value == "application/vnd.ms-appx.bundlemanifest+xml"))
+                {
+                    // Package is a bundle
+                    extension += "bundle";
+                }
+            }
+            if (File.Exists(contentTypeFilepath))
+                File.Delete(contentTypeFilepath);
+
+            if (extension != "")
+                await destinationFile.RenameAsync(destinationFile.Name + extension, NameCollisionOption.ReplaceExisting);
 
             return (destinationFile, progressToast).ToTuple();
         }
 
         public static PackageInstance GetLatestDesktopPackage(List<PackageInstance> packages, string family, ProductDetails product)
         {
-            List<PackageInstance> installables = packages.FindAll(p => {
-                return p.PackageType != PackageType.Unknown
-                    && (p.PackageFamily != null) && ($"{p.PackageFamily}_{p.PublisherId}" == family)
-                    && ((p.Architecture == "neutral") || (p.Architecture == "x64"))
-                    && p.Version.Revision != 70;
-            });
+            List<PackageInstance> installables = packages.FindAll(p => p.Version.Revision != 70);
             if (installables.Count <= 0)
                 return null;
             // TODO: Add addtional checks that might take longer that the user can enable 
@@ -159,6 +198,42 @@ namespace FluentStore.Helpers
                     return true;
             }
             return false;
+        }
+
+        private static readonly Uri dummyUri = new Uri("mailto:dummy@seznam.cz");
+        /// <summary>
+        /// Check if target <paramref name="packageName"/> is installed on this device.
+        /// </summary>
+        /// <param name="packageName">Package name in format: "949FFEAB.Email.cz_refxrrjvvv3cw"</param>
+        /// <returns>True is app is installed on this device, false otherwise.</returns>
+        public static async Task<bool> IsAppInstalledAsync(string packageName)
+        {
+            try
+            {
+                bool appInstalled;
+                LaunchQuerySupportStatus result = await Launcher.QueryUriSupportAsync(dummyUri, LaunchQuerySupportType.Uri, packageName);
+                switch (result)
+                {
+                    case LaunchQuerySupportStatus.Available:
+                    case LaunchQuerySupportStatus.NotSupported:
+                        appInstalled = true;
+                        break;
+                    //case LaunchQuerySupportStatus.AppNotInstalled:
+                    //case LaunchQuerySupportStatus.AppUnavailable:
+                    //case LaunchQuerySupportStatus.Unknown:
+                    default:
+                        appInstalled = false;
+                        break;
+                }
+
+                Debug.WriteLine($"App {packageName}, query status: {result}, installed: {appInstalled}");
+                return appInstalled;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error checking if app {packageName} is installed. Error: {ex}");
+                return false;
+            }
         }
 
         public static ToastNotification GenerateProgressToast(PackageInstance package, ProductDetails product)

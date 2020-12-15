@@ -127,7 +127,7 @@ namespace FluentStore
             }
             else if (!string.IsNullOrEmpty(args.QueryText))
             {
-                //NavigationRootPage.RootFrame.Navigate(typeof(SearchResultsPage), controlsSearchBox.ItemsSource as IEnumerable<MicrosoftStore.Models.Product>);
+                NavService.Navigate(typeof(Views.SearchResultsView), args.QueryText);
             }
         }
         
@@ -139,9 +139,10 @@ namespace FluentStore
         public async Task<List<MicrosoftStore.Models.Product>> GetSuggestions(string query)
         {
             var suggs = await Ioc.Default.GetRequiredService<MicrosoftStore.IMSStoreApi>().GetSuggestions(
-                query, "en-US", MicrosoftStore.Constants.CLIENT_ID,
+                query, CultureInfo.CurrentUICulture.Name, MicrosoftStore.Constants.CLIENT_ID,
                 new string[] { MicrosoftStore.Constants.CAT_ALL_PRODUCTS }, new int[] { 10, 0, 0 }
             );
+
             if (suggs.ResultSets.Count <= 0)
                 return null;
             return suggs.ResultSets[0].Suggests;
