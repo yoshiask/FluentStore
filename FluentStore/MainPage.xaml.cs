@@ -22,6 +22,8 @@ namespace FluentStore
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        private Services.NavigationService NavService { get; } = Ioc.Default.GetService<Services.INavigationService>() as Services.NavigationService;
+
         public ObservableCollection<MicrosoftStore.Models.Product> Results { get; set; }
         MicrosoftStore.Models.ProductDetails CurrentProduct { get; set; } = null;
 
@@ -31,6 +33,7 @@ namespace FluentStore
 
             MainFrame.Navigated += MainFrame_Navigated;
             NavigationHelper.PageFrame = MainFrame;
+            NavService.CurrentFrame = MainFrame;
 
             foreach(PageInfo page in NavigationHelper.Pages)
             {
@@ -114,7 +117,7 @@ namespace FluentStore
                     {
                         CurrentProduct = candidate;
                         LoadingIndicator.Visibility = Visibility.Collapsed;
-                        Frame.Navigate(typeof(Views.ProductDetailsView), CurrentProduct);
+                        NavService.AppFrame.Navigate(typeof(Views.ProductDetailsView), CurrentProduct);
                     }
                 }
                 catch (ArgumentNullException ex)
@@ -170,25 +173,25 @@ namespace FluentStore
         {
             if (args.IsSettingsSelected)
             {
-                NavigationHelper.NavigateToSettings();
+                NavService.Navigate(typeof(Views.SettingsView));
                 return;
             }
 
             if (!(args.SelectedItem is Microsoft.UI.Xaml.Controls.NavigationViewItem navItem))
             {
-                NavigationHelper.NavigateToHome();
+                NavService.Navigate(typeof(Views.HomeView));
                 return;
             }
 
             PageInfo pageInfo = NavigationHelper.Pages.Find((info) => info.Title == navItem.Content.ToString());
             if (pageInfo == null)
             {
-                NavigationHelper.NavigateToHome();
+                NavService.Navigate(typeof(Views.HomeView));
                 return;
             }
 
             if (pageInfo != null && pageInfo.PageType.BaseType == typeof(Page))
-                MainFrame.Navigate(pageInfo.PageType);
+                NavService.Navigate(pageInfo.PageType);
         }
 	}
 }

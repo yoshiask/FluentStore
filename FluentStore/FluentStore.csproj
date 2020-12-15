@@ -122,6 +122,7 @@
     </Compile>
     <Compile Include="Controls\ProductCard.cs" />
     <Compile Include="Helpers\NavigationHelper.cs" />
+    <Compile Include="Helpers\NavigationService.cs" />
     <Compile Include="Helpers\ObservableSettings.cs" />
     <Compile Include="Helpers\PackageHelper.cs" />
     <Compile Include="Helpers\Settings.cs" />
@@ -222,6 +223,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj">
+      <Project>{c913bcf0-3d85-4b80-af1b-eec60033ae47}</Project>
+      <Name>FluentStore.Services</Name>
+    </ProjectReference>
     <ProjectReference Include="..\FluentStore.ViewModels\FluentStore.ViewModels.csproj">
       <Project>{dc3ed84a-983c-42dd-9074-26d7c7e44f90}</Project>
       <Name>FluentStore.ViewModels</Name>

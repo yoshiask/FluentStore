@@ -1,4 +1,7 @@
-﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using FluentStore.Services;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using Microsoft.Toolkit.Mvvm.Input;
 using MicrosoftStore.Models;
 using System;
 using System.Collections.Generic;
@@ -7,11 +10,25 @@ namespace FluentStore.ViewModels
 {
     public class ProductDetailsViewModel : ObservableObject
     {
+        public ProductDetailsViewModel()
+        {
+            ViewProductCommand = new RelayCommand<object>(ViewProduct);
+        }
+
+        private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
+
         private ProductDetails product;
         public ProductDetails Product
         {
             get => product;
             set => SetProperty(ref product, value);
+        }
+
+        private IRelayCommand<object> _ViewProductCommand;
+        public IRelayCommand<object> ViewProductCommand
+        {
+            get => _ViewProductCommand;
+            set => SetProperty(ref _ViewProductCommand, value);
         }
 
         public Uri GetAppIcon()
@@ -48,9 +65,23 @@ namespace FluentStore.ViewModels
             return Product.Images.FindAll(i => i.ImageType == MicrosoftStore.Enums.ImageType.Screenshot);
         }
 
-        public string GetAverageRatingString()
+        public string AverageRatingString => Product.AverageRating.ToString("F1");
+
+        public void ViewProduct(object obj)
         {
-            return Product.AverageRating.ToString("F1");
+            ProductDetails pd;
+            switch (obj)
+            {
+                case ProductDetailsViewModel viewModel:
+                    pd = viewModel.Product;
+                    break;
+                case ProductDetails product:
+                    pd = product;
+                    break;
+                default:
+                    throw new ArgumentException($"'{nameof(obj)}' is an invalid type: {obj.GetType().Name}");
+            }
+            NavigationService.AppNavigate("ProductDetailsView", pd);
         }
     }
 }

@@ -111,7 +111,9 @@
                             </Image>
                         </Viewbox>
                         <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="30" FontWeight="Bold" Text="{x:Bind ViewModel.Product.Title}" />
-                        <StackPanel Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="{x:Bind ViewModel.Product.DisplayPrice}" VerticalAlignment="Center"
+                                       FontSize="16" FontWeight="SemiBold"/>
                             <Button Click="AddToCollection_Click" Padding="10" Background="{ThemeResource SystemChromeAltHighColor}">
                                 <StackPanel Orientation="Horizontal" Spacing="10">
                                     <FontIcon Glyph="&#xECCD;" />
@@ -125,7 +127,7 @@
                                     <TextBlock Text="Install" />
                                 </StackPanel>
                                 <SplitButton.Flyout>
-                                    <MenuFlyout>
+                                    <MenuFlyout Placement="BottomEdgeAlignedRight">
                                         <MenuFlyoutItem Icon="Download" Text="Download installer" ToolTipService.ToolTip="Downloads the app without installing it"
                                                         Click="Download_Click"/>
                                         <MenuFlyoutItem Text="Install with App Installer" ToolTipService.ToolTip="Installs the app using Microsoft's App Installer"

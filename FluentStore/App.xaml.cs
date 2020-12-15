@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using FluentStore.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using System;
 using Windows.ApplicationModel;
@@ -56,6 +57,7 @@ namespace FluentStore
                 // Place the frame in the current Window
                 Window.Current.Content = rootFrame;
             }
+            (Ioc.Default.GetService<INavigationService>() as NavigationService).AppFrame = rootFrame;
 
             var coreTitleBar = CoreApplication.GetCurrentView().TitleBar;
             coreTitleBar.ExtendViewIntoTitleBar = true;
@@ -127,6 +129,7 @@ namespace FluentStore
             services.AddSingleton(Refit.RestService.For<MicrosoftStore.IStorefrontApi>(
                 MicrosoftStore.Constants.STOREFRONT_API_HOST
             ));
+            services.AddSingleton<INavigationService, NavigationService>();
 
             return services.BuildServiceProvider();
         }

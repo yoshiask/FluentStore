@@ -1,4 +1,5 @@
-﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using FluentStore.Services;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
 using MicrosoftStore;
@@ -56,6 +57,13 @@ namespace FluentStore.ViewModels
         {
             get => _SelectedCarouselItemIndex;
             set => SetProperty(ref _SelectedCarouselItemIndex, value);
+        }
+
+        private ProductDetailsViewModel _SelectedCarouselItem;
+        public ProductDetailsViewModel SelectedCarouselItem
+        {
+            get => _SelectedCarouselItem;
+            set => SetProperty(ref _SelectedCarouselItem, value);
         }
 
     }

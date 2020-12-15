@@ -9,6 +9,7 @@
     xmlns:viewmodels="using:FluentStore.ViewModels"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
@@ -28,6 +29,7 @@
         </Grid.RowDefinitions>
         <controls:Carousel x:Name="FeaturedCarousel" ItemsSource="{x:Bind ViewModel.CarouselItems}"
                            SelectedIndex="{x:Bind ViewModel.SelectedCarouselItemIndex, Mode=TwoWay}"
+                           SelectedItem="{x:Bind ViewModel.SelectedCarouselItem, Mode=TwoWay}"
                            ItemMargin="16" ItemDepth="200">
             <controls:Carousel.EasingFunction>
                 <CubicEase EasingMode="EaseOut" />
@@ -45,26 +47,34 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition/>
                                 <RowDefinition/>
-                                <!--<RowDefinition/>-->
+                                <RowDefinition/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Viewbox MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="100"
-                                     Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                     Grid.RowSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                                 <Image>
                                     <Image.Source>
                                         <BitmapImage UriSource="{x:Bind GetAppIcon()}"/>
                                     </Image.Source>
                                 </Image>
                             </Viewbox>
-                            <TextBlock Text="{x:Bind Product.ShortTitle}" FontWeight="Bold" Grid.Column="1" FontSize="24" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{x:Bind Product.ShortTitle}" FontWeight="Bold" Grid.Column="1" FontSize="20" TextTrimming="CharacterEllipsis"/>
                             <TextBlock Text="{x:Bind Product.Subtitle}" Grid.Column="1" Grid.Row="1"/>
-                            <Button Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Right"
-                                    Style="{ThemeResource AccentButtonStyle}" FontWeight="SemiBold"
-                                    Padding="10" Margin="0,0,10,0"
-                                    Content="{Binding Product.DisplayPrice}"/>
+                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                                <TextBlock Text="{x:Bind Product.RatingCount}" FontSize="14" VerticalAlignment="Center"/>
+                                <winui:RatingControl Value="{Binding Product.AverageRating}" IsReadOnly="True">
+                                    <winui:RatingControl.Resources>
+                                        <SolidColorBrush x:Key="RatingControlSelectedForeground" Color="{ThemeResource SystemColorHighlightTextColor}"/>
+                                    </winui:RatingControl.Resources>
+                                </winui:RatingControl>
+                            </StackPanel>
+                            <Button Grid.Column="1" Grid.RowSpan="3" HorizontalAlignment="Right"
+                                    Margin="0,0,10,0" Style="{ThemeResource AccentButtonStyle}"
+                                    FontWeight="SemiBold" Padding="10" Content="{x:Bind Product.DisplayPrice}"
+                                    Command="{x:Bind ViewProductCommand}" CommandParameter="{x:Bind Product}"/>
                         </Grid>
                     </Grid>
                 </DataTemplate>
