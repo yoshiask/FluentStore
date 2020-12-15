@@ -9,27 +9,14 @@
     xmlns:storeModels="using:MicrosoftStore.Models"
     xmlns:viewModels="using:FluentStore.ViewModels"
     mc:Ignorable="d"
-    SizeChanged="Page_SizeChanged">
+    SizeChanged="Page_SizeChanged"
+    NavigationCacheMode="Required">
     <Page.Resources>
         <viewModels:ProductDetailsViewModel x:Name="ViewModel" x:FieldModifier="public" />
     </Page.Resources>
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="32" />
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-
-        <controls:DockPanel Background="{ThemeResource SystemControlAcrylicWindowBrush}">
-            <StackPanel Orientation="Horizontal">
-                <Button x:Name="BackButton" Click="BackButton_Click" Style="{StaticResource NavigationBackButtonNormalStyle}" />
-                <TextBlock Margin="0,0,3,0" VerticalAlignment="Center" FontSize="12" Text="Fluent Store - " />
-                <TextBlock VerticalAlignment="Center" FontSize="12" Text="{x:Bind ViewModel.Product.MediaType}" />
-            </StackPanel>
-            <Border x:Name="TitlebarDragTarget" Background="Transparent" />
-        </controls:DockPanel>
-
-        <ParallaxView Source="{x:Bind ContentScroller}" Grid.Row="1" VerticalShift="200" VerticalSourceOffsetKind="Absolute">
+        <ParallaxView Source="{x:Bind ContentScroller}" VerticalShift="200" VerticalSourceOffsetKind="Absolute">
             <Image x:Name="HeroImage" VerticalAlignment="Top" HorizontalAlignment="Left" Stretch="Uniform">
                 <Image.Source>
                     <BitmapImage UriSource="{x:Bind ViewModel.GetHeroImage(), TargetNullValue=//:0}" ImageOpened="HeroImage_ImageOpened"/>

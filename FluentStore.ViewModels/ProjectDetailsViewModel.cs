@@ -81,7 +81,7 @@ namespace FluentStore.ViewModels
                 default:
                     throw new ArgumentException($"'{nameof(obj)}' is an invalid type: {obj.GetType().Name}");
             }
-            NavigationService.AppNavigate("ProductDetailsView", pd);
+            NavigationService.Navigate("ProductDetailsView", pd);
         }
     }
 }

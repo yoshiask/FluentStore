@@ -23,8 +23,6 @@ namespace FluentStore.Views
         public ProductDetailsView()
         {
             this.InitializeComponent();
-
-            Window.Current.SetTitleBar(TitlebarDragTarget);
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -35,8 +33,6 @@ namespace FluentStore.Views
             {
                 ViewModel.Product = details;
             }
-
-            BackButton.IsEnabled = this.Frame.CanGoBack;
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)

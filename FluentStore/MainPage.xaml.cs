@@ -117,7 +117,7 @@ namespace FluentStore
                     {
                         CurrentProduct = candidate;
                         LoadingIndicator.Visibility = Visibility.Collapsed;
-                        NavService.AppFrame.Navigate(typeof(Views.ProductDetailsView), CurrentProduct);
+                        NavService.Navigate(typeof(Views.ProductDetailsView), CurrentProduct);
                     }
                 }
                 catch (ArgumentNullException ex)
