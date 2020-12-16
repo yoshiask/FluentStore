@@ -1,4 +1,6 @@
-﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using FSAPI = FluentStoreAPI.FluentStoreAPI;
+using FluentStore.Services;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
 using MicrosoftStore;
@@ -17,11 +19,16 @@ namespace FluentStore.ViewModels
         public ShellViewModel()
         {
             GetSearchSuggestionsCommand = new AsyncRelayCommand(GetSearchSuggestionsAsync);
-            SubmitQueryCommand = new AsyncRelayCommand(SubmitQueryAsync);
+            SubmitQueryCommand = new AsyncRelayCommand<Product>(SubmitQueryAsync);
+            SignInCommand = new AsyncRelayCommand(SignInAsync);
+            SignOutCommand = new AsyncRelayCommand(SignOutAsync);
         }
 
         private readonly IStorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<IStorefrontApi>();
         private readonly IMSStoreApi MSStoreApi = Ioc.Default.GetRequiredService<IMSStoreApi>();
+        private readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
+        private readonly IPasswordVaultService PasswordVaultService = Ioc.Default.GetRequiredService<IPasswordVaultService>();
+        private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
 
         private ObservableCollection<Product> _SearchSuggestions = new ObservableCollection<Product>();
         public ObservableCollection<Product> SearchSuggestions
@@ -58,11 +65,39 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _GetSearchSuggestionsCommand, value);
         }
 
-        private IAsyncRelayCommand _SubmitQueryCommand;
-        public IAsyncRelayCommand SubmitQueryCommand
+        private IAsyncRelayCommand<Product> _SubmitQueryCommand;
+        public IAsyncRelayCommand<Product> SubmitQueryCommand
         {
             get => _SubmitQueryCommand;
             set => SetProperty(ref _SubmitQueryCommand, value);
+        }
+
+        private IAsyncRelayCommand _TestAuthCommand;
+        public IAsyncRelayCommand TestAuthCommand
+        {
+            get => _TestAuthCommand;
+            set => SetProperty(ref _TestAuthCommand, value);
+        }
+
+        private IAsyncRelayCommand _SignInCommand;
+        public IAsyncRelayCommand SignInCommand
+        {
+            get => _SignInCommand;
+            set => SetProperty(ref _SignInCommand, value);
+        }
+
+        private IAsyncRelayCommand _SignOutCommand;
+        public IAsyncRelayCommand SignOutCommand
+        {
+            get => _SignOutCommand;
+            set => SetProperty(ref _SignOutCommand, value);
+        }
+
+        private IAsyncRelayCommand _EditProfileCommand;
+        public IAsyncRelayCommand EditProfileCommand
+        {
+            get => _EditProfileCommand;
+            set => SetProperty(ref _EditProfileCommand, value);
         }
 
         public async Task GetSearchSuggestionsAsync()
@@ -112,21 +147,20 @@ namespace FluentStore.ViewModels
             }
         }
 
-        public async Task SubmitQueryAsync()
+        public async Task SubmitQueryAsync(Product product)
         {
-            throw new NotImplementedException();
-            //var culture = CultureInfo.CurrentUICulture;
-            //var region = new RegionInfo(culture.LCID);
-            //string productId = product.Metas.First(m => m.Key == "BigCatalogId").Value;
+            var culture = CultureInfo.CurrentUICulture;
+            var region = new RegionInfo(culture.LCID);
+            string productId = product.Metas.First(m => m.Key == "BigCatalogId").Value;
 
-            //// Get the full product details
-            //var item = await StorefrontApi.GetProduct(productId, region.TwoLetterISORegionName, culture.Name);
-            //var candidate = item.Convert<ProductDetails>().Payload;
-            //if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
-            //{
-            //    SelectedProduct = candidate;
-            //    Frame.Navigate("ProductDetails", SelectedProduct);
-            //}
+            // Get the full product details
+            var item = await StorefrontApi.GetProduct(productId, region.TwoLetterISORegionName, culture.Name);
+            var candidate = item.Convert<ProductDetails>().Payload;
+            if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
+            {
+                SelectedProduct = candidate;
+                NavService.Navigate("ProductDetailsView", SelectedProduct);
+            }
         }
 
         public async Task<List<Product>> GetSuggestions(string query)
@@ -138,6 +172,27 @@ namespace FluentStore.ViewModels
             if (suggs.ResultSets.Count <= 0)
                 return null;
             return suggs.ResultSets[0].Suggests;
+        }
+
+        public async Task TestAuthAsync()
+        {
+            var signInRes = await FSApi.SignInAsync("testA@example.com", "123456");
+            FSApi.Token = signInRes.IDToken;
+            FSApi.RefreshToken = signInRes.RefreshToken;
+
+            var user = await FSApi.GetUserDataAsync();
+        }
+
+        public async Task SignInAsync()
+        {
+
+        }
+
+        public async Task SignOutAsync()
+        {
+            FSApi.Token = null;
+            FSApi.RefreshToken = null;
+            PasswordVaultService.Remove(new CredentialBase());
         }
     }
 }

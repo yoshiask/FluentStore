@@ -20,9 +20,6 @@
         <core:EventTriggerBehavior EventName="Loading">
             <core:InvokeCommandAction Command="{x:Bind ViewModel.LoadFeaturedCommand}"/>
         </core:EventTriggerBehavior>
-        <core:EventTriggerBehavior EventName="Loading">
-            <core:InvokeCommandAction Command="{x:Bind ViewModel.TestAuthCommand}"/>
-        </core:EventTriggerBehavior>
     </interactivity:Interaction.Behaviors>
     
     <Grid>

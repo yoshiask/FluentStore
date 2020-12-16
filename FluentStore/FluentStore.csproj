@@ -126,6 +126,7 @@
     <Compile Include="Helpers\NavigationService.cs" />
     <Compile Include="Helpers\ObservableSettings.cs" />
     <Compile Include="Helpers\PackageHelper.cs" />
+    <Compile Include="Helpers\PasswordVaultService.cs" />
     <Compile Include="Helpers\Settings.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>

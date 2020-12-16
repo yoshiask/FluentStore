@@ -130,6 +130,7 @@ namespace FluentStore
                 MicrosoftStore.Constants.STOREFRONT_API_HOST
             ));
             services.AddSingleton<INavigationService, NavigationService>();
+            services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
             services.AddSingleton(new FluentStoreAPI.FluentStoreAPI());
 
             return services.BuildServiceProvider();

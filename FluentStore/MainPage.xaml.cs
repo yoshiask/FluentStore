@@ -24,9 +24,6 @@ namespace FluentStore
     {
         private Services.NavigationService NavService { get; } = Ioc.Default.GetService<Services.INavigationService>() as Services.NavigationService;
 
-        public ObservableCollection<MicrosoftStore.Models.Product> Results { get; set; }
-        MicrosoftStore.Models.ProductDetails CurrentProduct { get; set; } = null;
-
         public MainPage()
         {
             this.InitializeComponent();
@@ -51,79 +48,15 @@ namespace FluentStore
 
         private async void controlsSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            if (!args.CheckCurrent())
-                return;
-
-            var r = await GetSuggestions(sender.Text);
-            if (r == null)
-                return;
-            Results = new ObservableCollection<MicrosoftStore.Models.Product>(r.Where(s => s.Source == "Apps"));
-
-            if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
-            {
-                var suggestions = new List<MicrosoftStore.Models.Product>();
-
-                var querySplit = sender.Text.Split(" ");
-                var matchingItems = Results.Where(
-                    item =>
-                    {
-                        // Idea: check for every word entered (separated by space) if it is in the name, 
-                        // e.g. for query "split button" the only result should "SplitButton" since its the only query to contain "split" and "button"
-                        // If any of the sub tokens is not in the string, we ignore the item. So the search gets more precise with more words
-                        bool flag = true;
-                        foreach (string queryToken in querySplit)
-                        {
-                            // Check if token is not in string
-                            if (item.Title.IndexOf(queryToken, StringComparison.CurrentCultureIgnoreCase) < 0)
-                            {
-                                // Token is not in string, so we ignore this item.
-                                flag = false;
-                            }
-                        }
-                        return flag;
-                    }
-                );
-                foreach (var item in matchingItems)
-                {
-                    suggestions.Add(item);
-                }
-                if (suggestions.Count > 0)
-                {
-                    controlsSearchBox.ItemsSource = suggestions.OrderByDescending(i => i.Title.StartsWith(sender.Text, StringComparison.CurrentCultureIgnoreCase)).ThenBy(i => i.Title);
-                }
-                else
-                {
-                    controlsSearchBox.ItemsSource = new string[] { "No results found" };
-                }
-            }
+            if (args.CheckCurrent() && args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
+                await ViewModel.GetSearchSuggestionsAsync();
         }
 
         private async void controlsSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
             if (args.ChosenSuggestion != null && args.ChosenSuggestion is MicrosoftStore.Models.Product product)
             {
-                try
-                {
-                    LoadingIndicator.Visibility = Visibility.Visible;
-
-                    var culture = CultureInfo.CurrentUICulture;
-                    var region = new RegionInfo(culture.LCID);
-                    string productId = product.Metas.First(m => m.Key == "BigCatalogId").Value;
-
-                    // Get the full product details
-                    var item = await Ioc.Default.GetRequiredService<MicrosoftStore.IStorefrontApi>().GetProduct(productId, region.TwoLetterISORegionName, culture.Name);
-                    var candidate = item.Convert<MicrosoftStore.Models.ProductDetails>().Payload;
-                    if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
-                    {
-                        CurrentProduct = candidate;
-                        LoadingIndicator.Visibility = Visibility.Collapsed;
-                        NavService.Navigate(typeof(Views.ProductDetailsView), CurrentProduct);
-                    }
-                }
-                catch (ArgumentNullException ex)
-                {
-                    Debug.WriteLine(ex.ParamName + ":\r\n" + ex.StackTrace);
-                }
+                await ViewModel.SubmitQueryAsync(product);
             }
             else if (!string.IsNullOrEmpty(args.QueryText))
             {
@@ -134,18 +67,6 @@ namespace FluentStore
         private void CtrlF_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
         {
             controlsSearchBox.Focus(FocusState.Programmatic);
-        }
-
-        public async Task<List<MicrosoftStore.Models.Product>> GetSuggestions(string query)
-        {
-            var suggs = await Ioc.Default.GetRequiredService<MicrosoftStore.IMSStoreApi>().GetSuggestions(
-                query, CultureInfo.CurrentUICulture.Name, MicrosoftStore.Constants.CLIENT_ID,
-                new string[] { MicrosoftStore.Constants.CAT_ALL_PRODUCTS }, new int[] { 10, 0, 0 }
-            );
-
-            if (suggs.ResultSets.Count <= 0)
-                return null;
-            return suggs.ResultSets[0].Suggests;
         }
 
         private void MainFrame_Navigated(object sender, NavigationEventArgs e)
