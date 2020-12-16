@@ -9,79 +9,79 @@ namespace FluentStoreAPI.Models.Firebase
         /// The uid of the current user.
         /// </summary>
         [JsonProperty("localId")]
-        public string LocalID { get; }
+        public string LocalID { get; set; }
 
         /// <summary>
         /// User's email address.
         /// </summary>
         [JsonProperty("email")]
-        public string Email { get; }
+        public string Email { get; set; }
 
         /// <summary>
         /// Whether or not the account's email has been verified.
         /// </summary>
         [JsonProperty("emailVerified")]
-        public bool IsEmailVerified { get; }
+        public bool IsEmailVerified { get; set; }
 
         /// <summary>
         /// The display name for the account.
         /// </summary>
         [JsonProperty("DisplayName")]
-        public string DisplayName { get; }
+        public string DisplayName { get; set; }
 
         /// <summary>
         /// List of all linked provider objects which contain "providerId" and "federatedId".
         /// </summary>
         [JsonProperty("providerUserInfo")]
-        public IReadOnlyList<Provider> ProviderUserInfo { get; }
+        public IReadOnlyList<Provider> ProviderUserInfo { get; set; }
 
         /// <summary>
         /// User's new photo url.
         /// </summary>
         [JsonProperty("photoUrl")]
-        public string PhotoUrl { get; }
+        public string PhotoUrl { get; set; }
 
         /// <summary>
         /// Hash version of the password.
         /// </summary>
         [JsonProperty("passwordHash")]
-        public string PasswordHash { get; }
+        public string PasswordHash { get; set; }
 
         /// <summary>
         /// The timestamp, in milliseconds, that the account password was last changed.
         /// </summary>
         [JsonProperty("passwordUpdatedAt")]
-        public double PasswordUpdatedAt { get; }
+        public double PasswordUpdatedAt { get; set; }
 
         /// <summary>
         /// The timestamp, in seconds, which marks a boundary, before which Firebase ID token are considered revoked.
         /// </summary>
         [JsonProperty("validSince")]
-        public string ValidSince { get; }
+        public string ValidSince { get; set; }
 
         /// <summary>
         /// Whether the account is disabled or not.
         /// </summary>
         [JsonProperty("disabled")]
-        public bool IsDisabled { get; }
+        public bool IsDisabled { get; set; }
 
         /// <summary>
         /// The timestamp, in milliseconds, that the account last logged in at.
         /// </summary>
         [JsonProperty("lastLoginAt")]
-        public string LastLoginAt { get; }
+        public string LastLoginAt { get; set; }
 
         /// <summary>
         /// The timestamp, in milliseconds, that the account was created at.
         /// </summary>
         [JsonProperty("createdAt")]
-        public string CreatedAt { get; }
+        public string CreatedAt { get; set; }
 
         /// <summary>
         /// Whether the account is authenticated by the developer.
         /// </summary>
         [JsonProperty("customAuth")]
-        public bool IsCustomAuth { get; }
+        public bool IsCustomAuth { get; set; }
 
         public static class CommonErrors
         {

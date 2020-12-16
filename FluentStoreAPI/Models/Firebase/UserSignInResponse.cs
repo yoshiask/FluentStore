@@ -5,43 +5,43 @@ namespace FluentStoreAPI.Models.Firebase
     public class UserSignInResponse
     {
         [JsonProperty("kind")]
-        public string Kind { get; }
+        public string Kind { get; set; }
 
         /// <summary>
         /// A Firebase Auth ID token for the newly created user.
         /// </summary>
         [JsonProperty("idToken")]
-        public string IDToken { get; }
+        public string IDToken { get; set; }
 
         /// <summary>
         /// The email for the newly created user.
         /// </summary>
         [JsonProperty("email")]
-        public string Email { get; }
+        public string Email { get; set; }
 
         /// <summary>
         /// A Firebase Auth refresh token for the newly created user.
         /// </summary>
         [JsonProperty("refreshToken")]
-        public string RefreshToken { get; }
+        public string RefreshToken { get; set; }
 
         /// <summary>
         /// The number of seconds in which the ID token expires.
         /// </summary>
         [JsonProperty("expiresIn")]
-        public string ExpiresIn { get; }
+        public string ExpiresIn { get; set; }
 
         /// <summary>
         /// The uid of the newly created user.
         /// </summary>
         [JsonProperty("localId")]
-        public string LocalID { get; }
+        public string LocalID { get; set; }
 
         /// <summary>
         /// Whether the email is for an existing account.
         /// </summary>
         [JsonProperty("isRegistered")]
-        public bool IsRegistered { get; }
+        public bool IsRegistered { get; set; }
 
         public static class CommonErrors
         {

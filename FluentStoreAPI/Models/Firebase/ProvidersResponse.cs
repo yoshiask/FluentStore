@@ -9,13 +9,13 @@ namespace FluentStoreAPI.Models.Firebase
         /// The list of providers that the user has previously signed in with.
         /// </summary>
         [JsonProperty("allProviders")]
-        public IReadOnlyList<string> AllProviders { get; }
+        public IReadOnlyList<string> AllProviders { get; set; }
 
         /// <summary>
         /// Whether the email is for an existing account.
         /// </summary>
         [JsonProperty("registered")]
-        public bool IsRegistered { get; }
+        public bool IsRegistered { get; set; }
 
         public static class CommonErrors
         {

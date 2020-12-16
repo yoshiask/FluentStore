@@ -4,7 +4,6 @@ using Flurl;
 using Flurl.Http;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace FluentStoreAPI
@@ -29,6 +28,46 @@ namespace FluentStoreAPI
             return IDENTITY_TK_BASE_URL.SetQueryParam("key", "AIzaSyCoINaQk7QdzPryW0oZHppWnboRRPk26fQ");
         }
 
+        static readonly Newtonsoft.Json.JsonSerializerSettings _json = new Newtonsoft.Json.JsonSerializerSettings()
+        {
+            Error = (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs e) => 
+            {
+                if (e.CurrentObject is null)
+                {
+                    string log = $"Serialization on path {e.ErrorContext.Path} generated an exception {e.ErrorContext.Error.GetType().Name} with warning {e.ErrorContext.Error.Message}";
+#if DEBUG
+                    System.Diagnostics.Debugger.Break();
+                    System.Diagnostics.Debug.WriteLine(log);
+#else
+                    Console.WriteLine(log);
+#endif
+                }
+                else
+                {
+                    string log = $"Serialization on {e.CurrentObject.GetType().Name} had issues with path {e.ErrorContext.Path} and generated an exception {e.ErrorContext.Error.GetType().Name} with warning {e.ErrorContext.Error.Message}";
+#if DEBUG
+                    System.Diagnostics.Debugger.Break();
+                    System.Diagnostics.Debug.WriteLine(log);
+#else
+                    Console.WriteLine(log);
+#endif
+                }
+
+                e.ErrorContext.Handled = true;
+            },
+            DateFormatHandling = Newtonsoft.Json.DateFormatHandling.IsoDateFormat,
+            MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Ignore,
+            ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
+            NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+            DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore,
+            ConstructorHandling = Newtonsoft.Json.ConstructorHandling.AllowNonPublicDefaultConstructor,
+        };
+        private async Task<TResult> ConvertToResult<TResult>(IFlurlResponse response)
+        {
+            var json = await response.GetStringAsync();
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<TResult>(json);
+        }
+
         public async Task<HomePageFeatured> GetHomePageFeaturedAsync()
         {
             return await STORAGE_BASE_URL.AppendPathSegment("HomePage.json")
@@ -38,15 +77,15 @@ namespace FluentStoreAPI
         public async Task<UserSignInResponse> SignUpAsync(string email, string password)
         {
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:signUp")
-                .SendJsonAsync(HttpMethod.Post, new { email = email, password = password, returnSecureToken = true });
-            return await response.GetJsonAsync<UserSignInResponse>();
+                .PostJsonAsync(new { email = email, password = password, returnSecureToken = true });
+            return await ConvertToResult<UserSignInResponse>(response);
         }
 
         public async Task<UserSignInResponse> SignInAsync(string email, string password)
         {
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:signInWithPassword")
-                .SendJsonAsync(HttpMethod.Post, new { email = email, password = password, returnSecureToken = true });
-            return await response.GetJsonAsync<UserSignInResponse>();
+                .PostJsonAsync(new { email = email, password = password, returnSecureToken = true });
+            return await ConvertToResult<UserSignInResponse>(response);
         }
 
         /// <summary>
@@ -68,8 +107,8 @@ namespace FluentStoreAPI
                 returnIdpCredential = returnIdpCredential
             };
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:signInWithIdp")
-                .SendJsonAsync(HttpMethod.Post, payload);
-            return await response.GetJsonAsync<OAuthUserSignInResponse>();
+                .PostJsonAsync(payload);
+            return await ConvertToResult<OAuthUserSignInResponse>(response);
         }
 
         /// <summary>
@@ -85,8 +124,8 @@ namespace FluentStoreAPI
                 identifier = email
             };
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:createAuthUri")
-                .SendJsonAsync(HttpMethod.Post, payload);
-            return await response.GetJsonAsync<ProvidersResponse>();
+                .PostJsonAsync(payload);
+            return await ConvertToResult<ProvidersResponse>(response);
         }
 
         /// <summary>
@@ -101,15 +140,15 @@ namespace FluentStoreAPI
             };
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:sendOobCode")
                 .WithHeader("X-Firebase-Locale", CultureInfo.CurrentUICulture)
-                .SendJsonAsync(HttpMethod.Post, payload);
+                .PostJsonAsync(payload);
             return (await response.GetJsonAsync()).email;
         }
 
         public async Task<PasswordResetPayload> VerifyPasswordResetAsync(string code)
         {
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:resetPassword")
-                .SendJsonAsync(HttpMethod.Post, new { oobCode = code });
-            return await response.GetJsonAsync<PasswordResetPayload>();
+                .PostJsonAsync(new { oobCode = code });
+            return await ConvertToResult<PasswordResetPayload>(response);
         }
 
         /// <summary>
@@ -120,8 +159,8 @@ namespace FluentStoreAPI
         public async Task<PasswordResetPayload> ConfirmPasswordResetAsync(string code, string newPassword)
         {
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:resetPassword")
-                .SendJsonAsync(HttpMethod.Post, new { oobCode = code, newPassword = newPassword });
-            return await response.GetJsonAsync<PasswordResetPayload>();
+                .PostJsonAsync(new { oobCode = code, newPassword = newPassword });
+            return await ConvertToResult<PasswordResetPayload>(response);
         }
         
         public async Task<UpdateAccountResponse> ChangeEmailAsync(string newEmail)
@@ -134,8 +173,8 @@ namespace FluentStoreAPI
             };
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:update")
                 .WithHeader("X-Firebase-Locale", CultureInfo.CurrentUICulture)
-                .SendJsonAsync(HttpMethod.Post, payload);
-            return await response.GetJsonAsync<UpdateAccountResponse>();
+                .PostJsonAsync(payload);
+            return await ConvertToResult<UpdateAccountResponse>(response);
         }
 
         public async Task<UpdateAccountResponse> ChangePasswordAsync(string newPassword)
@@ -148,8 +187,8 @@ namespace FluentStoreAPI
             };
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:update")
                 .WithHeader("X-Firebase-Locale", CultureInfo.CurrentUICulture)
-                .SendJsonAsync(HttpMethod.Post, payload);
-            return await response.GetJsonAsync<UpdateAccountResponse>();
+                .PostJsonAsync(payload);
+            return await ConvertToResult<UpdateAccountResponse>(response);
         }
 
         public async Task<UpdateProfileResponse> UpdateProfileAsync(string displayName, string photoUrl,
@@ -169,19 +208,15 @@ namespace FluentStoreAPI
             };
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:update")
                 .WithHeader("X-Firebase-Locale", CultureInfo.CurrentUICulture)
-                .SendJsonAsync(HttpMethod.Post, payload);
-            return await response.GetJsonAsync<UpdateProfileResponse>();
+                .PostJsonAsync(payload);
+            return await ConvertToResult<UpdateProfileResponse>(response);
         }
 
-        public async Task<List<User>> GetUserDataAsync()
+        public async Task<IReadOnlyList<User>> GetUserDataAsync()
         {
-            var payload = new
-            {
-                idToken = Token
-            };
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:lookup")
-                .SendJsonAsync(HttpMethod.Post, payload);
-            return (await response.GetJsonAsync()).users;
+                .PostJsonAsync(new { idToken = Token });
+            return (await response.GetJsonAsync<UserDataResponse>()).Users;
         }
 
         public async Task<UpdateProfileResponse> LinkWithEmailAndPasswordAsync(string email, string password)
@@ -194,8 +229,8 @@ namespace FluentStoreAPI
                 returnSecureToken = true
             };
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:update")
-                .SendJsonAsync(HttpMethod.Post, payload);
-            return await response.GetJsonAsync<UpdateProfileResponse>();
+                .PostJsonAsync(payload);
+            return await ConvertToResult<UpdateProfileResponse>(response);
         }
 
         public async Task<OAuthUserSignInResponse> LinkWithOAuthCredentialAsync(string oauthData, bool returnIdpCredential = false)
@@ -210,8 +245,8 @@ namespace FluentStoreAPI
                 returnIdpCredential = returnIdpCredential
             };
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:signInWithIdp")
-                .SendJsonAsync(HttpMethod.Post, payload);
-            return await response.GetJsonAsync<OAuthUserSignInResponse>();
+                .PostJsonAsync(payload);
+            return await ConvertToResult<OAuthUserSignInResponse>(response);
         }
 
         public async Task<UpdateProfileResponse> UnlinkProviderAsync(params string[] providerIds)
@@ -222,8 +257,8 @@ namespace FluentStoreAPI
                 deleteProvider = providerIds,
             };
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:update")
-                .SendJsonAsync(HttpMethod.Post, payload);
-            return await response.GetJsonAsync<UpdateProfileResponse>();
+                .PostJsonAsync(payload);
+            return await ConvertToResult<UpdateProfileResponse>(response);
         }
 
         public async Task<string> RequestEmailVerification()
@@ -235,7 +270,7 @@ namespace FluentStoreAPI
             };
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:sendOobCode")
                 .WithHeader("X-Firebase-Locale", CultureInfo.CurrentUICulture)
-                .SendJsonAsync(HttpMethod.Post, payload);
+                .PostJsonAsync(payload);
             return (await response.GetJsonAsync()).email;
         }
 
@@ -246,14 +281,14 @@ namespace FluentStoreAPI
         public async Task<UpdateAccountResponse> ConfirmEmailVerificationAsync(string code)
         {
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:update")
-                .SendJsonAsync(HttpMethod.Post, new { oobCode = code });
-            return await response.GetJsonAsync<UpdateAccountResponse>();
+                .PostJsonAsync(new { oobCode = code });
+            return await ConvertToResult<UpdateAccountResponse>(response);
         }
 
         public async Task DeleteAccountAsync()
         {
             await GetIdentityTKBase().AppendPathSegment("accounts:delete")
-                .SendJsonAsync(HttpMethod.Post, new { idToken = Token });
+                .PostJsonAsync(new { idToken = Token });
         }
     }
 }

@@ -7,12 +7,12 @@ namespace FluentStoreAPI.Models.Firebase
         /// User's new display name.
         /// </summary>
         [JsonProperty("displayName")]
-        public string DisplayName { get; }
+        public string DisplayName { get; set; }
 
         /// <summary>
         /// User's new photo url.
         /// </summary>
         [JsonProperty("photoUrl")]
-        public string PhotoUrl { get; }
+        public string PhotoUrl { get; set; }
     }
 }

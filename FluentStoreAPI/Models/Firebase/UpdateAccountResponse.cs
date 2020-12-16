@@ -9,43 +9,43 @@ namespace FluentStoreAPI.Models.Firebase
         /// The uid of the current user.
         /// </summary>
         [JsonProperty("localId")]
-        public string LocalID { get; }
+        public string LocalID { get; set; }
 
         /// <summary>
         /// User's email address.
         /// </summary>
         [JsonProperty("email")]
-        public string Email { get; }
+        public string Email { get; set; }
 
         /// <summary>
         /// Hash version of the password.
         /// </summary>
         [JsonProperty("passwordHash")]
-        public string PasswordHash { get; }
+        public string PasswordHash { get; set; }
 
         /// <summary>
         /// List of all linked provider objects which contain "providerId" and "federatedId".
         /// </summary>
         [JsonProperty("providerUserInfo")]
-        public IReadOnlyList<Provider> ProviderUserInfo { get; }
+        public IReadOnlyList<Provider> ProviderUserInfo { get; set; }
 
         /// <summary>
         /// New Firebase Auth ID token for user.
         /// </summary>
         [JsonProperty("idToken")]
-        public string IDToken { get; }
+        public string IDToken { get; set; }
 
         /// <summary>
         /// A Firebase Auth refresh token.
         /// </summary>
         [JsonProperty("refreshToken")]
-        public string RefreshToken { get; }
+        public string RefreshToken { get; set; }
 
         /// <summary>
         /// The number of seconds in which the ID token expires.
         /// </summary>
         [JsonProperty("expiresIn")]
-        public string ExpiresIn { get; }
+        public string ExpiresIn { get; set; }
 
         public static class CommonErrors
         {

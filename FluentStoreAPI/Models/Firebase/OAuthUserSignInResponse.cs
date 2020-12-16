@@ -8,111 +8,111 @@ namespace FluentStoreAPI.Models.Firebase
         /// The unique ID identifies the IdP account.
         /// </summary>
         [JsonProperty("federatedId")]
-        public string FederatedID { get; }
+        public string FederatedID { get; set; }
 
         /// <summary>
         /// The linked provider ID (e.g. "google.com" for the Google provider).
         /// </summary>
         [JsonProperty("providerId")]
-        public string ProviderID { get; }
+        public string ProviderID { get; set; }
 
         /// <summary>
         /// The uid of the authenticated user.
         /// </summary>
         [JsonProperty("localId")]
-        public string LocalID { get; }
+        public string LocalID { get; set; }
 
         /// <summary>
         /// Whether the sign-in email is verified.
         /// </summary>
         [JsonProperty("emailVerified")]
-        public bool IsEmailVerified { get; }
+        public bool IsEmailVerified { get; set; }
 
         /// <summary>
         /// The email of the account.
         /// </summary>
         [JsonProperty("email")]
-        public string Email { get; }
+        public string Email { get; set; }
 
         /// <summary>
         /// The OIDC id token if available.
         /// </summary>
         [JsonProperty("oauthIdToken")]
-        public string OAuthIDToken { get; }
+        public string OAuthIDToken { get; set; }
 
         /// <summary>
         /// The OAuth access token if available.
         /// </summary>
         [JsonProperty("oauthAccessToken")]
-        public string OAuthAccessToken { get; }
+        public string OAuthAccessToken { get; set; }
 
         /// <summary>
         /// The OAuth 1.0 token secret if available.
         /// </summary>
         [JsonProperty("oauthTokenSecret")]
-        public string OAuthTokenSecret { get; }
+        public string OAuthTokenSecret { get; set; }
 
         /// <summary>
         /// The stringified JSON response containing all the IdP data corresponding
         /// to the provided OAuth credential.
         /// </summary>
         [JsonProperty("rawUserInfo")]
-        public string RawUserInfo { get; }
+        public string RawUserInfo { get; set; }
 
         /// <summary>
         /// The first name for the account.
         /// </summary>
         [JsonProperty("firstName")]
-        public string FirstName { get; }
+        public string FirstName { get; set; }
 
         /// <summary>
         /// The last name for the account.
         /// </summary>
         [JsonProperty("lastName")]
-        public string LastName { get; }
+        public string LastName { get; set; }
 
         /// <summary>
         /// The full name for the account.
         /// </summary>
         [JsonProperty("fullName")]
-        public string FullName { get; }
+        public string FullName { get; set; }
 
         /// <summary>
         /// The display name for the account.
         /// </summary>
         [JsonProperty("displayName")]
-        public string DisplayName { get; }
+        public string DisplayName { get; set; }
 
         /// <summary>
         /// The photo Url for the account.
         /// </summary>
         [JsonProperty("photoUrl")]
-        public string PhotoUrl { get; }
+        public string PhotoUrl { get; set; }
 
         /// <summary>
         /// A Firebase Auth ID token for the authenticated user.
         /// </summary>
         [JsonProperty("idToken")]
-        public string IDToken { get; }
+        public string IDToken { get; set; }
 
         /// <summary>
         /// A Firebase Auth refresh token for the authenticated user.
         /// </summary>
         [JsonProperty("refreshToken")]
-        public string RefreshToken { get; }
+        public string RefreshToken { get; set; }
 
         /// <summary>
         /// The number of seconds in which the ID token expires.
         /// </summary>
         [JsonProperty("expiresIn")]
-        public string ExpiresIn { get; }
+        public string ExpiresIn { get; set; }
 
         /// <summary>
         /// Whether another account with the same credential already exists.
         /// The user will need to sign in to the original account and then link the current credential to it.
         /// </summary>
         [JsonProperty("needConfirmation")]
-        public bool NeedsConfirmation { get; }
+        public bool NeedsConfirmation { get; set; }
 
         public static class CommonErrors
         {

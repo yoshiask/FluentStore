@@ -1,4 +1,5 @@
-﻿using FluentStore.Services;
+﻿using FSAPI = FluentStoreAPI.FluentStoreAPI;
+using FluentStore.Services;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
@@ -15,6 +16,7 @@ namespace FluentStore.ViewModels
         public HomeViewModel()
         {
             LoadFeaturedCommand = new AsyncRelayCommand(LoadFeaturedAsync);
+            TestAuthCommand = new AsyncRelayCommand(TestAuthAsync);
         }
 
         public async Task LoadFeaturedAsync()
@@ -22,7 +24,7 @@ namespace FluentStore.ViewModels
             var culture = CultureInfo.CurrentUICulture;
             var region = new RegionInfo(culture.LCID);
 
-            var featured = await FluentStoreAPI.FluentStoreAPI.GetHomePageFeaturedAsync();
+            var featured = await FSApi.GetHomePageFeaturedAsync();
             CarouselItems.Clear();
 
             for (int i = 0; i < featured.Carousel.Count; i++)
@@ -36,6 +38,16 @@ namespace FluentStore.ViewModels
             }
         }
 
+        private readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
+        public async Task TestAuthAsync()
+        {
+            var signInRes = await FSApi.SignInAsync("testA@example.com", "123456");
+            FSApi.Token = signInRes.IDToken;
+            FSApi.RefreshToken = signInRes.RefreshToken;
+
+            var user = await FSApi.GetUserDataAsync();
+        }
+
         private readonly IStorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<IStorefrontApi>();
 
         private IAsyncRelayCommand _LoadFeaturedCommand;
@@ -43,6 +55,13 @@ namespace FluentStore.ViewModels
         {
             get => _LoadFeaturedCommand;
             set => SetProperty(ref _LoadFeaturedCommand, value);
+        }
+
+        private IAsyncRelayCommand _TestAuthCommand;
+        public IAsyncRelayCommand TestAuthCommand
+        {
+            get => _TestAuthCommand;
+            set => SetProperty(ref _TestAuthCommand, value);
         }
 
         private ObservableCollection<ProductDetailsViewModel> _CarouselItems = new ObservableCollection<ProductDetailsViewModel>();
