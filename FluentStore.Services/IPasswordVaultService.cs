@@ -4,7 +4,6 @@ namespace FluentStore.Services
 {
     public interface IPasswordVaultService
     {
-
         /// <summary>
         /// Adds a credential to the locker.
         /// </summary>

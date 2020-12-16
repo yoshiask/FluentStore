@@ -132,6 +132,7 @@ namespace FluentStore
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
             services.AddSingleton(new FluentStoreAPI.FluentStoreAPI());
+            services.AddSingleton(typeof(UserService));
 
             return services.BuildServiceProvider();
         }

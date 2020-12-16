@@ -8,18 +8,13 @@
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
-    xmlns:interactivity="using:Microsoft.Xaml.Interactivity" xmlns:viewmodels="using:FluentStore.ViewModels"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:viewmodels="using:FluentStore.ViewModels"
     mc:Ignorable="d"
     Background="{ThemeResource SystemControlAcrylicWindowBrush}">
     <Page.Resources>
         <viewmodels:ShellViewModel x:Name="ViewModel"/>
     </Page.Resources>
-
-    <interactivity:Interaction.Behaviors>
-        <core:EventTriggerBehavior EventName="Loaded">
-            <core:InvokeCommandAction Command="{x:Bind ViewModel.SignInCommand}"/>
-        </core:EventTriggerBehavior>
-    </interactivity:Interaction.Behaviors>
 
     <winui:NavigationView x:Name="MainNav" PaneDisplayMode="LeftCompact" IsTitleBarAutoPaddingEnabled="False"
 						  SelectionChanged="NavigationView_SelectionChanged">
@@ -80,7 +75,7 @@
             </Grid>
         </winui:NavigationView.PaneFooter>
 
-        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid Background="{ThemeResource SystemControlChromeMediumLowAcrylicWindowMediumBrush}">
 			<winui:ProgressBar x:Name="LoadingIndicator" IsIndeterminate="True"
 							   Grid.Row="1" Visibility="Collapsed" VerticalAlignment="Top"/>
 			<Frame x:Name="MainFrame"/>

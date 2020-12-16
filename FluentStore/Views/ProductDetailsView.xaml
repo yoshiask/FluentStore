@@ -10,7 +10,8 @@
     xmlns:viewModels="using:FluentStore.ViewModels"
     mc:Ignorable="d"
     SizeChanged="Page_SizeChanged"
-    NavigationCacheMode="Required">
+    NavigationCacheMode="Disabled"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
         <viewModels:ProductDetailsViewModel x:Name="ViewModel" x:FieldModifier="public" />
     </Page.Resources>
@@ -79,7 +80,7 @@
                     <Border x:Name="HeroImageSpacer"/>
                     <Grid Grid.Row="1" Padding="20,0,20,20" ColumnSpacing="20" Margin="20,0" MaxHeight="300"
                           Background="{ThemeResource SystemControlAcrylicElementMediumHighBrush}"
-                          x:Name="InfoCard">
+                          x:Name="InfoCard" CornerRadius="4">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition x:Name="DescriptionRow" Height="4*" />

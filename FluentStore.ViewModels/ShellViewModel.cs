@@ -174,18 +174,9 @@ namespace FluentStore.ViewModels
             return suggs.ResultSets[0].Suggests;
         }
 
-        public async Task TestAuthAsync()
-        {
-            var signInRes = await FSApi.SignInAsync("testA@example.com", "123456");
-            FSApi.Token = signInRes.IDToken;
-            FSApi.RefreshToken = signInRes.RefreshToken;
-
-            var user = await FSApi.GetUserDataAsync();
-        }
-
         public async Task SignInAsync()
         {
-
+            NavService.Navigate("Auth.SignInView");
         }
 
         public async Task SignOutAsync()

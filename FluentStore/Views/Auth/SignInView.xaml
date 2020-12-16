@@ -1,0 +1,44 @@
+﻿<Page
+    x:Class="FluentStore.Views.Auth.SignInView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FluentStore.Views.Auth"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:authviewmodels="using:FluentStore.ViewModels.Auth"
+    mc:Ignorable="d">
+    <Page.Resources>
+        <authviewmodels:SignInViewModel x:Name="ViewModel"/>
+    </Page.Resources>
+
+    <Grid x:Name="MainGrid" VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="300" Margin="10">
+        <StackPanel Spacing="10" HorizontalAlignment="Stretch">
+            <TextBox Text="{x:Bind ViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     PlaceholderText="Email"/>
+            <PasswordBox Password="{x:Bind ViewModel.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         PlaceholderText="Password"/>
+            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
+                <HyperlinkButton Content="Sign up" Command="{x:Bind ViewModel.SignUpCommand}"/>
+                <Button Content="Log in" Style="{ThemeResource AccentButtonStyle}" Command="{x:Bind ViewModel.SignInCommand}"/>
+            </StackPanel>
+        </StackPanel>
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="641" />
+                    </VisualState.StateTriggers>
+
+                    <VisualState.Setters>
+                        <Setter Target="MainGrid.HorizontalAlignment" Value="Center"/>
+                        <Setter Target="MainGrid.Margin" Value="0"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+    </Grid>
+
+</Page>

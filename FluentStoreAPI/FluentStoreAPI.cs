@@ -12,6 +12,7 @@ namespace FluentStoreAPI
     {
         public const string STORAGE_BASE_URL = "https://firebasestorage.googleapis.com/v0/b/fluent-store.appspot.com/o/";
         public const string IDENTITY_TK_BASE_URL = "https://identitytoolkit.googleapis.com/v1";
+        private const string KEY = "AIzaSyCoINaQk7QdzPryW0oZHppWnboRRPk26fQ";
 
         public string Token { get; set; }
         public string RefreshToken { get; set; }
@@ -25,7 +26,7 @@ namespace FluentStoreAPI
 
         private Url GetIdentityTKBase()
         {
-            return IDENTITY_TK_BASE_URL.SetQueryParam("key", "AIzaSyCoINaQk7QdzPryW0oZHppWnboRRPk26fQ");
+            return IDENTITY_TK_BASE_URL.SetQueryParam("key", KEY);
         }
 
         static readonly Newtonsoft.Json.JsonSerializerSettings _json = new Newtonsoft.Json.JsonSerializerSettings()
@@ -109,6 +110,17 @@ namespace FluentStoreAPI
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:signInWithIdp")
                 .PostJsonAsync(payload);
             return await ConvertToResult<OAuthUserSignInResponse>(response);
+        }
+
+        /// <summary>
+        /// Exchanges the <see cref="RefreshToken"/> to get new tokens.
+        /// </summary>
+        /// <remarks>Note that this does *not* update <see cref="Token"/> or <see cref="RefreshToken"/></remarks>
+        public async Task<UseRefreshTokenResponse> UseRefreshToken()
+        {
+            var response = await "https://securetoken.googleapis.com/v1/token".SetQueryParam("key", KEY)
+                .PostUrlEncodedAsync(new { grant_type = "refresh_token", refresh_token = RefreshToken });
+            return await ConvertToResult<UseRefreshTokenResponse>(response);
         }
 
         /// <summary>
