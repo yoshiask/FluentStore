@@ -33,7 +33,11 @@ namespace FluentStore.Views
             {
                 ViewModel.Product = details;
 
-                await PackageHelper.IsAppInstalledAsync(ViewModel.Product.PackageFamilyNames[0]);
+                string packageFamily = ViewModel.Product.PackageFamilyNames[0];
+                if (await PackageHelper.IsAppInstalledAsync(packageFamily))
+                {
+                    UpdateInstallButtonToLaunch();
+                }
             }
         }
 
@@ -94,7 +98,10 @@ namespace FluentStore.Views
                 }
                 else
                 {
-                    await PackageHelper.InstallPackage(package, ViewModel.Product);
+                    if (await PackageHelper.InstallPackage(package, ViewModel.Product))
+                    {
+                        UpdateInstallButtonToLaunch();
+                    }
                 }
             }
 
@@ -240,6 +247,19 @@ namespace FluentStore.Views
                     + InfoCard.Margin.Top + InfoCard.Margin.Bottom;
                 HeroImageSpacer.Height = Math.Max(HeroImage.ActualHeight - offset, 0);
             }
+        }
+
+        private void UpdateInstallButtonToLaunch()
+        {
+            string packageFamily = ViewModel.Product.PackageFamilyNames[0];
+            InstallButtonText.Text = "Launch";
+            InstallUsingAppInstallerMenuItem.IsEnabled = false;
+            InstallButton.Click -= InstallButton_Click;
+            InstallButton.Click += async (SplitButton sender, SplitButtonClickEventArgs e) =>
+            {
+                var app = await PackageHelper.GetAppByPackageFamilyNameAsync(packageFamily);
+                await app.LaunchAsync();
+            };
         }
     }
 }

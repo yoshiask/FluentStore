@@ -99,7 +99,7 @@
                         </Viewbox>
                         <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="30" FontWeight="Bold" Text="{x:Bind ViewModel.Product.Title}" />
                         <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Spacing="10">
-                            <TextBlock Text="{x:Bind ViewModel.Product.DisplayPrice}" VerticalAlignment="Center"
+                            <TextBlock Text="{x:Bind ViewModel.Product.DisplayPrice, Mode=OneWay}" VerticalAlignment="Center"
                                        FontSize="16" FontWeight="SemiBold"/>
                             <Button Click="AddToCollection_Click" Padding="10" Background="{ThemeResource SystemChromeAltHighColor}">
                                 <StackPanel Orientation="Horizontal" Spacing="10">
@@ -111,14 +111,14 @@
                                          BorderThickness="0">
                                 <StackPanel Orientation="Horizontal" Spacing="10">
                                     <FontIcon Glyph="&#xECAA;" />
-                                    <TextBlock Text="Install" />
+                                    <TextBlock Text="Install" x:Name="InstallButtonText" />
                                 </StackPanel>
                                 <SplitButton.Flyout>
                                     <MenuFlyout Placement="BottomEdgeAlignedRight">
                                         <MenuFlyoutItem Icon="Download" Text="Download installer" ToolTipService.ToolTip="Downloads the app without installing it"
-                                                        Click="Download_Click"/>
+                                                        x:Name="DownloadMenuItem" Click="Download_Click"/>
                                         <MenuFlyoutItem Text="Install with App Installer" ToolTipService.ToolTip="Installs the app using Microsoft's App Installer"
-                                                        Click="InstallUsingAppInstaller_Click">
+                                                        x:Name="InstallUsingAppInstallerMenuItem" Click="InstallUsingAppInstaller_Click">
                                             <MenuFlyoutItem.Icon>
                                                 <BitmapIcon UriSource="Assets/AppPackageAppList.png"/>
                                             </MenuFlyoutItem.Icon>

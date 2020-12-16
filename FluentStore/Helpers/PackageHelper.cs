@@ -9,6 +9,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Windows.ApplicationModel.Core;
 using Windows.Management.Deployment;
 using Windows.Networking.BackgroundTransfer;
 using Windows.Storage;
@@ -189,7 +190,19 @@ namespace FluentStore.Helpers
             PackageManager pkgManager = new PackageManager();
             return pkgManager.FindPackages().ToList();
         }
-        
+
+        public static async Task<AppListEntry> GetAppByPackageFamilyNameAsync(string packageFamilyName)
+        {
+            var pkgManager = new PackageManager();
+            var pkg = pkgManager.FindPackagesForUser("", packageFamilyName).FirstOrDefault();
+
+            if (pkg == null) return null;
+
+            var apps = await pkg.GetAppListEntriesAsync();
+            var firstApp = apps.FirstOrDefault();
+            return firstApp;
+        }
+
         public static bool IsFiletype(string file, params string[] exts)
         {
             foreach (string ext in exts)
