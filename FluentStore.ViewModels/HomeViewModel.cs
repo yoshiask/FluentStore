@@ -65,6 +65,5 @@ namespace FluentStore.ViewModels
             get => _SelectedCarouselItem;
             set => SetProperty(ref _SelectedCarouselItem, value);
         }
-
     }
 }

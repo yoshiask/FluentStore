@@ -132,7 +132,7 @@ namespace FluentStore.ViewModels
         public async Task<List<Product>> GetSuggestions(string query)
         {
             var suggs = await MSStoreApi.GetSuggestions(
-                query, "en-US", Constants.CLIENT_ID,
+                query, CultureInfo.CurrentUICulture.Name, Constants.CLIENT_ID,
                 new string[] { Constants.CAT_ALL_PRODUCTS }, new int[] { 10, 0, 0 }
             );
             if (suggs.ResultSets.Count <= 0)

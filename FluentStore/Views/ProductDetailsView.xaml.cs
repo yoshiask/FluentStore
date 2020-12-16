@@ -76,7 +76,7 @@ namespace FluentStore.Views
             };
             dialog.ShowAsync();
 
-            DisplayCatalogHandler dcathandler = new DisplayCatalogHandler(DCatEndpoint.Production, new Locale(Market.US, Lang.en, true));
+            DisplayCatalogHandler dcathandler = new DisplayCatalogHandler(DCatEndpoint.Production, new Locale(culture, true));
             await dcathandler.QueryDCATAsync(productId);
             var packs = await dcathandler.GetMainPackagesForProductAsync();
             string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;
@@ -196,7 +196,7 @@ namespace FluentStore.Views
             };
             dialog.ShowAsync();
 
-            DisplayCatalogHandler dcathandler = new DisplayCatalogHandler(DCatEndpoint.Production, new Locale(Market.US, Lang.en, true));
+            DisplayCatalogHandler dcathandler = new DisplayCatalogHandler(DCatEndpoint.Production, new Locale(culture, true));
             await dcathandler.QueryDCATAsync(productId);
             var packs = await dcathandler.GetPackagesForProductAsync();
             string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;

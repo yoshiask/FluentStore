@@ -92,14 +92,7 @@ namespace FluentStore.ViewModels
 
         public async Task GetSuggestionsAsync()
         {
-            //var suggsResponse = await MSStoreApi.GetSuggestions(
-            //    Query, CultureInfo.CurrentUICulture.Name, Constants.CLIENT_ID,
-            //    new[] { Constants.CAT_ALL_PRODUCTS }, new int[] { 100, 0, 0 }
-            //);
-            //Products = new ObservableCollection<Product>(suggsResponse.ResultSets[0].Suggests);
-
-            var dcat = new DisplayCatalogHandler(
-                StoreLib.Models.DCatEndpoint.Production, new Locale(CultureInfo.CurrentUICulture, true));
+            var dcat = new DisplayCatalogHandler(StoreLib.Models.DCatEndpoint.Production, new Locale(CultureInfo.CurrentUICulture, true));
             var dcatSearch = await dcat.SearchDCATAsync(Query, StoreLib.Models.DeviceFamily.Desktop);
             var products = new ObservableCollection<StoreLib.Models.Product>();
             foreach (var result in dcatSearch.Results)
