@@ -7,8 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="using:FluentStore.ViewModels"
     xmlns:converters="using:FluentStore.Converters"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    mc:Ignorable="d">
     <Page.Resources>
         <viewmodels:SearchResultsViewModel x:Name="ViewModel"/>
         <converters:CSSColorToBrushConverter x:Name="CSSColorToBrushConverter"/>
@@ -24,7 +23,8 @@
         </GridView.ItemContainerStyle>
         <GridView.ItemTemplate>
             <DataTemplate x:DataType="viewmodels:ProductDetailsViewModel">
-                <Grid MaxHeight="300" MaxWidth="150" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <Grid MaxHeight="300" MaxWidth="150" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                      Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="150"/>
                         <RowDefinition Height="150"/>

@@ -10,8 +10,8 @@
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:viewmodels="using:FluentStore.ViewModels"
-    mc:Ignorable="d"
-    Background="{ThemeResource SystemControlAcrylicWindowBrush}">
+    mc:Ignorable="d">
+    <!--Background="{ThemeResource SystemControlAcrylicWindowBrush}"-->
     <Page.Resources>
         <viewmodels:ShellViewModel x:Name="ViewModel"/>
     </Page.Resources>
@@ -75,7 +75,8 @@
             </Grid>
         </winui:NavigationView.PaneFooter>
 
-        <Grid Background="{ThemeResource SystemControlChromeMediumLowAcrylicWindowMediumBrush}">
+        <!--SystemControlChromeMediumLowAcrylicWindowMediumBrush-->
+        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 			<winui:ProgressBar x:Name="LoadingIndicator" IsIndeterminate="True"
 							   Grid.Row="1" Visibility="Collapsed" VerticalAlignment="Top"/>
 			<Frame x:Name="MainFrame"/>

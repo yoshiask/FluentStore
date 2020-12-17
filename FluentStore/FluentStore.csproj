@@ -122,6 +122,7 @@
     </Compile>
     <Compile Include="Controls\ProductCard.cs" />
     <Compile Include="Converters\CSSColorToBrushConverter.cs" />
+    <Compile Include="Helpers\AppViewModel.cs" />
     <Compile Include="Helpers\NavigationHelper.cs" />
     <Compile Include="Helpers\NavigationService.cs" />
     <Compile Include="Helpers\ObservableSettings.cs" />

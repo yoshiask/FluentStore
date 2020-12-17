@@ -5,10 +5,88 @@
     xmlns:local="using:FluentStore.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:viewmodels="using:FluentStore.ViewModels"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Loading="Page_Loading">
+    <Page.Resources>
+        <viewmodels:MyAppsViewModel x:Name="ViewModel"/>
+    </Page.Resources>
 
-	<Grid Padding="5">
-		<TextBlock Text="My Apps" FontWeight="Bold" FontSize="16"/>
-	</Grid>
+    <Grid>
+        <ProgressRing IsActive="{x:Bind ViewModel.IsLoadingMyApps, Mode=OneWay}"/>
+
+        <GridView ItemsSource="{x:Bind ViewModel.Apps, Mode=OneWay}"
+              SelectedItem="{x:Bind ViewModel.SelectedApp, Mode=TwoWay}" SelectionMode="Single"
+              HorizontalAlignment="Center" HorizontalContentAlignment="Stretch" Padding="10">
+            <GridView.ItemContainerStyle>
+                <Style TargetType="GridViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                </Style>
+            </GridView.ItemContainerStyle>
+            <GridView.ItemTemplate>
+                <DataTemplate x:DataType="viewmodels:AppViewModel">
+                    <Grid MaxHeight="300" MaxWidth="115" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                        <interactivity:Interaction.Behaviors>
+                            <core:EventTriggerBehavior EventName="Loaded">
+                                <core:InvokeCommandAction Command="{x:Bind LoadIconSourceCommand}"/>
+                            </core:EventTriggerBehavior>
+                        </interactivity:Interaction.Behaviors>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="115"/>
+                            <!--<RowDefinition Height="125"/>-->
+                        </Grid.RowDefinitions>
+                        <Border Background="{ThemeResource SystemControlHighlightListMediumRevealBackgroundBrush}"/>
+                        <Image Source="{x:Bind IconSource, Mode=OneWay}"/>
+                        <TextBlock Text="{Binding DisplayName}" FontSize="12" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
+                               MaxLines="2" VerticalAlignment="Bottom" Padding="10"/>
+                        <!--<Grid Grid.Row="1" Padding="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Spacing="5" Grid.Row="0">
+                            <TextBlock Text="{x:Bind DisplayName}" FontWeight="SemiBold"
+                                       TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxLines="2"/>
+                            <TextBlock Text="{x:Bind Description}" TextWrapping="Wrap" TextTrimming="WordEllipsis"
+                                       MaxLines="3"/>
+                        </StackPanel>
+                        <TextBlock Grid.Row="1" Text="{x:Bind Entry.AppUserModelId}" VerticalAlignment="Bottom"/>
+                    </Grid>-->
+                    </Grid>
+                </DataTemplate>
+            </GridView.ItemTemplate>
+            <GridView.ItemContainerTransitions>
+                <TransitionCollection>
+                    <AddDeleteThemeTransition/>
+                    <RepositionThemeTransition IsStaggeringEnabled="False"/>
+                    <PopupThemeTransition/>
+                </TransitionCollection>
+            </GridView.ItemContainerTransitions>
+            <GridView.Transitions>
+                <TransitionCollection>
+                    <ReorderThemeTransition/>
+                </TransitionCollection>
+            </GridView.Transitions>
+
+            <interactivity:Interaction.Behaviors>
+                <core:EventTriggerBehavior EventName="SelectionChanged">
+                    <core:InvokeCommandAction Command="{x:Bind ViewModel.ViewAppCommand}"/>
+                </core:EventTriggerBehavior>
+            </interactivity:Interaction.Behaviors>
+        </GridView>
+
+        <Border Visibility="{x:Bind ViewModel.ViewAppCommand.IsRunning, Mode=OneWay}">
+            <Border.Background>
+                <AcrylicBrush BackgroundSource="Backdrop" FallbackColor="{ThemeResource SystemChromeLowColor}"
+                              Opacity="0.95" TintColor="{ThemeResource SystemChromeLowColor}"
+                              TintLuminosityOpacity="0.5" TintOpacity="0.75"/>
+            </Border.Background>
+        </Border>
+        <ProgressRing IsActive="{x:Bind ViewModel.ViewAppCommand.IsRunning, Mode=OneWay}"/>
+    </Grid>
+
 </Page>

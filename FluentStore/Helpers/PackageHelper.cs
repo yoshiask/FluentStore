@@ -184,11 +184,12 @@ namespace FluentStore.Helpers
             return installables.OrderByDescending(p => p.Version).First();
         }
 
-        public static List<Windows.ApplicationModel.Package> GetInstalledPackages()
+        public static async Task<List<AppListEntry>> GetInstalledPackages()
         {
-            // TOOD: Always throws "access denied"
             PackageManager pkgManager = new PackageManager();
-            return pkgManager.FindPackages().ToList();
+            var allEntries = await Task.WhenAll(pkgManager.FindPackagesForUser("")
+                .Select(async pkg => await pkg.GetAppListEntriesAsync()));
+            return allEntries.Select(e => e.FirstOrDefault()).Where(e => e != null).ToList();
         }
 
         public static async Task<AppListEntry> GetAppByPackageFamilyNameAsync(string packageFamilyName)
