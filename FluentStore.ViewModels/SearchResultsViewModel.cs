@@ -7,6 +7,7 @@ using MicrosoftStore.Models;
 using StoreLib.Services;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,14 +18,39 @@ namespace FluentStore.ViewModels
     {
         public SearchResultsViewModel()
         {
-            PopulateProductDetailsCommand = new AsyncRelayCommand(PopulateProductDetailsAsync);
-            GetSuggestionsCommand = new AsyncRelayCommand(GetSuggestionsAsync);
+            //PopulateProductDetailsCommand = new AsyncRelayCommand(PopulateProductDetailsAsync);
+            GetResultsCommand = new AsyncRelayCommand(GetResultsAsync);
             ViewProductCommand = new RelayCommand(ViewProduct);
+
+            ProductDetails.CollectionChanged += Products_CollectionChanged;
         }
+
+        private async void Products_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            var culture = CultureInfo.CurrentUICulture;
+            var region = new RegionInfo(culture.LCID);
+
+            switch (e.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    var newItems = e.NewItems.OfType<ProductDetailsViewModel>();
+                    for (int i = 0; i < newItems.Count(); i++)
+                    {
+                        var pvm = newItems.ElementAt(i);
+                        var pd = await GetProductDetailsAsync(pvm.Product, culture, region);
+                        if (pd != null)
+                        {
+                            ProductDetails[e.NewStartingIndex + i].Product = pd.Product;
+                        }
+                    }
+                    break;
+            }
+        }
+
         public SearchResultsViewModel(string query)
         {
-            PopulateProductDetailsCommand = new AsyncRelayCommand(PopulateProductDetailsAsync);
-            GetSuggestionsCommand = new AsyncRelayCommand(GetSuggestionsAsync);
+            //PopulateProductDetailsCommand = new AsyncRelayCommand(PopulateProductDetailsAsync);
+            GetResultsCommand = new AsyncRelayCommand(GetResultsAsync);
             ViewProductCommand = new RelayCommand(ViewProduct);
             Query = query;
         }
@@ -40,19 +66,15 @@ namespace FluentStore.ViewModels
             set
             {
                 SetProperty(ref _Query, value);
-                GetSuggestionsCommand.Execute(null);
+                GetResultsCommand.Execute(null);
             }
         }
 
-        private ObservableCollection<StoreLib.Models.Product> _Products;
-        public ObservableCollection<StoreLib.Models.Product> Products
+        private ObservableCollection<ProductDetails> _Products = new ObservableCollection<ProductDetails>();
+        public ObservableCollection<ProductDetails> Products
         {
             get => _Products;
-            set
-            {
-                SetProperty(ref _Products, value);
-                PopulateProductDetailsCommand.Execute(null);
-            }
+            set => SetProperty(ref _Products, value);
         }
 
         private ObservableCollection<ProductDetailsViewModel> _ProductDetails = new ObservableCollection<ProductDetailsViewModel>();
@@ -77,7 +99,7 @@ namespace FluentStore.ViewModels
         }
 
         private IAsyncRelayCommand _GetSuggestionsCommand;
-        public IAsyncRelayCommand GetSuggestionsCommand
+        public IAsyncRelayCommand GetResultsCommand
         {
             get => _GetSuggestionsCommand;
             set => SetProperty(ref _GetSuggestionsCommand, value);
@@ -90,41 +112,47 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _ViewProductCommand, value);
         }
 
-        public async Task PopulateProductDetailsAsync()
+        public async Task GetResultsAsync()
         {
             var culture = CultureInfo.CurrentUICulture;
             var region = new RegionInfo(culture.LCID);
             ProductDetails.Clear();
 
-            foreach (StoreLib.Models.Product product in Products)
+            int pageSize = 25;
+            var firstPage = await StorefrontApi.Search(Query, region.TwoLetterISORegionName, culture.Name, "apps", "all", "Windows.Desktop", pageSize, 0);
+            foreach (var product in firstPage.Payload.Cards)
             {
-                // Get the full product details
-                var item = await StorefrontApi.GetProduct(product.ProductId, region.TwoLetterISORegionName, culture.Name);
-                var candidate = item.Convert<ProductDetails>().Payload;
-                if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
+                ProductDetails.Add(new ProductDetailsViewModel(product));
+            }
+
+            double requestCount = System.Math.Ceiling((double)firstPage.Payload.TotalItems / pageSize);
+            for (int i = 1; i < requestCount; i++)
+            {
+                var search = await StorefrontApi.Search(
+                    Query, region.TwoLetterISORegionName, culture.Name,
+                    "apps", "all", "Windows.Desktop",
+                    pageSize, i * pageSize);
+                foreach (var product in search.Payload.Cards)
                 {
-                    ProductDetails.Add(new ProductDetailsViewModel(candidate));
+                    ProductDetails.Add(new ProductDetailsViewModel(product));
                 }
             }
         }
 
-        public async Task GetSuggestionsAsync()
+        public async Task<ProductDetailsViewModel> GetProductDetailsAsync(ProductDetails productDetails, CultureInfo culture, RegionInfo region)
         {
-            var dcat = new DisplayCatalogHandler(StoreLib.Models.DCatEndpoint.Production, new Locale(CultureInfo.CurrentUICulture, true));
-            var dcatSearch = await dcat.SearchDCATAsync(Query, StoreLib.Models.DeviceFamily.Desktop);
-            var products = new ObservableCollection<StoreLib.Models.Product>();
-            foreach (var result in dcatSearch.Results)
+            var item = await StorefrontApi.GetProduct(productDetails.ProductId, region.TwoLetterISORegionName, culture.Name);
+            var candidate = item.Convert<ProductDetails>().Payload;
+            if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
             {
-                foreach (var product in result.Products)
-                {
-                    products.Add(product);
-                }
+                return new ProductDetailsViewModel(candidate);
             }
-            Products = products;
+            else return null;
         }
 
         public void ViewProduct()
         {
+            GetResultsCommand.Cancel();
             NavService.Navigate("ProductDetailsView", SelectedProductDetails);
         }
     }

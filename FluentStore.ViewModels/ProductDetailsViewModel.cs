@@ -44,7 +44,7 @@ namespace FluentStore.ViewModels
             get
             {
                 if (_AppIcon == null)
-                    _AppIcon = Product.Images
+                    _AppIcon = Product?.Images
                         .FindAll(i => i.ImageType == ImageType.Logo || i.ImageType == ImageType.Tile)
                         .OrderByDescending(i => i.Height * i.Width).First();
                 return _AppIcon;
@@ -56,7 +56,7 @@ namespace FluentStore.ViewModels
         {
             string url = "";
             int width = 0;
-            foreach (ImageItem image in Product.Images.FindAll(i => i.ImageType == ImageType.Hero))
+            foreach (ImageItem image in Product?.Images.FindAll(i => i.ImageType == ImageType.Hero))
             {
                 if (image.Width > width)
                     url = image.Url;
@@ -71,7 +71,7 @@ namespace FluentStore.ViewModels
 
         public List<ImageItem> GetScreenshots()
         {
-            return Product.Images.FindAll(i => i.ImageType == MicrosoftStore.Enums.ImageType.Screenshot);
+            return Product?.Images.FindAll(i => i.ImageType == ImageType.Screenshot);
         }
 
         public string AverageRatingString => Product.AverageRating.ToString("F1");

@@ -22,4 +22,12 @@ namespace MicrosoftStore.Responses
         public int PageSize { get; set; }
         public List<ProductDetails> Products { get; set; }
     }
+
+    public class ProductCardListPayload : Payload
+    {
+        public List<ProductDetails> Cards { get; set; }
+        public bool HasThirdPartyIAPs { get; set; }
+        public int TotalItems { get; set; }
+        public int PageSize { get; set; }
+    }
 }

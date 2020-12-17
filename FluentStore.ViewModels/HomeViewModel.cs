@@ -30,7 +30,7 @@ namespace FluentStore.ViewModels
                 string productId = featured.Carousel[i];
                 var product = (await StorefrontApi.GetProduct(productId, region.TwoLetterISORegionName, culture.Name))
                     .Convert<ProductDetails>().Payload;
-                CarouselItems.Add(new ProductDetailsViewModel() { Product = product });
+                CarouselItems.Add(new ProductDetailsViewModel(product));
                 if (i == 0 || (i == 1 && featured.Carousel.Count >= 3))
                     SelectedCarouselItemIndex = i;
             }
