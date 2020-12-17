@@ -17,7 +17,7 @@
     </Page.Resources>
 
     <winui:NavigationView x:Name="MainNav" PaneDisplayMode="LeftCompact" IsTitleBarAutoPaddingEnabled="False"
-						  SelectionChanged="NavigationView_SelectionChanged">
+						  SelectionChanged="NavigationView_SelectionChanged" BackRequested="MainNav_BackRequested">
         <!--<winui:NavigationView.MenuItems>
             <winui:NavigationViewItem Content="Home" Icon="Home"/>
             <winui:NavigationViewItem Content="My Apps" Icon="AllApps"/>

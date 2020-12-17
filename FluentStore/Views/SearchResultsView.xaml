@@ -7,13 +7,17 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="using:FluentStore.ViewModels"
     xmlns:converters="using:FluentStore.Converters"
+    xmlns:winui="using:Microsoft.UI.Xaml.Controls"
+    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     mc:Ignorable="d">
     <Page.Resources>
         <viewmodels:SearchResultsViewModel x:Name="ViewModel"/>
         <converters:CSSColorToBrushConverter x:Name="CSSColorToBrushConverter"/>
     </Page.Resources>
 
-    <GridView ItemsSource="{x:Bind ViewModel.ProductDetails, Mode=OneWay}" SelectionMode="Single"
+    <GridView ItemsSource="{x:Bind ViewModel.ProductDetails, Mode=OneWay}"
+              SelectedItem="{x:Bind ViewModel.SelectedProductDetails, Mode=TwoWay}" SelectionMode="Single"
               HorizontalAlignment="Center" HorizontalContentAlignment="Stretch" Padding="10">
         <GridView.ItemContainerStyle>
             <Style TargetType="GridViewItem">
@@ -43,7 +47,16 @@
                         <StackPanel Spacing="5" Grid.Row="0">
                             <TextBlock Text="{x:Bind Product.Title}" FontWeight="SemiBold"
                                        TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxLines="2"/>
-                            <TextBlock Text="{x:Bind Product.RatingCount}"/>
+                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                                <TextBlock Text="{x:Bind Product.RatingCount}" FontSize="14" VerticalAlignment="Center"/>
+                                <Viewbox Width="90" Margin="0,0,0,-5">
+                                    <winui:RatingControl Value="{Binding Product.AverageRating}" IsReadOnly="True">
+                                        <winui:RatingControl.Resources>
+                                            <SolidColorBrush x:Key="RatingControlSelectedForeground" Color="{ThemeResource SystemColorHighlightTextColor}"/>
+                                        </winui:RatingControl.Resources>
+                                    </winui:RatingControl>
+                                </Viewbox>
+                            </StackPanel>
                             <TextBlock Text="{x:Bind Product.AvailableDevicesDisplayText}" FontFamily="Segoe MDL2 Assets"/>
                         </StackPanel>
                         <TextBlock Grid.Row="1" Text="{x:Bind Product.DisplayPrice}" VerticalAlignment="Bottom"/>
@@ -56,6 +69,18 @@
                 <RepositionThemeTransition/>
             </TransitionCollection>
         </GridView.Transitions>
+        <GridView.ItemContainerTransitions>
+            <TransitionCollection>
+                <AddDeleteThemeTransition/>
+                <PopupThemeTransition/>
+            </TransitionCollection>
+        </GridView.ItemContainerTransitions>
+
+        <interactivity:Interaction.Behaviors>
+            <core:EventTriggerBehavior EventName="SelectionChanged">
+                <core:InvokeCommandAction Command="{x:Bind ViewModel.ViewProductCommand}"/>
+            </core:EventTriggerBehavior>
+        </interactivity:Interaction.Behaviors>
     </GridView>
     
 </Page>

@@ -1,4 +1,5 @@
-﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using FluentStore.Services;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
 using MicrosoftStore;
@@ -18,16 +19,19 @@ namespace FluentStore.ViewModels
         {
             PopulateProductDetailsCommand = new AsyncRelayCommand(PopulateProductDetailsAsync);
             GetSuggestionsCommand = new AsyncRelayCommand(GetSuggestionsAsync);
+            ViewProductCommand = new RelayCommand(ViewProduct);
         }
         public SearchResultsViewModel(string query)
         {
             PopulateProductDetailsCommand = new AsyncRelayCommand(PopulateProductDetailsAsync);
             GetSuggestionsCommand = new AsyncRelayCommand(GetSuggestionsAsync);
+            ViewProductCommand = new RelayCommand(ViewProduct);
             Query = query;
         }
 
         private readonly IStorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<IStorefrontApi>();
         private readonly IMSStoreApi MSStoreApi = Ioc.Default.GetRequiredService<IMSStoreApi>();
+        private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
 
         private string _Query;
         public string Query
@@ -58,6 +62,13 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _ProductDetails, value);
         }
 
+        private ProductDetailsViewModel _SelectedProductDetails;
+        public ProductDetailsViewModel SelectedProductDetails
+        {
+            get => _SelectedProductDetails;
+            set => SetProperty(ref _SelectedProductDetails, value);
+        }
+
         private IAsyncRelayCommand _PopulateProductDetailsCommand;
         public IAsyncRelayCommand PopulateProductDetailsCommand
         {
@@ -70,6 +81,13 @@ namespace FluentStore.ViewModels
         {
             get => _GetSuggestionsCommand;
             set => SetProperty(ref _GetSuggestionsCommand, value);
+        }
+
+        private IRelayCommand _ViewProductCommand;
+        public IRelayCommand ViewProductCommand
+        {
+            get => _ViewProductCommand;
+            set => SetProperty(ref _ViewProductCommand, value);
         }
 
         public async Task PopulateProductDetailsAsync()
@@ -103,6 +121,11 @@ namespace FluentStore.ViewModels
                 }
             }
             Products = products;
+        }
+
+        public void ViewProduct()
+        {
+            NavService.Navigate("ProductDetailsView", SelectedProductDetails);
         }
     }
 }

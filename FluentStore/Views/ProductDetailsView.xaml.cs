@@ -32,35 +32,20 @@ namespace FluentStore.Views
             if (e.Parameter is ProductDetails details)
             {
                 ViewModel.Product = details;
+            }
+            else if (e.Parameter is ViewModels.ProductDetailsViewModel vm)
+            {
+                ViewModel = vm;
+            }
 
+            if (ViewModel?.Product != null)
+            {
                 string packageFamily = ViewModel.Product.PackageFamilyNames[0];
                 if (await PackageHelper.IsAppInstalledAsync(packageFamily))
                 {
                     UpdateInstallButtonToLaunch();
                 }
             }
-        }
-
-        private void BackButton_Click(object sender, RoutedEventArgs e)
-        {
-            OnBackRequested();
-        }
-
-        // Handles system-level BackRequested events and page-level back button Click events
-        private bool OnBackRequested()
-        {
-            if (this.Frame.CanGoBack)
-            {
-                this.Frame.GoBack();
-                return true;
-            }
-            return false;
-        }
-
-        private void BackInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
-        {
-            OnBackRequested();
-            args.Handled = true;
         }
 
         private async void InstallButton_Click(SplitButton sender, SplitButtonClickEventArgs e)

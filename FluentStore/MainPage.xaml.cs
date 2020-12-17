@@ -46,6 +46,33 @@ namespace FluentStore
             MainNav.SelectedItem = MainNav.MenuItems[0];
         }
 
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            OnBackRequested();
+        }
+
+        // Handles system-level BackRequested events and page-level back button Click events
+        private bool OnBackRequested()
+        {
+            if (MainFrame.CanGoBack)
+            {
+                MainFrame.GoBack();
+                return true;
+            }
+            return false;
+        }
+
+        private void BackInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+        {
+            OnBackRequested();
+            args.Handled = true;
+        }
+
+        private void MainNav_BackRequested(Microsoft.UI.Xaml.Controls.NavigationView sender, Microsoft.UI.Xaml.Controls.NavigationViewBackRequestedEventArgs args)
+        {
+            OnBackRequested();
+        }
+
         private async void controlsSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             if (args.CheckCurrent() && args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
@@ -115,5 +142,5 @@ namespace FluentStore
             if (pageInfo != null && pageInfo.PageType.BaseType == typeof(Page))
                 NavService.Navigate(pageInfo.PageType);
         }
-	}
+    }
 }
