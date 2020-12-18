@@ -4,6 +4,7 @@ using StoreLib.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -53,7 +54,6 @@ namespace FluentStore.Helpers
                     switch (await Launcher.QueryUriSupportAsync(launchUri, LaunchQuerySupportType.Uri))
                     {
                         case LaunchQuerySupportStatus.Available:
-                            // TODO: Somehow this is trying to install a .NET Framework installer. :/
                             isSuccess = await Launcher.LaunchUriAsync(launchUri);
                             if (!isSuccess)
                                 finalNotif = GenerateInstallFailureToast(package, product, new Exception("Failed to launch App Installer."));
@@ -92,14 +92,13 @@ namespace FluentStore.Helpers
                     else
                         finalNotif = GenerateInstallFailureToast(package, product, result.ExtendedErrorCode);
                     isSuccess = result.IsRegistered;
+                    await installer.DeleteAsync();
                 }
 
                 // Hide progress notification
                 ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
                 // Show the final notification
                 ToastNotificationManager.GetDefault().CreateToastNotifier().Show(finalNotif);
-
-                await installer.DeleteAsync();
 
                 return true;
             }
@@ -108,6 +107,42 @@ namespace FluentStore.Helpers
                 ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateInstallFailureToast(package, product, ex));
                 return false;
             }
+        }
+
+        public static async Task<bool> InstallPackage(ProductDetails product, bool? useAppInstaller = null,
+            Action<ProductDetails> gettingPackagesCallback = null, Action<ProductDetails> noPackagesCallback = null,
+            Action<ProductDetails> packagesLoadedCallback = null, Action<ProductDetails, PackageInstance> packageInstalledCallback = null)
+        {
+            var culture = CultureInfo.CurrentUICulture;
+
+            gettingPackagesCallback?.Invoke(product);
+
+            var dcathandler = new StoreLib.Services.DisplayCatalogHandler(DCatEndpoint.Production, new StoreLib.Services.Locale(culture, true));
+            await dcathandler.QueryDCATAsync(product.ProductId);
+            var packs = await dcathandler.GetMainPackagesForProductAsync();
+            string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;
+
+            packagesLoadedCallback?.Invoke(product);
+
+            if (packs != null)
+            {
+                var package = GetLatestDesktopPackage(packs.ToList(), packageFamilyName, product);
+                if (package == null)
+                {
+                    noPackagesCallback?.Invoke(product);
+                    return false;
+                }
+                else
+                {
+                    if (await InstallPackage(package, product, useAppInstaller))
+                    {
+                        packageInstalledCallback?.Invoke(product, package);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         public static async Task<Tuple<StorageFile, ToastNotification>> DownloadPackage(PackageInstance package, ProductDetails product, bool hideProgressToastWhenDone = true, string filepath = null)
@@ -175,10 +210,18 @@ namespace FluentStore.Helpers
                                 // Package is a bundle
                                 extension += "bundle";
                             }
+
+                            if (extension == string.Empty)
+                            {
+                                // We're not sure exactly what kind of package it is, but it's definitely
+                                // a package archive. Even if it's not actually an appxbundle, it will
+                                // likely still work.
+                                extension = ".appxbundle";
+                            }
                         }
                         break;
 
-                    // EMSIX, MAAPX, EMSIXBUNDLE, EAPPXBUNDLE
+                    // EMSIX, EAAPX, EMSIXBUNDLE, EAPPXBUNDLE
                     /// An encrypted installer [bundle]?
                     case 0x45584248:
                         // This means the downloaded file wasn't a zip archive.
@@ -197,6 +240,44 @@ namespace FluentStore.Helpers
                 await destinationFile.RenameAsync(destinationFile.Name + extension, NameCollisionOption.ReplaceExisting);
 
             return (destinationFile, progressToast).ToTuple();
+        }
+
+        public static async Task<Tuple<StorageFile, ToastNotification>> DownloadPackage(ProductDetails product,
+            bool hideProgressToastWhenDone = true, string filepath = null,
+            Action<ProductDetails> gettingPackagesCallback = null, Action<ProductDetails> noPackagesCallback = null,
+            Action<ProductDetails> packagesLoadedCallback = null, Action<ProductDetails, PackageInstance, StorageFile, ToastNotification> packageDownloadedCallback = null)
+        {
+            var culture = CultureInfo.CurrentUICulture;
+
+            gettingPackagesCallback?.Invoke(product);
+
+            var dcathandler = new StoreLib.Services.DisplayCatalogHandler(DCatEndpoint.Production, new StoreLib.Services.Locale(culture, true));
+            await dcathandler.QueryDCATAsync(product.ProductId);
+            var packs = await dcathandler.GetMainPackagesForProductAsync();
+            string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;
+
+            packagesLoadedCallback?.Invoke(product);
+
+            if (packs != null)
+            {
+                var package = GetLatestDesktopPackage(packs.ToList(), packageFamilyName, product);
+                if (package == null)
+                {
+                    noPackagesCallback?.Invoke(product);
+                    return null;
+                }
+                else
+                {
+                    var result = await DownloadPackage(package, product, hideProgressToastWhenDone, filepath);
+                    if (result != null && result.Item1 != null)
+                    {
+                        packageDownloadedCallback?.Invoke(product, package, result.Item1, result.Item2);
+                        return result;
+                    }
+                }
+            }
+
+            return null;
         }
 
         public static PackageInstance GetLatestDesktopPackage(List<PackageInstance> packages, string family, ProductDetails product)
@@ -358,7 +439,7 @@ namespace FluentStore.Helpers
         {
             var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
                 .AddToastActivationInfo($"action=viewEvent&eventId={package.PackageMoniker}", ToastActivationType.Foreground)
-                .AddText(product.Title)
+                .AddText(product.ShortTitle)
                 .AddText(product.Title + " just got installed.")
                 .AddAppLogoOverride(product.Images.FindLast(i => i.ImageType == MicrosoftStore.Enums.ImageType.Logo).Uri, addImageQuery: false)
                 .Content;

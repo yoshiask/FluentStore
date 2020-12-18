@@ -51,26 +51,18 @@ namespace FluentStore.Views
         private async void InstallButton_Click(SplitButton sender, SplitButtonClickEventArgs e)
         {
             InstallButton.IsEnabled = false;
-            var culture = CultureInfo.CurrentUICulture;
-            string productId = ViewModel.Product.ProductId;
 
-            var dialog = new ProgressDialog()
+            var gettingPackagesDialog = new ProgressDialog()
             {
                 Title = ViewModel.Product.Title,
                 Body = "Fetching packages..."
             };
-            dialog.ShowAsync();
-
-            DisplayCatalogHandler dcathandler = new DisplayCatalogHandler(DCatEndpoint.Production, new Locale(culture, true));
-            await dcathandler.QueryDCATAsync(productId);
-            var packs = await dcathandler.GetMainPackagesForProductAsync();
-            string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;
-
-            dialog.Hide();
-            if (packs != null)// && packs.Count > 0)
-            {
-                var package = PackageHelper.GetLatestDesktopPackage(packs.ToList(), packageFamilyName, ViewModel.Product);
-                if (package == null)
+            await PackageHelper.InstallPackage(ViewModel.Product, false,
+                gettingPackagesCallback: product =>
+                {
+                    gettingPackagesDialog.ShowAsync();
+                },
+                noPackagesCallback: async product =>
                 {
                     var noPackagesDialog = new ContentDialog()
                     {
@@ -79,16 +71,15 @@ namespace FluentStore.Views
                         PrimaryButtonText = "Ok"
                     };
                     await noPackagesDialog.ShowAsync();
-                    return;
-                }
-                else
+                },
+                packagesLoadedCallback: product =>
                 {
-                    if (await PackageHelper.InstallPackage(package, ViewModel.Product))
-                    {
-                        UpdateInstallButtonToLaunch();
-                    }
-                }
-            }
+                    gettingPackagesDialog.Hide();
+                },
+                packageInstalledCallback: (product, package) =>
+                {
+                    UpdateInstallButtonToLaunch();
+                });
 
             InstallButton.IsEnabled = true;
         }
@@ -126,43 +117,33 @@ namespace FluentStore.Views
         private async void Download_Click(object sender, RoutedEventArgs e)
         {
             InstallButton.IsEnabled = false;
-            var culture = CultureInfo.CurrentUICulture;
-            string productId = ViewModel.Product.ProductId;
 
-            var dialog = new ProgressDialog()
+            var gettingPackagesDialog = new ProgressDialog()
             {
                 Title = ViewModel.Product.Title,
                 Body = "Fetching packages..."
             };
-            dialog.ShowAsync();
-
-            DisplayCatalogHandler dcathandler = new DisplayCatalogHandler(DCatEndpoint.Production, new Locale(culture, true));
-            await dcathandler.QueryDCATAsync(productId);
-            var packs = await dcathandler.GetMainPackagesForProductAsync();
-            string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;
-
-            dialog.Hide();
-            if (packs != null)// && packs.Count > 0)
-            {
-                var package = PackageHelper.GetLatestDesktopPackage(packs.ToList(), packageFamilyName, ViewModel.Product);
-                if (package == null)
+            await PackageHelper.DownloadPackage(ViewModel.Product,
+                gettingPackagesCallback: product =>
+                {                    
+                    gettingPackagesDialog.ShowAsync();
+                },
+                noPackagesCallback: async product =>
                 {
                     var noPackagesDialog = new ContentDialog()
                     {
-                        Title = ViewModel.Product.Title,
+                        Title = product.Title,
                         Content = "No available packages for this product.",
                         PrimaryButtonText = "Ok"
                     };
                     await noPackagesDialog.ShowAsync();
-                    return;
-                }
-                else
+                },
+                packagesLoadedCallback: product =>
                 {
-                    var file = (await PackageHelper.DownloadPackage(package, ViewModel.Product)).Item1;
-
-                    var toast = PackageHelper.GenerateDownloadSuccessToast(package, ViewModel.Product, file);
-                    Windows.UI.Notifications.ToastNotificationManager.GetDefault().CreateToastNotifier().Show(toast);
-
+                    gettingPackagesDialog.Hide();
+                },
+                packageDownloadedCallback: async (product, details, file, toast) =>
+                {
                     var savePicker = new Windows.Storage.Pickers.FileSavePicker();
                     savePicker.SuggestedStartLocation =
                         Windows.Storage.Pickers.PickerLocationId.Downloads;
@@ -177,6 +158,38 @@ namespace FluentStore.Views
                     {
                         await file.MoveAndReplaceAsync(userFile);
                     }
+                });
+
+            InstallButton.IsEnabled = true;
+            return;
+
+            var culture = CultureInfo.CurrentUICulture;
+            string productId = ViewModel.Product.ProductId;
+
+            
+
+            DisplayCatalogHandler dcathandler = new DisplayCatalogHandler(DCatEndpoint.Production, new Locale(culture, true));
+            await dcathandler.QueryDCATAsync(productId);
+            var packs = await dcathandler.GetMainPackagesForProductAsync();
+            string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;
+
+            gettingPackagesDialog.Hide();
+            if (packs != null)// && packs.Count > 0)
+            {
+                var package = PackageHelper.GetLatestDesktopPackage(packs.ToList(), packageFamilyName, ViewModel.Product);
+                if (package == null)
+                {
+                    
+                    return;
+                }
+                else
+                {
+                    var file = (await PackageHelper.DownloadPackage(package, ViewModel.Product)).Item1;
+
+                    var toast = PackageHelper.GenerateDownloadSuccessToast(package, ViewModel.Product, file);
+                    Windows.UI.Notifications.ToastNotificationManager.GetDefault().CreateToastNotifier().Show(toast);
+
+                    
                 }
             }
 
@@ -186,26 +199,18 @@ namespace FluentStore.Views
         private async void InstallUsingAppInstaller_Click(object sender, RoutedEventArgs e)
         {
             InstallButton.IsEnabled = false;
-            var culture = CultureInfo.CurrentUICulture;
-            string productId = ViewModel.Product.ProductId;
 
-            var dialog = new ProgressDialog()
+            var gettingPackagesDialog = new ProgressDialog()
             {
                 Title = ViewModel.Product.Title,
                 Body = "Fetching packages..."
             };
-            dialog.ShowAsync();
-
-            DisplayCatalogHandler dcathandler = new DisplayCatalogHandler(DCatEndpoint.Production, new Locale(culture, true));
-            await dcathandler.QueryDCATAsync(productId);
-            var packs = await dcathandler.GetMainPackagesForProductAsync();
-            string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;
-
-            dialog.Hide();
-            if (packs != null)// && packs.Count > 0)
-            {
-                var package = PackageHelper.GetLatestDesktopPackage(packs.ToList(), packageFamilyName, ViewModel.Product);
-                if (package == null)
+            await PackageHelper.InstallPackage(ViewModel.Product, true,
+                gettingPackagesCallback: product =>
+                {
+                    gettingPackagesDialog.ShowAsync();
+                },
+                noPackagesCallback: async product =>
                 {
                     var noPackagesDialog = new ContentDialog()
                     {
@@ -214,13 +219,15 @@ namespace FluentStore.Views
                         PrimaryButtonText = "Ok"
                     };
                     await noPackagesDialog.ShowAsync();
-                    return;
-                }
-                else
+                },
+                packagesLoadedCallback: product =>
                 {
-                    await PackageHelper.InstallPackage(package, ViewModel.Product, true);
-                }
-            }
+                    gettingPackagesDialog.Hide();
+                },
+                packageInstalledCallback: (product, package) =>
+                {
+                    UpdateInstallButtonToLaunch();
+                });
 
             InstallButton.IsEnabled = true;
         }

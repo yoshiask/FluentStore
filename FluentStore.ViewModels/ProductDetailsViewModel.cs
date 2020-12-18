@@ -38,6 +38,27 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _ViewProductCommand, value);
         }
 
+        private IAsyncRelayCommand<object> _DownloadCommand;
+        public IAsyncRelayCommand<object> DownloadCommand
+        {
+            get => _DownloadCommand;
+            set => SetProperty(ref _DownloadCommand, value);
+        }
+
+        private IAsyncRelayCommand<object> _InstallCommand;
+        public IAsyncRelayCommand<object> InstallCommand
+        {
+            get => _InstallCommand;
+            set => SetProperty(ref _InstallCommand, value);
+        }
+
+        private IAsyncRelayCommand<object> _SaveToCollectionCommand;
+        public IAsyncRelayCommand<object> SaveToCollectionCommand
+        {
+            get => _SaveToCollectionCommand;
+            set => SetProperty(ref _SaveToCollectionCommand, value);
+        }
+
         private ImageItem _AppIcon;
         public ImageItem AppIcon
         {
