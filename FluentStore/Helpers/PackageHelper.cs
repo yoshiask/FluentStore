@@ -110,13 +110,12 @@ namespace FluentStore.Helpers
             }
         }
 
-        public static async Task<Tuple<StorageFile, ToastNotification>> DownloadPackage(PackageInstance package, ProductDetails product, bool hideProgressToastWhenDone = true)
+        public static async Task<Tuple<StorageFile, ToastNotification>> DownloadPackage(PackageInstance package, ProductDetails product, bool hideProgressToastWhenDone = true, string filepath = null)
         {
             // Download the file to the app's temp directory
-            //var client = new System.Net.WebClient();
-            string filepath = Path.Combine(ApplicationData.Current.TemporaryFolder.Path, package.PackageMoniker);
+            if (filepath == null)
+                filepath = Path.Combine(ApplicationData.Current.TemporaryFolder.Path, package.PackageMoniker);
             Debug.WriteLine(filepath);
-            //client.DownloadFile(package.Uri, filepath);
 
             StorageFile destinationFile = await ApplicationData.Current.TemporaryFolder.CreateFileAsync(
                 package.PackageMoniker, CreationCollisionOption.ReplaceExisting);
@@ -143,32 +142,58 @@ namespace FluentStore.Helpers
 
             string extension = "";
             string contentTypeFilepath = filepath + "_[Content_Types].xml";
-            using (var archive = ZipFile.OpenRead(filepath))
+
+            using (var stream = await destinationFile.OpenStreamForReadAsync())
             {
-                var entry = archive.GetEntry("[Content_Types].xml");
-                entry.ExtractToFile(contentTypeFilepath, true);
-                var ctypesXml = XDocument.Load(contentTypeFilepath);
-                var defaults = ctypesXml.Root.Elements().Where(e => e.Name.LocalName == "Default");
-                if (defaults.Any(d => d.Attribute("Extension").Value == "msix"))
+                var bytes = new byte[4];
+                stream.Read(bytes, 0, 4);
+                uint magicNumber = (uint)((bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3]);
+
+                switch (magicNumber)
                 {
-                    // Package contains one or more MSIX packages
-                    extension += ".msix";
-                }
-                else if (defaults.Any(d => d.Attribute("Extension").Value == "appx"))
-                {
-                    // Package contains one or more MSIX packages
-                    extension += ".appx";
-                }
-                if (defaults.Any(defaults => defaults.Attribute("ContentType").Value == "application/vnd.ms-appx.bundlemanifest+xml"))
-                {
-                    // Package is a bundle
-                    extension += "bundle";
+                    // ZIP
+                    /// Typical [not empty or spanned] ZIP archive
+                    case 0x504B0304:
+                        using (var archive = ZipFile.OpenRead(filepath))
+                        {
+                            var entry = archive.GetEntry("[Content_Types].xml");
+                            entry.ExtractToFile(contentTypeFilepath, true);
+                            var ctypesXml = XDocument.Load(contentTypeFilepath);
+                            var defaults = ctypesXml.Root.Elements().Where(e => e.Name.LocalName == "Default");
+                            if (defaults.Any(d => d.Attribute("Extension").Value == "msix"))
+                            {
+                                // Package contains one or more MSIX packages
+                                extension += ".msix";
+                            }
+                            else if (defaults.Any(d => d.Attribute("Extension").Value == "appx"))
+                            {
+                                // Package contains one or more MSIX packages
+                                extension += ".appx";
+                            }
+                            if (defaults.Any(defaults => defaults.Attribute("ContentType").Value == "application/vnd.ms-appx.bundlemanifest+xml"))
+                            {
+                                // Package is a bundle
+                                extension += "bundle";
+                            }
+                        }
+                        break;
+
+                    // EMSIX, MAAPX, EMSIXBUNDLE, EAPPXBUNDLE
+                    /// An encrypted installer [bundle]?
+                    case 0x45584248:
+                        // This means the downloaded file wasn't a zip archive.
+                        // Some inspection of a hex dump of the file leads me to believe that this means
+                        // the installer is encrypted. There's probably nothing that can be done about this,
+                        // but since it's a known case, let's leave this here.
+                        extension = ".eappxbundle";
+                        break;
                 }
             }
+
             if (File.Exists(contentTypeFilepath))
                 File.Delete(contentTypeFilepath);
 
-            if (extension != "")
+            if (extension != string.Empty)
                 await destinationFile.RenameAsync(destinationFile.Name + extension, NameCollisionOption.ReplaceExisting);
 
             return (destinationFile, progressToast).ToTuple();

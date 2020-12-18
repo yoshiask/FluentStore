@@ -14,7 +14,6 @@ namespace MicrosoftStore
         [Get("/pages/pdp")]
         Task<List<ResponseItem>> GetPage(string productId, string market, string locale, string appversion);
 
-
         /// <summary>
         /// Gets the details for the product with the given product ID
         /// </summary>

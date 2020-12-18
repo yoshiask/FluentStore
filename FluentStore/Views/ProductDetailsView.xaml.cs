@@ -138,7 +138,7 @@ namespace FluentStore.Views
 
             DisplayCatalogHandler dcathandler = new DisplayCatalogHandler(DCatEndpoint.Production, new Locale(culture, true));
             await dcathandler.QueryDCATAsync(productId);
-            var packs = await dcathandler.GetPackagesForProductAsync();
+            var packs = await dcathandler.GetMainPackagesForProductAsync();
             string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;
 
             dialog.Hide();
@@ -162,6 +162,21 @@ namespace FluentStore.Views
 
                     var toast = PackageHelper.GenerateDownloadSuccessToast(package, ViewModel.Product, file);
                     Windows.UI.Notifications.ToastNotificationManager.GetDefault().CreateToastNotifier().Show(toast);
+
+                    var savePicker = new Windows.Storage.Pickers.FileSavePicker();
+                    savePicker.SuggestedStartLocation =
+                        Windows.Storage.Pickers.PickerLocationId.Downloads;
+                    if (file.FileType.EndsWith("bundle"))
+                        savePicker.FileTypeChoices.Add("Windows App Bundle", new string[] { file.FileType });
+                    else
+                        savePicker.FileTypeChoices.Add("Windows App Package", new string[] { file.FileType });
+                    savePicker.SuggestedFileName = file.DisplayName;
+                    savePicker.SuggestedSaveFile = file;
+                    var userFile = await savePicker.PickSaveFileAsync();
+                    if (userFile != null)
+                    {
+                        await file.MoveAndReplaceAsync(userFile);
+                    }
                 }
             }
 
@@ -183,7 +198,7 @@ namespace FluentStore.Views
 
             DisplayCatalogHandler dcathandler = new DisplayCatalogHandler(DCatEndpoint.Production, new Locale(culture, true));
             await dcathandler.QueryDCATAsync(productId);
-            var packs = await dcathandler.GetPackagesForProductAsync();
+            var packs = await dcathandler.GetMainPackagesForProductAsync();
             string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;
 
             dialog.Hide();
