@@ -141,13 +141,21 @@ namespace FluentStore.ViewModels
 
         public async Task<ProductDetailsViewModel> GetProductDetailsAsync(ProductDetails productDetails, CultureInfo culture, RegionInfo region)
         {
-            var item = await StorefrontApi.GetProduct(productDetails.ProductId, region.TwoLetterISORegionName, culture.Name);
-            var candidate = item.Convert<ProductDetails>().Payload;
-            if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
+            try
             {
-                return new ProductDetailsViewModel(candidate);
+                var item = await StorefrontApi.GetProduct(productDetails.ProductId, "CA", "en-CA");
+                var candidate = item.Convert<ProductDetails>().Payload;
+                if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
+                {
+                    return new ProductDetailsViewModel(candidate);
+                }
+                else return null;
             }
-            else return null;
+            catch (System.Exception ex)
+            {
+                // FIXME: Resolve JSON parsing issue on dates above
+                return null;
+            }
         }
 
         public void ViewProduct()
