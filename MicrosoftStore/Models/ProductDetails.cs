@@ -35,7 +35,7 @@ namespace MicrosoftStore.Models
         public string DeviceFamilyDisallowedReason { get; set; }
         public string BuiltFor { get; set; }
         public List<VideoItem> Trailers { get; set; }
-        public DateTimeOffset RevisionId { get; set; }
+        public string RevisionId { get; set; }
         public string PdpBackgroundColor { get; set; }
         public bool ContainsDownloadPackage { get; set; }
         public SystemRequirements SystemRequirements { get; set; }
