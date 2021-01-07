@@ -153,7 +153,8 @@ namespace FluentStore.ViewModels
             }
             catch (System.Exception ex)
             {
-                // FIXME: Resolve JSON parsing issue on dates above
+                // MP! note: Report likely JSON parsing issue so we can resolve type mapping mistakes.  Fail silentely on release build.
+                cLog.Out(ex.Message);
                 return null;
             }
         }
