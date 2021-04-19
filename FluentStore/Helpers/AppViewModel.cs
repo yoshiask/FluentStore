@@ -33,10 +33,14 @@ namespace FluentStore.ViewModels
 
         public async Task LoadIconSourceAsync()
         {
-            var streamData = await Entry.DisplayInfo.GetLogo(new Windows.Foundation.Size(256, 256)).OpenReadAsync();
-            var iconSource = new BitmapImage();
-            iconSource.SetSource(streamData);
-            IconSource = iconSource;
+            try
+            {
+                var streamData = await Entry.DisplayInfo.GetLogo(new Windows.Foundation.Size(256, 256)).OpenReadAsync();
+                var iconSource = new BitmapImage();
+                iconSource.SetSource(streamData);
+                IconSource = iconSource;
+            }
+            catch { }
         }
 
         public AppViewModel(AppListEntry entry, string packageFamily)
