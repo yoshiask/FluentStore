@@ -250,9 +250,14 @@ namespace FluentStore.Views
             }
             else
             {
-                double offset = InfoCard.ActualHeight * 1.5
-                    + InfoCard.Margin.Top + InfoCard.Margin.Bottom;
-                HeroImageSpacer.Height = Math.Max(HeroImage.ActualHeight - offset, 0);
+                // Height of the card including padding and spacing
+                double cardHeight = InfoCard.ActualHeight + InfoCard.Margin.Top + InfoCard.Margin.Bottom
+                    + ((StackPanel)ContentScroller.Content).Spacing * 2;
+
+                // Required amount of additional spacing to place the card at the bottom of the hero image,
+                // or at the bottom of the page (whichever places the card higher up)
+                double offset = Math.Min(HeroImage.ActualHeight - cardHeight, ActualHeight - cardHeight);
+                HeroImageSpacer.Height = Math.Max(offset, 0);
             }
         }
 
