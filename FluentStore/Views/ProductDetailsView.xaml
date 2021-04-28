@@ -7,13 +7,16 @@
     xmlns:local="using:FluentStore.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:storeModels="using:MicrosoftStore.Models"
+    xmlns:storeEnums="using:MicrosoftStore.Enums"
     xmlns:viewModels="using:FluentStore.ViewModels"
+    xmlns:tkconverters="using:Microsoft.Toolkit.Uwp.UI.Converters"
     mc:Ignorable="d"
     SizeChanged="Page_SizeChanged"
     NavigationCacheMode="Disabled"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
         <viewModels:ProductDetailsViewModel x:Name="ViewModel" x:FieldModifier="public" />
+        <tkconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Page.Resources>
 
     <Grid>
@@ -175,24 +178,32 @@
                                 Padding="20" Spacing="20">
                         <StackPanel Spacing="10">
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Available on" />
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <StackPanel Padding="10" Orientation="Horizontal" Spacing="10">
+                            <StackPanel Padding="0" Spacing="0">
+                                <StackPanel.Resources>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Padding" Value="10"/>
+                                        <Setter Property="Spacing" Value="10"/>
+                                        <Setter Property="Orientation" Value="Horizontal"/>
+                                        <Setter Property="Margin" Value="0,0,10,0"/>
+                                    </Style>
+                                </StackPanel.Resources>
+                                <StackPanel Visibility="{x:Bind ShowPlatform(storeEnums:PlatWindows.Desktop)}">
                                     <FontIcon Glyph="&#xE977;" />
                                     <TextBlock Text="PC" />
                                 </StackPanel>
-                                <StackPanel Padding="10" Orientation="Horizontal" Spacing="10">
+                                <StackPanel Visibility="{x:Bind ShowPlatform(storeEnums:PlatWindows.Xbox)}">
                                     <FontIcon Glyph="&#xE990;" />
                                     <TextBlock Text="Xbox One" />
                                 </StackPanel>
-                                <StackPanel Padding="10" Orientation="Horizontal" Spacing="10">
+                                <StackPanel Visibility="{x:Bind ShowPlatform(storeEnums:PlatWindows.Holographic)}">
                                     <FontIcon FontFamily="Hololens MDL2 Assets" Glyph="&#xF132;" />
                                     <TextBlock Text="Hololens" />
                                 </StackPanel>
-                                <StackPanel Padding="10" Orientation="Horizontal" Spacing="10">
+                                <StackPanel Visibility="{x:Bind ShowPlatform(storeEnums:PlatWindows.Mobile)}">
                                     <FontIcon Glyph="&#xE1C9;" />
                                     <TextBlock Text="Mobile" />
                                 </StackPanel>
-                                <StackPanel Padding="10" Orientation="Horizontal" Spacing="10">
+                                <StackPanel Visibility="{x:Bind ShowPlatform(storeEnums:PlatWindows.Team)}">
                                     <FontIcon Glyph="&#xE8AE;" />
                                     <TextBlock Text="Hub" />
                                 </StackPanel>

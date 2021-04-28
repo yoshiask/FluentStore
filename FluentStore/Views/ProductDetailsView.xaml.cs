@@ -25,6 +25,11 @@ namespace FluentStore.Views
             this.InitializeComponent();
         }
 
+        private Visibility ShowPlatform(MicrosoftStore.Enums.PlatWindows plat)
+        {
+            return ViewModel.SupportsPlatform(plat) ? Visibility.Visible : Visibility.Collapsed;
+        }
+
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);

@@ -1,4 +1,5 @@
-﻿using MicrosoftStore.Responses;
+﻿using MicrosoftStore.Enums;
+using MicrosoftStore.Responses;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,7 @@ namespace MicrosoftStore.Models
         public bool ContainsDownloadPackage { get; set; }
         public SystemRequirements SystemRequirements { get; set; }
         public List<string> KeyIds { get; set; }
-        public List<string> AllowedPlatforms { get; set; }
+        public List<PlatWindows> AllowedPlatforms { get; set; }
         public string InstallationTerms { get; set; }
         public bool XboxXpa { get; set; }
         public object DetailsDisplayConfiguration { get; set; }

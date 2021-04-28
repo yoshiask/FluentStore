@@ -97,6 +97,8 @@ namespace FluentStore.ViewModels
 
         public string AverageRatingString => Product.AverageRating.ToString("F1");
 
+        public bool SupportsPlatform(PlatWindows plat) => Product.AllowedPlatforms.Contains(plat);
+
         public void ViewProduct(object obj)
         {
             ProductDetails pd;
