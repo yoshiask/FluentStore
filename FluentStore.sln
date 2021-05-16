@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentStore", "FluentStore\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{A6FEC513-6706-44AF-B200-D40836E32C19}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicrosoftStore", "MicrosoftStore\MicrosoftStore.csproj", "{7FC21573-6B0F-4B5B-BAE5-AF80546C0D79}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicrosoftStore", "MicrosoftStore\MicrosoftStore.csproj", "{7FC21573-6B0F-4B5B-BAE5-AF80546C0D79}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdGuard", "AdGuard\AdGuard.csproj", "{28CD7DC1-DF8D-4A8E-9BBA-55BEB89F7643}"
 EndProject
@@ -15,9 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StoreLib", "StoreLib\StoreL
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentStoreAPI", "FluentStoreAPI\FluentStoreAPI.csproj", "{9918633D-4C2A-463D-A4CA-C8FC095A820C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentStore.ViewModels", "FluentStore.ViewModels\FluentStore.ViewModels.csproj", "{DC3ED84A-983C-42DD-9074-26D7C7E44F90}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentStore.ViewModels", "FluentStore.ViewModels\FluentStore.ViewModels.csproj", "{DC3ED84A-983C-42DD-9074-26D7C7E44F90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentStore.Services", "FluentStore.Services\FluentStore.Services.csproj", "{C913BCF0-3D85-4B80-AF1B-EEC60033AE47}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentStore.Services", "FluentStore.Services\FluentStore.Services.csproj", "{C913BCF0-3D85-4B80-AF1B-EEC60033AE47}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,8 +67,8 @@ Global
 		{7FC21573-6B0F-4B5B-BAE5-AF80546C0D79}.Debug|ARM.Build.0 = Debug|ARM
 		{7FC21573-6B0F-4B5B-BAE5-AF80546C0D79}.Debug|ARM64.ActiveCfg = Debug|ARM64
 		{7FC21573-6B0F-4B5B-BAE5-AF80546C0D79}.Debug|ARM64.Build.0 = Debug|ARM64
-		{7FC21573-6B0F-4B5B-BAE5-AF80546C0D79}.Debug|x64.ActiveCfg = Debug|x64
-		{7FC21573-6B0F-4B5B-BAE5-AF80546C0D79}.Debug|x64.Build.0 = Debug|x64
+		{7FC21573-6B0F-4B5B-BAE5-AF80546C0D79}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7FC21573-6B0F-4B5B-BAE5-AF80546C0D79}.Debug|x64.Build.0 = Debug|Any CPU
 		{7FC21573-6B0F-4B5B-BAE5-AF80546C0D79}.Debug|x86.ActiveCfg = Debug|x86
 		{7FC21573-6B0F-4B5B-BAE5-AF80546C0D79}.Debug|x86.Build.0 = Debug|x86
 		{7FC21573-6B0F-4B5B-BAE5-AF80546C0D79}.Release|Any CPU.ActiveCfg = Release|Any CPU

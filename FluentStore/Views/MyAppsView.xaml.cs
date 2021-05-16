@@ -37,12 +37,13 @@ namespace FluentStore.Views
                     {
                         await app.LoadIconSourceAsync();
 
-                        appsList.Add(app);
+                        ViewModel.Apps.Add(app);
+                        //appsList.Add(app);
                     });
                 }
             }
             ViewModel.IsLoadingMyApps = false;
-            ViewModel.Apps = appsList;
+            //ViewModel.Apps = appsList;
         }
     }
 }

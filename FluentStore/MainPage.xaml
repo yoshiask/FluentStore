@@ -100,7 +100,7 @@
             <VisualStateGroup>
                 <VisualState>
                     <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="{x:Bind MainNav.CompactModeThresholdWidth}" />
+                        <AdaptiveTrigger MinWindowWidth="{StaticResource CompactModeMinWidth}" />
                     </VisualState.StateTriggers>
 
                     <VisualState.Setters>

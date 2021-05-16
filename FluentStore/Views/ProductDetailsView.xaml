@@ -9,6 +9,7 @@
     xmlns:storeModels="using:MicrosoftStore.Models"
     xmlns:storeEnums="using:MicrosoftStore.Enums"
     xmlns:viewModels="using:FluentStore.ViewModels"
+    xmlns:converters="using:FluentStore.Converters"
     xmlns:tkconverters="using:Microsoft.Toolkit.Uwp.UI.Converters"
     mc:Ignorable="d"
     SizeChanged="Page_SizeChanged"
@@ -17,6 +18,7 @@
     <Page.Resources>
         <viewModels:ProductDetailsViewModel x:Name="ViewModel" x:FieldModifier="public" />
         <tkconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <converters:PlatWindowsEnumToVisibility x:Key="PlatWindowsEnumToVisibility"/>
     </Page.Resources>
 
     <Grid>
@@ -187,23 +189,23 @@
                                         <Setter Property="Margin" Value="0,0,10,0"/>
                                     </Style>
                                 </StackPanel.Resources>
-                                <StackPanel Visibility="{x:Bind ShowPlatform(storeEnums:PlatWindows.Desktop)}">
+                                <StackPanel Visibility="{x:Bind ViewModel, ConverterParameter=Desktop, Converter={StaticResource PlatWindowsEnumToVisibility}}">
                                     <FontIcon Glyph="&#xE977;" />
                                     <TextBlock Text="PC" />
                                 </StackPanel>
-                                <StackPanel Visibility="{x:Bind ShowPlatform(storeEnums:PlatWindows.Xbox)}">
+                                <StackPanel Visibility="{x:Bind ViewModel, ConverterParameter=Xbox, Converter={StaticResource PlatWindowsEnumToVisibility}}">
                                     <FontIcon Glyph="&#xE990;" />
                                     <TextBlock Text="Xbox One" />
                                 </StackPanel>
-                                <StackPanel Visibility="{x:Bind ShowPlatform(storeEnums:PlatWindows.Holographic)}">
+                                <StackPanel Visibility="{x:Bind ViewModel, ConverterParameter=Holographic, Converter={StaticResource PlatWindowsEnumToVisibility}}">
                                     <FontIcon FontFamily="Hololens MDL2 Assets" Glyph="&#xF132;" />
                                     <TextBlock Text="Hololens" />
                                 </StackPanel>
-                                <StackPanel Visibility="{x:Bind ShowPlatform(storeEnums:PlatWindows.Mobile)}">
+                                <StackPanel Visibility="{x:Bind ViewModel, ConverterParameter=Mobile, Converter={StaticResource PlatWindowsEnumToVisibility}}">
                                     <FontIcon Glyph="&#xE1C9;" />
                                     <TextBlock Text="Mobile" />
                                 </StackPanel>
-                                <StackPanel Visibility="{x:Bind ShowPlatform(storeEnums:PlatWindows.Team)}">
+                                <StackPanel Visibility="{x:Bind ViewModel, ConverterParameter=Team, Converter={StaticResource PlatWindowsEnumToVisibility}}">
                                     <FontIcon Glyph="&#xE8AE;" />
                                     <TextBlock Text="Hub" />
                                 </StackPanel>
@@ -264,5 +266,15 @@
                 </StackPanel>
             </ScrollViewer>
         </Grid>
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="{StaticResource CompactModeMinWidth}" />
+                    </VisualState.StateTriggers>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
     </Grid>
 </Page>
