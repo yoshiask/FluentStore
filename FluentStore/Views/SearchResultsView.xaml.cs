@@ -24,7 +24,6 @@ namespace FluentStore.Views
         public static readonly DependencyProperty ViewModelProperty =
             DependencyProperty.Register(nameof(ViewModel), typeof(SearchResultsViewModel), typeof(SearchResultsView), new PropertyMetadata(new SearchResultsViewModel()));
 
-
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);

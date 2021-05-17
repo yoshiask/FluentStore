@@ -17,12 +17,14 @@ namespace FluentStore.ViewModels
     public class SearchResultsViewModel : ObservableRecipient
     {
         private bool UpdateResultsList = true;
+        readonly CultureInfo Culture = CultureInfo.CurrentUICulture;
+        readonly RegionInfo Region = new RegionInfo(CultureInfo.CurrentUICulture.LCID);
 
         public SearchResultsViewModel()
         {
             //PopulateProductDetailsCommand = new AsyncRelayCommand(PopulateProductDetailsAsync);
             GetResultsCommand = new AsyncRelayCommand(GetResultsAsync);
-            ViewProductCommand = new RelayCommand(ViewProduct);
+            ViewProductCommand = new AsyncRelayCommand(ViewProduct);
 
             ProductDetails.CollectionChanged += Products_CollectionChanged;
         }
@@ -32,9 +34,6 @@ namespace FluentStore.ViewModels
             if (!UpdateResultsList)
                 return;
 
-            var culture = CultureInfo.CurrentUICulture;
-            var region = new RegionInfo(culture.LCID);
-
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
@@ -42,7 +41,7 @@ namespace FluentStore.ViewModels
                     for (int i = 0; i < newItems.Count(); i++)
                     {
                         var pvm = newItems.ElementAt(i);
-                        var pd = await GetProductDetailsAsync(pvm.Product, culture, region);
+                        var pd = await GetProductDetailsAsync(pvm.Product, Culture, Region);
                         if (pd != null)
                         {
                             ProductDetails[e.NewStartingIndex + i].Product = pd.Product;
@@ -56,12 +55,11 @@ namespace FluentStore.ViewModels
         {
             //PopulateProductDetailsCommand = new AsyncRelayCommand(PopulateProductDetailsAsync);
             GetResultsCommand = new AsyncRelayCommand(GetResultsAsync);
-            ViewProductCommand = new RelayCommand(ViewProduct);
+            ViewProductCommand = new AsyncRelayCommand(ViewProduct);
             Query = query;
         }
 
         private readonly IStorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<IStorefrontApi>();
-        private readonly IMSStoreApi MSStoreApi = Ioc.Default.GetRequiredService<IMSStoreApi>();
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
 
         private string _Query;
@@ -110,8 +108,8 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _GetSuggestionsCommand, value);
         }
 
-        private IRelayCommand _ViewProductCommand;
-        public IRelayCommand ViewProductCommand
+        private IAsyncRelayCommand _ViewProductCommand;
+        public IAsyncRelayCommand ViewProductCommand
         {
             get => _ViewProductCommand;
             set => SetProperty(ref _ViewProductCommand, value);
@@ -119,12 +117,10 @@ namespace FluentStore.ViewModels
 
         public async Task GetResultsAsync()
         {
-            var culture = CultureInfo.CurrentUICulture;
-            var region = new RegionInfo(culture.LCID);
             ProductDetails.Clear();
 
             int pageSize = 25;
-            var firstPage = await StorefrontApi.Search(Query, region.TwoLetterISORegionName, culture.Name, "apps", "all", "Windows.Desktop", pageSize, 0);
+            var firstPage = await StorefrontApi.Search(Query, Region.TwoLetterISORegionName, Culture.Name, "apps", "all", "Windows.Desktop", pageSize, 0);
             foreach (var product in firstPage.Payload.Cards)
             {
                 ProductDetails.Add(new ProductDetailsViewModel(product));
@@ -134,7 +130,7 @@ namespace FluentStore.ViewModels
             for (int i = 1; i < requestCount; i++)
             {
                 var search = await StorefrontApi.Search(
-                    Query, region.TwoLetterISORegionName, culture.Name,
+                    Query, Region.TwoLetterISORegionName, Culture.Name,
                     "apps", "all", "Windows.Desktop",
                     pageSize, i * pageSize);
                 foreach (var product in search.Payload.Cards)
@@ -150,10 +146,9 @@ namespace FluentStore.ViewModels
             {
                 var item = await StorefrontApi.GetProduct(productDetails.ProductId, region.TwoLetterISORegionName, culture.Name);
                 var candidate = item.Convert<ProductDetails>().Payload;
+
                 if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
-                {
                     return new ProductDetailsViewModel(candidate);
-                }
                 else return null;
             }
             catch (System.Exception ex)
@@ -166,10 +161,17 @@ namespace FluentStore.ViewModels
             }
         }
 
-        public void ViewProduct()
+        public async Task ViewProduct()
         {
             GetResultsCommand.Cancel();
             UpdateResultsList = false;
+
+            // Make sure we have the complete ProductDetails
+            if (SelectedProductDetails.Product.PublisherId == null)
+            {
+                _SelectedProductDetails = await GetProductDetailsAsync(SelectedProductDetails.Product, Culture, Region);
+            }
+
             NavService.Navigate("ProductDetailsView", SelectedProductDetails);
         }
     }
