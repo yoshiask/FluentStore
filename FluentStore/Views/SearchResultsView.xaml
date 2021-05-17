@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="using:FluentStore.ViewModels"
     xmlns:converters="using:FluentStore.Converters"
+    xmlns:controls="using:FluentStore.Controls"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
@@ -17,9 +18,9 @@
         <converters:CSSColorToBrushConverter x:Name="CSSColorToBrushConverter"/>
     </Page.Resources>
 
-    <GridView ItemsSource="{x:Bind ViewModel.ProductDetails, Mode=OneWay}"
-              SelectedItem="{x:Bind ViewModel.SelectedProductDetails, Mode=TwoWay}" SelectionMode="Single"
-              HorizontalAlignment="Center" HorizontalContentAlignment="Stretch" Padding="10">
+    <GridView ItemsSource="{x:Bind ViewModel.ProductDetails, Mode=OneWay}" SelectionMode="Single"
+              SelectedItem="{x:Bind ViewModel.SelectedProductDetails, Mode=TwoWay}" Padding="10"
+              controls:ListViewBehaviour.FillBeforeWrap="True" controls:ListViewBehaviour.MinItemWidth="150">
         <GridView.ItemContainerStyle>
             <Style TargetType="GridViewItem">
                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -28,8 +29,7 @@
         </GridView.ItemContainerStyle>
         <GridView.ItemTemplate>
             <DataTemplate x:DataType="viewmodels:ProductDetailsViewModel">
-                <Grid MaxHeight="300" MaxWidth="150" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                      Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
+                <Grid MaxHeight="300" Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="150"/>
                         <RowDefinition Height="150"/>
@@ -65,6 +65,7 @@
                 </Grid>
             </DataTemplate>
         </GridView.ItemTemplate>
+        
         <GridView.Transitions>
             <TransitionCollection>
                 <RepositionThemeTransition/>

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace FluentStore.ViewModels
 {
-    class cLog
+    public class cLog
     {
         /// <summary>
         /// Simple logging to debug console for debug builds.
