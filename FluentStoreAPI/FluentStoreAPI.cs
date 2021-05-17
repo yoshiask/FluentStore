@@ -11,6 +11,7 @@ namespace FluentStoreAPI
     public class FluentStoreAPI
     {
         public const string STORAGE_BASE_URL = "https://firebasestorage.googleapis.com/v0/b/fluent-store.appspot.com/o/";
+        public const string FIRESTORE_BASE_URL = "https://firestore.googleapis.com/v1/projects/fluent-store/databases/(default)/documents/";
         public const string IDENTITY_TK_BASE_URL = "https://identitytoolkit.googleapis.com/v1";
         private const string KEY = "AIzaSyCoINaQk7QdzPryW0oZHppWnboRRPk26fQ";
 
@@ -78,14 +79,14 @@ namespace FluentStoreAPI
         public async Task<UserSignInResponse> SignUpAsync(string email, string password)
         {
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:signUp")
-                .PostJsonAsync(new { email = email, password = password, returnSecureToken = true });
+                .PostJsonAsync(new { email, password, returnSecureToken = true });
             return await ConvertToResult<UserSignInResponse>(response);
         }
 
         public async Task<UserSignInResponse> SignInAsync(string email, string password)
         {
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:signInWithPassword")
-                .PostJsonAsync(new { email = email, password = password, returnSecureToken = true });
+                .PostJsonAsync(new { email, password, returnSecureToken = true });
             return await ConvertToResult<UserSignInResponse>(response);
         }
 
@@ -105,7 +106,7 @@ namespace FluentStoreAPI
                 requestUri = "fluent-store://firebase_auth",
                 postBody = oauthData,
                 returnSecureToken = true,
-                returnIdpCredential = returnIdpCredential
+                returnIdpCredential
             };
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:signInWithIdp")
                 .PostJsonAsync(payload);
@@ -171,7 +172,7 @@ namespace FluentStoreAPI
         public async Task<PasswordResetPayload> ConfirmPasswordResetAsync(string code, string newPassword)
         {
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:resetPassword")
-                .PostJsonAsync(new { oobCode = code, newPassword = newPassword });
+                .PostJsonAsync(new { oobCode = code, newPassword });
             return await ConvertToResult<PasswordResetPayload>(response);
         }
         
@@ -213,9 +214,9 @@ namespace FluentStoreAPI
             var payload = new
             {
                 idToken = Token,
-                displayName = displayName,
-                photoUrl = photoUrl,
-                deleteAttribute = deleteAttribute,
+                displayName,
+                photoUrl,
+                deleteAttribute,
                 returnSecureToken = true
             };
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:update")
@@ -236,8 +237,8 @@ namespace FluentStoreAPI
             var payload = new
             {
                 idToken = Token,
-                email = email,
-                password = password,
+                email,
+                password,
                 returnSecureToken = true
             };
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:update")
@@ -254,7 +255,7 @@ namespace FluentStoreAPI
                 requestUri = "fluent-store://firebase_auth",
                 postBody = oauthData,
                 returnSecureToken = true,
-                returnIdpCredential = returnIdpCredential
+                returnIdpCredential
             };
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:signInWithIdp")
                 .PostJsonAsync(payload);
