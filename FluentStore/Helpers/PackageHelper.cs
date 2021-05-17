@@ -202,7 +202,7 @@ namespace FluentStore.Helpers
                             }
                             else if (defaults.Any(d => d.Attribute("Extension").Value == "appx"))
                             {
-                                // Package contains one or more MSIX packages
+                                // Package contains one or more APPX packages
                                 extension += ".appx";
                             }
                             if (defaults.Any(defaults => defaults.Attribute("ContentType").Value == "application/vnd.ms-appx.bundlemanifest+xml"))

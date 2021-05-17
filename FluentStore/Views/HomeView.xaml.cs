@@ -1,7 +1,4 @@
 ﻿using FluentStore.ViewModels;
-using MicrosoftStore.Models;
-using System.Collections.ObjectModel;
-using System.Globalization;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -16,7 +13,15 @@ namespace FluentStore.Views
     {
         public HomeView()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
+
+        public HomeViewModel ViewModel
+        {
+            get => (HomeViewModel)GetValue(ViewModelProperty);
+            set => SetValue(ViewModelProperty, value);
+        }
+        public static readonly DependencyProperty ViewModelProperty =
+            DependencyProperty.Register(nameof(ViewModel), typeof(HomeViewModel), typeof(HomeView), new PropertyMetadata(new HomeViewModel()));
     }
 }

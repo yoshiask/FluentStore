@@ -20,6 +20,14 @@ namespace FluentStore.Views
             this.InitializeComponent();
         }
 
+        public MyAppsViewModel ViewModel
+        {
+            get => (MyAppsViewModel)GetValue(ViewModelProperty);
+            set => SetValue(ViewModelProperty, value);
+        }
+        public static readonly DependencyProperty ViewModelProperty =
+            DependencyProperty.Register(nameof(ViewModel), typeof(MyAppsViewModel), typeof(MyAppsView), new PropertyMetadata(new MyAppsViewModel()));
+
         private async void Page_Loading(FrameworkElement sender, object args)
         {
             ViewModel.IsLoadingMyApps = true;

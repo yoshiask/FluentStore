@@ -28,7 +28,13 @@ namespace FluentStore.ViewModels
         public ProductDetails Product
         {
             get => product;
-            set => SetProperty(ref product, value);
+            set
+            {
+                SetProperty(ref product, value);
+
+                // Reset cached properties
+                AppIcon = null;
+            }
         }
 
         private IRelayCommand<object> _ViewProductCommand;

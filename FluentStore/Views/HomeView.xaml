@@ -11,10 +11,7 @@
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
-    <Page.Resources>
-        <viewmodels:HomeViewModel x:Name="ViewModel"/>
-    </Page.Resources>
-    
+
     <interactivity:Interaction.Behaviors>
         <core:EventTriggerBehavior EventName="Loading">
             <core:InvokeCommandAction Command="{x:Bind ViewModel.LoadFeaturedCommand}"/>

@@ -10,9 +10,6 @@
     xmlns:viewmodels="using:FluentStore.ViewModels"
     mc:Ignorable="d"
     Loading="Page_Loading">
-    <Page.Resources>
-        <viewmodels:MyAppsViewModel x:Name="ViewModel"/>
-    </Page.Resources>
 
     <Grid>
         <ProgressRing IsActive="{x:Bind ViewModel.IsLoadingMyApps, Mode=OneWay}"/>

@@ -7,7 +7,6 @@
     xmlns:local="using:FluentStore.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:storeModels="using:MicrosoftStore.Models"
-    xmlns:storeEnums="using:MicrosoftStore.Enums"
     xmlns:viewModels="using:FluentStore.ViewModels"
     xmlns:converters="using:FluentStore.Converters"
     xmlns:tkconverters="using:Microsoft.Toolkit.Uwp.UI.Converters"
@@ -16,7 +15,6 @@
     NavigationCacheMode="Disabled"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
-        <viewModels:ProductDetailsViewModel x:Name="ViewModel" x:FieldModifier="public" />
         <tkconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <converters:PlatWindowsEnumToVisibility x:Key="PlatWindowsEnumToVisibility"/>
     </Page.Resources>
@@ -37,48 +35,48 @@
             </Grid.ColumnDefinitions>
 
             <!--<Grid Grid.Column="1" Grid.Row="2" Grid.RowSpan="2" RowSpacing="10" Padding="0,15,15,0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <TextBlock Text="Ratings and Reviews" Style="{ThemeResource NavigationViewItemHeaderTextStyle}"/>
-            <StackPanel Orientation="Horizontal" Spacing="10" Grid.Row="1">
-                <TextBlock Text="{x:Bind ViewModel.GetAverageRatingString()}" FontSize="24" FontWeight="Bold"/>
-                <RatingControl Value="{x:Bind ViewModel.Product.AverageRating}" IsReadOnly="True" VerticalAlignment="Bottom"/>
-            </StackPanel>
-            <Button Style="{ThemeResource AccentButtonStyle}" Padding="10" Grid.Row="1" HorizontalAlignment="Right"
-                    Visibility="Collapsed">
-                <StackPanel Orientation="Horizontal" Spacing="10">
-                    <FontIcon Glyph="&#xE1CE;"/>
-                    <TextBlock Text="Rate this app"/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="Ratings and Reviews" Style="{ThemeResource NavigationViewItemHeaderTextStyle}"/>
+                <StackPanel Orientation="Horizontal" Spacing="10" Grid.Row="1">
+                    <TextBlock Text="{x:Bind ViewModel.GetAverageRatingString()}" FontSize="24" FontWeight="Bold"/>
+                    <RatingControl Value="{x:Bind ViewModel.Product.AverageRating}" IsReadOnly="True" VerticalAlignment="Bottom"/>
                 </StackPanel>
-            </Button>
-            <ScrollViewer Grid.Row="2">
-                <StackPanel Spacing="10">
-                    <Grid Background="{ThemeResource SystemChromeLowColor}"
-                            ColumnSpacing="10" CornerRadius="4" Padding="15">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <PersonPicture MaxWidth="32"/>
-                        <TextBlock Text="Joe Mama" FontWeight="Bold"
-                                    Grid.Column="1" VerticalAlignment="Center"/>
-                        <TextBlock Text="July 17, 2020 2:22 AM" Foreground="{ThemeResource SystemBaseMediumHighColor}"
-                                    HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="1"/>
-                        <RatingControl Value="2.5" IsReadOnly="True" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left"/>
-                        <TextBlock Text="What does it even do?" Margin="0,5,0,0"
-                                    TextWrapping="Wrap" Grid.Row="2" Grid.Column="1" FontSize="16"/>
-                    </Grid>
-                </StackPanel>
-            </ScrollViewer>
-        </Grid>-->
+                <Button Style="{ThemeResource AccentButtonStyle}" Padding="10" Grid.Row="1" HorizontalAlignment="Right"
+                        Visibility="Collapsed">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <FontIcon Glyph="&#xE1CE;"/>
+                        <TextBlock Text="Rate this app"/>
+                    </StackPanel>
+                </Button>
+                <ScrollViewer Grid.Row="2">
+                    <StackPanel Spacing="10">
+                        <Grid Background="{ThemeResource SystemChromeLowColor}"
+                                ColumnSpacing="10" CornerRadius="4" Padding="15">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <PersonPicture MaxWidth="32"/>
+                            <TextBlock Text="Joe Mama" FontWeight="Bold"
+                                        Grid.Column="1" VerticalAlignment="Center"/>
+                            <TextBlock Text="July 17, 2020 2:22 AM" Foreground="{ThemeResource SystemBaseMediumHighColor}"
+                                        HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="1"/>
+                            <RatingControl Value="2.5" IsReadOnly="True" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left"/>
+                            <TextBlock Text="What does it even do?" Margin="0,5,0,0"
+                                        TextWrapping="Wrap" Grid.Row="2" Grid.Column="1" FontSize="16"/>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>-->
 
             <ScrollViewer Grid.Column="0" x:Name="ContentScroller">
                 <StackPanel Spacing="20">
@@ -213,7 +211,7 @@
                         </StackPanel>
                         <StackPanel Spacing="10">
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Screenshots" />
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Enabled" IsHorizontalScrollChainingEnabled="True">
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto">
                                 <ItemsControl ItemsSource="{x:Bind ViewModel.GetScreenshots()}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>

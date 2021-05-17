@@ -1,4 +1,5 @@
 ﻿using FluentStore.Helpers;
+using FluentStore.ViewModels;
 using MicrosoftStore.Models;
 using StoreLib.Models;
 using StoreLib.Services;
@@ -25,10 +26,13 @@ namespace FluentStore.Views
             this.InitializeComponent();
         }
 
-        private Visibility ShowPlatform(MicrosoftStore.Enums.PlatWindows plat)
+        public ProductDetailsViewModel ViewModel
         {
-            return ViewModel.SupportsPlatform(plat) ? Visibility.Visible : Visibility.Collapsed;
+            get => (ProductDetailsViewModel)GetValue(ViewModelProperty);
+            set => SetValue(ViewModelProperty, value);
         }
+        public static readonly DependencyProperty ViewModelProperty =
+            DependencyProperty.Register(nameof(ViewModel), typeof(ProductDetailsViewModel), typeof(ProductDetailsView), new PropertyMetadata(new ProductDetailsViewModel()));
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
