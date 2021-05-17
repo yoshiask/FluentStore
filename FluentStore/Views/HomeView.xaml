@@ -38,7 +38,7 @@
                             <RowDefinition Height="3*"/>
                             <RowDefinition Height="1*"/>
                         </Grid.RowDefinitions>
-                        <controls:ImageEx Source="{x:Bind GetHeroImage()}" Grid.RowSpan="2"/>
+                        <controls:ImageEx Source="{x:Bind HeroImage}" Grid.RowSpan="2"/>
                         <Grid Grid.Row="1" Padding="5" ColumnSpacing="10" Background="{ThemeResource SystemControlBaseHighAcrylicElementBrush}">
                             <Grid.RowDefinitions>
                                 <RowDefinition/>

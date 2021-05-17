@@ -16,6 +16,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
         <tkconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <tkconverters:CollectionVisibilityConverter x:Key="CollectionVisibilityConverter"/>
         <converters:PlatWindowsEnumToVisibility x:Key="PlatWindowsEnumToVisibility"/>
     </Page.Resources>
 
@@ -23,7 +24,7 @@
         <ParallaxView Source="{x:Bind ContentScroller}" VerticalShift="200" VerticalSourceOffsetKind="Absolute">
             <Image x:Name="HeroImage" VerticalAlignment="Top" HorizontalAlignment="Left" Stretch="Uniform">
                 <Image.Source>
-                    <BitmapImage UriSource="{x:Bind ViewModel.GetHeroImage(), TargetNullValue=//:0}" ImageOpened="HeroImage_ImageOpened"/>
+                    <BitmapImage UriSource="{x:Bind ViewModel.HeroImage, TargetNullValue=//:0}" ImageOpened="HeroImage_ImageOpened"/>
                 </Image.Source>
             </Image>
         </ParallaxView>
@@ -209,10 +210,10 @@
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>
-                        <StackPanel Spacing="10">
+                        <StackPanel Spacing="10" Visibility="{x:Bind ViewModel.Screenshots, Converter={StaticResource CollectionVisibilityConverter}}">
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Screenshots" />
                             <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto">
-                                <ItemsControl ItemsSource="{x:Bind ViewModel.GetScreenshots()}">
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.Screenshots}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <StackPanel MaxHeight="150" Orientation="Horizontal" Spacing="10" />

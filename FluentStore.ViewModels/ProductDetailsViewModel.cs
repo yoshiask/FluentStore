@@ -34,6 +34,8 @@ namespace FluentStore.ViewModels
 
                 // Reset cached properties
                 AppIcon = null;
+                HeroImage = null;
+                Screenshots = null;
             }
         }
 
@@ -71,7 +73,7 @@ namespace FluentStore.ViewModels
             get
             {
                 if (_AppIcon == null)
-                    _AppIcon = Product?.Images
+                    AppIcon = Product?.Images
                         .FindAll(i => i.ImageType == ImageType.Logo || i.ImageType == ImageType.Tile)
                         .OrderByDescending(i => i.Height * i.Width).First();
                 return _AppIcon;
@@ -79,26 +81,46 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _AppIcon, value);
         }
 
-        public Uri GetHeroImage()
+        private Uri _HeroImage;
+        public Uri HeroImage
         {
-            string url = "";
-            int width = 0;
-            foreach (ImageItem image in Product?.Images.FindAll(i => i.ImageType == ImageType.Hero))
+            get
             {
-                if (image.Width > width)
-                    url = image.Url;
-            }
-            if (string.IsNullOrWhiteSpace(url))
-            {
-                return new Uri("https://via.placeholder.com/1");
-            }
+                if (_HeroImage == null)
+                {
+                    string url = "";
+                    int width = 0;
+                    foreach (ImageItem image in Product?.Images.FindAll(i => i.ImageType == ImageType.Hero))
+                    {
+                        if (image.Width > width)
+                            url = image.Url;
+                    }
+                    if (string.IsNullOrWhiteSpace(url))
+                    {
+                        HeroImage = new Uri("https://via.placeholder.com/1");
+                    }
+                    else
+                    {
+                        HeroImage = new Uri(url);
+                    }
+                }
 
-            return new Uri(url);
+                return _HeroImage;
+            }
+            set => SetProperty(ref _HeroImage, value);
         }
 
-        public List<ImageItem> GetScreenshots()
+        private List<ImageItem> _Screenshots;
+        public List<ImageItem> Screenshots
         {
-            return Product?.Images.FindAll(i => i.ImageType == ImageType.Screenshot);
+            get
+            {
+                if (_Screenshots == null)
+                    Screenshots = Product?.Images.FindAll(i => i.ImageType == ImageType.Screenshot);
+
+                return _Screenshots;
+            }
+            set => SetProperty(ref _Screenshots, value);
         }
 
         public string AverageRatingString => Product.AverageRating.ToString("F1");

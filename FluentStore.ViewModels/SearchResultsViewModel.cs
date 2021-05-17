@@ -16,6 +16,8 @@ namespace FluentStore.ViewModels
 {
     public class SearchResultsViewModel : ObservableRecipient
     {
+        private bool UpdateResultsList = true;
+
         public SearchResultsViewModel()
         {
             //PopulateProductDetailsCommand = new AsyncRelayCommand(PopulateProductDetailsAsync);
@@ -27,6 +29,9 @@ namespace FluentStore.ViewModels
 
         private async void Products_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
+            if (!UpdateResultsList)
+                return;
+
             var culture = CultureInfo.CurrentUICulture;
             var region = new RegionInfo(culture.LCID);
 
@@ -162,6 +167,7 @@ namespace FluentStore.ViewModels
         public void ViewProduct()
         {
             GetResultsCommand.Cancel();
+            UpdateResultsList = false;
             NavService.Navigate("ProductDetailsView", SelectedProductDetails);
         }
     }
