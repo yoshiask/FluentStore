@@ -5,15 +5,15 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace FluentStore.ViewModels
+namespace FluentStore.Services
 {
-    public class cLog
+    public class LoggerService
     {
         /// <summary>
         /// Simple logging to debug console for debug builds.
         /// </summary>
         [Conditional("DEBUG")]
-        public static void Out(string message, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
+        public void Log(string message, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
         {
             Debug.WriteLine($"{Path.GetFileName(filePath)}_{memberName}() [{lineNumber:D4}] : {message}");
         }

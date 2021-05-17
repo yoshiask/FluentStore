@@ -148,7 +148,7 @@ namespace FluentStore.ViewModels
         {
             try
             {
-                var item = await StorefrontApi.GetProduct(productDetails.ProductId, "CA", "en-CA");
+                var item = await StorefrontApi.GetProduct(productDetails.ProductId, region.TwoLetterISORegionName, culture.Name);
                 var candidate = item.Convert<ProductDetails>().Payload;
                 if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
                 {
@@ -158,8 +158,10 @@ namespace FluentStore.ViewModels
             }
             catch (System.Exception ex)
             {
-                // MP! note: Report likely JSON parsing issue so we can resolve type mapping mistakes.  Fail silentely on release build.
-                cLog.Out(ex.Message);
+                // Report likely JSON parsing issue so we can resolve type mapping mistakes.
+                // Fail silentely on release build.
+                LoggerService LoggerService = Ioc.Default.GetRequiredService<LoggerService>();
+                LoggerService.Log(ex.Message);
                 return null;
             }
         }

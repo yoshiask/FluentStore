@@ -133,6 +133,7 @@ namespace FluentStore
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
             services.AddSingleton(new FluentStoreAPI.FluentStoreAPI());
             services.AddSingleton(typeof(UserService));
+            services.AddSingleton(typeof(LoggerService));
 
             return services.BuildServiceProvider();
         }
