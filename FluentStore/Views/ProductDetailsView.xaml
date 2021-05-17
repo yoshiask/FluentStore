@@ -222,7 +222,9 @@
                                         <DataTemplate x:DataType="storeModels:ImageItem">
                                             <Image>
                                                 <Image.Source>
-                                                    <BitmapImage UriSource="{x:Bind GetSource()}"/>
+                                                    <BitmapImage UriSource="{x:Bind GetSource()}"
+                                                                 DecodePixelHeight="{x:Bind Height}"
+                                                                 DecodePixelWidth="{x:Bind Width}"/>
                                                 </Image.Source>
                                             </Image>
                                         </DataTemplate>
