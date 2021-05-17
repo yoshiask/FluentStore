@@ -41,7 +41,7 @@
                         <controls:ImageEx Source="{x:Bind HeroImage}" Grid.RowSpan="2"/>
                         <Grid Grid.Row="1" Padding="5" ColumnSpacing="10" Background="{ThemeResource SystemControlBaseHighAcrylicElementBrush}">
                             <Grid.RowDefinitions>
-                                <RowDefinition/>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition/>
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
@@ -57,7 +57,8 @@
                                     </Image.Source>
                                 </Image>
                             </Viewbox>
-                            <TextBlock Text="{x:Bind Product.ShortTitle}" FontWeight="Bold" Grid.Column="1" FontSize="20" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{x:Bind Product.ShortTitle}" Grid.Column="1" FontSize="20"
+                                       FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
                             <TextBlock Text="{x:Bind Product.Subtitle}" Grid.Column="1" Grid.Row="1"/>
                             <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="10">
                                 <TextBlock Text="{x:Bind Product.RatingCount}" FontSize="14" VerticalAlignment="Center"/>
