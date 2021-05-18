@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:tkconverters="using:Microsoft.Toolkit.Uwp.UI.Converters"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:viewmodels="using:FluentStore.ViewModels"
@@ -17,7 +18,7 @@
     </Page.Resources>
 
     <winui:NavigationView x:Name="MainNav" PaneDisplayMode="LeftCompact" IsTitleBarAutoPaddingEnabled="False"
-						  SelectionChanged="NavigationView_SelectionChanged" BackRequested="MainNav_BackRequested">
+                          SelectionChanged="NavigationView_SelectionChanged" BackRequested="MainNav_BackRequested">
         <!--<winui:NavigationView.MenuItems>
             <winui:NavigationViewItem Content="Home" Icon="Home"/>
             <winui:NavigationViewItem Content="My Apps" Icon="AllApps"/>
@@ -44,13 +45,12 @@
                 </Button>
 
                 <Button x:Name="UserButton" Visibility="Collapsed" Background="Transparent"
-                        CornerRadius="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
+                        CornerRadius="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                        x:DefaultBindMode="OneWay">
                     <Button.Content>
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Viewbox x:Name="UserProfilePictureBox" MaxHeight="9999">
-                                <winui:PersonPicture x:Name="UserProfilePicture" PreferSmallImage="True"/>
-                            </Viewbox>
-                            <TextBlock x:Name="UserProfileName" Text="Username"
+                            <SymbolIcon Symbol="Contact"/>
+                            <TextBlock x:Name="UserProfileName" Text="{x:Bind UserService.CurrentUser.Email}"
                                        VerticalAlignment="Center" TextLineBounds="Tight"/>
                         </StackPanel>
                     </Button.Content>
@@ -77,10 +77,10 @@
 
         <!--SystemControlChromeMediumLowAcrylicWindowMediumBrush-->
         <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-			<winui:ProgressBar x:Name="LoadingIndicator" IsIndeterminate="True"
-							   Grid.Row="1" Visibility="Collapsed" VerticalAlignment="Top"/>
-			<Frame x:Name="MainFrame"/>
-		</Grid>
+            <winui:ProgressBar x:Name="LoadingIndicator" IsIndeterminate="True"
+                               Grid.Row="1" Visibility="Collapsed" VerticalAlignment="Top"/>
+            <Frame x:Name="MainFrame"/>
+        </Grid>
 
         <winui:NavigationView.AutoSuggestBox>
             <AutoSuggestBox x:Name="controlsSearchBox" VerticalAlignment="Center"

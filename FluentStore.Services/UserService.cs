@@ -63,8 +63,10 @@ namespace FluentStore.Services
 
                 IsLoggedIn = true;
             }
-            catch
+            catch (System.Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+
                 FSApi.Token = null;
                 FSApi.RefreshToken = null;
                 IsLoggedIn = false;

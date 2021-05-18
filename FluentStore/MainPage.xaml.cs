@@ -11,6 +11,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Automation;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
@@ -23,6 +24,7 @@ namespace FluentStore
     public sealed partial class MainPage : Page
     {
         private Services.NavigationService NavService { get; } = Ioc.Default.GetService<Services.INavigationService>() as Services.NavigationService;
+        private Services.UserService UserService { get; } = Ioc.Default.GetService<Services.UserService>();
 
         public MainPage()
         {
@@ -44,6 +46,23 @@ namespace FluentStore
                 AutomationProperties.SetName(item, page.Title);
             }
             MainNav.SelectedItem = MainNav.MenuItems[0];
+
+            Services.UserService.OnLoginStateChanged += UserService_OnLoginStateChanged;
+            UserService.TrySignIn();
+        }
+
+        private void UserService_OnLoginStateChanged(bool isLoggedIn)
+        {
+            if (isLoggedIn)
+            {
+                UserButton.Visibility = Visibility.Visible;
+                SignInButton.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                UserButton.Visibility = Visibility.Collapsed;
+                SignInButton.Visibility = Visibility.Visible;
+            }
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
