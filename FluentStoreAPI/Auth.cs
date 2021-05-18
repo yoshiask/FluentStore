@@ -1,5 +1,4 @@
-﻿using FluentStoreAPI.Models;
-using FluentStoreAPI.Models.Firebase;
+﻿using FluentStoreAPI.Models.Firebase;
 using Flurl;
 using Flurl.Http;
 using System.Collections.Generic;

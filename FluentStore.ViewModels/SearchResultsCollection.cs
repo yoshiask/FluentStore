@@ -19,7 +19,7 @@ namespace FluentStore.ViewModels
 
             for (int i = 1; i <= 200; i++)
             {
-                var p = new ProductDetailsViewModel { Name = "ProductDetailsViewModel " + i };
+                var p = new ProductDetailsViewModel();// { Name = "ProductDetailsViewModel " + i };
                 _people.Add(p);
             }
         }
