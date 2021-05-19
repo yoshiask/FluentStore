@@ -37,6 +37,13 @@ namespace FluentStore.ViewModels.Auth
             set => SetProperty(ref _Password, value);
         }
 
+        private bool _IsSigningIn;
+        public bool IsSigningIn
+        {
+            get => _IsSigningIn;
+            set => SetProperty(ref _IsSigningIn, value);
+        }
+
         private string _FailReason;
         public string FailReason
         {
@@ -62,6 +69,7 @@ namespace FluentStore.ViewModels.Auth
         {
             try
             {
+                IsSigningIn = true;
                 FailReason = null;
                 var resp = await FSApi.SignInAsync(Email, Password);
                 if (await UserService.SignInAsync(resp.IDToken, resp.RefreshToken))
@@ -72,12 +80,17 @@ namespace FluentStore.ViewModels.Auth
                 var errorResp = await ex.GetErrorResponse();
                 FailReason = UserSignInResponse.CommonErrors.GetMessage(errorResp.Message);
             }
+            finally
+            {
+                IsSigningIn = false;
+            }
         }
 
         public async Task SignUpAsync()
         {
             try
             {
+                IsSigningIn = true;
                 FailReason = null;
                 var resp = await FSApi.SignUpAsync(Email, Password);
                 if (await UserService.SignInAsync(resp.IDToken, resp.RefreshToken))
@@ -87,6 +100,10 @@ namespace FluentStore.ViewModels.Auth
             {
                 var errorResp = await ex.GetErrorResponse();
                 FailReason = UserSignInResponse.CommonErrors.GetMessage(errorResp.Message);
+            }
+            finally
+            {
+                IsSigningIn = false;
             }
         }
     }
