@@ -7,13 +7,14 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     mc:Ignorable="d"
-    Title="Working..."
     PrimaryButtonText="Cancel"
     IsPrimaryButtonEnabled="False"
     IsSecondaryButtonEnabled="False"
     PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
-    Background="{ThemeResource SystemControlAcrylicElementBrush}">
+    xmlns:tkconverters="using:Microsoft.Toolkit.Uwp.UI.Converters"
+    Background="{ThemeResource SystemControlAcrylicElementBrush}"
+    x:DefaultBindMode="OneWay">
 
     <ContentDialog.Resources>
         <ResourceDictionary>
@@ -22,18 +23,29 @@
                 <!-- Other merged dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
             <!-- Other app resources here -->
+            <tkconverters:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
         </ResourceDictionary>
     </ContentDialog.Resources>
     
     <ContentDialog.TitleTemplate>
-        <DataTemplate>
-            <TextBlock Text="{x:Bind}" FontWeight="Bold" FontSize="24"/>
+        <DataTemplate x:DataType="x:String">
+            <TextBlock Text="{x:Bind}" FontWeight="Bold" FontSize="24"
+                       d:Text="Title"/>
         </DataTemplate>
     </ContentDialog.TitleTemplate>
 
     <controls:DockPanel>
-        <TextBlock Text="{x:Bind Body}" controls:DockPanel.Dock="Top"/>
-        <winui:ProgressBar IsIndeterminate="True" controls:DockPanel.Dock="Bottom"/>
+        <TextBlock Text="{x:Bind Body}" controls:DockPanel.Dock="Top"
+                   d:Text="Coding..."/>
+        <StackPanel Spacing="4">
+            <TextBlock x:Name="ProgressLabelBlock" HorizontalAlignment="Right"
+                       Visibility="Collapsed" d:Visibility="Visible">
+                <Run Text="{x:Bind Progress}" d:Text="50"/><Run Text="%"/>
+            </TextBlock>
+            <winui:ProgressBar IsIndeterminate="{x:Bind IsIndeterminate}" d:IsIndeterminate="False"
+                               Value="{x:Bind Progress}" d:Value="50"
+                               controls:DockPanel.Dock="Bottom"/>
+        </StackPanel>
     </controls:DockPanel>
     
 </ContentDialog>

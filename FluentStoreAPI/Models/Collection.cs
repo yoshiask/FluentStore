@@ -1,4 +1,5 @@
 ﻿using FluentStoreAPI.Models.Firebase;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,8 +7,11 @@ namespace FluentStoreAPI.Models
 {
     public class Collection
     {
+        public Guid Id { get; set; }
         public bool IsPublic { get; set; }
         public string Name { get; set; }
+        public string Description { get; set; }
+        public string TileGlyph { get; set; }
         public List<string> Items { get; set; }
 
         /// <summary>

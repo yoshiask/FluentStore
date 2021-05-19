@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FluentStore.Helpers;
+using System;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Controls;
 
@@ -32,6 +33,16 @@ namespace FluentStore.Services
             Navigate(type, parameter);
         }
 
+        public void Navigate(object parameter)
+        {
+            if (parameter == null)
+                return;
+            string paramName = parameter.GetType().Name;
+            string vmName = paramName.ReplaceLastOccurrence("Model", "");
+            Type type = Type.GetType("FluentStore.Views." + vmName);
+            Navigate(type, parameter);
+        }
+
 
         public void AppNavigate(Type page)
         {
@@ -52,6 +63,14 @@ namespace FluentStore.Services
         public void AppNavigate(string page, object parameter)
         {
             Type type = Type.GetType("FluentStore.Views." + page);
+            AppNavigate(type, parameter);
+        }
+
+        public void AppNavigate(object parameter)
+        {
+            string paramName = parameter.GetType().Name;
+            string vmName = paramName.ReplaceLastOccurrence("Model", "");
+            Type type = Type.GetType("FluentStore.Views." + vmName);
             AppNavigate(type, parameter);
         }
 

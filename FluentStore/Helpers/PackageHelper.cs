@@ -21,6 +21,16 @@ namespace FluentStore.Helpers
 {
     public static class PackageHelper
     {
+        public static Action<ProductDetails> GettingPackagesCallback { get; set; }
+        public static Action<ProductDetails> NoPackagesCallback { get; set; }
+        public static Action<ProductDetails> PackagesLoadedCallback { get; set; }
+        public static Action<ProductDetails, PackageInstance> PackageDownloadingCallback { get; set; }
+        public static Action<ProductDetails, PackageInstance, ulong, ulong> PackageDownloadProgressCallback { get; set; }
+        public static Action<ProductDetails, PackageInstance, StorageFile> PackageDownloadedCallback { get; set; }
+        public static Action<ProductDetails, PackageInstance> PackageInstallingCallback { get; set; }
+        public static Action<ProductDetails, PackageInstance> PackageInstalledCallback { get; set; }
+
+
         public static readonly string[] INSTALLABLE_EXTS = new string[]
         {
             ".appx", ".appxbundle", ".msix", ".msixbundle"
@@ -46,6 +56,9 @@ namespace FluentStore.Helpers
                         progressToast.Tag
                     );
                 });
+
+                PackageInstallingCallback?.Invoke(product, package);
+                PackageInstallingCallback = null;
 
                 if (Settings.Default.UseAppInstaller || (useAppInstaller.HasValue && useAppInstaller.Value))
                 {
@@ -99,6 +112,9 @@ namespace FluentStore.Helpers
                 ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
                 // Show the final notification
                 ToastNotificationManager.GetDefault().CreateToastNotifier().Show(finalNotif);
+                // Fire the success callback
+                PackageInstalledCallback?.Invoke(product, package);
+                PackageInstalledCallback = null;
 
                 return true;
             }
@@ -109,34 +125,34 @@ namespace FluentStore.Helpers
             }
         }
 
-        public static async Task<bool> InstallPackage(ProductDetails product, bool? useAppInstaller = null,
-            Action<ProductDetails> gettingPackagesCallback = null, Action<ProductDetails> noPackagesCallback = null,
-            Action<ProductDetails> packagesLoadedCallback = null, Action<ProductDetails, PackageInstance> packageInstalledCallback = null)
+        public static async Task<bool> InstallPackage(ProductDetails product, bool? useAppInstaller = null)
         {
             var culture = CultureInfo.CurrentUICulture;
 
-            gettingPackagesCallback?.Invoke(product);
+            GettingPackagesCallback?.Invoke(product);
+            GettingPackagesCallback = null;
 
             var dcathandler = new StoreLib.Services.DisplayCatalogHandler(DCatEndpoint.Production, new StoreLib.Services.Locale(culture, true));
             await dcathandler.QueryDCATAsync(product.ProductId);
             var packs = await dcathandler.GetMainPackagesForProductAsync();
             string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;
 
-            packagesLoadedCallback?.Invoke(product);
+            PackagesLoadedCallback?.Invoke(product);
+            PackagesLoadedCallback = null;
 
             if (packs != null)
             {
                 var package = GetLatestDesktopPackage(packs.ToList(), packageFamilyName, product);
                 if (package == null)
                 {
-                    noPackagesCallback?.Invoke(product);
+                    NoPackagesCallback?.Invoke(product);
+                    NoPackagesCallback = null;
                     return false;
                 }
                 else
                 {
                     if (await InstallPackage(package, product, useAppInstaller))
                     {
-                        packageInstalledCallback?.Invoke(product, package);
                         return true;
                     }
                 }
@@ -169,15 +185,18 @@ namespace FluentStore.Helpers
                     }),
                     progressToast.Tag
                 );
+
+                PackageDownloadProgressCallback?.Invoke(product, package, op.Progress.BytesReceived, op.Progress.TotalBytesToReceive);
             };
+
+            PackageDownloadingCallback?.Invoke(product, package);
+            PackageDownloadingCallback = null;
             ToastNotificationManager.GetDefault().CreateToastNotifier().Show(progressToast);
+
             await download.StartAsync();
-            if (hideProgressToastWhenDone)
-                ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
 
             string extension = "";
             string contentTypeFilepath = filepath + "_[Content_Types].xml";
-
             using (var stream = await destinationFile.OpenStreamForReadAsync())
             {
                 var bytes = new byte[4];
@@ -239,31 +258,38 @@ namespace FluentStore.Helpers
             if (extension != string.Empty)
                 await destinationFile.RenameAsync(destinationFile.Name + extension, NameCollisionOption.ReplaceExisting);
 
+            PackageDownloadProgressCallback = null;
+            PackageDownloadedCallback?.Invoke(product, package, destinationFile);
+            PackageDownloadedCallback = null;
+            if (hideProgressToastWhenDone)
+                ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
+
             return (destinationFile, progressToast).ToTuple();
         }
 
         public static async Task<Tuple<StorageFile, ToastNotification>> DownloadPackage(ProductDetails product,
-            bool hideProgressToastWhenDone = true, string filepath = null,
-            Action<ProductDetails> gettingPackagesCallback = null, Action<ProductDetails> noPackagesCallback = null,
-            Action<ProductDetails> packagesLoadedCallback = null, Action<ProductDetails, PackageInstance, StorageFile, ToastNotification> packageDownloadedCallback = null)
+            bool hideProgressToastWhenDone = true, string filepath = null)
         {
             var culture = CultureInfo.CurrentUICulture;
 
-            gettingPackagesCallback?.Invoke(product);
+            GettingPackagesCallback?.Invoke(product);
+            GettingPackagesCallback = null;
 
             var dcathandler = new StoreLib.Services.DisplayCatalogHandler(DCatEndpoint.Production, new StoreLib.Services.Locale(culture, true));
             await dcathandler.QueryDCATAsync(product.ProductId);
             var packs = await dcathandler.GetMainPackagesForProductAsync();
             string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;
 
-            packagesLoadedCallback?.Invoke(product);
+            PackagesLoadedCallback?.Invoke(product);
+            PackagesLoadedCallback = null;
 
             if (packs != null)
             {
                 var package = GetLatestDesktopPackage(packs.ToList(), packageFamilyName, product);
                 if (package == null)
                 {
-                    noPackagesCallback?.Invoke(product);
+                    NoPackagesCallback?.Invoke(product);
+                    NoPackagesCallback = null;
                     return null;
                 }
                 else
@@ -271,7 +297,8 @@ namespace FluentStore.Helpers
                     var result = await DownloadPackage(package, product, hideProgressToastWhenDone, filepath);
                     if (result != null && result.Item1 != null)
                     {
-                        packageDownloadedCallback?.Invoke(product, package, result.Item1, result.Item2);
+                        PackageDownloadedCallback?.Invoke(product, package, result.Item1);
+                        PackageDownloadedCallback = null;
                         return result;
                     }
                 }

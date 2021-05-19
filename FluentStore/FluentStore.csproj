@@ -131,6 +131,7 @@
     <Compile Include="Helpers\PackageHelper.cs" />
     <Compile Include="Helpers\PasswordVaultService.cs" />
     <Compile Include="Helpers\Settings.cs" />
+    <Compile Include="Helpers\StringEx.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -138,11 +139,17 @@
     <Compile Include="Views\Auth\SignInView.xaml.cs">
       <DependentUpon>SignInView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\CollectionView.xaml.cs">
+      <DependentUpon>CollectionView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\HomeView.xaml.cs">
       <DependentUpon>HomeView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\MyAppsView.xaml.cs">
       <DependentUpon>MyAppsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MyCollectionsView.xaml.cs">
+      <DependentUpon>MyCollectionsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ProductDetailsView.xaml.cs">
       <DependentUpon>ProductDetailsView.xaml</DependentUpon>
@@ -190,11 +197,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\CollectionView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\HomeView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\MyAppsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MyCollectionsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

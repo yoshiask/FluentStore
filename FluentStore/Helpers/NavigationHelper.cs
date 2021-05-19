@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Windows.System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using NavigationViewItem = Microsoft.UI.Xaml.Controls.NavigationViewItem;
 
 namespace FluentStore.Helpers
 {
@@ -134,6 +135,14 @@ namespace FluentStore.Helpers
                 Title = "My Apps",
                 Path = "myapps"
             },
+
+            new PageInfo()
+            {
+                PageType = typeof(MyCollectionsView),
+                Icon = new SymbolIcon(Symbol.List),
+                Title = "My Collections",
+                Path = "mycollections"
+            },
         };
     }
 
@@ -151,11 +160,18 @@ namespace FluentStore.Helpers
         public PageInfo(NavigationViewItem navItem)
         {
             Title = (navItem.Content == null) ? "" : navItem.Content.ToString();
-            Icon = (navItem.Icon == null) ? new SymbolIcon(Symbol.Document) : navItem.Icon;
-            Visibility = navItem.Visibility;
+            Icon = navItem.Icon ?? new SymbolIcon(Symbol.Document);
 
             var tooltip = ToolTipService.GetToolTip(navItem);
             Tooltip = (tooltip == null) ? "" : tooltip.ToString();
+        }
+
+        public static PageInfo CreateFromNavigationViewItem(NavigationViewItem navItem)
+        {
+            if (navItem.Tag is PageInfo pageInfo)
+                return pageInfo;
+            else
+                return null;
         }
 
         public string Title { get; set; }
@@ -164,7 +180,7 @@ namespace FluentStore.Helpers
         public Type PageType { get; set; }
         public string Path { get; set; }
         public string Tooltip { get; set; }
-        public Visibility Visibility { get; set; } = Visibility.Visible;
+        public bool RequiresSignIn { get; set; } = false;
 
         // Derived properties
         public NavigationViewItem NavViewItem
@@ -173,11 +189,13 @@ namespace FluentStore.Helpers
             {
                 var item = new NavigationViewItem()
                 {
-                    Icon = Icon,
+                    Tag = this,
                     Content = Title,
-                    Visibility = Visibility
+                    Icon = Icon,
+                    Visibility = RequiresSignIn ? Visibility.Collapsed : Visibility.Visible,
                 };
                 ToolTipService.SetToolTip(item, new ToolTip() { Content = Tooltip });
+                Windows.UI.Xaml.Automation.AutomationProperties.SetName(item, Title);
 
                 return item;
             }

@@ -1,5 +1,7 @@
 ﻿using FluentStore.Helpers;
+using FluentStore.Services;
 using FluentStore.ViewModels;
+using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using MicrosoftStore.Models;
 using StoreLib.Models;
 using StoreLib.Services;
@@ -61,35 +63,18 @@ namespace FluentStore.Views
         {
             InstallButton.IsEnabled = false;
 
-            var gettingPackagesDialog = new ProgressDialog()
+            ProgressDialog progressDialog = new ProgressDialog()
             {
                 Title = ViewModel.Product.Title,
                 Body = "Fetching packages..."
             };
-            await PackageHelper.InstallPackage(ViewModel.Product, false,
-                gettingPackagesCallback: product =>
-                {
-                    gettingPackagesDialog.ShowAsync();
-                },
-                noPackagesCallback: async product =>
-                {
-                    var noPackagesDialog = new ContentDialog()
-                    {
-                        Title = ViewModel.Product.Title,
-                        Content = "No available packages for this product.",
-                        PrimaryButtonText = "Ok"
-                    };
-                    await noPackagesDialog.ShowAsync();
-                },
-                packagesLoadedCallback: product =>
-                {
-                    gettingPackagesDialog.Hide();
-                },
-                packageInstalledCallback: (product, package) =>
-                {
-                    UpdateInstallButtonToLaunch();
-                });
+            SetUpPackageHelperCallbacks(progressDialog);
+            PackageHelper.PackageInstalledCallback = (product, package) => UpdateInstallButtonToLaunch();
+            progressDialog.ShowAsync();
 
+            await PackageHelper.InstallPackage(ViewModel.Product, false);
+
+            progressDialog.Hide();
             InstallButton.IsEnabled = true;
         }
 
@@ -127,81 +112,34 @@ namespace FluentStore.Views
         {
             InstallButton.IsEnabled = false;
 
-            var gettingPackagesDialog = new ProgressDialog()
+            ProgressDialog progressDialog = new ProgressDialog()
             {
                 Title = ViewModel.Product.Title,
                 Body = "Fetching packages..."
             };
-            await PackageHelper.DownloadPackage(ViewModel.Product,
-                gettingPackagesCallback: product =>
-                {                    
-                    gettingPackagesDialog.ShowAsync();
-                },
-                noPackagesCallback: async product =>
-                {
-                    var noPackagesDialog = new ContentDialog()
-                    {
-                        Title = product.Title,
-                        Content = "No available packages for this product.",
-                        PrimaryButtonText = "Ok"
-                    };
-                    await noPackagesDialog.ShowAsync();
-                },
-                packagesLoadedCallback: product =>
-                {
-                    gettingPackagesDialog.Hide();
-                },
-                packageDownloadedCallback: async (product, details, file, toast) =>
-                {
-                    var savePicker = new Windows.Storage.Pickers.FileSavePicker();
-                    savePicker.SuggestedStartLocation =
-                        Windows.Storage.Pickers.PickerLocationId.Downloads;
-                    if (file.FileType.EndsWith("bundle"))
-                        savePicker.FileTypeChoices.Add("Windows App Bundle", new string[] { file.FileType });
-                    else
-                        savePicker.FileTypeChoices.Add("Windows App Package", new string[] { file.FileType });
-                    savePicker.SuggestedFileName = file.DisplayName;
-                    savePicker.SuggestedSaveFile = file;
-                    var userFile = await savePicker.PickSaveFileAsync();
-                    if (userFile != null)
-                    {
-                        await file.MoveAndReplaceAsync(userFile);
-                    }
-                });
-
-            InstallButton.IsEnabled = true;
-            return;
-
-            var culture = CultureInfo.CurrentUICulture;
-            string productId = ViewModel.Product.ProductId;
-
-            
-
-            DisplayCatalogHandler dcathandler = new DisplayCatalogHandler(DCatEndpoint.Production, new Locale(culture, true));
-            await dcathandler.QueryDCATAsync(productId);
-            var packs = await dcathandler.GetMainPackagesForProductAsync();
-            string packageFamilyName = dcathandler.ProductListing.Product.Properties.PackageFamilyName;
-
-            gettingPackagesDialog.Hide();
-            if (packs != null)// && packs.Count > 0)
+            SetUpPackageHelperCallbacks(progressDialog);
+            PackageHelper.PackageDownloadedCallback = async (product, details, file) =>
             {
-                var package = PackageHelper.GetLatestDesktopPackage(packs.ToList(), packageFamilyName, ViewModel.Product);
-                if (package == null)
-                {
-                    
-                    return;
-                }
+                var savePicker = new Windows.Storage.Pickers.FileSavePicker();
+                savePicker.SuggestedStartLocation =
+                    Windows.Storage.Pickers.PickerLocationId.Downloads;
+                if (file.FileType.EndsWith("bundle"))
+                    savePicker.FileTypeChoices.Add("Windows App Bundle", new string[] { file.FileType });
                 else
+                    savePicker.FileTypeChoices.Add("Windows App Package", new string[] { file.FileType });
+                savePicker.SuggestedFileName = file.DisplayName;
+                savePicker.SuggestedSaveFile = file;
+                var userFile = await savePicker.PickSaveFileAsync();
+                if (userFile != null)
                 {
-                    var file = (await PackageHelper.DownloadPackage(package, ViewModel.Product)).Item1;
-
-                    var toast = PackageHelper.GenerateDownloadSuccessToast(package, ViewModel.Product, file);
-                    Windows.UI.Notifications.ToastNotificationManager.GetDefault().CreateToastNotifier().Show(toast);
-
-                    
+                    await file.MoveAndReplaceAsync(userFile);
                 }
-            }
+            };
+            progressDialog.ShowAsync();
 
+            await PackageHelper.DownloadPackage(ViewModel.Product);
+            
+            progressDialog.Hide();
             InstallButton.IsEnabled = true;
         }
 
@@ -209,35 +147,18 @@ namespace FluentStore.Views
         {
             InstallButton.IsEnabled = false;
 
-            var gettingPackagesDialog = new ProgressDialog()
+            ProgressDialog progressDialog = new ProgressDialog()
             {
                 Title = ViewModel.Product.Title,
                 Body = "Fetching packages..."
             };
-            await PackageHelper.InstallPackage(ViewModel.Product, true,
-                gettingPackagesCallback: product =>
-                {
-                    gettingPackagesDialog.ShowAsync();
-                },
-                noPackagesCallback: async product =>
-                {
-                    var noPackagesDialog = new ContentDialog()
-                    {
-                        Title = ViewModel.Product.Title,
-                        Content = "No available packages for this product.",
-                        PrimaryButtonText = "Ok"
-                    };
-                    await noPackagesDialog.ShowAsync();
-                },
-                packagesLoadedCallback: product =>
-                {
-                    gettingPackagesDialog.Hide();
-                },
-                packageInstalledCallback: (product, package) =>
-                {
-                    UpdateInstallButtonToLaunch();
-                });
+            SetUpPackageHelperCallbacks(progressDialog);
+            PackageHelper.PackageInstalledCallback = (product, package) => UpdateInstallButtonToLaunch();
+            progressDialog.ShowAsync();
 
+            await PackageHelper.InstallPackage(ViewModel.Product, true);
+
+            progressDialog.Hide();
             InstallButton.IsEnabled = true;
         }
 
@@ -281,6 +202,42 @@ namespace FluentStore.Views
                 var app = await PackageHelper.GetAppByPackageFamilyNameAsync(packageFamily);
                 await app.LaunchAsync();
             };
+        }
+
+        public static ProgressDialog SetUpPackageHelperCallbacks(ProgressDialog progressDialog)
+        {
+            PackageHelper.GettingPackagesCallback = product =>
+            {
+                progressDialog.Body = "Fetching packages...";
+            };
+            PackageHelper.NoPackagesCallback = async product =>
+            {
+                progressDialog.Hide();
+                var noPackagesDialog = new ContentDialog()
+                {
+                    Title = product.Title,
+                    Content = "No available packages for this product.",
+                    PrimaryButtonText = "Ok"
+                };
+                await noPackagesDialog.ShowAsync();
+            };
+            PackageHelper.PackageDownloadingCallback = (product, package) =>
+            {
+                progressDialog.Body = "Downloading package...";
+            };
+            PackageHelper.PackageDownloadProgressCallback = async (product, package, downloaded, total) =>
+            {
+                double prog = (double)downloaded / total;
+                await progressDialog.SetProgressAsync(prog);
+            };
+            PackageHelper.PackageInstallingCallback = async (product, package) =>
+            {
+                progressDialog.IsIndeterminate = true;
+                progressDialog.Body = "Installing package...";
+            };
+            PackageHelper.PackageInstalledCallback = (product, package) => progressDialog.Hide();
+
+            return progressDialog;
         }
     }
 }

@@ -159,7 +159,7 @@ namespace FluentStore.ViewModels
             if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
             {
                 SelectedProduct = candidate;
-                NavService.Navigate("ProductDetailsView", SelectedProduct);
+                NavService.Navigate(SelectedProduct);
             }
         }
 

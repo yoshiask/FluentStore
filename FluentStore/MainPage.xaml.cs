@@ -1,18 +1,11 @@
 ﻿using FluentStore.Helpers;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
 using Windows.UI.Xaml;
-using Windows.UI.Xaml.Automation;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
+using NavigationViewItem = Microsoft.UI.Xaml.Controls.NavigationViewItem;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -36,14 +29,7 @@ namespace FluentStore
 
             foreach(PageInfo page in NavigationHelper.Pages)
             {
-                var item = new Microsoft.UI.Xaml.Controls.NavigationViewItem()
-                {
-                    Content = page.Title,
-                    Icon = page.Icon,
-                    Visibility = page.Visibility,
-                };
-                MainNav.MenuItems.Add(item);
-                AutomationProperties.SetName(item, page.Title);
+                MainNav.MenuItems.Add(page.NavViewItem);
             }
             MainNav.SelectedItem = MainNav.MenuItems[0];
 
@@ -57,11 +43,21 @@ namespace FluentStore
             {
                 UserButton.Visibility = Visibility.Visible;
                 SignInButton.Visibility = Visibility.Collapsed;
+
+                // Show pages that require signin
+                foreach (NavigationViewItem navItem in MainNav.MenuItems)
+                    if (((PageInfo)navItem.Tag).RequiresSignIn)
+                        navItem.Visibility = Visibility.Visible;
             }
             else
             {
                 UserButton.Visibility = Visibility.Collapsed;
                 SignInButton.Visibility = Visibility.Visible;
+
+                // Hide pages that require signin
+                foreach (NavigationViewItem navItem in MainNav.MenuItems)
+                    if (((PageInfo)navItem.Tag).RequiresSignIn)
+                        navItem.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -129,7 +125,7 @@ namespace FluentStore
                     MainNav.SelectedItem = null;
                     return;
                 }
-                MainNav.SelectedItem = MainNav.MenuItems.ToList().Find((obj) => (obj as Microsoft.UI.Xaml.Controls.NavigationViewItem).Content.ToString() == page.Title);
+                MainNav.SelectedItem = MainNav.MenuItems.ToList().Find((obj) => (obj as NavigationViewItem).Tag == page);
             }
             catch
             {

@@ -172,7 +172,7 @@ namespace FluentStore.ViewModels
                 _SelectedProductDetails = await GetProductDetailsAsync(SelectedProductDetails.Product, Culture, Region);
             }
 
-            NavService.Navigate("ProductDetailsView", SelectedProductDetails);
+            NavService.Navigate(SelectedProductDetails);
         }
     }
 }

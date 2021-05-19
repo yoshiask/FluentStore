@@ -97,11 +97,27 @@ namespace FluentStoreAPI.Models.Firebase
                 {
                     PropertyInfo targetProp = tType.GetProperty(fieldName, fieldValue.GetType());
                     if (targetProp != null)
-                    {
                         targetProp.SetValue(result, fieldValue);
-                    }
                 }
             }
+
+            // Set document ID
+            PropertyInfo idProp = tType.GetProperty("Id", typeof(Guid));
+            if (idProp != null)
+            {
+                string id = Name.Split(new[] { '/' }).Last();
+                idProp.SetValue(result, new Guid(id));
+            }
+
+            // Set CreatedAt
+            PropertyInfo createdAtProp = tType.GetProperty("CreatedAt", typeof(Guid));
+            if (createdAtProp != null)
+                createdAtProp.SetValue(result, CreatedAt);
+
+            // Set UpdatedAt
+            PropertyInfo updatedAtProp = tType.GetProperty("UpdatedAt", typeof(Guid));
+            if (updatedAtProp != null)
+                updatedAtProp.SetValue(result, UpdatedAt);
 
             return result;
         }
