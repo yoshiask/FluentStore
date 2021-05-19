@@ -29,12 +29,20 @@ namespace FluentStore.ViewModels
 
         private readonly IStorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<IStorefrontApi>();
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
+        private readonly FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
 
         private Collection _Collection;
         public Collection Collection
         {
             get => _Collection;
             set => SetProperty(ref _Collection, value);
+        }
+
+        private string _AuthorName;
+        public string AuthorName
+        {
+            get => _AuthorName;
+            set => SetProperty(ref _AuthorName, value);
         }
 
         private ObservableCollection<ProductDetailsViewModel> _Items = new ObservableCollection<ProductDetailsViewModel>();
@@ -97,6 +105,11 @@ namespace FluentStore.ViewModels
 
         public async Task LoadItemsAsync()
         {
+            // Get the author's display name
+            var authorProfile = await FSApi.GetUserProfileAsync(Collection.AuthorId);
+            AuthorName = authorProfile.DisplayName;
+
+            // Load items
             var culture = CultureInfo.CurrentUICulture;
             var region = new RegionInfo(culture.LCID);
 

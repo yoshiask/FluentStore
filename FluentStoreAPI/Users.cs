@@ -8,20 +8,32 @@ namespace FluentStoreAPI
 {
     public partial class FluentStoreAPI
     {
-        private Url GetFirebaseBase()
+        private IFlurlRequest GetFirestoreBase()
         {
-            return FIRESTORE_BASE_URL.SetQueryParam("key", KEY);
+            return FIRESTORE_BASE_URL.WithTimeout(10);
         }
 
-        public async Task<User> GetCurrentFSUserAsync()
+        public async Task<User> GetUserAsync(string userId)
         {
-            return await STORAGE_BASE_URL.AppendPathSegment("HomePage.json")
-                .SetQueryParam("alt", "media").GetJsonAsync<User>();
+            var fbCollections = await GetFirestoreBase().AppendPathSegments("users", userId)
+                .WithOAuthBearerToken(Token).GetJsonAsync<Newtonsoft.Json.Linq.JObject>();
+            var doc = fbCollections.ToObject<Models.Firebase.Document>();
+
+            return doc.Transform<User>();
+        }
+
+        public async Task<Profile> GetUserProfileAsync(string userId)
+        {
+            var fbProfile = await GetFirestoreBase().AppendPathSegments("users", userId, "public", "profile")
+                .WithOAuthBearerToken(Token).GetJsonAsync<Newtonsoft.Json.Linq.JObject>();
+            var doc = fbProfile.ToObject<Models.Firebase.Document>();
+
+            return doc.Transform<Profile>();
         }
 
         public async Task<List<Collection>> GetCollectionsAsync(string userId)
         {
-            var fbCollections = await FIRESTORE_BASE_URL.AppendPathSegments("users", userId, "collections")
+            var fbCollections = await GetFirestoreBase().AppendPathSegments("users", userId, "collections")
                 .WithOAuthBearerToken(Token).GetJsonAsync<Newtonsoft.Json.Linq.JObject>();
             var documents = fbCollections["documents"].ToObject<List<Models.Firebase.Document>>();
 

@@ -11,9 +11,9 @@ namespace FluentStoreAPI
     {
         public const string IDENTITY_TK_BASE_URL = "https://identitytoolkit.googleapis.com/v1";
 
-        private Url GetIdentityTKBase()
+        private IFlurlRequest GetIdentityTKBase()
         {
-            return IDENTITY_TK_BASE_URL.SetQueryParam("key", KEY);
+            return IDENTITY_TK_BASE_URL.SetQueryParam("key", KEY).WithTimeout(10);
         }
 
         public async Task<UserSignInResponse> SignUpAsync(string email, string password)
@@ -165,7 +165,7 @@ namespace FluentStoreAPI
             return await ConvertToResult<UpdateProfileResponse>(response);
         }
 
-        public async Task<IReadOnlyList<User>> GetUserDataAsync()
+        public async Task<IReadOnlyList<User>> GetCurrentUserDataAsync()
         {
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:lookup")
                 .PostJsonAsync(new { idToken = Token });

@@ -9,11 +9,25 @@ namespace FluentStore.Services
 {
     public class UserService : ObservableObject
     {
-        private User _CurrentUser;
-        public User CurrentUser
+        private User _CurrentFirebaseUser;
+        public User CurrentFirebaseUser
+        {
+            get => _CurrentFirebaseUser;
+            internal set => SetProperty(ref _CurrentFirebaseUser, value);
+        }
+
+        private FluentStoreAPI.Models.User _CurrentUser;
+        public FluentStoreAPI.Models.User CurrentUser
         {
             get => _CurrentUser;
-            internal set => SetProperty(ref _CurrentUser, value);
+            set => SetProperty(ref _CurrentUser, value);
+        }
+
+        private FluentStoreAPI.Models.Profile _CurrentProfile;
+        public FluentStoreAPI.Models.Profile CurrentProfile
+        {
+            get => _CurrentProfile;
+            set => SetProperty(ref _CurrentProfile, value);
         }
 
         private bool _IsLoggedIn;
@@ -57,9 +71,11 @@ namespace FluentStore.Services
 
                 FSApi.Token = token;
                 FSApi.RefreshToken = refreshToken;
-                CurrentUser = (await FSApi.GetUserDataAsync()).First();
+                CurrentFirebaseUser = (await FSApi.GetCurrentUserDataAsync()).First();
+                CurrentUser = await FSApi.GetUserAsync(CurrentFirebaseUser.LocalID);
+                CurrentProfile = await FSApi.GetUserProfileAsync(CurrentFirebaseUser.LocalID);
 
-                PasswordVaultService.Add(new CredentialBase(CurrentUser.LocalID, refreshToken));
+                PasswordVaultService.Add(new CredentialBase(CurrentFirebaseUser.LocalID, refreshToken));
 
                 IsLoggedIn = true;
             }
@@ -82,26 +98,33 @@ namespace FluentStore.Services
 
                 if (loginCredential != null)
                 {
-                    await SignInAsync(null, loginCredential.Password);
-                }
-                else if (useUi)
-                {
-                    // There is no credential stored in the locker.
-                    // Display UI to get user credentials.
-                    // TODO: NavService.RequestSignIn("HomeView");
+                    bool success = await SignInAsync(null, loginCredential.Password);
+                    if (!success)
+                        goto failed;
                 }
             }
-            catch { }
+            catch
+            {
+                goto failed;
+            }
+
+        failed:
+            if (useUi)
+            {
+                // There is no credential stored in the locker.
+                // Display UI to get user credentials.
+                NavService.Navigate("Auth.SignInView");
+            }
         }
 
         public void SignOut()
         {
-            PasswordVaultService.Remove(new CredentialBase(CurrentUser.LocalID, FSApi.RefreshToken));
+            PasswordVaultService.Remove(new CredentialBase(CurrentFirebaseUser.LocalID, FSApi.RefreshToken));
 
             IsLoggedIn = false;
             FSApi.Token = null;
             FSApi.RefreshToken = null;
-            CurrentUser = null;
+            CurrentFirebaseUser = null;
         }
     }
 }

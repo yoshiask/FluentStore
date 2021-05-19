@@ -21,13 +21,12 @@ namespace FluentStore.ViewModels
             GetSearchSuggestionsCommand = new AsyncRelayCommand(GetSearchSuggestionsAsync);
             SubmitQueryCommand = new AsyncRelayCommand<Product>(SubmitQueryAsync);
             SignInCommand = new AsyncRelayCommand(SignInAsync);
-            SignOutCommand = new AsyncRelayCommand(SignOutAsync);
+            SignOutCommand = new RelayCommand(UserService.SignOut);
         }
 
         private readonly IStorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<IStorefrontApi>();
         private readonly IMSStoreApi MSStoreApi = Ioc.Default.GetRequiredService<IMSStoreApi>();
-        private readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
-        private readonly IPasswordVaultService PasswordVaultService = Ioc.Default.GetRequiredService<IPasswordVaultService>();
+        private readonly UserService UserService = Ioc.Default.GetRequiredService<UserService>();
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
 
         private ObservableCollection<Product> _SearchSuggestions = new ObservableCollection<Product>();
@@ -86,8 +85,8 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _SignInCommand, value);
         }
 
-        private IAsyncRelayCommand _SignOutCommand;
-        public IAsyncRelayCommand SignOutCommand
+        private IRelayCommand _SignOutCommand;
+        public IRelayCommand SignOutCommand
         {
             get => _SignOutCommand;
             set => SetProperty(ref _SignOutCommand, value);
@@ -174,16 +173,6 @@ namespace FluentStore.ViewModels
             return suggs.ResultSets[0].Suggests;
         }
 
-        public async Task SignInAsync()
-        {
-            NavService.Navigate("Auth.SignInView");
-        }
-
-        public async Task SignOutAsync()
-        {
-            FSApi.Token = null;
-            FSApi.RefreshToken = null;
-            PasswordVaultService.Remove(new CredentialBase());
-        }
+        public async Task SignInAsync() => await UserService.TrySignIn();
     }
 }

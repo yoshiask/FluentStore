@@ -5,16 +5,19 @@
     xmlns:local="using:FluentStore.Views.Auth"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
-    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:tkconverters="using:Microsoft.Toolkit.Uwp.UI.Converters"
     xmlns:authviewmodels="using:FluentStore.ViewModels.Auth"
     mc:Ignorable="d">
     <Page.Resources>
         <authviewmodels:SignInViewModel x:Name="ViewModel"/>
+        <tkconverters:StringVisibilityConverter x:Key="StringVisConverter"/>
     </Page.Resources>
 
     <Grid x:Name="MainGrid" VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="300" Margin="10">
         <StackPanel Spacing="10" HorizontalAlignment="Stretch">
+            <TextBlock Text="{x:Bind ViewModel.FailReason, Mode=OneWay}" IsTextSelectionEnabled="True"
+                       Visibility="{x:Bind ViewModel.FailReason, Converter={StaticResource StringVisConverter}, Mode=OneWay}"
+                       Foreground="{ThemeResource SystemControlErrorTextForegroundBrush}"/>
             <TextBox Text="{x:Bind ViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      PlaceholderText="Email"/>
             <PasswordBox Password="{x:Bind ViewModel.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -29,7 +32,7 @@
             <VisualStateGroup>
                 <VisualState>
                     <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="641" />
+                        <AdaptiveTrigger MinWindowWidth="{StaticResource CompactModeMinWidth}" />
                     </VisualState.StateTriggers>
 
                     <VisualState.Setters>

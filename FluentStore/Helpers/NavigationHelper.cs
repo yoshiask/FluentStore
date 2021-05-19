@@ -141,7 +141,8 @@ namespace FluentStore.Helpers
                 PageType = typeof(MyCollectionsView),
                 Icon = new SymbolIcon(Symbol.List),
                 Title = "My Collections",
-                Path = "mycollections"
+                Path = "mycollections",
+                RequiresSignIn = true
             },
         };
     }

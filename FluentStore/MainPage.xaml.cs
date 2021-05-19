@@ -34,7 +34,7 @@ namespace FluentStore
             MainNav.SelectedItem = MainNav.MenuItems[0];
 
             Services.UserService.OnLoginStateChanged += UserService_OnLoginStateChanged;
-            UserService.TrySignIn();
+            UserService.TrySignIn(false);
         }
 
         private void UserService_OnLoginStateChanged(bool isLoggedIn)

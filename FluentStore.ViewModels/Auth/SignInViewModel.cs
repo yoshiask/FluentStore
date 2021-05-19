@@ -4,6 +4,10 @@ using Microsoft.Toolkit.Mvvm.Input;
 using System.Threading.Tasks;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using FluentStore.Services;
+using System;
+using Flurl.Http;
+using FluentStoreAPI;
+using FluentStoreAPI.Models.Firebase;
 
 namespace FluentStore.ViewModels.Auth
 {
@@ -33,6 +37,13 @@ namespace FluentStore.ViewModels.Auth
             set => SetProperty(ref _Password, value);
         }
 
+        private string _FailReason;
+        public string FailReason
+        {
+            get => _FailReason;
+            set => SetProperty(ref _FailReason, value);
+        }
+
         private IAsyncRelayCommand _SignInCommand;
         public IAsyncRelayCommand SignInCommand
         {
@@ -49,16 +60,34 @@ namespace FluentStore.ViewModels.Auth
 
         public async Task SignInAsync()
         {
-            var resp = await FSApi.SignInAsync(Email, Password);
-            if (await UserService.SignInAsync(resp.IDToken, resp.RefreshToken))
-                NavService.Navigate("HomeView");
+            try
+            {
+                FailReason = null;
+                var resp = await FSApi.SignInAsync(Email, Password);
+                if (await UserService.SignInAsync(resp.IDToken, resp.RefreshToken))
+                    NavService.Navigate("HomeView");
+            }
+            catch (FlurlHttpException ex)
+            {
+                var errorResp = await ex.GetErrorResponse();
+                FailReason = UserSignInResponse.CommonErrors.GetMessage(errorResp.Message);
+            }
         }
 
         public async Task SignUpAsync()
         {
-            var resp = await FSApi.SignUpAsync(Email, Password);
-            if (await UserService.SignInAsync(resp.IDToken, resp.RefreshToken))
-                NavService.Navigate("HomeView");
+            try
+            {
+                FailReason = null;
+                var resp = await FSApi.SignUpAsync(Email, Password);
+                if (await UserService.SignInAsync(resp.IDToken, resp.RefreshToken))
+                    NavService.Navigate("HomeView");
+            }
+            catch (FlurlHttpException ex)
+            {
+                var errorResp = await ex.GetErrorResponse();
+                FailReason = UserSignInResponse.CommonErrors.GetMessage(errorResp.Message);
+            }
         }
     }
 }

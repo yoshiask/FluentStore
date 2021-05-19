@@ -56,7 +56,7 @@ namespace FluentStore.ViewModels
 
         public async Task LoadCollectionsAsync()
         {
-            var collections = await FSApi.GetCollectionsAsync(UserService.CurrentUser.LocalID);
+            var collections = await FSApi.GetCollectionsAsync(UserService.CurrentFirebaseUser.LocalID);
             Collections = new ObservableCollection<CollectionViewModel>(
                 collections.Select(c => new CollectionViewModel(c)));
         }

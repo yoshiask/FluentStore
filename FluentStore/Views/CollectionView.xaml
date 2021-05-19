@@ -115,7 +115,7 @@
                                Text="{x:Bind ViewModel.Collection.Description}" d:Text="This is just a test collection for Fluent Store"
                                TextTrimming="WordEllipsis" TextWrapping="Wrap" />
                     <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="10" Grid.ColumnSpan="2">
-                        <TextBlock VerticalAlignment="Center" Text="{x:Bind UserService.CurrentUser.DisplayName}"
+                        <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.AuthorName, Mode=OneWay}"
                                    d:Text="YoshiAsk"/>
                         <Ellipse Width="3" Height="3" VerticalAlignment="Center" Fill="{ThemeResource SystemBaseHighColor}"
                                  StrokeThickness="0" Visibility="{x:Bind ViewModel.Collection.IsPublic, Converter={StaticResource BoolToVisibilityConverter}}" />

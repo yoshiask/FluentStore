@@ -56,6 +56,16 @@ namespace FluentStoreAPI.Models.Firebase
             public const string OPERATION_NOT_ALLOWED = nameof(OPERATION_NOT_ALLOWED);
 
             /// <summary>
+            /// An email address was not provided.
+            /// </summary>
+            public const string MISSING_EMAIL = nameof(MISSING_EMAIL);
+
+            /// <summary>
+            /// A password was not provided.
+            /// </summary>
+            public const string MISSING_PASSWORD = nameof(MISSING_PASSWORD);
+
+            /// <summary>
             /// The email address is already in use by another account.
             /// </summary>
             /// <remarks>Applies only to sign up requests.</remarks>
@@ -78,6 +88,32 @@ namespace FluentStoreAPI.Models.Firebase
             /// </summary>
             /// <remarks>Applies only to sign in requests.</remarks>
             public const string USER_DISABLED = nameof(USER_DISABLED);
+
+            public static string GetMessage(string error)
+            {
+                switch (error)
+                {
+                    case TOO_MANY_ATTEMPTS_TRY_LATER:
+                        return "Too many attempts, try again later";
+                    case OPERATION_NOT_ALLOWED:
+                        return "Password sign-in has been disabled";
+                    case MISSING_EMAIL:
+                        return "An email address was not provided";
+                    case MISSING_PASSWORD:
+                        return "A password was not provided";
+                    case EMAIL_EXISTS:
+                        return "An account with that email already exists";
+                    case EMAIL_NOT_FOUND:
+                        return "An account with that email could not be found";
+                    case INVALID_PASSWORD:
+                        return "The password was incorrect";
+                    case USER_DISABLED:
+                        return "Account disabled by administrator";
+
+                    default:
+                        return "An unknown error occured:\r\n" + error;
+                }
+            }
         }
     }
 }

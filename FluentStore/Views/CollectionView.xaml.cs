@@ -32,8 +32,6 @@ namespace FluentStore.Views
     /// </summary>
     public sealed partial class CollectionView : Page
     {
-        private UserService UserService { get; } = Ioc.Default.GetRequiredService<UserService>();
-
         public CollectionView()
         {
             this.InitializeComponent();

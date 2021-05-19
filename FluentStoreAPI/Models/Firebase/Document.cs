@@ -83,21 +83,24 @@ namespace FluentStoreAPI.Models.Firebase
         {
             T result = new T();
             Type tType = result.GetType();
-            foreach (string fieldName in Fields.Keys)
+            if (Fields != null)
             {
-                object fieldValue = TransformField(Fields[fieldName]);
-                if (fieldValue.GetType().IsGenericType)
+                foreach (string fieldName in Fields.Keys)
                 {
-                    // Ignore generics, since TransformField will set
-                    // all type parameters to object
-                    var setter = tType.GetMethod("Set" + fieldName);
-                    setter.Invoke(result, new[] { fieldValue });
-                }
-                else
-                {
-                    PropertyInfo targetProp = tType.GetProperty(fieldName, fieldValue.GetType());
-                    if (targetProp != null)
-                        targetProp.SetValue(result, fieldValue);
+                    object fieldValue = TransformField(Fields[fieldName]);
+                    if (fieldValue.GetType().IsGenericType)
+                    {
+                        // Ignore generics, since TransformField will set
+                        // all type parameters to object
+                        var setter = tType.GetMethod("Set" + fieldName);
+                        setter.Invoke(result, new[] { fieldValue });
+                    }
+                    else
+                    {
+                        PropertyInfo targetProp = tType.GetProperty(fieldName, fieldValue.GetType());
+                        if (targetProp != null)
+                            targetProp.SetValue(result, fieldValue);
+                    }
                 }
             }
 
