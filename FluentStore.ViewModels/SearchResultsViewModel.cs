@@ -1,7 +1,9 @@
 ﻿using FluentStore.Services;
+using FluentStore.ViewModels.Messages;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
+using Microsoft.Toolkit.Mvvm.Messaging;
 using MicrosoftStore;
 using MicrosoftStore.Models;
 using StoreLib.Services;
@@ -37,6 +39,8 @@ namespace FluentStore.ViewModels
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
+                    WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+
                     var newItems = e.NewItems.OfType<ProductDetailsViewModel>();
                     for (int i = 0; i < newItems.Count(); i++)
                     {
@@ -47,6 +51,8 @@ namespace FluentStore.ViewModels
                             ProductDetails[e.NewStartingIndex + i].Product = pd.Product;
                         }
                     }
+
+                    WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
                     break;
             }
         }
@@ -117,6 +123,7 @@ namespace FluentStore.ViewModels
 
         public async Task GetResultsAsync()
         {
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
             ProductDetails.Clear();
 
             int pageSize = 25;
@@ -138,6 +145,8 @@ namespace FluentStore.ViewModels
                     ProductDetails.Add(new ProductDetailsViewModel(product));
                 }
             }
+
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
 
         public async Task<ProductDetailsViewModel> GetProductDetailsAsync(ProductDetails productDetails, CultureInfo culture, RegionInfo region)
@@ -163,6 +172,8 @@ namespace FluentStore.ViewModels
 
         public async Task ViewProduct()
         {
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+
             GetResultsCommand.Cancel();
             UpdateResultsList = false;
 
@@ -172,6 +183,7 @@ namespace FluentStore.ViewModels
                 _SelectedProductDetails = await GetProductDetailsAsync(SelectedProductDetails.Product, Culture, Region);
             }
 
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
             NavService.Navigate(SelectedProductDetails);
         }
     }

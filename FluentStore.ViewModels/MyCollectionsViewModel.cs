@@ -1,8 +1,10 @@
 ﻿using FluentStore.Services;
+using FluentStore.ViewModels.Messages;
 using FluentStoreAPI.Models;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
+using Microsoft.Toolkit.Mvvm.Messaging;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,6 +17,8 @@ namespace FluentStore.ViewModels
         {
             ViewCollectionCommand = new AsyncRelayCommand(ViewCollectionAsync);
             LoadCollectionsCommand = new AsyncRelayCommand(LoadCollectionsAsync);
+
+            WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("My Collections"));
         }
 
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
@@ -56,9 +60,13 @@ namespace FluentStore.ViewModels
 
         public async Task LoadCollectionsAsync()
         {
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+
             var collections = await FSApi.GetCollectionsAsync(UserService.CurrentFirebaseUser.LocalID);
             Collections = new ObservableCollection<CollectionViewModel>(
                 collections.Select(c => new CollectionViewModel(c)));
+
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
     }
 }

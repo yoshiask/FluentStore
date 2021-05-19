@@ -1,7 +1,9 @@
 ﻿using FluentStore.Services;
+using FluentStore.ViewModels.Messages;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
+using Microsoft.Toolkit.Mvvm.Messaging;
 using MicrosoftStore;
 using MicrosoftStore.Models;
 using StoreLib.Models;
@@ -17,6 +19,8 @@ namespace FluentStore.ViewModels
         public MyAppsViewModel()
         {
             ViewAppCommand = new AsyncRelayCommand(ViewAppAsync);
+
+            WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("My Apps"));
         }
 
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
@@ -52,6 +56,8 @@ namespace FluentStore.ViewModels
 
         public async Task ViewAppAsync()
         {
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+
             // TODO: This really shouldn't have to make two separate API calls.
             // Is there a better way to get the product ID using the package family name?
 
@@ -68,6 +74,7 @@ namespace FluentStore.ViewModels
                 var product = item.Convert<ProductDetails>().Payload;
                 if (product?.PackageFamilyNames != null && product?.ProductId != null)
                 {
+                    WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
                     NavService.Navigate("ProductDetailsView", product);
                 }
             }

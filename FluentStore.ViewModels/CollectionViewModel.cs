@@ -1,8 +1,10 @@
 ﻿using FluentStore.Services;
+using FluentStore.ViewModels.Messages;
 using FluentStoreAPI.Models;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
+using Microsoft.Toolkit.Mvvm.Messaging;
 using MicrosoftStore;
 using MicrosoftStore.Models;
 using System;
@@ -105,6 +107,8 @@ namespace FluentStore.ViewModels
 
         public async Task LoadItemsAsync()
         {
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+
             // Get the author's display name
             var authorProfile = await FSApi.GetUserProfileAsync(Collection.AuthorId);
             AuthorName = authorProfile.DisplayName;
@@ -121,6 +125,8 @@ namespace FluentStore.ViewModels
                     .Convert<ProductDetails>().Payload;
                 Items.Add(new ProductDetailsViewModel(product));
             }
+            
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
     }
 }

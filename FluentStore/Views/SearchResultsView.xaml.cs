@@ -1,4 +1,6 @@
 ﻿using FluentStore.ViewModels;
+using FluentStore.ViewModels.Messages;
+using Microsoft.Toolkit.Mvvm.Messaging;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -14,7 +16,8 @@ namespace FluentStore.Views
     {
         public SearchResultsView()
         {
-            this.InitializeComponent();
+            InitializeComponent();
+            ViewModel = new SearchResultsViewModel();
         }
         public SearchResultsViewModel ViewModel
         {
@@ -22,7 +25,7 @@ namespace FluentStore.Views
             set => SetValue(ViewModelProperty, value);
         }
         public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register(nameof(ViewModel), typeof(SearchResultsViewModel), typeof(SearchResultsView), new PropertyMetadata(new SearchResultsViewModel()));
+            DependencyProperty.Register(nameof(ViewModel), typeof(SearchResultsViewModel), typeof(SearchResultsView), new PropertyMetadata(null));
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
@@ -34,6 +37,8 @@ namespace FluentStore.Views
                     ViewModel.Query = query;
                     break;
             }
+
+            WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage($"Apps - \"{ViewModel.Query}\""));
         }
     }
 }

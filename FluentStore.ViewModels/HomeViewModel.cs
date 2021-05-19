@@ -7,6 +7,8 @@ using MicrosoftStore.Models;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Threading.Tasks;
+using Microsoft.Toolkit.Mvvm.Messaging;
+using FluentStore.ViewModels.Messages;
 
 namespace FluentStore.ViewModels
 {
@@ -15,10 +17,14 @@ namespace FluentStore.ViewModels
         public HomeViewModel()
         {
             LoadFeaturedCommand = new AsyncRelayCommand(LoadFeaturedAsync);
+
+            WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Home"));
         }
 
         public async Task LoadFeaturedAsync()
         {
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+
             var culture = CultureInfo.CurrentUICulture;
             var region = new RegionInfo(culture.LCID);
 
@@ -34,6 +40,8 @@ namespace FluentStore.ViewModels
                 if (i == 0 || (i == 1 && featured.Carousel.Count >= 3))
                     SelectedCarouselItemIndex = i;
             }
+
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
 
         private readonly IStorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<IStorefrontApi>();

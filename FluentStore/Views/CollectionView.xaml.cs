@@ -1,8 +1,10 @@
 ﻿using FluentStore.Helpers;
 using FluentStore.Services;
 using FluentStore.ViewModels;
+using FluentStore.ViewModels.Messages;
 using FluentStoreAPI.Models;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using Microsoft.Toolkit.Mvvm.Messaging;
 using StoreLib.Models;
 using StoreLib.Services;
 using System;
@@ -35,7 +37,8 @@ namespace FluentStore.Views
     {
         public CollectionView()
         {
-            this.InitializeComponent();
+            InitializeComponent();
+            ViewModel = new CollectionViewModel();
         }
         public CollectionViewModel ViewModel
         {
@@ -43,7 +46,7 @@ namespace FluentStore.Views
             set => SetValue(ViewModelProperty, value);
         }
         public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register(nameof(ViewModel), typeof(CollectionViewModel), typeof(CollectionView), new PropertyMetadata(new CollectionViewModel()));
+            DependencyProperty.Register(nameof(ViewModel), typeof(CollectionViewModel), typeof(CollectionView), new PropertyMetadata(null));
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
@@ -60,7 +63,7 @@ namespace FluentStore.Views
 
             if (ViewModel?.Collection != null)
             {
-                
+                WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("My Collections"));
             }
         }
 

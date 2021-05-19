@@ -88,7 +88,7 @@ namespace FluentStore.Controls
             if (itemsControl.ItemsPanelRoot is ItemsWrapGrid itemsPanel)
             {
                 //Get total size
-                var total = e.NewSize.Width;
+                var total = e.NewSize.Width - (itemsPanel.Margin.Left + itemsPanel.Margin.Right + itemsControl.Padding.Left + itemsControl.Padding.Right);
 
                 //Minimum item size.
                 var itemMinSize = Math.Min(total, (double)itemsControl.GetValue(MinItemWidthProperty));

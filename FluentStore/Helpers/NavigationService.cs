@@ -38,7 +38,7 @@ namespace FluentStore.Services
             if (parameter == null)
                 return;
             string paramName = parameter.GetType().Name;
-            string vmName = paramName.ReplaceLastOccurrence("Model", "");
+            string vmName = paramName.ReplaceLastOccurrence("ViewModel", "") + "View";
             Type type = Type.GetType("FluentStore.Views." + vmName);
             Navigate(type, parameter);
         }

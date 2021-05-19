@@ -8,15 +8,15 @@
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:viewmodels="using:FluentStore.ViewModels"
+    xmlns:controls="using:FluentStore.Controls"
     mc:Ignorable="d"
     Loading="Page_Loading">
 
     <Grid>
-        <ProgressRing IsActive="{x:Bind ViewModel.IsLoadingMyApps, Mode=OneWay}"/>
-
         <GridView ItemsSource="{x:Bind ViewModel.Apps, Mode=OneWay}"
-              SelectedItem="{x:Bind ViewModel.SelectedApp, Mode=TwoWay}" SelectionMode="Single"
-              HorizontalAlignment="Center" HorizontalContentAlignment="Stretch" Padding="10">
+                  SelectedItem="{x:Bind ViewModel.SelectedApp, Mode=TwoWay}" SelectionMode="Single"
+                  HorizontalContentAlignment="Stretch" Padding="10"
+                  controls:ListViewBehaviour.FillBeforeWrap="True" controls:ListViewBehaviour.MinItemWidth="115">
             <GridView.ItemContainerStyle>
                 <Style TargetType="GridViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -25,7 +25,7 @@
             </GridView.ItemContainerStyle>
             <GridView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:AppViewModel">
-                    <Grid MaxHeight="300" MaxWidth="115" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                         <interactivity:Interaction.Behaviors>
                             <core:EventTriggerBehavior EventName="Loaded">
                                 <core:InvokeCommandAction Command="{x:Bind LoadIconSourceCommand}"/>
@@ -75,15 +75,6 @@
                 </core:EventTriggerBehavior>
             </interactivity:Interaction.Behaviors>
         </GridView>
-
-        <Border Visibility="{x:Bind ViewModel.ViewAppCommand.IsRunning, Mode=OneWay}">
-            <Border.Background>
-                <AcrylicBrush BackgroundSource="Backdrop" FallbackColor="{ThemeResource SystemChromeLowColor}"
-                              Opacity="0.95" TintColor="{ThemeResource SystemChromeLowColor}"
-                              TintLuminosityOpacity="0.5" TintOpacity="0.75"/>
-            </Border.Background>
-        </Border>
-        <ProgressRing IsActive="{x:Bind ViewModel.ViewAppCommand.IsRunning, Mode=OneWay}"/>
     </Grid>
 
 </Page>

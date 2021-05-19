@@ -8,6 +8,7 @@
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:viewmodels="using:FluentStore.ViewModels"
+    xmlns:controls="using:FluentStore.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -19,8 +20,9 @@
 
     <Grid>
         <GridView ItemsSource="{x:Bind ViewModel.Collections, Mode=OneWay}"
-              SelectedItem="{x:Bind ViewModel.SelectedCollection, Mode=TwoWay}" SelectionMode="Single"
-              HorizontalAlignment="Center" HorizontalContentAlignment="Stretch" Padding="10">
+                  SelectedItem="{x:Bind ViewModel.SelectedCollection, Mode=TwoWay}" SelectionMode="Single"
+                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="10"
+                  controls:ListViewBehaviour.FillBeforeWrap="True" controls:ListViewBehaviour.MinItemWidth="150">
             <GridView.ItemContainerStyle>
                 <Style TargetType="GridViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -29,19 +31,17 @@
             </GridView.ItemContainerStyle>
             <GridView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:CollectionViewModel">
-                    <Grid MaxHeight="300" MaxWidth="115" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                        <!--<interactivity:Interaction.Behaviors>
-                            <core:EventTriggerBehavior EventName="Loaded">
-                                <core:InvokeCommandAction Command="{x:Bind LoadIconSourceCommand}"/>
-                            </core:EventTriggerBehavior>
-                        </interactivity:Interaction.Behaviors>-->
-
+                    <Grid MaxHeight="300" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="115"/>
                             <!--<RowDefinition Height="125"/>-->
                         </Grid.RowDefinitions>
                         <Border Background="{ThemeResource SystemControlHighlightListMediumRevealBackgroundBrush}"/>
-                        <!--<Image Source="{x:Bind IconSource, Mode=OneWay}"/>-->
+                        <Viewbox>
+                            <TextBlock Text="{x:Bind Collection.TileGlyph}" TextLineBounds="Tight"
+                                       TextWrapping="NoWrap" FontSize="24" FontWeight="Bold" Padding="12"
+                                       d:Text="FS"/>
+                        </Viewbox>
                         <TextBlock Text="{x:Bind Collection.Name}" FontSize="12" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
                                    MaxLines="2" VerticalAlignment="Bottom" Padding="10"/>
                     </Grid>

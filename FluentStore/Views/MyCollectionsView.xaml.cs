@@ -18,11 +18,12 @@ namespace FluentStore.Views
             set => SetValue(ViewModelProperty, value);
         }
         public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register(nameof(ViewModel), typeof(MyCollectionsViewModel), typeof(MyCollectionsView), new PropertyMetadata(new MyCollectionsViewModel()));
+            DependencyProperty.Register(nameof(ViewModel), typeof(MyCollectionsViewModel), typeof(MyCollectionsView), new PropertyMetadata(null));
 
         public MyCollectionsView()
         {
-            this.InitializeComponent();
+            InitializeComponent();
+            ViewModel = new MyCollectionsViewModel();
         }
     }
 }

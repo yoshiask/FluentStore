@@ -1,7 +1,9 @@
 ﻿using FluentStore.Helpers;
 using FluentStore.Services;
 using FluentStore.ViewModels;
+using FluentStore.ViewModels.Messages;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using Microsoft.Toolkit.Mvvm.Messaging;
 using MicrosoftStore.Models;
 using StoreLib.Models;
 using StoreLib.Services;
@@ -26,7 +28,8 @@ namespace FluentStore.Views
     {
         public ProductDetailsView()
         {
-            this.InitializeComponent();
+            InitializeComponent();
+            ViewModel = new ProductDetailsViewModel();
         }
 
         public ProductDetailsViewModel ViewModel
@@ -35,7 +38,7 @@ namespace FluentStore.Views
             set => SetValue(ViewModelProperty, value);
         }
         public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register(nameof(ViewModel), typeof(ProductDetailsViewModel), typeof(ProductDetailsView), new PropertyMetadata(new ProductDetailsViewModel()));
+            DependencyProperty.Register(nameof(ViewModel), typeof(ProductDetailsViewModel), typeof(ProductDetailsView), new PropertyMetadata(null));
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
@@ -45,13 +48,15 @@ namespace FluentStore.Views
             {
                 ViewModel.Product = details;
             }
-            else if (e.Parameter is ViewModels.ProductDetailsViewModel vm)
+            else if (e.Parameter is ProductDetailsViewModel vm)
             {
                 ViewModel = vm;
             }
 
             if (ViewModel?.Product != null)
             {
+                WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Apps"));
+
                 string packageFamily = ViewModel.Product.PackageFamilyNames[0];
                 if (await PackageHelper.IsAppInstalledAsync(packageFamily))
                 {

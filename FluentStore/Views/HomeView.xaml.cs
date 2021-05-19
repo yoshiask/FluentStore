@@ -14,6 +14,7 @@ namespace FluentStore.Views
         public HomeView()
         {
             InitializeComponent();
+            ViewModel = new HomeViewModel();
         }
 
         public HomeViewModel ViewModel
@@ -22,6 +23,6 @@ namespace FluentStore.Views
             set => SetValue(ViewModelProperty, value);
         }
         public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register(nameof(ViewModel), typeof(HomeViewModel), typeof(HomeView), new PropertyMetadata(new HomeViewModel()));
+            DependencyProperty.Register(nameof(ViewModel), typeof(HomeViewModel), typeof(HomeView), new PropertyMetadata(null));
     }
 }

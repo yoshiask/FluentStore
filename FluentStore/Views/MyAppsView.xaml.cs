@@ -1,4 +1,6 @@
 ﻿using FluentStore.ViewModels;
+using FluentStore.ViewModels.Messages;
+using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -18,6 +20,7 @@ namespace FluentStore.Views
         public MyAppsView()
         {
             this.InitializeComponent();
+            ViewModel = new MyAppsViewModel();
         }
 
         public MyAppsViewModel ViewModel
@@ -26,16 +29,16 @@ namespace FluentStore.Views
             set => SetValue(ViewModelProperty, value);
         }
         public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register(nameof(ViewModel), typeof(MyAppsViewModel), typeof(MyAppsView), new PropertyMetadata(new MyAppsViewModel()));
+            DependencyProperty.Register(nameof(ViewModel), typeof(MyAppsViewModel), typeof(MyAppsView), new PropertyMetadata(null));
 
         private async void Page_Loading(FrameworkElement sender, object args)
         {
-            ViewModel.IsLoadingMyApps = true;
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
             ViewModel.Apps = new ObservableCollection<AppViewModelBase>();
             PackageManager pkgManager = new PackageManager();
 
             var appsList = new ObservableCollection<AppViewModelBase>();
-            foreach (var pkg in pkgManager.FindPackagesForUser("").OrderBy(p => p.DisplayName))
+            foreach (var pkg in pkgManager.FindPackagesForUser(string.Empty).OrderBy(p => p.DisplayName))
             {
                 var entry = (await pkg.GetAppListEntriesAsync()).FirstOrDefault();
                 if (entry != null)
@@ -50,7 +53,8 @@ namespace FluentStore.Views
                     });
                 }
             }
-            ViewModel.IsLoadingMyApps = false;
+
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
             //ViewModel.Apps = appsList;
         }
     }

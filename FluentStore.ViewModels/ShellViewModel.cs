@@ -1,5 +1,4 @@
-﻿using FSAPI = FluentStoreAPI.FluentStoreAPI;
-using FluentStore.Services;
+﻿using FluentStore.Services;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
@@ -11,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Toolkit.Mvvm.Messaging;
 
 namespace FluentStore.ViewModels
 {
@@ -22,12 +22,40 @@ namespace FluentStore.ViewModels
             SubmitQueryCommand = new AsyncRelayCommand<Product>(SubmitQueryAsync);
             SignInCommand = new AsyncRelayCommand(SignInAsync);
             SignOutCommand = new RelayCommand(UserService.SignOut);
+
+            WeakReferenceMessenger.Default.Register<Messages.PageLoadingMessage>(this, (r, m) =>
+            {
+                // Handle the message here, with r being the recipient and m being the
+                // input messenger. Using the recipient passed as input makes it so that
+                // the lambda expression doesn't capture "this", improving performance.
+                var self = (ShellViewModel)r;
+                self.IsPageLoading = m.Value;
+            });
+            WeakReferenceMessenger.Default.Register<Messages.SetPageHeaderMessage>(this, (r, m) =>
+            {
+                var self = (ShellViewModel)r;
+                self.PageHeader = m.Value;
+            });
         }
 
         private readonly IStorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<IStorefrontApi>();
         private readonly IMSStoreApi MSStoreApi = Ioc.Default.GetRequiredService<IMSStoreApi>();
         private readonly UserService UserService = Ioc.Default.GetRequiredService<UserService>();
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
+
+        private string _PageHeader;
+        public string PageHeader
+        {
+            get => _PageHeader;
+            set => SetProperty(ref _PageHeader, value);
+        }
+
+        private bool _IsPageLoading;
+        public bool IsPageLoading
+        {
+            get => _IsPageLoading;
+            set => SetProperty(ref _IsPageLoading, value);
+        }
 
         private ObservableCollection<Product> _SearchSuggestions = new ObservableCollection<Product>();
         public ObservableCollection<Product> SearchSuggestions

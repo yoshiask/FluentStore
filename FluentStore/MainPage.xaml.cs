@@ -1,5 +1,7 @@
 ﻿using FluentStore.Helpers;
+using FluentStore.ViewModels;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using System;
 using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -18,6 +20,14 @@ namespace FluentStore
     {
         private Services.NavigationService NavService { get; } = Ioc.Default.GetService<Services.INavigationService>() as Services.NavigationService;
         private Services.UserService UserService { get; } = Ioc.Default.GetService<Services.UserService>();
+        
+        public ShellViewModel ViewModel
+        {
+            get => (ShellViewModel)GetValue(ViewModelProperty);
+            set => SetValue(ViewModelProperty, value);
+        }
+        public static readonly DependencyProperty ViewModelProperty =
+            DependencyProperty.Register(nameof(ViewModel), typeof(ShellViewModel), typeof(MainPage), new PropertyMetadata(new ShellViewModel()));
 
         public MainPage()
         {
@@ -147,7 +157,8 @@ namespace FluentStore
                     MainNav.SelectedItem = null;
                     return;
                 }
-                MainNav.SelectedItem = MainNav.MenuItems.ToList().Find((obj) => (obj as NavigationViewItem)?.Tag == page);
+
+                MainNav.SelectedItem = MainNav.MenuItems.First(obj => (obj as NavigationViewItem)?.Tag == page);
             }
             catch
             {
@@ -178,6 +189,31 @@ namespace FluentStore
 
             if (pageInfo.PageType.BaseType == typeof(Page))
                 NavService.Navigate(pageInfo.PageType);
+        }
+
+        private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            // Set titlebar to page header when in compact
+            double CompactModeMinWidth = (double)App.Current.Resources["CompactModeMinWidth"];
+            if (e.NewSize.Width <= CompactModeMinWidth && e.PreviousSize.Width > CompactModeMinWidth)
+            {
+                var coreTitleBar = Windows.ApplicationModel.Core.CoreApplication.GetCurrentView().TitleBar;
+                coreTitleBar.LayoutMetricsChanged += CoreTitleBar_LayoutMetricsChanged;
+                // Set XAML element as a draggable region.
+                Window.Current.SetTitleBar(TitlebarGrid);
+            }
+            else if (e.NewSize.Width > CompactModeMinWidth && e.PreviousSize.Width <= CompactModeMinWidth)
+            {
+                var coreTitleBar = Windows.ApplicationModel.Core.CoreApplication.GetCurrentView().TitleBar;
+                coreTitleBar.LayoutMetricsChanged -= CoreTitleBar_LayoutMetricsChanged;
+                // Set XAML element as a draggable region.
+                Window.Current.SetTitleBar(null);
+            }
+        }
+
+        private void CoreTitleBar_LayoutMetricsChanged(Windows.ApplicationModel.Core.CoreApplicationViewTitleBar sender, object args)
+        {
+            //TitlebarRow.Height = new GridLength(sender.Height);
         }
     }
 }
