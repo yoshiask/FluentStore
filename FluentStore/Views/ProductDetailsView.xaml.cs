@@ -8,6 +8,7 @@ using StoreLib.Services;
 using System;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using Windows.UI.Text;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -59,25 +60,6 @@ namespace FluentStore.Views
             }
         }
 
-        private async void InstallButton_Click(SplitButton sender, SplitButtonClickEventArgs e)
-        {
-            InstallButton.IsEnabled = false;
-
-            ProgressDialog progressDialog = new ProgressDialog()
-            {
-                Title = ViewModel.Product.Title,
-                Body = "Fetching packages..."
-            };
-            SetUpPackageHelperCallbacks(progressDialog);
-            PackageHelper.PackageInstalledCallback = (product, package) => UpdateInstallButtonToLaunch();
-            progressDialog.ShowAsync();
-
-            await PackageHelper.InstallPackage(ViewModel.Product, false);
-
-            progressDialog.Hide();
-            InstallButton.IsEnabled = true;
-        }
-
         private async void MoreButton_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new ContentDialog()
@@ -106,6 +88,11 @@ namespace FluentStore.Views
         private void AddToCollection_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private async void InstallButton_Click(SplitButton sender, SplitButtonClickEventArgs e)
+        {
+            await HandleInstall(false);
         }
 
         private async void Download_Click(object sender, RoutedEventArgs e)
@@ -145,21 +132,7 @@ namespace FluentStore.Views
 
         private async void InstallUsingAppInstaller_Click(object sender, RoutedEventArgs e)
         {
-            InstallButton.IsEnabled = false;
-
-            ProgressDialog progressDialog = new ProgressDialog()
-            {
-                Title = ViewModel.Product.Title,
-                Body = "Fetching packages..."
-            };
-            SetUpPackageHelperCallbacks(progressDialog);
-            PackageHelper.PackageInstalledCallback = (product, package) => UpdateInstallButtonToLaunch();
-            progressDialog.ShowAsync();
-
-            await PackageHelper.InstallPackage(ViewModel.Product, true);
-
-            progressDialog.Hide();
-            InstallButton.IsEnabled = true;
+            await HandleInstall(true);
         }
 
         private void HeroImage_ImageOpened(object sender, RoutedEventArgs e)
@@ -238,6 +211,25 @@ namespace FluentStore.Views
             PackageHelper.PackageInstalledCallback = (product, package) => progressDialog.Hide();
 
             return progressDialog;
+        }
+
+        public async Task HandleInstall(bool? useAppInstaller = null)
+        {
+            InstallButton.IsEnabled = false;
+
+            ProgressDialog progressDialog = new ProgressDialog()
+            {
+                Title = ViewModel.Product.Title,
+                Body = "Fetching packages..."
+            };
+            SetUpPackageHelperCallbacks(progressDialog);
+            PackageHelper.PackageInstalledCallback = (product, package) => UpdateInstallButtonToLaunch();
+            progressDialog.ShowAsync();
+
+            await PackageHelper.InstallPackage(ViewModel.Product, useAppInstaller ?? Settings.Default.UseAppInstaller);
+
+            progressDialog.Hide();
+            InstallButton.IsEnabled = true;
         }
     }
 }

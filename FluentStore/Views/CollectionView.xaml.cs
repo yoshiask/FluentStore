@@ -11,6 +11,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Text;
@@ -64,51 +65,6 @@ namespace FluentStore.Views
             }
         }
 
-        private async void InstallButton_Click(SplitButton sender, SplitButtonClickEventArgs e)
-        {
-            InstallButton.IsEnabled = false;
-
-            var installingDialog = new ProgressDialog()
-            {
-                Title = ViewModel.Collection.Name,
-                Body = "Installing packages..."
-            };
-            installingDialog.ShowAsync();
-
-            int completedSteps = 0;
-            int totalSteps = ViewModel.Items.Count * 3;
-            foreach (ProductDetailsViewModel pdvm in ViewModel.Items)
-            {
-                MicrosoftStore.Models.ProductDetails product = pdvm.Product;
-
-                // Set callbacks
-                PackageHelper.GettingPackagesCallback = prod =>
-                {
-                    installingDialog.Body = prod.ShortTitle + "\r\nFetching packages...";
-                };
-                PackageHelper.PackageDownloadingCallback = (prod, pkg) =>
-                {
-                    installingDialog.Body = prod.ShortTitle + "\r\nDownloading package...";
-                    installingDialog.Progress = ++completedSteps / totalSteps;
-                };
-                PackageHelper.PackageInstallingCallback = (prod, pkg) =>
-                {
-                    installingDialog.Body = prod.ShortTitle + "\r\nInstalling package...";
-                    installingDialog.Progress = ++completedSteps / totalSteps;
-                };
-                PackageHelper.PackageInstalledCallback = (prod, pkg) =>
-                {
-                    installingDialog.Body = "Installed " + prod.ShortTitle + " version " + pkg.Version.ToString();
-                    installingDialog.Progress = ++completedSteps / totalSteps;
-                };
-
-                // Install package
-                await PackageHelper.InstallPackage(product, false);
-            }
-
-            InstallButton.IsEnabled = true;
-        }
-
         private async void MoreButton_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new ContentDialog()
@@ -137,6 +93,11 @@ namespace FluentStore.Views
         private void AddToCollection_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private async void InstallButton_Click(SplitButton sender, SplitButtonClickEventArgs e)
+        {
+            await HandleInstall(false);
         }
 
         private async void Download_Click(object sender, RoutedEventArgs e)
@@ -190,16 +151,50 @@ namespace FluentStore.Views
 
         private async void InstallUsingAppInstaller_Click(object sender, RoutedEventArgs e)
         {
+            await HandleInstall(true);
+        }
+
+        public async Task HandleInstall(bool? useAppInstaller = null)
+        {
             InstallButton.IsEnabled = false;
 
-            var gettingPackagesDialog = new ProgressDialog()
+            var installingDialog = new ProgressDialog()
             {
                 Title = ViewModel.Collection.Name,
-                Body = "Fetching packages..."
+                Body = "Getting ready..."
             };
-            PackageHelper.PackagesLoadedCallback = product => gettingPackagesDialog.Hide();
+            installingDialog.ShowAsync();
 
-            await PackageHelper.InstallPackage(ViewModel.Items[0].Product, true);
+            int completedSteps = 0;
+            int totalSteps = ViewModel.Items.Count * 3;
+            foreach (ProductDetailsViewModel pdvm in ViewModel.Items)
+            {
+                MicrosoftStore.Models.ProductDetails product = pdvm.Product;
+
+                // Set callbacks
+                PackageHelper.GettingPackagesCallback = prod =>
+                {
+                    installingDialog.Body = prod.ShortTitle + "\r\nFetching packages...";
+                };
+                PackageHelper.PackageDownloadingCallback = (prod, pkg) =>
+                {
+                    installingDialog.Body = prod.ShortTitle + "\r\nDownloading package...";
+                    installingDialog.Progress = ++completedSteps / totalSteps;
+                };
+                PackageHelper.PackageInstallingCallback = (prod, pkg) =>
+                {
+                    installingDialog.Body = prod.ShortTitle + "\r\nInstalling package...";
+                    installingDialog.Progress = ++completedSteps / totalSteps;
+                };
+                PackageHelper.PackageInstalledCallback = (prod, pkg) =>
+                {
+                    installingDialog.Body = "Installed " + prod.ShortTitle + " version " + pkg.Version.ToString();
+                    installingDialog.Progress = ++completedSteps / totalSteps;
+                };
+
+                // Install package
+                await PackageHelper.InstallPackage(product, useAppInstaller ?? Settings.Default.UseAppInstaller);
+            }
 
             InstallButton.IsEnabled = true;
         }
