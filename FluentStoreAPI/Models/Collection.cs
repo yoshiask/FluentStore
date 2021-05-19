@@ -22,5 +22,7 @@ namespace FluentStoreAPI.Models
         {
             Items = objItems.Cast<string>().ToList();
         }
+
+        public bool IsPrivate => !IsPublic;
     }
 }

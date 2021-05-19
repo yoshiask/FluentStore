@@ -118,9 +118,9 @@
                         <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.AuthorName, Mode=OneWay}"
                                    d:Text="YoshiAsk"/>
                         <Ellipse Width="3" Height="3" VerticalAlignment="Center" Fill="{ThemeResource SystemBaseHighColor}"
-                                 StrokeThickness="0" Visibility="{x:Bind ViewModel.Collection.IsPublic, Converter={StaticResource BoolToVisibilityConverter}}" />
-                        <FontIcon Glyph="&#xE72E;" Visibility="{x:Bind ViewModel.Collection.IsPublic, Converter={StaticResource BoolToVisibilityConverter}}" />
-                        <TextBlock Text="Private" Visibility="{x:Bind ViewModel.Collection.IsPublic, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                 StrokeThickness="0" Visibility="{x:Bind ViewModel.Collection.IsPrivate, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <FontIcon Glyph="&#xE72E;" Visibility="{x:Bind ViewModel.Collection.IsPrivate, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <TextBlock Text="Private" Visibility="{x:Bind ViewModel.Collection.IsPrivate, Converter={StaticResource BoolToVisibilityConverter}}" />
                     </StackPanel>
                     <HyperlinkButton x:Name="MoreButton" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Right"
                                      Click="MoreButton_Click" Content="More" RelativePanel.Below="DescriptionBlock"
