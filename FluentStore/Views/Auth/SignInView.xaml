@@ -15,13 +15,16 @@
 
     <Grid x:Name="MainGrid" VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="300" Margin="10">
         <StackPanel Spacing="10" HorizontalAlignment="Stretch">
+            <TextBlock Text="Fluent Store Social" Style="{ThemeResource SubtitleTextBlockStyle}"
+                       TextLineBounds="Tight"/>
             <TextBlock Text="{x:Bind ViewModel.FailReason, Mode=OneWay}" IsTextSelectionEnabled="True"
                        Visibility="{x:Bind ViewModel.FailReason, Converter={StaticResource StringVisConverter}, Mode=OneWay}"
-                       Foreground="{ThemeResource SystemControlErrorTextForegroundBrush}"/>
+                       Foreground="{ThemeResource SystemControlErrorTextForegroundBrush}"
+                       d:Visibility="Collapsed"/>
             <TextBox Text="{x:Bind ViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      PlaceholderText="Email"/>
             <PasswordBox Password="{x:Bind ViewModel.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         PlaceholderText="Password"/>
+                         PlaceholderText="Password" KeyDown="PasswordBox_KeyDown"/>
             <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
                 <HyperlinkButton Content="Sign up" Command="{x:Bind ViewModel.SignUpCommand}"/>
                 <Button Content="Log in" Style="{ThemeResource AccentButtonStyle}" Command="{x:Bind ViewModel.SignInCommand}"/>
