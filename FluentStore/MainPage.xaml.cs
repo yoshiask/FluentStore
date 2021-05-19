@@ -58,6 +58,19 @@ namespace FluentStore
                 foreach (NavigationViewItem navItem in MainNav.MenuItems)
                     if (((PageInfo)navItem.Tag).RequiresSignIn)
                         navItem.Visibility = Visibility.Collapsed;
+
+                // If the current page requires sign in, navigate away
+                if (RequiresSignInAttribute.IsPresent(MainFrame.Content))
+                    NavService.Navigate(typeof(Views.HomeView));
+
+                // Remove all pages from the back stack
+                // that require authentication
+                var backStack = MainFrame.BackStack.ToArray();
+                foreach (PageStackEntry entry in backStack)
+                {
+                    if (RequiresSignInAttribute.IsPresent(entry.SourcePageType))
+                        MainFrame.BackStack.Remove(entry);
+                }
             }
         }
 
@@ -119,13 +132,22 @@ namespace FluentStore
                 // Update the NavView when the frame navigates on its own.
                 // This is in a try-catch block so that I don't have to do a dozen
                 // null checks.
+
+                // If the user is not signed in but current page requires it, navigate away
+                bool requiresSignIn = RequiresSignInAttribute.IsPresent(e.SourcePageType);
+                if (requiresSignIn && !UserService.IsLoggedIn)
+                {
+                    MainNav.SelectedItem = null;
+                    return;
+                }
+
                 var page = NavigationHelper.Pages.Find((info) => info.PageType == e.SourcePageType);
                 if (page == null)
                 {
                     MainNav.SelectedItem = null;
                     return;
                 }
-                MainNav.SelectedItem = MainNav.MenuItems.ToList().Find((obj) => (obj as NavigationViewItem).Tag == page);
+                MainNav.SelectedItem = MainNav.MenuItems.ToList().Find((obj) => (obj as NavigationViewItem)?.Tag == page);
             }
             catch
             {
@@ -141,20 +163,20 @@ namespace FluentStore
                 return;
             }
 
-            if (!(args.SelectedItem is Microsoft.UI.Xaml.Controls.NavigationViewItem navItem))
+            if (!(args.SelectedItem is NavigationViewItem navItem))
             {
                 NavService.Navigate(typeof(Views.HomeView));
                 return;
             }
 
-            PageInfo pageInfo = NavigationHelper.Pages.Find((info) => info.Title == navItem.Content.ToString());
+            PageInfo pageInfo = NavigationHelper.Pages.Find((info) => info == navItem.Tag);
             if (pageInfo == null)
             {
                 NavService.Navigate(typeof(Views.HomeView));
                 return;
             }
 
-            if (pageInfo != null && pageInfo.PageType.BaseType == typeof(Page))
+            if (pageInfo.PageType.BaseType == typeof(Page))
                 NavService.Navigate(pageInfo.PageType);
         }
     }

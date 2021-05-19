@@ -130,6 +130,7 @@
     <Compile Include="Helpers\ObservableSettings.cs" />
     <Compile Include="Helpers\PackageHelper.cs" />
     <Compile Include="Helpers\PasswordVaultService.cs" />
+    <Compile Include="Helpers\RequiresSignInAttribute.cs" />
     <Compile Include="Helpers\Settings.cs" />
     <Compile Include="Helpers\StringEx.cs" />
     <Compile Include="MainPage.xaml.cs">

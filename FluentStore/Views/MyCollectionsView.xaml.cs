@@ -9,6 +9,7 @@ namespace FluentStore.Views
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
+    [Helpers.RequiresSignIn]
     public sealed partial class MyCollectionsView : Page
     {
         public MyCollectionsViewModel ViewModel
