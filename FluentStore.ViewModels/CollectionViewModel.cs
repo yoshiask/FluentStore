@@ -19,19 +19,25 @@ namespace FluentStore.ViewModels
     {
         public CollectionViewModel()
         {
-            ViewItemCommand = new RelayCommand(ViewItem);
-            LoadItemsCommand = new AsyncRelayCommand(LoadItemsAsync);
+            SetUpCommands();
         }
         public CollectionViewModel(Collection collection)
         {
+            SetUpCommands();
+            Collection = collection;
+        }
+
+        private void SetUpCommands()
+        {
             ViewItemCommand = new RelayCommand(ViewItem);
             LoadItemsCommand = new AsyncRelayCommand(LoadItemsAsync);
-            Collection = collection;
+            UpdateCollectionCommand = new AsyncRelayCommand<Collection>(UpdateCollectionAsync);
         }
 
         private readonly IStorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<IStorefrontApi>();
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
         private readonly FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
+        private readonly UserService UserService = Ioc.Default.GetRequiredService<UserService>();
 
         private Collection _Collection;
         public Collection Collection
@@ -96,6 +102,13 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _LoadItemsCommand, value);
         }
 
+        private IAsyncRelayCommand<Collection> _UpdateCollectionCommand;
+        public IAsyncRelayCommand<Collection> UpdateCollectionCommand
+        {
+            get => _UpdateCollectionCommand;
+            set => SetProperty(ref _UpdateCollectionCommand, value);
+        }
+
         public void ViewItem()
         {
             if (SelectedItem == null)
@@ -127,6 +140,12 @@ namespace FluentStore.ViewModels
             }
             
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+        }
+
+        public async Task UpdateCollectionAsync(Collection newCollection)
+        {
+            await FSApi.UpdateCollectionAsync(UserService.CurrentFirebaseUser.LocalID, newCollection);
+            Collection = await FSApi.GetCollectionAsync(UserService.CurrentFirebaseUser.LocalID, newCollection.Id.ToString());
         }
     }
 }

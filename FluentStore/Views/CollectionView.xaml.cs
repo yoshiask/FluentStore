@@ -200,5 +200,15 @@ namespace FluentStore.Views
 
             InstallButton.IsEnabled = true;
         }
+
+        private async void EditButton_Click(object sender, RoutedEventArgs e)
+        {
+            var editDialog = new EditCollectionDetailsDialog(ViewModel.Collection);
+            if (await editDialog.ShowAsync() == ContentDialogResult.Primary)
+            {
+                // User wants to save
+                await ViewModel.UpdateCollectionAsync(editDialog.Collection);
+            }
+        }
     }
 }

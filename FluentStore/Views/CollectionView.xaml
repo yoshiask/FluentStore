@@ -14,7 +14,8 @@
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:tkconverters="using:Microsoft.Toolkit.Uwp.UI.Converters"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    x:DefaultBindMode="OneWay">
     <Page.Resources>
         <tkconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <tkconverters:CollectionVisibilityConverter x:Key="CollectionVisibilityConverter"/>
@@ -29,7 +30,12 @@
     </interactivity:Interaction.Behaviors>
 
     <Grid>
-        <ScrollViewer Grid.Row="1" Grid.RowSpan="2" x:Name="ContentScroller">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <ScrollViewer x:Name="ContentScroller">
             <StackPanel Spacing="20">
                 <Grid Padding="20" ColumnSpacing="20" Margin="20,20,20,0" MaxHeight="300"
                       Background="{ThemeResource SystemControlAcrylicElementMediumHighBrush}"
@@ -195,6 +201,11 @@
             </StackPanel>
         </ScrollViewer>
 
+        <CommandBar Grid.Row="1" DefaultLabelPosition="Right">
+            <AppBarButton Icon="Edit" Label="Edit details" Click="EditButton_Click"/>
+            <AppBarButton Icon="Add" Label="Add"/>
+        </CommandBar>
+        
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
                 <VisualState>

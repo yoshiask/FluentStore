@@ -1,0 +1,30 @@
+﻿<ContentDialog
+    x:Class="FluentStore.Views.EditCollectionDetailsDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FluentStore.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Edit collection details"
+    PrimaryButtonText="Save"
+    SecondaryButtonText="Cancel"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+    Loaded="ContentDialog_Loaded">
+
+    <Grid RowSpacing="4">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBox x:Name="NameBox" PlaceholderText="Name" Header="Name"
+                 Grid.Row="0"/>
+        <TextBox x:Name="TileGlyphBox" PlaceholderText="Tile glyph" Header="Tile glyph"
+                 Grid.Row="1"/>
+        <ToggleSwitch x:Name="IsPublicSwitch" OnContent="Public" OffContent="Private"
+                      Grid.Row="2"/>
+    </Grid>
+    
+</ContentDialog>
