@@ -18,8 +18,9 @@ namespace FluentStore.Views
 
         private void ContentDialog_Loaded(object sender, RoutedEventArgs e)
         {
-            NameBox.Text = Collection.Name;
-            TileGlyphBox.Text = Collection.TileGlyph;
+            NameBox.Text = Collection.Name ?? string.Empty;
+            TileGlyphBox.Text = Collection.TileGlyph ?? string.Empty;
+            DescriptionBox.Text = Collection.Description ?? string.Empty;
             IsPublicSwitch.IsOn = Collection.IsPublic;
         }
 
@@ -27,6 +28,7 @@ namespace FluentStore.Views
         {
             Collection.Name = NameBox.Text;
             Collection.TileGlyph = TileGlyphBox.Text;
+            Collection.Description = DescriptionBox.Text;
             Collection.IsPublic = IsPublicSwitch.IsOn;
         }
     }
