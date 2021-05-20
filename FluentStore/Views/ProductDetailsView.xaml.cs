@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Windows.UI.Text;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
 
@@ -90,9 +91,36 @@ namespace FluentStore.Views
             return;
         }
 
-        private void AddToCollection_Click(object sender, RoutedEventArgs e)
+        private async void AddToCollection_Click(object sender, RoutedEventArgs e)
         {
+            var FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
+            string userId = Ioc.Default.GetRequiredService<UserService>().CurrentFirebaseUser.LocalID;
+            var flyout = new MenuFlyout();
+            foreach (FluentStoreAPI.Models.Collection collection in await FSApi.GetCollectionsAsync(userId))
+            {
+                var item = new MenuFlyoutItem
+                {
+                    Text = collection.Name,
+                    Tag = collection
+                };
+                item.Click += (object s, RoutedEventArgs e) =>
+                {
+                    var it = (MenuFlyoutItem)s;
+                    var col = (FluentStoreAPI.Models.Collection)it.Tag;
+                    col.Items.Add(ViewModel.Product.ProductId);
+                };
+                flyout.Items.Add(item);
+            }
+            flyout.Closed += async (s, e) =>
+            {
+                foreach (var it in ((MenuFlyout)s).Items)
+                {
+                    var col = (FluentStoreAPI.Models.Collection)it.Tag;
+                    await FSApi.UpdateCollectionAsync(userId, col);
+                }
+            };
 
+            flyout.ShowAt((Button)sender);
         }
 
         private async void InstallButton_Click(SplitButton sender, SplitButtonClickEventArgs e)
@@ -130,7 +158,7 @@ namespace FluentStore.Views
             progressDialog.ShowAsync();
 
             await PackageHelper.DownloadPackage(ViewModel.Product);
-            
+
             progressDialog.Hide();
             InstallButton.IsEnabled = true;
         }

@@ -203,7 +203,6 @@
 
         <CommandBar Grid.Row="1" DefaultLabelPosition="Right">
             <AppBarButton Icon="Edit" Label="Edit details" Click="EditButton_Click"/>
-            <AppBarButton Icon="Add" Label="Add"/>
         </CommandBar>
         
         <VisualStateManager.VisualStateGroups>

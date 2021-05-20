@@ -108,7 +108,7 @@
                         <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Spacing="10">
                             <TextBlock Text="{x:Bind ViewModel.Product.DisplayPrice, Mode=OneWay}" VerticalAlignment="Center"
                                        FontSize="16" FontWeight="SemiBold"/>
-                            <Button Click="AddToCollection_Click" Padding="10" Background="{ThemeResource SystemChromeAltHighColor}" Visibility="Collapsed">
+                            <Button Click="AddToCollection_Click" Padding="10" Background="{ThemeResource SystemChromeAltHighColor}">
                                 <StackPanel Orientation="Horizontal" Spacing="10">
                                     <FontIcon Glyph="&#xECCD;" />
                                     <TextBlock Text="Add to collection" />
