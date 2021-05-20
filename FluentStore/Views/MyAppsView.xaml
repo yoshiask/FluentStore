@@ -32,27 +32,10 @@
                             </core:EventTriggerBehavior>
                         </interactivity:Interaction.Behaviors>
 
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="115"/>
-                            <!--<RowDefinition Height="125"/>-->
-                        </Grid.RowDefinitions>
                         <Border Background="{ThemeResource SystemControlHighlightListMediumRevealBackgroundBrush}"/>
                         <Image Source="{x:Bind IconSource, Mode=OneWay}"/>
                         <TextBlock Text="{Binding DisplayName}" FontSize="12" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
-                               MaxLines="2" VerticalAlignment="Bottom" Padding="10"/>
-                        <!--<Grid Grid.Row="1" Padding="10">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <StackPanel Spacing="5" Grid.Row="0">
-                            <TextBlock Text="{x:Bind DisplayName}" FontWeight="SemiBold"
-                                       TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxLines="2"/>
-                            <TextBlock Text="{x:Bind Description}" TextWrapping="Wrap" TextTrimming="WordEllipsis"
-                                       MaxLines="3"/>
-                        </StackPanel>
-                        <TextBlock Grid.Row="1" Text="{x:Bind Entry.AppUserModelId}" VerticalAlignment="Bottom"/>
-                    </Grid>-->
+                                   MaxLines="2" VerticalAlignment="Bottom" Padding="10"/>
                     </Grid>
                 </DataTemplate>
             </GridView.ItemTemplate>
