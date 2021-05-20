@@ -1,4 +1,6 @@
 ﻿using FluentStore.ViewModels;
+using FluentStoreAPI.Models;
+using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -24,6 +26,16 @@ namespace FluentStore.Views
         {
             InitializeComponent();
             ViewModel = new MyCollectionsViewModel();
+        }
+
+        private async void NewButton_Click(object sender, RoutedEventArgs e)
+        {
+            var editDialog = new EditCollectionDetailsDialog(new Collection());
+            if (await editDialog.ShowAsync() == ContentDialogResult.Primary)
+            {
+                // User wants to save
+                await ViewModel.UpdateCollectionAsync(editDialog.Collection);
+            }
         }
     }
 }

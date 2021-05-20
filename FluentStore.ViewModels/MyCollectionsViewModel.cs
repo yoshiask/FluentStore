@@ -5,6 +5,7 @@ using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
 using Microsoft.Toolkit.Mvvm.Messaging;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -56,6 +57,15 @@ namespace FluentStore.ViewModels
         public async Task ViewCollectionAsync()
         {
             NavService.Navigate(SelectedCollection);
+        }
+
+        public async Task UpdateCollectionAsync(Collection newCollection)
+        {
+            // Make sure collection has a unique ID
+            if (newCollection.Id == Guid.Empty)
+                newCollection.Id = Guid.NewGuid();
+            await FSApi.UpdateCollectionAsync(UserService.CurrentFirebaseUser.LocalID, newCollection);
+            await LoadCollectionsAsync();
         }
 
         public async Task LoadCollectionsAsync()

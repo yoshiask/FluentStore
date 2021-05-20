@@ -19,6 +19,11 @@
     </interactivity:Interaction.Behaviors>
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
         <GridView ItemsSource="{x:Bind ViewModel.Collections, Mode=OneWay}"
                   SelectedItem="{x:Bind ViewModel.SelectedCollection, Mode=TwoWay}" SelectionMode="Single"
                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="10"
@@ -67,14 +72,9 @@
             </interactivity:Interaction.Behaviors>
         </GridView>
 
-        <Border Visibility="{x:Bind ViewModel.ViewCollectionCommand.IsRunning, Mode=OneWay}">
-            <Border.Background>
-                <AcrylicBrush BackgroundSource="Backdrop" FallbackColor="{ThemeResource SystemChromeLowColor}"
-                              Opacity="0.95" TintColor="{ThemeResource SystemChromeLowColor}"
-                              TintLuminosityOpacity="0.5" TintOpacity="0.75"/>
-            </Border.Background>
-        </Border>
-        <ProgressRing IsActive="{x:Bind ViewModel.ViewCollectionCommand.IsRunning, Mode=OneWay}"/>
+        <CommandBar Grid.Row="1" DefaultLabelPosition="Right">
+            <AppBarButton Icon="Add" Label="New" Click="NewButton_Click"/>
+        </CommandBar>
     </Grid>
     
 </Page>
