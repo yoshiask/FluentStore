@@ -107,6 +107,7 @@ namespace FluentStore.Views
                 {
                     var it = (MenuFlyoutItem)s;
                     var col = (FluentStoreAPI.Models.Collection)it.Tag;
+                    col.Items ??= new System.Collections.Generic.List<string>(1);
                     col.Items.Add(ViewModel.Product.ProductId);
                 };
                 flyout.Items.Add(item);
@@ -263,6 +264,33 @@ namespace FluentStore.Views
 
             progressDialog.Hide();
             InstallButton.IsEnabled = true;
+        }
+
+        private void InfoCard_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+
+        }
+
+        private void SetVisualState(UIElement elem, string stateName)
+        {
+            if (elem is Panel pnl)
+                foreach (UIElement subElem in pnl.Children)
+                    SetVisualState(subElem, stateName);
+            else if (typeof(Control).IsAssignableFrom(elem.GetType()))
+                VisualStateManager.GoToState((Control)elem, stateName, true);
+        }
+
+        private void TitleBlock_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (TitleBlock.IsTextTrimmed)
+            {
+                // Title is being trimmed, switch to compact styles
+                SetVisualState(InfoCard, "Compact");
+            }
+            else
+            {
+                SetVisualState(InfoCard, "Full");
+            }
         }
     }
 }
