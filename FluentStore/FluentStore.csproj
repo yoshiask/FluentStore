@@ -120,6 +120,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\CompactGrid.cs" />
     <Compile Include="Controls\IconButton.cs" />
     <Compile Include="Controls\ListViewBehavior.cs" />
     <Compile Include="Controls\ProductCard.cs" />

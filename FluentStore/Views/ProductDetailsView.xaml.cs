@@ -95,7 +95,10 @@ namespace FluentStore.Views
         {
             var FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
             string userId = Ioc.Default.GetRequiredService<UserService>().CurrentFirebaseUser.LocalID;
-            var flyout = new MenuFlyout();
+            var flyout = new MenuFlyout
+            {
+                Placement = FlyoutPlacementMode.BottomEdgeAlignedLeft
+            };
             foreach (FluentStoreAPI.Models.Collection collection in await FSApi.GetCollectionsAsync(userId))
             {
                 var item = new MenuFlyoutItem
@@ -271,25 +274,17 @@ namespace FluentStore.Views
 
         }
 
-        private void SetVisualState(UIElement elem, string stateName)
+        private void Title_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (elem is Panel pnl)
-                foreach (UIElement subElem in pnl.Children)
-                    SetVisualState(subElem, stateName);
-            else if (typeof(Control).IsAssignableFrom(elem.GetType()))
-                VisualStateManager.GoToState((Control)elem, stateName, true);
-        }
-
-        private void TitleBlock_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            if (TitleBlock.IsTextTrimmed)
+            double remainingSpace = TitleBorder.ActualWidth - TitleBlock.ActualWidth;
+            if (TitleBlock.IsTextTrimmed || remainingSpace <= 100)
             {
                 // Title is being trimmed, switch to compact styles
-                SetVisualState(InfoCard, "Compact");
+                Controls.CompactGrid.SetCompactState(InfoCard);
             }
             else
             {
-                SetVisualState(InfoCard, "Full");
+                Controls.CompactGrid.SetFullState(InfoCard);
             }
         }
     }
