@@ -35,7 +35,7 @@
                         <RowDefinition Height="150"/>
                     </Grid.RowDefinitions>
                     <Rectangle Fill="{x:Bind AppIcon.BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}"/>
-                    <toolkit:ImageEx CacheMode="BitmapCache" CachingStrategy="Internal">
+                    <toolkit:ImageEx CacheMode="BitmapCache">
                         <toolkit:ImageEx.Source>
                             <BitmapImage UriSource="{x:Bind AppIcon.Uri}"/>
                         </toolkit:ImageEx.Source>
