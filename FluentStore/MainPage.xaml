@@ -20,9 +20,11 @@
 
         <winui:NavigationView.PaneHeader>
             <StackPanel Orientation="Horizontal">
-                <FontIcon Glyph="&#xE14D;" />
+                <Viewbox>
+                    <Image Source="/Assets/Square71x71Logo.png"/>
+                </Viewbox>
                 <TextBlock Text="Fluent Store" Style="{ThemeResource SubtitleTextBlockStyle}"
-                           VerticalAlignment="Center" Margin="5,0" FontSize="20"/>
+                           VerticalAlignment="Center" Margin="4,0" FontSize="20"/>
             </StackPanel>
         </winui:NavigationView.PaneHeader>
 

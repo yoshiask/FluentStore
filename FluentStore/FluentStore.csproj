@@ -177,6 +177,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\AppPackageAppList.targetsize-24.png" />
+    <Content Include="Assets\Square310x310Logo.scale-200.png" />
+    <Content Include="Assets\Square71x71Logo.scale-200.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
