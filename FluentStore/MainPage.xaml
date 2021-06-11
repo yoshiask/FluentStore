@@ -8,8 +8,9 @@
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     xmlns:tkconverters="using:Microsoft.Toolkit.Uwp.UI.Converters"
     mc:Ignorable="d"
-    SizeChanged="Page_SizeChanged">
-    <!--Background="{ThemeResource SystemControlAcrylicWindowBrush}"-->
+    SizeChanged="Page_SizeChanged"
+    Background="{ThemeResource SystemControlAcrylicWindowBrush}">
+    
     <Page.Resources>
         <tkconverters:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
     </Page.Resources>
