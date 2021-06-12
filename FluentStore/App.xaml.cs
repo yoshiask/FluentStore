@@ -38,6 +38,7 @@ namespace FluentStore
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
+            ExtendIntoTitlebar();
             Frame rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
@@ -58,11 +59,6 @@ namespace FluentStore
                 Window.Current.Content = rootFrame;
             }
             (Ioc.Default.GetService<INavigationService>() as NavigationService).AppFrame = rootFrame;
-
-            var coreTitleBar = CoreApplication.GetCurrentView().TitleBar;
-            coreTitleBar.ExtendViewIntoTitleBar = true;
-            ApplicationView.GetForCurrentView().TitleBar.ButtonForegroundColor = (Color)App.Current.Resources["SystemBaseHighColor"];
-            ApplicationView.GetForCurrentView().TitleBar.ButtonBackgroundColor = Colors.Transparent;
 
             if (e.PrelaunchActivated == false)
             {
@@ -136,6 +132,15 @@ namespace FluentStore
             services.AddSingleton(typeof(LoggerService));
 
             return services.BuildServiceProvider();
+        }
+
+        private static void ExtendIntoTitlebar()
+        {
+            var coreTitleBar = CoreApplication.GetCurrentView().TitleBar;
+            coreTitleBar.ExtendViewIntoTitleBar = true;
+            ApplicationView.GetForCurrentView().TitleBar.ButtonForegroundColor = (Color)App.Current.Resources["SystemBaseHighColor"];
+            ApplicationView.GetForCurrentView().TitleBar.ButtonBackgroundColor = Colors.Transparent;
+            ApplicationView.GetForCurrentView().TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
         }
     }
 }

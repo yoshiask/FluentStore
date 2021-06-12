@@ -94,35 +94,52 @@ namespace FluentStore.Views
         private async void AddToCollection_Click(object sender, RoutedEventArgs e)
         {
             var FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
-            string userId = Ioc.Default.GetRequiredService<UserService>().CurrentFirebaseUser.LocalID;
-            var flyout = new MenuFlyout
+            var userService = Ioc.Default.GetRequiredService<UserService>();
+            FlyoutBase flyout;
+            if (!userService.IsLoggedIn)
             {
-                Placement = FlyoutPlacementMode.BottomEdgeAlignedLeft
-            };
-            foreach (FluentStoreAPI.Models.Collection collection in await FSApi.GetCollectionsAsync(userId))
-            {
-                var item = new MenuFlyoutItem
+                flyout = new Flyout
                 {
-                    Text = collection.Name,
-                    Tag = collection
+                    Content = new TextBlock
+                    {
+                        Text = "Please create an account or\r\nlog in to access this feature.",
+                        TextWrapping = TextWrapping.Wrap
+                    },
+                    Placement = FlyoutPlacementMode.Bottom
                 };
-                item.Click += (object s, RoutedEventArgs e) =>
-                {
-                    var it = (MenuFlyoutItem)s;
-                    var col = (FluentStoreAPI.Models.Collection)it.Tag;
-                    col.Items ??= new System.Collections.Generic.List<string>(1);
-                    col.Items.Add(ViewModel.Product.ProductId);
-                };
-                flyout.Items.Add(item);
             }
-            flyout.Closed += async (s, e) =>
+            else
             {
-                foreach (var it in ((MenuFlyout)s).Items)
+                string userId = userService.CurrentFirebaseUser.LocalID;
+                flyout = new MenuFlyout
                 {
-                    var col = (FluentStoreAPI.Models.Collection)it.Tag;
-                    await FSApi.UpdateCollectionAsync(userId, col);
+                    Placement = FlyoutPlacementMode.BottomEdgeAlignedLeft
+                };
+                foreach (FluentStoreAPI.Models.Collection collection in await FSApi.GetCollectionsAsync(userId))
+                {
+                    var item = new MenuFlyoutItem
+                    {
+                        Text = collection.Name,
+                        Tag = collection
+                    };
+                    item.Click += (object s, RoutedEventArgs e) =>
+                    {
+                        var it = (MenuFlyoutItem)s;
+                        var col = (FluentStoreAPI.Models.Collection)it.Tag;
+                        col.Items ??= new System.Collections.Generic.List<string>(1);
+                        col.Items.Add(ViewModel.Product.ProductId);
+                    };
+                    ((MenuFlyout)flyout).Items.Add(item);
                 }
-            };
+                flyout.Closed += async (s, e) =>
+                {
+                    foreach (var it in ((MenuFlyout)s).Items)
+                    {
+                        var col = (FluentStoreAPI.Models.Collection)it.Tag;
+                        await FSApi.UpdateCollectionAsync(userId, col);
+                    }
+                };
+            }
 
             flyout.ShowAt((Button)sender);
         }

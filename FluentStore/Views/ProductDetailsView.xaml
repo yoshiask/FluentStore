@@ -105,14 +105,13 @@
                             </Image>
                         </Viewbox>
                         <Border x:Name="TitleBorder" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                                SizeChanged="Title_SizeChanged" Background="Blue">
+                                SizeChanged="Title_SizeChanged">
                             <TextBlock Text="{x:Bind ViewModel.Product.Title}" ToolTipService.ToolTip="{x:Bind ViewModel.Product.Title}"
                                        HorizontalAlignment="Left" FontSize="30" FontWeight="Bold" TextTrimming="CharacterEllipsis"
                                        x:Name="TitleBlock"/>
                         </Border>
                         <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                    x:Name="ButtonStack" Orientation="Horizontal" Spacing="10"
-                                    Background="Red">
+                                    x:Name="ButtonStack" Orientation="Horizontal" Spacing="10">
                             <TextBlock Text="{x:Bind ViewModel.Product.DisplayPrice, Mode=OneWay}" VerticalAlignment="Center"
                                        FontSize="16" FontWeight="SemiBold"/>
                             <Button Click="AddToCollection_Click" Padding="10" Background="{ThemeResource SystemChromeAltHighColor}">
@@ -122,11 +121,11 @@
                                     <FontIcon Glyph="&#xE70D;" FontSize="12"/>
                                 </StackPanel>
                             </Button>
-                            <controls:IconButton Content="Add to Collection">
+                            <!--<controls:IconButton Content="Add to Collection">
                                 <controls:IconButton.Icon>
                                     <FontIcon Glyph="&#xECCD;" />
                                 </controls:IconButton.Icon>
-                            </controls:IconButton>
+                            </controls:IconButton>-->
                             <SplitButton x:Name="InstallButton" Padding="10" Click="InstallButton_Click" CornerRadius="2"
                                          BorderThickness="0" VerticalAlignment="Stretch">
                                 <StackPanel Orientation="Horizontal" Spacing="10">
