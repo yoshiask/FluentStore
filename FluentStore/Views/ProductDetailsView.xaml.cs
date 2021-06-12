@@ -144,7 +144,7 @@ namespace FluentStore.Views
             flyout.ShowAt((Button)sender);
         }
 
-        private async void InstallButton_Click(SplitButton sender, SplitButtonClickEventArgs e)
+        private async void InstallButton_Click(object sender, RoutedEventArgs e)
         {
             await HandleInstall(false);
         }
@@ -221,10 +221,10 @@ namespace FluentStore.Views
         private void UpdateInstallButtonToLaunch()
         {
             string packageFamily = ViewModel.Product.PackageFamilyNames[0];
-            InstallButtonText.Text = "Launch";
+            InstallButton.Label = "Launch";
             InstallUsingAppInstallerMenuItem.IsEnabled = false;
             InstallButton.Click -= InstallButton_Click;
-            InstallButton.Click += async (SplitButton sender, SplitButtonClickEventArgs e) =>
+            InstallButton.Click += async (object sender, RoutedEventArgs e) =>
             {
                 var app = await PackageHelper.GetAppByPackageFamilyNameAsync(packageFamily);
                 await app.LaunchAsync();
@@ -284,25 +284,6 @@ namespace FluentStore.Views
 
             progressDialog.Hide();
             InstallButton.IsEnabled = true;
-        }
-
-        private void InfoCard_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-
-        }
-
-        private void Title_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            double remainingSpace = TitleBorder.ActualWidth - TitleBlock.ActualWidth;
-            if (TitleBlock.IsTextTrimmed || remainingSpace <= 100)
-            {
-                // Title is being trimmed, switch to compact styles
-                Controls.CompactGrid.SetCompactState(InfoCard);
-            }
-            else
-            {
-                Controls.CompactGrid.SetFullState(InfoCard);
-            }
         }
     }
 }
