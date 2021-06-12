@@ -22,6 +22,11 @@
     </Page.Resources>
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
         <ParallaxView Source="{x:Bind ContentScroller}" VerticalShift="200" VerticalSourceOffsetKind="Absolute">
             <Image x:Name="HeroImage" VerticalAlignment="Top" HorizontalAlignment="Left" Stretch="Uniform">
                 <Image.Source>
@@ -30,7 +35,7 @@
             </Image>
         </ParallaxView>
 
-        <Grid Grid.Row="1" Grid.RowSpan="2">
+        <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" />
                 <ColumnDefinition Width="0*" />
@@ -121,11 +126,6 @@
                                     <FontIcon Glyph="&#xE70D;" FontSize="12"/>
                                 </StackPanel>
                             </Button>
-                            <!--<controls:IconButton Content="Add to Collection">
-                                <controls:IconButton.Icon>
-                                    <FontIcon Glyph="&#xECCD;" />
-                                </controls:IconButton.Icon>
-                            </controls:IconButton>-->
                             <SplitButton x:Name="InstallButton" Padding="10" Click="InstallButton_Click" CornerRadius="2"
                                          BorderThickness="0" VerticalAlignment="Stretch">
                                 <StackPanel Orientation="Horizontal" Spacing="10">
@@ -280,6 +280,42 @@
             </ScrollViewer>
         </Grid>
 
+        <CommandBar x:Name="BottomAppBar" Grid.Row="1" HorizontalContentAlignment="Left" DefaultLabelPosition="Right">
+            <CommandBar.Content>
+                <TextBlock Text="{x:Bind ViewModel.Product.Title}" ToolTipService.ToolTip="{x:Bind ViewModel.Product.Title}"
+                           HorizontalAlignment="Left" FontSize="30" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
+            </CommandBar.Content>
+
+            <CommandBar.PrimaryCommands>
+                <AppBarElementContainer VerticalContentAlignment="Center">
+                    <TextBlock Text="{x:Bind ViewModel.Product.DisplayPrice, Mode=OneWay}" VerticalAlignment="Center"
+                               FontSize="16" FontWeight="SemiBold" Padding="0,0,8,0" TextLineBounds="Tight"/>
+                </AppBarElementContainer>
+                <AppBarButton Label="Add to Collection">
+                    <AppBarButton.Icon>
+                        <FontIcon Glyph="&#xECCD;" />
+                    </AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarButton Label="Install">
+                    <AppBarButton.Icon>
+                        <FontIcon Glyph="&#xECAA;" />
+                    </AppBarButton.Icon>
+                    <AppBarButton.Flyout>
+                        <MenuFlyout Placement="BottomEdgeAlignedRight">
+                            <MenuFlyoutItem Icon="Download" Text="Download installer" ToolTipService.ToolTip="Downloads the app without installing it"
+                                            Click="Download_Click"/>
+                            <MenuFlyoutItem Text="Install with App Installer" ToolTipService.ToolTip="Installs the app using Microsoft's App Installer"
+                                            Click="InstallUsingAppInstaller_Click">
+                                <MenuFlyoutItem.Icon>
+                                    <BitmapIcon UriSource="Assets/AppPackageAppList.png"/>
+                                </MenuFlyoutItem.Icon>
+                            </MenuFlyoutItem>
+                        </MenuFlyout>
+                    </AppBarButton.Flyout>
+                </AppBarButton>
+            </CommandBar.PrimaryCommands>
+        </CommandBar>
+        
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
                 <VisualState>

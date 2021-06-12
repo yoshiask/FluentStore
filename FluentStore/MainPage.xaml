@@ -32,9 +32,9 @@
         <winui:NavigationView.PaneFooter>
             <Grid>
                 <Button x:Name="SignInButton" Visibility="Visible" Command="{x:Bind ViewModel.SignInCommand}"
-                            Style="{ThemeResource AccentButtonStyle}" CornerRadius="0"
-                            ToolTipService.ToolTip="Sign in" AutomationProperties.Name="Sign in"
-                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
+                        Style="{ThemeResource AccentButtonStyle}" CornerRadius="0"
+                        ToolTipService.ToolTip="Sign in" AutomationProperties.Name="Sign in"
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
                     <StackPanel Spacing="8" Orientation="Horizontal">
                         <SymbolIcon Symbol="AddFriend" />
                         <TextBlock Text="Sign in"/>
@@ -42,8 +42,8 @@
                 </Button>
 
                 <Button x:Name="UserButton" Visibility="Collapsed" Background="Transparent"
-                            CornerRadius="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
-                            x:DefaultBindMode="OneWay">
+                        CornerRadius="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                        x:DefaultBindMode="OneWay">
                     <Button.Content>
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <SymbolIcon Symbol="Contact"/>
@@ -73,7 +73,7 @@
         </winui:NavigationView.PaneFooter>
 
         <!--SystemControlChromeMediumLowAcrylicWindowMediumBrush-->
-        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="-48,-12,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition x:Name="TitlebarRow" Height="40"/>
                 <RowDefinition Height="*"/>
@@ -113,6 +113,8 @@
                         <Setter Target="MainNav.PaneDisplayMode" Value="Top"/>
                         <Setter Target="MainNav.IsTitleBarAutoPaddingEnabled" Value="True"/>
                         <Setter Target="TitlebarRow.Height" Value="0"/>
+                        <Setter Target="SignInButton.CornerRadius" Value="4"/>
+                        <Setter Target="UserButton.CornerRadius" Value="4"/>
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
