@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using FluentStore.ViewModels.Messages;
+using FluentStore.SDK.Packages;
 
 namespace FluentStore.ViewModels
 {
@@ -36,7 +37,7 @@ namespace FluentStore.ViewModels
                 string productId = featured.Carousel[i];
                 var product = (await StorefrontApi.GetProduct(productId, region.TwoLetterISORegionName, culture.Name))
                     .Convert<ProductDetails>().Payload;
-                CarouselItems.Add(new ProductDetailsViewModel(product));
+                CarouselItems.Add(new PackageViewModel(new MicrosoftStorePackage(product)));
                 if (i == 0 || (i == 1 && featured.Carousel.Count >= 3))
                     SelectedCarouselItemIndex = i;
             }
@@ -54,8 +55,8 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _LoadFeaturedCommand, value);
         }
 
-        private ObservableCollection<ProductDetailsViewModel> _CarouselItems = new ObservableCollection<ProductDetailsViewModel>();
-        public ObservableCollection<ProductDetailsViewModel> CarouselItems
+        private ObservableCollection<PackageViewModel> _CarouselItems = new ObservableCollection<PackageViewModel>();
+        public ObservableCollection<PackageViewModel> CarouselItems
         {
             get => _CarouselItems;
             set => SetProperty(ref _CarouselItems, value);
@@ -68,8 +69,8 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _SelectedCarouselItemIndex, value);
         }
 
-        private ProductDetailsViewModel _SelectedCarouselItem;
-        public ProductDetailsViewModel SelectedCarouselItem
+        private PackageViewModel _SelectedCarouselItem;
+        public PackageViewModel SelectedCarouselItem
         {
             get => _SelectedCarouselItem;
             set => SetProperty(ref _SelectedCarouselItem, value);

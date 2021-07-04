@@ -15,7 +15,7 @@ namespace MicrosoftStore.Models
         public List<string> Notes { get; set; }
         public List<string> Features { get; set; }
         public List<string> Categories { get; set; }
-        public string PrivacryUrl { get; set; }
+        public string PrivacyUrl { get; set; }
         public List<string> Platforms { get; set; }
         public bool Accessible { get; set; }
         public bool IsDeviceCompanionApp { get; set; }
@@ -101,7 +101,7 @@ namespace MicrosoftStore.Models
             {
                 try
                 {
-                    return new Uri(PrivacryUrl);
+                    return new Uri(PrivacyUrl);
                 }
                 catch { return null; }
             }

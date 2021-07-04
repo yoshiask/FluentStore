@@ -1,4 +1,5 @@
-﻿using FluentStore.Services;
+﻿using FluentStore.SDK;
+using FluentStore.Services;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
@@ -7,30 +8,31 @@ using MicrosoftStore.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ImageType = FluentStore.SDK.ImageType;
 
 namespace FluentStore.ViewModels
 {
-    public class ProductDetailsViewModel : ObservableObject
+    public class PackageViewModel : ObservableObject
     {
-        public ProductDetailsViewModel()
+        public PackageViewModel()
         {
-            ViewProductCommand = new RelayCommand<object>(ViewProduct);
+            ViewProductCommand = new RelayCommand<object>(ViewPackage);
         }
-        public ProductDetailsViewModel(ProductDetails product)
+        public PackageViewModel(PackageBase package)
         {
-            ViewProductCommand = new RelayCommand<object>(ViewProduct);
-            Product = product;
+            ViewProductCommand = new RelayCommand<object>(ViewPackage);
+            Package = package;
         }
 
         private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
 
-        private ProductDetails product;
-        public ProductDetails Product
+        private PackageBase _Package;
+        public PackageBase Package
         {
-            get => product;
+            get => _Package;
             set
             {
-                SetProperty(ref product, value);
+                SetProperty(ref _Package, value);
 
                 // Reset cached properties
                 AppIcon = null;
@@ -67,13 +69,13 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _SaveToCollectionCommand, value);
         }
 
-        private ImageItem _AppIcon;
-        public ImageItem AppIcon
+        private ImageBase _AppIcon;
+        public ImageBase AppIcon
         {
             get
             {
                 if (_AppIcon == null)
-                    AppIcon = Product?.Images
+                    AppIcon = Package?.Images
                         .FindAll(i => i.ImageType == ImageType.Logo || i.ImageType == ImageType.Tile)
                         .OrderByDescending(i => i.Height * i.Width).First();
                 return _AppIcon;
@@ -90,7 +92,7 @@ namespace FluentStore.ViewModels
                 {
                     string url = "";
                     int width = 0;
-                    foreach (ImageItem image in Product?.Images.FindAll(i => i.ImageType == ImageType.Hero))
+                    foreach (ImageBase image in Package?.Images.FindAll(i => i.ImageType == ImageType.Hero))
                     {
                         if (image.Width > width)
                             url = image.Url;
@@ -110,38 +112,40 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _HeroImage, value);
         }
 
-        private List<ImageItem> _Screenshots;
-        public List<ImageItem> Screenshots
+        private List<ImageBase> _Screenshots;
+        public List<ImageBase> Screenshots
         {
             get
             {
                 if (_Screenshots == null)
-                    Screenshots = Product?.Images.FindAll(i => i.ImageType == ImageType.Screenshot);
+                    Screenshots = Package?.Images.FindAll(i => i.ImageType == ImageType.Screenshot);
 
                 return _Screenshots;
             }
             set => SetProperty(ref _Screenshots, value);
         }
 
-        public string AverageRatingString => Product.AverageRating.ToString("F1");
+        public string AverageRatingString => Package.AverageRating.HasValue
+            ? Package.AverageRating.Value.ToString("F1")
+            : string.Empty;
 
-        public bool SupportsPlatform(PlatWindows plat) => Product.AllowedPlatforms.Contains(plat);
+        //public bool SupportsPlatform(PlatWindows plat) => Package.AllowedPlatforms.Contains(plat);
 
-        public void ViewProduct(object obj)
+        public void ViewPackage(object obj)
         {
-            ProductDetails pd;
+            PackageBase pb;
             switch (obj)
             {
-                case ProductDetailsViewModel viewModel:
-                    pd = viewModel.Product;
+                case PackageViewModel viewModel:
+                    pb = viewModel.Package;
                     break;
-                case ProductDetails product:
-                    pd = product;
+                case PackageBase package:
+                    pb = package;
                     break;
                 default:
                     throw new ArgumentException($"'{nameof(obj)}' is an invalid type: {obj.GetType().Name}");
             }
-            NavigationService.Navigate("ProductDetailsView", pd);
+            NavigationService.Navigate("PackageView", pb);
         }
     }
 }

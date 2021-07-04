@@ -49,9 +49,6 @@ namespace MicrosoftStore.Models
             }
         }
 
-        public override string ToString()
-        {
-            return Title;
-        }
+        public override string ToString() => Title;
     }
 }

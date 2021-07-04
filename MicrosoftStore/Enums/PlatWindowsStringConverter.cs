@@ -50,40 +50,25 @@ namespace MicrosoftStore.Enums
         /// <returns>The object value.</returns>
         public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
-            if (reader.TokenType == JsonToken.Null)
-            {
-                return null;
-            }
-
             try
             {
-                if (reader.TokenType == JsonToken.String)
+                switch (reader.TokenType)
                 {
-                    string? enumText = reader.Value?.ToString();
-                    int dotIdx = enumText.LastIndexOf('.');
-                    if (dotIdx >= 0)
-                        enumText = enumText.Substring(dotIdx + 1);
+                    case JsonToken.String:
+                        return Parse(reader.Value?.ToString());
 
-                    if (String.IsNullOrEmpty(enumText))
-                    {
+                    case JsonToken.Integer:
+                        return (PlatWindows)reader.Value;
+
+                    case JsonToken.Null:
+                    default:
                         return null;
-                    }
-
-                    return Enum.Parse(typeof(PlatWindows), enumText);
-                }
-
-                if (reader.TokenType == JsonToken.Integer)
-                {
-
-                    return (PlatWindows)reader.Value;
                 }
             }
             catch (Exception ex)
             {
                 throw new JsonSerializationException($"Error converting value {reader.Value} to type '{typeof(PlatWindows).Name}'.", ex);
             }
-
-            return null;
         }
 
         /// <summary>
@@ -96,6 +81,18 @@ namespace MicrosoftStore.Enums
         public override bool CanConvert(Type objectType)
         {
             return objectType == typeof(PlatWindows);
+        }
+
+        public static PlatWindows? Parse(string enumText)
+        {
+            int dotIdx = enumText.LastIndexOf('.');
+            if (dotIdx >= 0)
+                enumText = enumText.Substring(dotIdx + 1);
+
+            if (string.IsNullOrEmpty(enumText))
+                return null;
+
+            return (PlatWindows)Enum.Parse(typeof(PlatWindows), enumText);
         }
     }
 }

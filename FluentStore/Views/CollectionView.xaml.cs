@@ -1,4 +1,5 @@
 ﻿using FluentStore.Helpers;
+using FluentStore.SDK.Messages;
 using FluentStore.Services;
 using FluentStore.ViewModels;
 using FluentStore.ViewModels.Messages;
@@ -111,25 +112,43 @@ namespace FluentStore.Views
                 Title = ViewModel.Collection.Name,
                 Body = "Fetching packages..."
             };
-            PackageHelper.GettingPackagesCallback = product => progressDialog.ShowAsync();
-            PackageHelper.NoPackagesCallback = async product =>
+            WeakReferenceMessenger.Default.Register<PackageFetchStartedMessage>(this, (r, m) =>
+            {
+                progressDialog.Body = "Fetching packages...";
+            });
+            WeakReferenceMessenger.Default.Register<PackageFetchFailedMessage>(this, async (r, m) =>
             {
                 progressDialog.Hide();
                 var noPackagesDialog = new ContentDialog()
                 {
-                    Title = product.Title,
-                    Content = "No available packages for this product.",
+                    Title = m.Package.Title,
+                    Content = "Failed to fetch packages for this product.",
                     PrimaryButtonText = "Ok"
                 };
                 await noPackagesDialog.ShowAsync();
-            };
-            PackageHelper.PackageDownloadProgressCallback = async (product, package, downloaded, total) =>
+            });
+            WeakReferenceMessenger.Default.Register<PackageDownloadStartedMessage>(this, (r, m) =>
             {
-                await progressDialog.SetProgressAsync(downloaded / total);
-            };
-            PackageHelper.PackagesLoadedCallback = product => progressDialog.Hide();
-            PackageHelper.PackageDownloadedCallback = async (product, details, file) =>
+                progressDialog.Body = "Downloading package...";
+            });
+            WeakReferenceMessenger.Default.Register<PackageDownloadProgressMessage>(this, async (r, m) =>
             {
+                double prog = m.Downloaded / m.Total;
+                await progressDialog.SetProgressAsync(prog);
+            });
+            WeakReferenceMessenger.Default.Register<PackageInstallProgressMessage>(this, async (r, m) =>
+            {
+                progressDialog.IsIndeterminate = true;
+                progressDialog.Body = "Installing package...";
+            });
+            WeakReferenceMessenger.Default.Register<PackageInstallCompletedMessage>(this, (r, m) =>
+            {
+                progressDialog.Hide();
+            });
+            WeakReferenceMessenger.Default.Unregister<PackageDownloadCompletedMessage>(this);
+            WeakReferenceMessenger.Default.Register<PackageDownloadCompletedMessage>(this, async (r, m) =>
+            {
+                var file = m.InstallerFile;
                 var savePicker = new Windows.Storage.Pickers.FileSavePicker();
                 savePicker.SuggestedStartLocation =
                     Windows.Storage.Pickers.PickerLocationId.Downloads;
@@ -144,11 +163,15 @@ namespace FluentStore.Views
                 {
                     await file.MoveAndReplaceAsync(userFile);
                 }
-            };
+            });
+            progressDialog.ShowAsync();
 
-            await PackageHelper.DownloadPackage(ViewModel.Items[0].Product);
+            //await PackageHelper.DownloadPackage(ViewModel.Items[0].Package);
+            await ViewModel.Items[0].Package.DownloadPackageAsync();
 
+            progressDialog.Hide();
             InstallButton.IsEnabled = true;
+            WeakReferenceMessenger.Default.UnregisterAll(this);
         }
 
         private async void InstallUsingAppInstaller_Click(object sender, RoutedEventArgs e)
@@ -167,38 +190,46 @@ namespace FluentStore.Views
             };
             installingDialog.ShowAsync();
 
-            int completedSteps = 0;
             int totalSteps = ViewModel.Items.Count * 3;
-            foreach (ProductDetailsViewModel pdvm in ViewModel.Items)
+            foreach (PackageViewModel pvm in ViewModel.Items)
             {
-                MicrosoftStore.Models.ProductDetails product = pdvm.Product;
+                //MicrosoftStore.Models.ProductDetails product = pdvm.Package;
 
                 // Set callbacks
-                PackageHelper.GettingPackagesCallback = prod =>
-                {
-                    installingDialog.Body = prod.ShortTitle + "\r\nFetching packages...";
-                };
-                PackageHelper.PackageDownloadingCallback = (prod, pkg) =>
-                {
-                    installingDialog.Body = prod.ShortTitle + "\r\nDownloading package...";
-                    installingDialog.Progress = ++completedSteps / totalSteps;
-                };
-                PackageHelper.PackageInstallingCallback = (prod, pkg) =>
-                {
-                    installingDialog.Body = prod.ShortTitle + "\r\nInstalling package...";
-                    installingDialog.Progress = ++completedSteps / totalSteps;
-                };
-                PackageHelper.PackageInstalledCallback = (prod, pkg) =>
-                {
-                    installingDialog.Body = "Installed " + prod.ShortTitle + " version " + pkg.Version.ToString();
-                    installingDialog.Progress = ++completedSteps / totalSteps;
-                };
+                RegisterPackageServiceMessages(installingDialog, totalSteps);
 
                 // Install package
-                await PackageHelper.InstallPackage(product, useAppInstaller ?? Settings.Default.UseAppInstaller);
+                if (await pvm.Package.DownloadPackageAsync())
+                    await pvm.Package.InstallAsync();
+                //await PackageHelper.InstallPackage(product, useAppInstaller ?? Settings.Default.UseAppInstaller);
             }
 
             InstallButton.IsEnabled = true;
+            WeakReferenceMessenger.Default.UnregisterAll(this);
+        }
+
+        public void RegisterPackageServiceMessages(ProgressDialog progressDialog, int totalSteps)
+        {
+            int completedSteps = 0;
+            WeakReferenceMessenger.Default.Register<PackageFetchStartedMessage>(this, (r, m) =>
+            {
+                progressDialog.Body = m.Package.ShortTitle + "\r\nFetching packages...";
+            });
+            WeakReferenceMessenger.Default.Register<PackageDownloadStartedMessage>(this, (r, m) =>
+            {
+                progressDialog.Body = m.Package.ShortTitle + "\r\nDownloading package...";
+                progressDialog.Progress = ++completedSteps / totalSteps;
+            });
+            WeakReferenceMessenger.Default.Register<PackageInstallStartedMessage>(this, (r, m) =>
+            {
+                progressDialog.Body = m.Package.ShortTitle + "\r\nInstalling package...";
+                progressDialog.Progress = ++completedSteps / totalSteps;
+            });
+            WeakReferenceMessenger.Default.Register<PackageInstallCompletedMessage>(this, (r, m) =>
+            {
+                progressDialog.Body = "Installed " + m.Package.ShortTitle + " version " + m.Package.Version.ToString();
+                progressDialog.Progress = ++completedSteps / totalSteps;
+            });
         }
 
         private async void EditButton_Click(object sender, RoutedEventArgs e)

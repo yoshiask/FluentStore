@@ -1,4 +1,5 @@
 ﻿using FluentStore.Helpers;
+using FluentStore.SDK;
 using FluentStore.ViewModels;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using System;
@@ -119,9 +120,9 @@ namespace FluentStore
 
         private async void controlsSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
-            if (args.ChosenSuggestion != null && args.ChosenSuggestion is MicrosoftStore.Models.Product product)
+            if (args.ChosenSuggestion != null && args.ChosenSuggestion is PackageBase package)
             {
-                await ViewModel.SubmitQueryAsync(product);
+                await ViewModel.SubmitQueryAsync(package);
             }
             else if (!string.IsNullOrEmpty(args.QueryText))
             {

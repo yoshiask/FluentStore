@@ -73,7 +73,7 @@
         </winui:NavigationView.PaneFooter>
 
         <!--SystemControlChromeMediumLowAcrylicWindowMediumBrush-->
-        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="-48,-12,0,0">
+        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
             <Grid.RowDefinitions>
                 <RowDefinition x:Name="TitlebarRow" Height="40"/>
                 <RowDefinition Height="*"/>

@@ -32,7 +32,7 @@
             </controls:Carousel.EasingFunction>
 
             <controls:Carousel.ItemTemplate>
-                <DataTemplate x:DataType="viewmodels:ProductDetailsViewModel">
+                <DataTemplate x:DataType="viewmodels:PackageViewModel">
                     <Grid Padding="0,16">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="3*"/>
@@ -57,12 +57,12 @@
                                     </Image.Source>
                                 </Image>
                             </Viewbox>
-                            <TextBlock Text="{x:Bind Product.ShortTitle}" Grid.Column="1" FontSize="20"
+                            <TextBlock Text="{x:Bind Package.ShortTitle}" Grid.Column="1" FontSize="20"
                                        FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock Text="{x:Bind Product.Subtitle}" Grid.Column="1" Grid.Row="1"/>
+                            <TextBlock Text="{x:Bind Package.DeveloperName}" Grid.Column="1" Grid.Row="1"/>
                             <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="{x:Bind Product.RatingCount}" FontSize="14" VerticalAlignment="Center"/>
-                                <winui:RatingControl Value="{Binding Product.AverageRating}" IsReadOnly="True">
+                                <TextBlock Text="{x:Bind Package.RatingCount}" FontSize="14" VerticalAlignment="Center"/>
+                                <winui:RatingControl Value="{Binding Package.AverageRating}" IsReadOnly="True">
                                     <winui:RatingControl.Resources>
                                         <SolidColorBrush x:Key="RatingControlSelectedForeground" Color="{ThemeResource SystemColorHighlightTextColor}"/>
                                     </winui:RatingControl.Resources>
@@ -70,8 +70,8 @@
                             </StackPanel>
                             <Button Grid.Column="1" Grid.RowSpan="3" HorizontalAlignment="Right"
                                     Margin="0,0,10,0" Style="{ThemeResource AccentButtonStyle}"
-                                    FontWeight="SemiBold" Padding="10" Content="{x:Bind Product.DisplayPrice}"
-                                    Command="{x:Bind ViewProductCommand}" CommandParameter="{x:Bind Product}"/>
+                                    FontWeight="SemiBold" Padding="10" Content="{x:Bind Package.DisplayPrice}"
+                                    Command="{x:Bind ViewProductCommand}" CommandParameter="{x:Bind Package}"/>
                         </Grid>
                     </Grid>
                 </DataTemplate>

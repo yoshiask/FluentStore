@@ -123,13 +123,14 @@ namespace FluentStore
                 }
             ));
             services.AddSingleton(Refit.RestService.For<MicrosoftStore.IStorefrontApi>(
-                MicrosoftStore.Constants.STOREFRONT_API_HOST
+                MicrosoftStore.Constants.STOREFRONT_API_HOST_V8
             ));
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
             services.AddSingleton(new FluentStoreAPI.FluentStoreAPI());
             services.AddSingleton(typeof(UserService));
             services.AddSingleton(typeof(LoggerService));
+            services.AddSingleton(new SDK.PackageService());
 
             return services.BuildServiceProvider();
         }

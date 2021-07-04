@@ -60,7 +60,7 @@
                                VerticalAlignment="Center" FontSize="30" FontWeight="Bold" TextTrimming="CharacterEllipsis"
                                d:Text="Fluent Store Test Collection"/>
                     <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Spacing="10">
-                        <!--<TextBlock Text="{x:Bind ViewModel.Product.DisplayPrice, Mode=OneWay}" VerticalAlignment="Center"
+                        <!--<TextBlock Text="{x:Bind ViewModel.Package.DisplayPrice, Mode=OneWay}" VerticalAlignment="Center"
                                        FontSize="16" FontWeight="SemiBold"/>-->
                         <Button Click="AddToCollection_Click" Padding="10" Background="{ThemeResource SystemChromeAltHighColor}">
                             <StackPanel Orientation="Horizontal" Spacing="10">
@@ -142,7 +142,7 @@
                         </Style>
                     </GridView.ItemContainerStyle>
                     <GridView.ItemTemplate>
-                        <DataTemplate x:DataType="viewmodels:ProductDetailsViewModel">
+                        <DataTemplate x:DataType="viewmodels:PackageViewModel">
                             <Grid MaxHeight="300" Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="150"/>
@@ -160,10 +160,10 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
                                     <StackPanel Spacing="5" Grid.Row="0">
-                                        <TextBlock Text="{x:Bind Product.Title}" FontWeight="SemiBold"
+                                        <TextBlock Text="{x:Bind Package.Title}" FontWeight="SemiBold"
                                                    TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxLines="2"/>
                                         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="10">
-                                            <TextBlock Text="{x:Bind Product.RatingCount, Mode=OneWay}" FontSize="14" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{x:Bind Package.RatingCount, Mode=OneWay}" FontSize="14" VerticalAlignment="Center"/>
                                             <Viewbox Width="90" Margin="0,0,0,-5">
                                                 <winui:RatingControl Value="{Binding Product.AverageRating, Mode=OneWay}" IsReadOnly="True">
                                                     <winui:RatingControl.Resources>
@@ -172,9 +172,9 @@
                                                 </winui:RatingControl>
                                             </Viewbox>
                                         </StackPanel>
-                                        <TextBlock Text="{x:Bind Product.AvailableDevicesDisplayText, Mode=OneWay}" FontFamily="Segoe MDL2 Assets"/>
+                                        <!--<TextBlock Text="{x:Bind Package.AvailableDevicesDisplayText, Mode=OneWay}" FontFamily="Segoe MDL2 Assets"/>-->
                                     </StackPanel>
-                                    <TextBlock Grid.Row="1" Text="{x:Bind Product.DisplayPrice, Mode=OneWay}" VerticalAlignment="Bottom"/>
+                                    <TextBlock Grid.Row="1" Text="{x:Bind Package.DisplayPrice, Mode=OneWay}" VerticalAlignment="Bottom"/>
                                 </Grid>
                             </Grid>
                         </DataTemplate>

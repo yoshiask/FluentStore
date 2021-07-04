@@ -1,4 +1,5 @@
 ﻿using FluentStore.Helpers;
+using Microsoft.Toolkit.Diagnostics;
 using System;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Controls;
@@ -24,12 +25,14 @@ namespace FluentStore.Services
         public void Navigate(string page)
         {
             Type type = Type.GetType("FluentStore.Views." + page);
+            Guard.IsNotNull(type, nameof(page));
             Navigate(type);
         }
 
         public void Navigate(string page, object parameter)
         {
             Type type = Type.GetType("FluentStore.Views." + page);
+            Guard.IsNotNull(type, nameof(page));
             Navigate(type, parameter);
         }
 
@@ -40,6 +43,7 @@ namespace FluentStore.Services
             string paramName = parameter.GetType().Name;
             string vmName = paramName.ReplaceLastOccurrence("ViewModel", "") + "View";
             Type type = Type.GetType("FluentStore.Views." + vmName);
+            Guard.IsNotNull(type, nameof(type));
             Navigate(type, parameter);
         }
 
@@ -57,12 +61,14 @@ namespace FluentStore.Services
         public void AppNavigate(string page)
         {
             Type type = Type.GetType("FluentStore.Views." + page);
+            Guard.IsNotNull(type, nameof(page));
             AppNavigate(type);
         }
 
         public void AppNavigate(string page, object parameter)
         {
             Type type = Type.GetType("FluentStore.Views." + page);
+            Guard.IsNotNull(type, nameof(page));
             AppNavigate(type, parameter);
         }
 
@@ -71,6 +77,7 @@ namespace FluentStore.Services
             string paramName = parameter.GetType().Name;
             string vmName = paramName.ReplaceLastOccurrence("Model", "");
             Type type = Type.GetType("FluentStore.Views." + vmName);
+            Guard.IsNotNull(type, nameof(type));
             AppNavigate(type, parameter);
         }
 

@@ -10,5 +10,6 @@ namespace MicrosoftStore.Enums
         Team,
         Xbox,
         Holographic,
+        IoT
     }
 }

@@ -1,4 +1,5 @@
-﻿using FluentStore.Services;
+﻿using FluentStore.SDK.Packages;
+using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
 using FluentStoreAPI.Models;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
@@ -53,15 +54,15 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _AuthorName, value);
         }
 
-        private ObservableCollection<ProductDetailsViewModel> _Items = new ObservableCollection<ProductDetailsViewModel>();
-        public ObservableCollection<ProductDetailsViewModel> Items
+        private ObservableCollection<PackageViewModel> _Items = new ObservableCollection<PackageViewModel>();
+        public ObservableCollection<PackageViewModel> Items
         {
             get => _Items;
             set => SetProperty(ref _Items, value);
         }
 
-        private ProductDetailsViewModel _SelectedItem;
-        public ProductDetailsViewModel SelectedItem
+        private PackageViewModel _SelectedItem;
+        public PackageViewModel SelectedItem
         {
             get => _SelectedItem;
             set => SetProperty(ref _SelectedItem, value);
@@ -136,7 +137,7 @@ namespace FluentStore.ViewModels
                 // Load the product details for each item
                 var product = (await StorefrontApi.GetProduct(productId, region.TwoLetterISORegionName, culture.Name))
                     .Convert<ProductDetails>().Payload;
-                Items.Add(new ProductDetailsViewModel(product));
+                Items.Add(new PackageViewModel(new MicrosoftStorePackage(product)));
             }
             
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));

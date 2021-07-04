@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentStore.ViewModels", "F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentStore.Services", "FluentStore.Services\FluentStore.Services.csproj", "{C913BCF0-3D85-4B80-AF1B-EEC60033AE47}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentStore.SDK", "FluentStore.SDK\FluentStore.SDK.csproj", "{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -181,6 +183,26 @@ Global
 		{C913BCF0-3D85-4B80-AF1B-EEC60033AE47}.Release|x64.Build.0 = Release|Any CPU
 		{C913BCF0-3D85-4B80-AF1B-EEC60033AE47}.Release|x86.ActiveCfg = Release|Any CPU
 		{C913BCF0-3D85-4B80-AF1B-EEC60033AE47}.Release|x86.Build.0 = Release|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Debug|ARM.Build.0 = Debug|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Debug|x64.Build.0 = Debug|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Debug|x86.Build.0 = Debug|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Release|ARM.ActiveCfg = Release|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Release|ARM.Build.0 = Release|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Release|ARM64.Build.0 = Release|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Release|x64.ActiveCfg = Release|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Release|x64.Build.0 = Release|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Release|x86.ActiveCfg = Release|Any CPU
+		{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

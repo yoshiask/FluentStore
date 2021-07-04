@@ -1,22 +1,21 @@
 ﻿using FluentStore.Helpers;
+using FluentStore.SDK;
+using FluentStore.SDK.Messages;
 using FluentStore.Services;
 using FluentStore.ViewModels;
 using FluentStore.ViewModels.Messages;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
-using MicrosoftStore.Models;
-using StoreLib.Models;
-using StoreLib.Services;
 using System;
-using System.Globalization;
-using System.Linq;
 using System.Threading.Tasks;
+using Windows.UI.Notifications;
 using Windows.UI.Text;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
+using SplitButton = Microsoft.UI.Xaml.Controls.SplitButton;
+using SplitButtonClickEventArgs = Microsoft.UI.Xaml.Controls.SplitButtonClickEventArgs;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -25,44 +24,52 @@ namespace FluentStore.Views
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class ProductDetailsView : Page
+    public sealed partial class PackageView : Page
     {
-        public ProductDetailsView()
+        public PackageView()
         {
             InitializeComponent();
-            ViewModel = new ProductDetailsViewModel();
+            ViewModel = new PackageViewModel();
         }
 
-        public ProductDetailsViewModel ViewModel
+        private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
+
+        public PackageViewModel ViewModel
         {
-            get => (ProductDetailsViewModel)GetValue(ViewModelProperty);
+            get => (PackageViewModel)GetValue(ViewModelProperty);
             set => SetValue(ViewModelProperty, value);
         }
         public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register(nameof(ViewModel), typeof(ProductDetailsViewModel), typeof(ProductDetailsView), new PropertyMetadata(null));
+            DependencyProperty.Register(nameof(ViewModel), typeof(PackageViewModel), typeof(PackageView), new PropertyMetadata(null));
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
 
-            if (e.Parameter is ProductDetails details)
+            if (e.Parameter is PackageBase package)
             {
-                ViewModel.Product = details;
+                ViewModel.Package = package;
             }
-            else if (e.Parameter is ProductDetailsViewModel vm)
+            else if (e.Parameter is PackageViewModel vm)
             {
                 ViewModel = vm;
             }
 
-            if (ViewModel?.Product != null)
+            if (ViewModel?.Package != null)
             {
                 WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Apps"));
 
-                string packageFamily = ViewModel.Product.PackageFamilyNames[0];
-                if (await PackageHelper.IsAppInstalledAsync(packageFamily))
+                bool isInstalled = false;
+                try
                 {
-                    UpdateInstallButtonToLaunch();
+                   isInstalled = await ViewModel.Package.IsPackageInstalledAsync();
                 }
+                catch (Exception ex)
+                {
+                    // TODO: Log exception
+                }
+                if (isInstalled)
+                    UpdateInstallButtonToLaunch();
             }
         }
 
@@ -72,7 +79,7 @@ namespace FluentStore.Views
             {
                 Title = new TextBlock()
                 {
-                    Text = ViewModel.Product.Title,
+                    Text = ViewModel.Package.Title,
                     FontSize = 24,
                     FontWeight = FontWeights.Bold
                 },
@@ -80,7 +87,7 @@ namespace FluentStore.Views
                 {
                     Content = new TextBlock()
                     {
-                        Text = ViewModel.Product.Description,
+                        Text = ViewModel.Package.Description,
                         TextWrapping = TextWrapping.Wrap
                     }
                 },
@@ -127,7 +134,7 @@ namespace FluentStore.Views
                         var it = (MenuFlyoutItem)s;
                         var col = (FluentStoreAPI.Models.Collection)it.Tag;
                         col.Items ??= new System.Collections.Generic.List<string>(1);
-                        col.Items.Add(ViewModel.Product.ProductId);
+                        col.Items.Add(ViewModel.Package.PackageId);
                     };
                     ((MenuFlyout)flyout).Items.Add(item);
                 }
@@ -149,18 +156,25 @@ namespace FluentStore.Views
             await HandleInstall(false);
         }
 
+        private async void InstallSplitButton_Click(SplitButton sender, SplitButtonClickEventArgs e)
+        {
+            await HandleInstall(false);
+        }
+
         private async void Download_Click(object sender, RoutedEventArgs e)
         {
             InstallButton.IsEnabled = false;
 
             ProgressDialog progressDialog = new ProgressDialog()
             {
-                Title = ViewModel.Product.Title,
+                Title = ViewModel.Package.Title,
                 Body = "Fetching packages..."
             };
-            SetUpPackageHelperCallbacks(progressDialog);
-            PackageHelper.PackageDownloadedCallback = async (product, details, file) =>
+            RegisterPackageServiceMessages(progressDialog);
+            WeakReferenceMessenger.Default.Unregister<PackageDownloadCompletedMessage>(this);
+            WeakReferenceMessenger.Default.Register<PackageDownloadCompletedMessage>(this, async (r, m) =>
             {
+                var file = m.InstallerFile;
                 var savePicker = new Windows.Storage.Pickers.FileSavePicker();
                 savePicker.SuggestedStartLocation =
                     Windows.Storage.Pickers.PickerLocationId.Downloads;
@@ -175,13 +189,14 @@ namespace FluentStore.Views
                 {
                     await file.MoveAndReplaceAsync(userFile);
                 }
-            };
+            });
             progressDialog.ShowAsync();
 
-            await PackageHelper.DownloadPackage(ViewModel.Product);
+            await ViewModel.Package.DownloadPackageAsync();
 
             progressDialog.Hide();
             InstallButton.IsEnabled = true;
+            WeakReferenceMessenger.Default.UnregisterAll(this);
         }
 
         private async void InstallUsingAppInstaller_Click(object sender, RoutedEventArgs e)
@@ -220,51 +235,64 @@ namespace FluentStore.Views
 
         private void UpdateInstallButtonToLaunch()
         {
-            string packageFamily = ViewModel.Product.PackageFamilyNames[0];
-            InstallButton.Label = "Launch";
+            string packageId = ViewModel.Package.PackageId;
             InstallUsingAppInstallerMenuItem.IsEnabled = false;
-            InstallButton.Click -= InstallButton_Click;
-            InstallButton.Click += async (object sender, RoutedEventArgs e) =>
+
+            InstallButtonText.Text = "Launch";
+            InstallButton.Click -= InstallSplitButton_Click;
+            InstallButton.Click += async (SplitButton sender, SplitButtonClickEventArgs e) =>
             {
-                var app = await PackageHelper.GetAppByPackageFamilyNameAsync(packageFamily);
+                var app = await PackageHelper.GetAppByPackageFamilyNameAsync(packageId);
                 await app.LaunchAsync();
             };
         }
 
-        public static ProgressDialog SetUpPackageHelperCallbacks(ProgressDialog progressDialog)
+        public ToastNotification RegisterPackageServiceMessages(ProgressDialog progressDialog)
         {
-            PackageHelper.GettingPackagesCallback = product =>
+            var progressToast = PackageHelper.GenerateProgressToast(ViewModel.Package);
+            WeakReferenceMessenger.Default.Register<PackageFetchStartedMessage>(this, (r, m) =>
             {
                 progressDialog.Body = "Fetching packages...";
-            };
-            PackageHelper.NoPackagesCallback = async product =>
+            });
+            WeakReferenceMessenger.Default.Register<PackageFetchFailedMessage>(this, async (r, m) =>
             {
                 progressDialog.Hide();
                 var noPackagesDialog = new ContentDialog()
                 {
-                    Title = product.Title,
-                    Content = "No available packages for this product.",
+                    Title = m.Package.Title,
+                    Content = "Failed to fetch packages for this product.",
                     PrimaryButtonText = "Ok"
                 };
                 await noPackagesDialog.ShowAsync();
-            };
-            PackageHelper.PackageDownloadingCallback = (product, package) =>
+            });
+            WeakReferenceMessenger.Default.Register<PackageDownloadStartedMessage>(this, (r, m) =>
             {
                 progressDialog.Body = "Downloading package...";
-            };
-            PackageHelper.PackageDownloadProgressCallback = async (product, package, downloaded, total) =>
+
+                PackageHelper.HandlePackageDownloadStartedToast(m, progressToast);
+            });
+            WeakReferenceMessenger.Default.Register<PackageDownloadProgressMessage>(this, async (r, m) =>
             {
-                double prog = (double)downloaded / total;
+                double prog = m.Downloaded / m.Total;
                 await progressDialog.SetProgressAsync(prog);
-            };
-            PackageHelper.PackageInstallingCallback = async (product, package) =>
+
+                PackageHelper.HandlePackageDownloadProgressToast(m, progressToast);
+            });
+            WeakReferenceMessenger.Default.Register<PackageInstallProgressMessage>(this, async (r, m) =>
             {
                 progressDialog.IsIndeterminate = true;
                 progressDialog.Body = "Installing package...";
-            };
-            PackageHelper.PackageInstalledCallback = (product, package) => progressDialog.Hide();
 
-            return progressDialog;
+                PackageHelper.HandlePackageInstallProgressToast(m, progressToast);
+            });
+            WeakReferenceMessenger.Default.Register<PackageInstallCompletedMessage>(this, (r, m) =>
+            {
+                progressDialog.Hide();
+
+                PackageHelper.HandlePackageInstallCompletedToast(m, progressToast);
+            });
+
+            return progressToast;
         }
 
         public async Task HandleInstall(bool? useAppInstaller = null)
@@ -273,17 +301,26 @@ namespace FluentStore.Views
 
             ProgressDialog progressDialog = new ProgressDialog()
             {
-                Title = ViewModel.Product.Title,
+                Title = ViewModel.Package.Title,
                 Body = "Fetching packages..."
             };
-            SetUpPackageHelperCallbacks(progressDialog);
-            PackageHelper.PackageInstalledCallback = (product, package) => UpdateInstallButtonToLaunch();
+            var progressToast = RegisterPackageServiceMessages(progressDialog);
+            WeakReferenceMessenger.Default.Unregister<PackageInstallCompletedMessage>(this);
+            WeakReferenceMessenger.Default.Register<PackageInstallCompletedMessage>(this, (r, m) =>
+            {
+                UpdateInstallButtonToLaunch();
+                progressDialog.Hide();
+
+                PackageHelper.HandlePackageInstallCompletedToast(m, progressToast);
+            });
             progressDialog.ShowAsync();
 
-            await PackageHelper.InstallPackage(ViewModel.Product, useAppInstaller ?? Settings.Default.UseAppInstaller);
+            if (await ViewModel.Package.DownloadPackageAsync())
+                await ViewModel.Package.InstallAsync();// ViewModel.Package, useAppInstaller ?? Settings.Default.UseAppInstaller);
 
             progressDialog.Hide();
             InstallButton.IsEnabled = true;
+            WeakReferenceMessenger.Default.UnregisterAll(this);
         }
     }
 }

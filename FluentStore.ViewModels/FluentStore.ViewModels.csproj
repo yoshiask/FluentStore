@@ -6,10 +6,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Toolkit" Version="7.0.2" />
-    <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.0.0-preview4" />
+    <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.0.2" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj" />
     <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
     <ProjectReference Include="..\FluentStoreAPI\FluentStoreAPI.csproj" />
     <ProjectReference Include="..\MicrosoftStore\MicrosoftStore.csproj" />

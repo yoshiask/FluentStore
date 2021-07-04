@@ -75,7 +75,7 @@ namespace FluentStore.ViewModels
                 if (product?.PackageFamilyNames != null && product?.ProductId != null)
                 {
                     WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
-                    NavService.Navigate("ProductDetailsView", product);
+                    NavService.Navigate("PackageView", new SDK.Packages.MicrosoftStorePackage(product));
                 }
             }
         }

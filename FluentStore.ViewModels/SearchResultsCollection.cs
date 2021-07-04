@@ -8,23 +8,23 @@ using System.Threading.Tasks;
 
 namespace FluentStore.ViewModels
 {
-    public class SearchResultsSource : IIncrementalSource<ProductDetailsViewModel>
+    public class SearchResultsSource : IIncrementalSource<PackageViewModel>
     {
-        private readonly List<ProductDetailsViewModel> _people;
+        private readonly List<PackageViewModel> _people;
 
         public SearchResultsSource()
         {
             // Creates an example collection.
-            _people = new List<ProductDetailsViewModel>();
+            _people = new List<PackageViewModel>();
 
             for (int i = 1; i <= 200; i++)
             {
-                var p = new ProductDetailsViewModel();// { Name = "ProductDetailsViewModel " + i };
+                var p = new PackageViewModel();// { Name = "ProductDetailsViewModel " + i };
                 _people.Add(p);
             }
         }
 
-        public async Task<IEnumerable<ProductDetailsViewModel>> GetPagedItemsAsync(int pageIndex, int pageSize, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<PackageViewModel>> GetPagedItemsAsync(int pageIndex, int pageSize, CancellationToken cancellationToken = default)
         {
             // Gets items from the collection according to pageIndex and pageSize parameters.
             var result = (from p in _people

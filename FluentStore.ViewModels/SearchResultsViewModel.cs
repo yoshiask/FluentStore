@@ -1,4 +1,5 @@
-﻿using FluentStore.Services;
+﻿using FluentStore.SDK;
+using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
@@ -19,8 +20,6 @@ namespace FluentStore.ViewModels
     public class SearchResultsViewModel : ObservableRecipient
     {
         private bool UpdateResultsList = true;
-        readonly CultureInfo Culture = CultureInfo.CurrentUICulture;
-        readonly RegionInfo Region = new RegionInfo(CultureInfo.CurrentUICulture.LCID);
 
         public SearchResultsViewModel()
         {
@@ -28,7 +27,7 @@ namespace FluentStore.ViewModels
             GetResultsCommand = new AsyncRelayCommand(GetResultsAsync);
             ViewProductCommand = new AsyncRelayCommand(ViewProduct);
 
-            ProductDetails.CollectionChanged += Products_CollectionChanged;
+            PackageList.CollectionChanged += Products_CollectionChanged;
         }
 
         private async void Products_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -41,18 +40,18 @@ namespace FluentStore.ViewModels
                 case NotifyCollectionChangedAction.Add:
                     WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
 
-                    var newItems = e.NewItems.OfType<ProductDetailsViewModel>();
+                    var newItems = e.NewItems.OfType<PackageViewModel>();
                     for (int i = 0; i < newItems.Count(); i++)
                     {
                         var pvm = newItems.ElementAt(i);
-                        var pd = await GetProductDetailsAsync(pvm.Product, Culture, Region);
-                        if (pd != null)
-                        {
-                            ProductDetails[e.NewStartingIndex + i].Product = pd.Product;
-                        }
+                        //var pd = await GetProductDetailsAsync(pvm.Package, Culture, Region);
+                        //if (pd != null)
+                        //{
+                        //    ProductDetails[e.NewStartingIndex + i].Package = pd.Product;
+                        //}
                     }
 
-                    WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+                    WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
                     break;
             }
         }
@@ -67,6 +66,7 @@ namespace FluentStore.ViewModels
 
         private readonly IStorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<IStorefrontApi>();
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
+        private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
         private string _Query;
         public string Query
@@ -79,22 +79,15 @@ namespace FluentStore.ViewModels
             }
         }
 
-        private ObservableCollection<ProductDetails> _Products = new ObservableCollection<ProductDetails>();
-        public ObservableCollection<ProductDetails> Products
+        private ObservableCollection<PackageViewModel> _PackageList = new ObservableCollection<PackageViewModel>();
+        public ObservableCollection<PackageViewModel> PackageList
         {
-            get => _Products;
-            set => SetProperty(ref _Products, value);
+            get => _PackageList;
+            set => SetProperty(ref _PackageList, value);
         }
 
-        private ObservableCollection<ProductDetailsViewModel> _ProductDetails = new ObservableCollection<ProductDetailsViewModel>();
-        public ObservableCollection<ProductDetailsViewModel> ProductDetails
-        {
-            get => _ProductDetails;
-            set => SetProperty(ref _ProductDetails, value);
-        }
-
-        private ProductDetailsViewModel _SelectedProductDetails;
-        public ProductDetailsViewModel SelectedProductDetails
+        private PackageViewModel _SelectedProductDetails;
+        public PackageViewModel SelectedPackage
         {
             get => _SelectedProductDetails;
             set => SetProperty(ref _SelectedProductDetails, value);
@@ -124,32 +117,15 @@ namespace FluentStore.ViewModels
         public async Task GetResultsAsync()
         {
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
-            ProductDetails.Clear();
 
-            int pageSize = 25;
-            var firstPage = await StorefrontApi.Search(Query, Region.TwoLetterISORegionName, Culture.Name, "apps", "all", "Windows.Desktop", pageSize, 0);
-            foreach (var product in firstPage.Payload.Cards)
-            {
-                ProductDetails.Add(new ProductDetailsViewModel(product));
-            }
-
-            double requestCount = System.Math.Ceiling((double)firstPage.Payload.TotalItems / pageSize);
-            for (int i = 1; i < requestCount; i++)
-            {
-                var search = await StorefrontApi.Search(
-                    Query, Region.TwoLetterISORegionName, Culture.Name,
-                    "apps", "all", "Windows.Desktop",
-                    pageSize, i * pageSize);
-                foreach (var product in search.Payload.Cards)
-                {
-                    ProductDetails.Add(new ProductDetailsViewModel(product));
-                }
-            }
+            PackageList.Clear();
+            var results = await PackageService.SearchAsync(Query);
+            PackageList = new ObservableCollection<PackageViewModel>(results.Collapse().Select(p => new PackageViewModel(p)));
 
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
 
-        public async Task<ProductDetailsViewModel> GetProductDetailsAsync(ProductDetails productDetails, CultureInfo culture, RegionInfo region)
+        public async Task<PackageViewModel> GetProductDetailsAsync(ProductDetails productDetails, CultureInfo culture, RegionInfo region)
         {
             try
             {
@@ -157,7 +133,7 @@ namespace FluentStore.ViewModels
                 var candidate = item.Convert<ProductDetails>().Payload;
 
                 if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
-                    return new ProductDetailsViewModel(candidate);
+                    throw new System.Exception();// return new PackageViewModel(candidate);
                 else return null;
             }
             catch (System.Exception ex)
@@ -178,13 +154,13 @@ namespace FluentStore.ViewModels
             UpdateResultsList = false;
 
             // Make sure we have the complete ProductDetails
-            if (SelectedProductDetails.Product.PublisherId == null)
-            {
-                _SelectedProductDetails = await GetProductDetailsAsync(SelectedProductDetails.Product, Culture, Region);
-            }
+            //if (SelectedProductDetails.Package.PublisherId == null)
+            //{
+            //    _SelectedProductDetails = await GetProductDetailsAsync(SelectedProductDetails.Package, Culture, Region);
+            //}
 
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
-            NavService.Navigate(SelectedProductDetails);
+            NavService.Navigate("PackageView", SelectedPackage);
         }
     }
 }
