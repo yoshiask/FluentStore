@@ -1,11 +1,11 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace MicrosoftStore.Enums
 {
-    [JsonConverter(typeof(StringEnumConverter))]
+    [JsonConverter(typeof(ImageTypeStringConverter))]
     public enum ImageType
     {
+        Unspecified,
         BoxArt,
         Logo,
         Poster,

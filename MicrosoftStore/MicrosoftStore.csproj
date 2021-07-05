@@ -8,12 +8,7 @@
     <LangVersion>8</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="HtmlAgilityPack">
-      <Version>1.11.28</Version>
-    </PackageReference>
-    <PackageReference Include="refit">
-      <Version>5.2.4</Version>
-    </PackageReference>
+    <PackageReference Include="Flurl.Http" Version="3.2.0" />
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

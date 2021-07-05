@@ -3,8 +3,6 @@ using FluentStore.Services;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
-using MicrosoftStore.Enums;
-using MicrosoftStore.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,7 +74,7 @@ namespace FluentStore.ViewModels
             {
                 if (_AppIcon == null)
                     AppIcon = Package?.Images
-                        .FindAll(i => i.ImageType == ImageType.Logo || i.ImageType == ImageType.Tile)
+                        .FindAll(i => i.ImageType == ImageType.Logo || i.ImageType == ImageType.Tile || i.ImageType == ImageType.Poster)
                         .OrderByDescending(i => i.Height * i.Width).First();
                 return _AppIcon;
             }
@@ -92,7 +90,7 @@ namespace FluentStore.ViewModels
                 {
                     string url = "";
                     int width = 0;
-                    foreach (ImageBase image in Package?.Images.FindAll(i => i.ImageType == ImageType.Hero))
+                    foreach (ImageBase image in Package?.Images.FindAll(i => i.ImageType == ImageType.Screenshot))
                     {
                         if (image.Width > width)
                             url = image.Url;

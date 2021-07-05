@@ -26,17 +26,13 @@ namespace FluentStore.ViewModels
         {
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
 
-            var culture = CultureInfo.CurrentUICulture;
-            var region = new RegionInfo(culture.LCID);
-
             var featured = await FSApi.GetHomePageFeaturedAsync();
             CarouselItems.Clear();
 
             for (int i = 0; i < featured.Carousel.Count; i++)
             {
                 string productId = featured.Carousel[i];
-                var product = (await StorefrontApi.GetProduct(productId, region.TwoLetterISORegionName, culture.Name))
-                    .Convert<ProductDetails>().Payload;
+                var product = (await StorefrontApi.GetProduct(productId)).Payload;
                 CarouselItems.Add(new PackageViewModel(new MicrosoftStorePackage(product)));
                 if (i == 0 || (i == 1 && featured.Carousel.Count >= 3))
                     SelectedCarouselItemIndex = i;
@@ -45,7 +41,7 @@ namespace FluentStore.ViewModels
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
 
-        private readonly IStorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<IStorefrontApi>();
+        private readonly StorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<StorefrontApi>();
         private readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
 
         private IAsyncRelayCommand _LoadFeaturedCommand;

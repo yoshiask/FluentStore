@@ -11,13 +11,13 @@ namespace MicrosoftStore.Responses
         public DateTimeOffset ExpiryUtc { get; set; }
         public object Payload { get; set; }
 
-        public ResponseItem<TPayload> Convert<TPayload>()
+        public ResponseItem<TPayload> Convert<TPayload>() where TPayload : Payload
         {
             return new ResponseItem<TPayload>(this);
         }
     }
 
-    public class ResponseItem<TPayload>
+    public class ResponseItem<TPayload> where TPayload : Payload
     {
         [JsonProperty(PropertyName = "$type", NullValueHandling = NullValueHandling.Ignore)]
         public string TypeName { get; set; }

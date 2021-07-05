@@ -64,7 +64,7 @@ namespace FluentStore.ViewModels
             Query = query;
         }
 
-        private readonly IStorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<IStorefrontApi>();
+        private readonly StorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<StorefrontApi>();
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
@@ -129,8 +129,8 @@ namespace FluentStore.ViewModels
         {
             try
             {
-                var item = await StorefrontApi.GetProduct(productDetails.ProductId, region.TwoLetterISORegionName, culture.Name);
-                var candidate = item.Convert<ProductDetails>().Payload;
+                var item = await StorefrontApi.GetProduct(productDetails.ProductId);
+                var candidate = item.Payload;
 
                 if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
                     throw new System.Exception();// return new PackageViewModel(candidate);

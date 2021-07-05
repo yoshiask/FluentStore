@@ -420,7 +420,7 @@ namespace FluentStore.Helpers
                         },
                         AppLogoOverride = new ToastGenericAppLogo()
                         {
-                            Source = package.Images.FindLast(i => i.ImageType == ImageType.Logo).Url
+                            Source = package.Images.FindLast(i => i.ImageType == ImageType.Logo || i.ImageType == ImageType.Poster).Url
                         }
                     }
                 },
@@ -446,7 +446,7 @@ namespace FluentStore.Helpers
             notif.Data = new NotificationData(new Dictionary<string, string>()
             {
                 { "progressTitle", package.Title },
-                { "progressVersion", package.Version.ToString() },
+                { "progressVersion", package.Version?.ToString() ?? string.Empty },
                 { "progressStatus", "Downloading..." }
             });
             notif.Tag = package.PackageId;

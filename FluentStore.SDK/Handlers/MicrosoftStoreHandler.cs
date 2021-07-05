@@ -18,64 +18,61 @@ namespace FluentStore.SDK.Handlers
 {
     public class MicrosoftStoreHandler : PackageHandlerBase
     {
-        private readonly IMSStoreApi MSStoreApi = Ioc.Default.GetRequiredService<IMSStoreApi>();
-        private readonly IStorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<IStorefrontApi>();
+        private readonly StorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<StorefrontApi>();
 
         public override async Task<List<PackageBase>> SearchAsync(string query)
         {
-            CultureInfo culture = CultureInfo.CurrentUICulture;
-            RegionInfo region = new RegionInfo(culture.LCID);
             int pageSize = 25;
 
             var packages = new List<PackageBase>();
-            var firstPage = await StorefrontApi.Search(query, region.TwoLetterISORegionName, culture.Name, "apps", "all", "Windows.Desktop", pageSize, 0);
-            foreach (var product in firstPage.Payload.Cards)
+            var firstPage = await StorefrontApi.Search(query, "apps", "Windows.Desktop");
+            foreach (var product in firstPage.Payload.SearchResults)
             {
                 // Get the full product details
-                var item = await StorefrontApi.GetProduct(product.ProductId, region.TwoLetterISORegionName, culture.Name);
-                var candidate = item.Convert<ProductDetails>().Payload;
+                var item = await StorefrontApi.GetProduct(product.ProductId);
+                var candidate = item.Payload;
                 if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
                 {
                     packages.Add(new MicrosoftStorePackage(candidate));
                 }
             }
 
-            double requestCount = Math.Ceiling((double)firstPage.Payload.TotalItems / pageSize);
-            for (int i = 1; i < requestCount; i++)
-            {
-                var search = await StorefrontApi.Search(
-                    query, region.TwoLetterISORegionName, culture.Name,
-                    "apps", "all", "Windows.Desktop",
-                    pageSize, i * pageSize);
-                foreach (var product in search.Payload.Cards)
-                {
-                    packages.Add(new MicrosoftStorePackage(product));
-                }
-            }
+            //double requestCount = Math.Ceiling((double)firstPage.Payload.TotalItems / pageSize);
+            //for (int i = 1; i < requestCount; i++)
+            //{
+            //    var search = await StorefrontApi.Search(
+            //        query, region.TwoLetterISORegionName, culture.Name,
+            //        "apps", "all", "Windows.Desktop",
+            //        pageSize, i * pageSize);
+            //    foreach (var product in search.Payload.Cards)
+            //    {
+            //        packages.Add(new MicrosoftStorePackage(product));
+            //    }
+            //}
 
             return packages;
         }
 
         public override async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
         {
-            var culture = CultureInfo.CurrentUICulture;
-            var region = new RegionInfo(culture.LCID);
-
-            var suggs = await MSStoreApi.GetSuggestions(
-                query, culture.Name, Constants.CLIENT_ID,
-                new string[] { Constants.CAT_ALL_PRODUCTS }, new int[] { 10, 0, 0 }
-            );
+            var suggs = await StorefrontApi.GetSearchSuggestions(query);
             var packages = new List<PackageBase>();
-            if (suggs.ResultSets.Count <= 0)
-                return packages;
-            
-            foreach (var product in suggs.ResultSets[0].Suggests.Where(s => s.Source == "Apps"))
-            {
-                string productId = product.Metas.First(m => m.Key == "BigCatalogId").Value;
 
+            //var culture = CultureInfo.CurrentUICulture;
+            //var region = new RegionInfo(culture.LCID);
+
+            //var suggs = await MSStoreApi.GetSuggestions(
+            //    query, culture.Name, Constants.CLIENT_ID,
+            //    new string[] { Constants.CAT_ALL_PRODUCTS }, new int[] { 10, 0, 0 }
+            //);
+            //if (suggs.ResultSets.Count <= 0)
+            //    return packages;
+
+            foreach (var product in suggs.Payload.AssetSuggestions)
+            {
                 // Get the full product details
-                var item = await StorefrontApi.GetProduct(productId, region.TwoLetterISORegionName, culture.Name);
-                var candidate = item.Convert<ProductDetails>().Payload;
+                var item = await StorefrontApi.GetProduct(product.ProductId);
+                var candidate = item.Payload;
                 if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
                 {
                     packages.Add(new MicrosoftStorePackage(candidate));

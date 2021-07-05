@@ -24,7 +24,7 @@ namespace FluentStore.ViewModels
         }
 
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
-        private readonly IStorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<IStorefrontApi>();
+        private readonly StorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<StorefrontApi>();
 
         private ObservableCollection<AppViewModelBase> _Apps;
         public ObservableCollection<AppViewModelBase> Apps
@@ -61,17 +61,14 @@ namespace FluentStore.ViewModels
             // TODO: This really shouldn't have to make two separate API calls.
             // Is there a better way to get the product ID using the package family name?
 
-            var culture = CultureInfo.CurrentUICulture;
-            var region = new RegionInfo(culture.LCID);
-
             // Get the full product details
             var dcat = DisplayCatalogHandler.ProductionConfig();
             await dcat.QueryDCATAsync(SelectedApp.PackageFamilyName, IdentiferType.PackageFamilyName);
             if (dcat.ProductListing != null && dcat.ProductListing.Products.Count > 0)
             {
                 var dcatProd = dcat.ProductListing.Products[0];
-                var item = await StorefrontApi.GetProduct(dcatProd.ProductId, region.TwoLetterISORegionName, culture.Name);
-                var product = item.Convert<ProductDetails>().Payload;
+                var item = await StorefrontApi.GetProduct(dcatProd.ProductId);
+                var product = item.Payload;
                 if (product?.PackageFamilyNames != null && product?.ProductId != null)
                 {
                     WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));

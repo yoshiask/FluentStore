@@ -35,7 +35,7 @@ namespace FluentStore.ViewModels
             UpdateCollectionCommand = new AsyncRelayCommand<Collection>(UpdateCollectionAsync);
         }
 
-        private readonly IStorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<IStorefrontApi>();
+        private readonly StorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<StorefrontApi>();
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
         private readonly FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
         private readonly UserService UserService = Ioc.Default.GetRequiredService<UserService>();
@@ -128,15 +128,11 @@ namespace FluentStore.ViewModels
             AuthorName = authorProfile.DisplayName;
 
             // Load items
-            var culture = CultureInfo.CurrentUICulture;
-            var region = new RegionInfo(culture.LCID);
-
             Items.Clear();
             foreach (string productId in Collection.Items)
             {
                 // Load the product details for each item
-                var product = (await StorefrontApi.GetProduct(productId, region.TwoLetterISORegionName, culture.Name))
-                    .Convert<ProductDetails>().Payload;
+                var product = (await StorefrontApi.GetProduct(productId)).Payload;
                 Items.Add(new PackageViewModel(new MicrosoftStorePackage(product)));
             }
             

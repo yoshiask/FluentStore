@@ -37,8 +37,8 @@ namespace FluentStore.SDK.Packages
             DisplayPrice = product.DisplayPrice;
             ShortTitle = product.ShortTitle;
             Website = product.AppWebsiteUrl;
-            PackageId = product.PackageFamilyNames?[0];
             StoreId = product.ProductId;
+            PackageId = product.PackageFamilyNames?[0] ?? StoreId;  // Unpackaged apps don't have PackageFamilyName
 
             // Set modern package properties
             PackageFamilyName = product.PackageFamilyNames?[0];
@@ -168,7 +168,6 @@ namespace FluentStore.SDK.Packages
             // TODO: Add addtional checks that might take longer that the user can enable 
             // if they are having issues
 
-            //PackageUri = installables.First().PackageUri;
             Update(installables.First());
             Status = PackageStatus.DownloadReady;
             return true;
