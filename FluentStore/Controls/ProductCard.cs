@@ -1,4 +1,4 @@
-﻿using MicrosoftStore.Models;
+﻿using Microsoft.Marketplace.Storefront.Contracts.V3;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;

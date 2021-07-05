@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace MicrosoftStore.Enums
+namespace Microsoft.Marketplace.Storefront.Contracts.Enums
 {
     [JsonConverter(typeof(PlatWindowsStringConverter))]
     public enum PlatWindows
@@ -10,6 +10,10 @@ namespace MicrosoftStore.Enums
         Team,
         Xbox,
         Holographic,
-        IoT
+        IoT,
+
+        Unknown   = 0x100,
+        Universal = 0x101,
+        Windows8x = 0x102,
     }
 }

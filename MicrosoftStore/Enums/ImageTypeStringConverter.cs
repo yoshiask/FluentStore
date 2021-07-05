@@ -1,9 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace MicrosoftStore.Enums
+namespace Microsoft.Marketplace.Storefront.Contracts.Enums
 {
     public class ImageTypeStringConverter : JsonConverter
     {

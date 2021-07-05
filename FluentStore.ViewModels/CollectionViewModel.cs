@@ -2,16 +2,13 @@
 using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
 using FluentStoreAPI.Models;
+using Microsoft.Marketplace.Storefront.Contracts;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
 using Microsoft.Toolkit.Mvvm.Messaging;
-using MicrosoftStore;
-using MicrosoftStore.Models;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Threading.Tasks;
 
 namespace FluentStore.ViewModels

@@ -1,9 +1,7 @@
 ﻿using FluentStore.SDK;
 using FluentStore.SDK.Messages;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.Messaging;
+using Microsoft.Marketplace.Storefront.Contracts.V3;
 using Microsoft.Toolkit.Uwp.Notifications;
-using MicrosoftStore.Models;
 using StoreLib.Models;
 using System;
 using System.Collections.Generic;
@@ -25,8 +23,6 @@ namespace FluentStore.Helpers
 {
     public static class PackageHelper
     {
-        private static readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
-
         public static Action<ProductDetails> GettingPackagesCallback { get; set; }
         public static Action<ProductDetails> NoPackagesCallback { get; set; }
         public static Action<ProductDetails> PackagesLoadedCallback { get; set; }

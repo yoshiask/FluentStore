@@ -1,8 +1,8 @@
 ﻿using FluentStore.SDK.Handlers;
 using FluentStore.SDK.Messages;
+using Microsoft.Marketplace.Storefront.Contracts.Enums;
 using Microsoft.Toolkit.Diagnostics;
 using Microsoft.Toolkit.Mvvm.Messaging;
-using MicrosoftStore.Enums;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +13,6 @@ using System.Xml.Linq;
 using System.Xml.XPath;
 using Windows.ApplicationModel;
 using Windows.Management.Deployment;
-using Windows.Storage;
 using Windows.System;
 using Windows.System.Profile;
 
@@ -34,11 +33,6 @@ namespace FluentStore.SDK.Packages
         }
 
         public override string HandlerId { get; set; } = nameof(MicrosoftStoreHandler);
-
-        //public override void OnDownloaded(StorageFile file)
-        //{
-        //    Type = (InstallerType)Enum.Parse(typeof(InstallerType), file.FileType.Substring(1), true);
-        //}
 
         public override bool Equals(PackageBase other)
         {
@@ -61,7 +55,7 @@ namespace FluentStore.SDK.Packages
             // Open package archive for reading
             using var stream = await InstallerFile.OpenReadAsync();
             //var reader = new BinaryReader(stream.AsStream());
-            using var archive = new System.IO.Compression.ZipArchive(stream.AsStream());
+            using var archive = new ZipArchive(stream.AsStream());
 
             // Extract metadata from manifest
             List<ProcessorArchitecture> architectures = new List<ProcessorArchitecture>();

@@ -1,5 +1,5 @@
 ﻿using FluentStore.ViewModels;
-using MicrosoftStore.Enums;
+using Microsoft.Marketplace.Storefront.Contracts.Enums;
 using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Data;

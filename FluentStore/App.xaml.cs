@@ -115,14 +115,7 @@ namespace FluentStore
         {
             var services = new ServiceCollection();
 
-            //services.AddSingleton(Refit.RestService.For<MicrosoftStore.MSStoreApi>(
-            //    MicrosoftStore.Constants.API_HOST,
-            //    new Refit.RefitSettings
-            //    {
-            //        ContentSerializer = new Refit.XmlContentSerializer()
-            //    }
-            //));
-            services.AddSingleton(new MicrosoftStore.StorefrontApi());
+            services.AddSingleton(new Microsoft.Marketplace.Storefront.Contracts.StorefrontApi());
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
             services.AddSingleton(new FluentStoreAPI.FluentStoreAPI());

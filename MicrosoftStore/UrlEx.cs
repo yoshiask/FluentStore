@@ -1,7 +1,7 @@
 ﻿using Flurl;
 using System.Globalization;
 
-namespace MicrosoftStore
+namespace Microsoft.Marketplace.Storefront.Contracts
 {
     internal static class UrlEx
     {

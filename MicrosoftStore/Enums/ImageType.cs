@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace MicrosoftStore.Enums
+namespace Microsoft.Marketplace.Storefront.Contracts.Enums
 {
     [JsonConverter(typeof(ImageTypeStringConverter))]
     public enum ImageType

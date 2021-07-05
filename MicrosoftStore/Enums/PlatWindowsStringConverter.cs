@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace MicrosoftStore.Enums
+namespace Microsoft.Marketplace.Storefront.Contracts.Enums
 {
     public class PlatWindowsStringConverter : JsonConverter
     {
@@ -62,7 +62,7 @@ namespace MicrosoftStore.Enums
 
                     case JsonToken.Null:
                     default:
-                        return null;
+                        return PlatWindows.Unknown;
                 }
             }
             catch (Exception ex)
@@ -83,16 +83,16 @@ namespace MicrosoftStore.Enums
             return objectType == typeof(PlatWindows);
         }
 
-        public static PlatWindows? Parse(string enumText)
+        public static PlatWindows Parse(string enumText)
         {
             int dotIdx = enumText.LastIndexOf('.');
             if (dotIdx >= 0)
                 enumText = enumText.Substring(dotIdx + 1);
 
-            if (string.IsNullOrEmpty(enumText))
-                return null;
-
-            return (PlatWindows)Enum.Parse(typeof(PlatWindows), enumText);
+            if (Enum.TryParse<PlatWindows>(enumText, out var platWindows))
+                return platWindows;
+            else
+                return PlatWindows.Unknown;
         }
     }
 }

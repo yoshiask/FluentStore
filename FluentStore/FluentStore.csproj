@@ -120,6 +120,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AutoSuggestions.cs" />
     <Compile Include="Controls\CompactGrid.cs" />
     <Compile Include="Controls\IconButton.cs" />
     <Compile Include="Controls\ListViewBehavior.cs" />
@@ -288,9 +289,9 @@
       <Project>{9918633d-4c2a-463d-a4ca-c8fc095a820c}</Project>
       <Name>FluentStoreAPI</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MicrosoftStore\MicrosoftStore.csproj">
+    <ProjectReference Include="..\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj">
       <Project>{7fc21573-6b0f-4b5b-bae5-af80546c0d79}</Project>
-      <Name>MicrosoftStore</Name>
+      <Name>Microsoft.Marketplace.Storefront.Contracts</Name>
     </ProjectReference>
     <ProjectReference Include="..\StoreLib\StoreLib\StoreLib.csproj">
       <Project>{e13711ff-3e53-4ca4-8043-63b92673567a}</Project>

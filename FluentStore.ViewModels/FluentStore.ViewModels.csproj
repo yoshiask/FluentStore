@@ -13,7 +13,7 @@
     <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj" />
     <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
     <ProjectReference Include="..\FluentStoreAPI\FluentStoreAPI.csproj" />
-    <ProjectReference Include="..\MicrosoftStore\MicrosoftStore.csproj" />
+    <ProjectReference Include="..\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
     <ProjectReference Include="..\StoreLib\StoreLib\StoreLib.csproj" />
   </ItemGroup>
 

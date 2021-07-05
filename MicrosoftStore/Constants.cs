@@ -1,6 +1,6 @@
-﻿using Flurl;
+﻿using Newtonsoft.Json;
 
-namespace MicrosoftStore
+namespace Microsoft.Marketplace.Storefront.Contracts
 {
     public static class Constants
     {
@@ -11,5 +11,11 @@ namespace MicrosoftStore
 
         public const string CAT_ALL_PRODUCTS = "DCatAll-Products";
         public const string CAT_APPS = "Apps";
+
+        public static readonly JsonSerializerSettings DefaultJsonSettings = new JsonSerializerSettings
+        {
+            MetadataPropertyHandling = MetadataPropertyHandling.Default,
+            TypeNameHandling = TypeNameHandling.All,
+        };
     }
 }
