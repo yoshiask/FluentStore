@@ -16,8 +16,8 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         public async Task<List<ResponseItem>> GetPage(string productId, CultureInfo culture = null)
         {
             string json = await GetStorefrontBase(culture).AppendPathSegments("pages", "pdp")
-                .SetQueryParam("productId", productId).GetStringAsync();
-            return (List<ResponseItem>)JsonConvert.DeserializeObject(json, Constants.DefaultJsonSettings);
+                    .SetQueryParam("productId", productId).GetStringAsync();
+            return JsonConvert.DeserializeObject<List<ResponseItem>>(json, Constants.DefaultJsonSettings);
         }
 
         /// <summary>

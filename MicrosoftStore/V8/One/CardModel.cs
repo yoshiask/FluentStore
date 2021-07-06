@@ -24,7 +24,5 @@ namespace Microsoft.Marketplace.Storefront.Contracts.V8.One
         public bool IsGamingAppOnly { get; set; }
         public List<string> Categories { get; set; }
         public string Schema { get; set; }
-
-        public int RatingCount => int.Parse(RatingsCount);
     }
 }

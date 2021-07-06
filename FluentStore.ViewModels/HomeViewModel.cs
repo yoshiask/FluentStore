@@ -24,6 +24,8 @@ namespace FluentStore.ViewModels
         {
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
 
+            var page = await StorefrontApi.GetHomeRecommendations();
+
             var featured = await FSApi.GetHomePageFeaturedAsync();
             CarouselItems.Clear();
 

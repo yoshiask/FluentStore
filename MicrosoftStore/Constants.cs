@@ -16,6 +16,7 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         {
             MetadataPropertyHandling = MetadataPropertyHandling.Default,
             TypeNameHandling = TypeNameHandling.All,
+            TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple
         };
     }
 }
