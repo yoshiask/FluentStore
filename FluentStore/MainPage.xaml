@@ -20,7 +20,7 @@
                           Grid.Row="1">
 
         <winui:NavigationView.PaneHeader>
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="-56,0,0,0">
                 <Viewbox>
                     <Image Source="/Assets/Square71x71Logo.png"/>
                 </Viewbox>

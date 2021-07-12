@@ -5,10 +5,7 @@ namespace FluentStore.Helpers
     public class Settings : ObservableSettings
     {
         private static Settings settings = new Settings();
-        public static Settings Default
-        {
-            get { return settings; }
-        }
+        public static Settings Default => settings;
 
         public Settings()
             : base(ApplicationData.Current.LocalSettings)
@@ -18,8 +15,8 @@ namespace FluentStore.Helpers
         [DefaultSettingValue(Value = false)]
         public bool UseAppInstaller
         {
-            get { return Get<bool>(); }
-            set { Set(value); }
+            get => Get<bool>();
+            set => Set(value);
         }
     }
 }
