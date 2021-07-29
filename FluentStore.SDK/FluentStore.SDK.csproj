@@ -9,6 +9,7 @@
         <PackageReference Include="Microsoft.Toolkit.Diagnostics" Version="7.0.2" />
         <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.0.2" />
         <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
+        <PackageReference Include="OwlCore" Version="0.0.18" />
         <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
     </ItemGroup>
 
