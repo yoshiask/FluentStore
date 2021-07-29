@@ -20,7 +20,8 @@
     
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
+            <!-- TODO: Properly handle short windows -->
+            <RowDefinition Height="*" MinHeight="300"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <controls:Carousel x:Name="FeaturedCarousel" ItemsSource="{x:Bind ViewModel.CarouselItems}"
@@ -36,7 +37,7 @@
                     <Grid Padding="0,16">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="3*"/>
-                            <RowDefinition Height="1*"/>
+                            <RowDefinition Height="1*" MinHeight="75"/>
                         </Grid.RowDefinitions>
                         <controls:ImageEx Source="{x:Bind HeroImage}" Grid.RowSpan="2"/>
                         <Grid Grid.Row="1" Padding="5" ColumnSpacing="10" Background="{ThemeResource SystemControlBaseHighAcrylicElementBrush}">

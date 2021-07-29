@@ -245,7 +245,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection">
-      <Version>5.0.1</Version>
+      <Version>5.0.2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.2.12</Version>
@@ -266,7 +266,7 @@
       <Version>2.0.1</Version>
     </PackageReference>
     <PackageReference Include="OwlCore">
-      <Version>0.0.18</Version>
+      <Version>0.0.21</Version>
     </PackageReference>
     <PackageReference Include="Refit">
       <Version>5.2.4</Version>
