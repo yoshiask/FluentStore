@@ -1,4 +1,5 @@
-﻿using FluentStore.SDK.Messages;
+﻿using FluentStore.SDK.Attributes;
+using FluentStore.SDK.Messages;
 using Microsoft.Marketplace.Storefront.Contracts.Enums;
 using Microsoft.Marketplace.Storefront.Contracts.V2;
 using Microsoft.Marketplace.Storefront.Contracts.V3;
@@ -175,6 +176,7 @@ namespace FluentStore.SDK.Packages
         }
 
         private List<string> _Notes = new List<string>();
+        [Display]
         public List<string> Notes
         {
             get => _Notes;
@@ -182,6 +184,7 @@ namespace FluentStore.SDK.Packages
         }
 
         private List<string> _Features = new List<string>();
+        [Display]
         public List<string> Features
         {
             get => _Features;
@@ -189,6 +192,7 @@ namespace FluentStore.SDK.Packages
         }
 
         private List<string> _Categories = new List<string>();
+        [Display]
         public List<string> Categories
         {
             get => _Categories;
@@ -196,6 +200,7 @@ namespace FluentStore.SDK.Packages
         }
 
         private string _PrivacyUrl;
+        [DisplayAdditionalInformation("Privacy url", "\uE71B")]
         public string PrivacyUrl
         {
             get => _PrivacyUrl;
@@ -217,6 +222,7 @@ namespace FluentStore.SDK.Packages
         }
 
         private List<ProductRating> _Ratings = new List<ProductRating>();
+        [Display]
         public List<ProductRating> Ratings
         {
             get => _Ratings;
@@ -224,6 +230,7 @@ namespace FluentStore.SDK.Packages
         }
 
         private List<string> _PermissionsRequested = new List<string>();
+        [DisplayAdditionalInformation("Permissions", "\uE8D7")]
         public List<string> PermissionsRequested
         {
             get => _PermissionsRequested;

@@ -1,0 +1,45 @@
+﻿<ResourceDictionary
+    x:Class="FluentStore.Themes.PackageDisplayTemplates"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="using:System"
+    xmlns:collections="using:System.Collections"
+    xmlns:controls="using:FluentStore.Controls"
+    xmlns:converters="using:Microsoft.Toolkit.Uwp.UI.Converters">
+
+    <converters:StringFormatConverter x:Key="StringFormatConverter" />
+
+    <DataTemplate x:Key="DefaultDisplayDateTimeTemplate" x:DataType="sys:DateTime">
+        <TextBlock Text="{x:Bind ToShortDateString()}"/>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DefaultDisplayDateTimeOffsetTemplate" x:DataType="sys:DateTimeOffset">
+        <TextBlock Text="{x:Bind Converter={StaticResource StringFormatConverter}, ConverterParameter='{}{0:d/M/yyy}'}"/>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DefaultDisplayUriTemplate" x:DataType="sys:Uri">
+        <HyperlinkButton Content="{x:Bind ToString()}" NavigateUri="{x:Bind}"/>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DefaultDisplayEnumerableTemplate" x:DataType="collections:IEnumerable">
+        <ItemsControl ItemsSource="{x:Bind}" ItemTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Spacing="4"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DefaultDisplayObjectTemplate" x:DataType="sys:Object">
+        <TextBlock Text="{x:Bind ToString()}" TextWrapping="Wrap"/>
+    </DataTemplate>
+
+    <controls:PackageDisplayTemplateSelector x:Key="DefaultDisplayTemplateSelector"
+                                             Default="{StaticResource DefaultDisplayObjectTemplate}"
+                                             DateTime="{StaticResource DefaultDisplayDateTimeTemplate}"
+                                             DateTimeOffset="{StaticResource DefaultDisplayDateTimeOffsetTemplate}"
+                                             Uri="{StaticResource DefaultDisplayUriTemplate}"
+                                             Enumerable="{StaticResource DefaultDisplayEnumerableTemplate}"/>
+
+</ResourceDictionary>

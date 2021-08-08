@@ -1,4 +1,5 @@
 ﻿using FluentStore.SDK;
+using FluentStore.SDK.Attributes;
 using FluentStore.Services;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
@@ -6,6 +7,7 @@ using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using ImageType = FluentStore.SDK.ImageType;
 
 namespace FluentStore.ViewModels
@@ -16,9 +18,8 @@ namespace FluentStore.ViewModels
         {
             ViewProductCommand = new RelayCommand<object>(ViewPackage);
         }
-        public PackageViewModel(PackageBase package)
+        public PackageViewModel(PackageBase package) : this()
         {
-            ViewProductCommand = new RelayCommand<object>(ViewPackage);
             Package = package;
         }
 
@@ -36,6 +37,8 @@ namespace FluentStore.ViewModels
                 AppIcon = null;
                 HeroImage = null;
                 Screenshots = null;
+                DisplayProperties = null;
+                DisplayAdditionalInformationProperties = null;
             }
         }
 
@@ -144,6 +147,57 @@ namespace FluentStore.ViewModels
                     throw new ArgumentException($"'{nameof(obj)}' is an invalid type: {obj.GetType().Name}");
             }
             NavigationService.Navigate("PackageView", pb);
+        }
+
+        private List<DisplayInfo> _DisplayProperties;
+        /// <summary>
+        /// Gets the value of all properties with <see cref="DisplayAttribute"/> applied.
+        /// </summary>
+        public List<DisplayInfo> DisplayProperties
+        {
+            get
+            {
+                if (_DisplayProperties == null)
+                {
+                    _DisplayProperties = new List<DisplayInfo>();
+                    Type type = Package.GetType();
+                    foreach (PropertyInfo prop in type.GetProperties())
+                    {
+                        var displayAttr = prop.GetCustomAttribute<DisplayAttribute>();
+                        if (displayAttr == null)
+                            continue;
+                        _DisplayProperties.Add(new DisplayInfo(displayAttr, prop.GetValue(Package)));
+                    }
+                }
+                return _DisplayProperties;
+            }
+            set => SetProperty(ref _DisplayProperties, value);
+        }
+
+
+        private List<DisplayAdditionalInformationInfo> _DisplayAdditionalInformationProperties;
+        /// <summary>
+        /// Gets the value of all properties with <see cref="DisplayAdditionalInformationAttribute"/> applied.
+        /// </summary>
+        public List<DisplayAdditionalInformationInfo> DisplayAdditionalInformationProperties
+        {
+            get
+            {
+                if (_DisplayAdditionalInformationProperties == null)
+                {
+                    _DisplayAdditionalInformationProperties = new List<DisplayAdditionalInformationInfo>();
+                    Type type = typeof(PackageBase);
+                    foreach (PropertyInfo prop in type.GetProperties())
+                    {
+                        var displayAttr = prop.GetCustomAttribute<DisplayAdditionalInformationAttribute>();
+                        if (displayAttr == null)
+                            continue;
+                        _DisplayAdditionalInformationProperties.Add(new DisplayAdditionalInformationInfo(displayAttr, prop.GetValue(Package)));
+                    }
+                }
+                return _DisplayAdditionalInformationProperties;
+            }
+            set => SetProperty(ref _DisplayAdditionalInformationProperties, value);
         }
     }
 }
