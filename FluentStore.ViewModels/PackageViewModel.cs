@@ -75,37 +75,26 @@ namespace FluentStore.ViewModels
         {
             get
             {
-                if (_AppIcon == null)
-                    AppIcon = Package?.Images
-                        .FindAll(i => i.ImageType == ImageType.Logo || i.ImageType == ImageType.Tile || i.ImageType == ImageType.Poster)
-                        .OrderByDescending(i => i.Height * i.Width).First();
+                if (_AppIcon == null && Package != null)
+                {
+                    // Yes, this will block the UI thread. Hopefully it's not for too long.
+                    AppIcon = Package.GetAppIcon()?.Result;
+                }
+
                 return _AppIcon;
             }
             set => SetProperty(ref _AppIcon, value);
         }
 
-        private Uri _HeroImage;
-        public Uri HeroImage
+        private ImageBase _HeroImage;
+        public ImageBase HeroImage
         {
             get
             {
                 if (_HeroImage == null)
                 {
-                    string url = "";
-                    int width = 0;
-                    foreach (ImageBase image in Package?.Images.FindAll(i => i.ImageType == ImageType.Screenshot))
-                    {
-                        if (image.Width > width)
-                            url = image.Url;
-                    }
-                    if (string.IsNullOrWhiteSpace(url))
-                    {
-                        HeroImage = new Uri("https://via.placeholder.com/1");
-                    }
-                    else
-                    {
-                        HeroImage = new Uri(url);
-                    }
+                    // Yes, this will block the UI thread. Hopefully it's not for too long.
+                    HeroImage = Package.GetHeroImage()?.Result;
                 }
 
                 return _HeroImage;
@@ -118,8 +107,11 @@ namespace FluentStore.ViewModels
         {
             get
             {
-                if (_Screenshots == null)
-                    Screenshots = Package?.Images.FindAll(i => i.ImageType == ImageType.Screenshot);
+                if (_Screenshots == null && Package != null)
+                {
+                    // Yes, this will block the UI thread. Hopefully it's not for too long.
+                    Screenshots = Package.GetScreenshots()?.Result;
+                }
 
                 return _Screenshots;
             }

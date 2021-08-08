@@ -61,7 +61,7 @@ namespace FluentStore.SDK.Packages
             List<ProcessorArchitecture> architectures = new List<ProcessorArchitecture>();
             if (Type.HasFlag(InstallerType.Bundle))
             {
-                var bundleManifestEntry = archive.GetEntry("AppxBundleManifest.xml");
+                var bundleManifestEntry = archive.GetEntry("AppxManifest\\AppxBundleManifest.xml");
                 using var bundleManifestStream = bundleManifestEntry.Open();
                 XPathDocument bundleManifest = new XPathDocument(bundleManifestStream);
                 var archNodes = bundleManifest.CreateNavigator().Select("//Package/@Architecture");
@@ -290,6 +290,66 @@ namespace FluentStore.SDK.Packages
                 File.Delete(contentTypeinstallerPath);
 
             return extension;
+        }
+
+        public override async Task<ImageBase> GetAppIcon()
+        {
+            Guard.IsNotNull(InstallerFile, nameof(InstallerFile));
+
+            // Open package archive for reading
+            using var stream = await InstallerFile.OpenReadAsync();
+            using var archive = new ZipArchive(stream.AsStream());
+
+            // Extract icon from manifest
+            ZipArchive packArchive;
+            if (Type.HasFlag(InstallerType.Bundle))
+            {
+                // Get the smallest application APPX/MSIX
+                var bundleManifestEntry = archive.GetEntry("AppxManifest\\AppxBundleManifest.xml");
+                using var bundleManifestStream = bundleManifestEntry.Open();
+                XPathDocument bundleManifest = new XPathDocument(bundleManifestStream);
+                var packageNodes = bundleManifest.CreateNavigator().Select("/Bundle/Packages/Package[@Type=\"application\"]");
+                XPathNavigator smallestPackEntry = null;
+                long smallestPackSize = long.MaxValue;
+                do
+                {
+                    var packEntry = packageNodes.Current;
+                    long packSize = long.Parse(packEntry.GetAttribute("Size", string.Empty));
+                    if (packSize < smallestPackSize)
+                        smallestPackEntry = packEntry;
+                } while (packageNodes.MoveNext());
+
+                // Open the APPX/MSIX
+                using Stream packStream = archive.GetEntry(smallestPackEntry.GetAttribute("FileName", string.Empty)).Open();
+                packArchive = new ZipArchive(packStream);
+            }
+            else
+            {
+                packArchive = archive;
+            }
+
+            // Get the app icon
+            var manifestEntry = archive.GetEntry("AppxManifest.xml");
+            using var manifestStream = manifestEntry.Open();
+            XPathDocument manifest = new XPathDocument(manifestStream);
+            var logoNode = manifest.CreateNavigator().Select("/Package/Properties/Logo[1]").Current;
+            var iconEntry = archive.GetEntry(logoNode.Value);
+            return new ImageBase
+            {
+                ImageType = ImageType.Logo,
+                BackgroundColor = "#00000000",
+                Stream = iconEntry.Open()
+            };
+        }
+
+        public override async Task<ImageBase> GetHeroImage()
+        {
+            return null;
+        }
+
+        public override async Task<List<ImageBase>> GetScreenshots()
+        {
+            return new List<ImageBase>();
         }
 
         private InstallerType _Type;

@@ -20,6 +20,7 @@
     <Page.Resources>
         <tkconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <tkconverters:CollectionVisibilityConverter x:Key="CollectionVisibilityConverter"/>
+        <tkconverters:EmptyStringToObjectConverter x:Key="EmptyStringToVisibilityConverter" EmptyValue="Collapsed" NotEmptyValue="Visible"/>
         <converters:PlatWindowsEnumToVisibility x:Key="PlatWindowsEnumToVisibility"/>
     </Page.Resources>
 
@@ -32,7 +33,7 @@
         <ParallaxView Source="{x:Bind ContentScroller}" VerticalShift="200" VerticalSourceOffsetKind="Absolute">
             <Image x:Name="HeroImage" VerticalAlignment="Top" HorizontalAlignment="Left" Stretch="Uniform">
                 <Image.Source>
-                    <BitmapImage UriSource="{x:Bind ViewModel.HeroImage, TargetNullValue=//:0}" ImageOpened="HeroImage_ImageOpened"/>
+                    <BitmapImage UriSource="{x:Bind ViewModel.HeroImage.Uri, TargetNullValue=//:0, Mode=OneWay}" ImageOpened="HeroImage_ImageOpened"/>
                 </Image.Source>
             </Image>
         </ParallaxView>
@@ -90,81 +91,68 @@
             <ScrollViewer Grid.Column="0" x:Name="ContentScroller">
                 <StackPanel Spacing="20">
                     <Border x:Name="HeroImageSpacer"/>
-                    <Grid Grid.Row="1" Padding="20,0,20,20" ColumnSpacing="20" Margin="20,0" MaxHeight="300"
+                    <Grid Grid.Row="1" Padding="20" ColumnSpacing="20" Margin="20,0" MaxHeight="300"
                           Background="{ThemeResource SystemControlAcrylicElementMediumHighBrush}"
                           x:Name="InfoCard" CornerRadius="4">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
-                            <RowDefinition x:Name="DescriptionRow" Height="4*" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" MaxWidth="125" />
+                            <ColumnDefinition Width="4*" />
                         </Grid.ColumnDefinitions>
-                        <Viewbox MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="100"
-                                 Margin="0,20,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        
+                        <Viewbox MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="125"
+                                 HorizontalAlignment="Stretch" VerticalAlignment="Top" Grid.RowSpan="3">
                             <Image>
                                 <Image.Source>
                                     <BitmapImage UriSource="{x:Bind ViewModel.AppIcon.Uri}"/>
                                 </Image.Source>
                             </Image>
                         </Viewbox>
-                        <CommandBar x:Name="ContentAppBar" Visibility="Collapsed"
-                                    HorizontalContentAlignment="Left" VerticalAlignment="Center" DefaultLabelPosition="Right"
-                                    Grid.Column="1" Grid.ColumnSpan="2" Padding="0" BorderThickness="0" Background="Transparent">
-                            <CommandBar.Content>
-                                <TextBlock Text="{x:Bind ViewModel.Package.Title}" ToolTipService.ToolTip="{x:Bind ViewModel.Package.Title}"
-                                           HorizontalAlignment="Left" FontSize="30" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
-                            </CommandBar.Content>
-
-                            <CommandBar.PrimaryCommands>
-                                <AppBarElementContainer VerticalContentAlignment="Center" HorizontalContentAlignment="Left">
-                                    <TextBlock Text="{x:Bind ViewModel.Package.DisplayPrice, Mode=OneWay}"
-                                               FontSize="16" FontWeight="SemiBold" Padding="8" TextLineBounds="Tight"
-                                               VerticalAlignment="Center"/>
-                                </AppBarElementContainer>
-                                <AppBarButton Label="Add to Collection">
-                                    <AppBarButton.Icon>
-                                        <FontIcon Glyph="&#xECCD;" />
-                                    </AppBarButton.Icon>
-                                </AppBarButton>
-                                <AppBarElementContainer>
-                                    <winui:SplitButton x:Name="InstallButton" Padding="8" Click="InstallSplitButton_Click" CornerRadius="2"
-                                                       BorderThickness="0" VerticalAlignment="Center" Style="{ThemeResource SplitButtonCommandBarStyle}">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <FontIcon Glyph="&#xECAA;" />
-                                            <TextBlock Text="Install" x:Name="InstallButtonText" />
-                                        </StackPanel>
-                                        <winui:SplitButton.Flyout>
-                                            <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                <MenuFlyoutItem Icon="Download" Text="Download installer" ToolTipService.ToolTip="Downloads the app without installing it"
-                                                        x:Name="DownloadMenuItem" Click="Download_Click"/>
-                                                <MenuFlyoutItem Text="Install with App Installer" ToolTipService.ToolTip="Installs the app using Microsoft's App Installer"
-                                                        x:Name="InstallUsingAppInstallerMenuItem" Click="InstallUsingAppInstaller_Click">
-                                                    <MenuFlyoutItem.Icon>
-                                                        <BitmapIcon UriSource="Assets/AppPackageAppList.png"/>
-                                                    </MenuFlyoutItem.Icon>
-                                                </MenuFlyoutItem>
-                                            </MenuFlyout>
-                                        </winui:SplitButton.Flyout>
-                                    </winui:SplitButton>
-                                </AppBarElementContainer>
-                            </CommandBar.PrimaryCommands>
-                        </CommandBar>
-                        <TextBlock x:Name="DescriptionBlock" Grid.Row="1" Grid.Column="1" FontSize="16" Margin="0,-12,0,0"
-                                   Foreground="{ThemeResource SystemBaseMediumHighColor}" Grid.ColumnSpan="2"
-                                   Text="{x:Bind ViewModel.Package.Description}"
-                                   TextTrimming="WordEllipsis" TextWrapping="Wrap" />
-                        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8" Grid.ColumnSpan="2">
-                            <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.Package.DeveloperName}" />
-                            <Ellipse Width="3" Height="3" VerticalAlignment="Center" Fill="{ThemeResource SystemBaseHighColor}" StrokeThickness="0" />
-                            <TextBlock VerticalAlignment="Center" Text="{Binding ViewModel.Package.Categories[0]}" />
+                        
+                        <TextBlock Text="{x:Bind ViewModel.Package.Title}" ToolTipService.ToolTip="{x:Bind ViewModel.Package.Title}"
+                                   HorizontalAlignment="Left" FontSize="30" FontWeight="Bold" TextTrimming="CharacterEllipsis"
+                                   Grid.Column="1" VerticalAlignment="Bottom"/>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal"
+                                    VerticalAlignment="Bottom" Spacing="8">
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.Package.DeveloperName}"/>
+                            <Ellipse Width="3" Height="3" VerticalAlignment="Center" Fill="{ThemeResource SystemBaseHighColor}" StrokeThickness="0"
+                                     Visibility="{x:Bind ViewModel.Package.Version, Converter={StaticResource EmptyStringToVisibilityConverter}}"/>
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.Package.Version}"/>
                         </StackPanel>
-                        <HyperlinkButton x:Name="MoreButton" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Right"
-                                         Click="MoreButton_Click" Content="More" RelativePanel.Below="DescriptionBlock"
-                                         Visibility="{Binding ElementName=DescriptionBlock, Path=IsTextTrimmed}" />
+
+                        <StackPanel Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="2" VerticalAlignment="Bottom"
+                                    Orientation="Horizontal" Spacing="8" Margin="0,16,0,0">
+                            <winui:SplitButton x:Name="InstallButton" Padding="8" Click="InstallSplitButton_Click"
+                                               VerticalAlignment="Stretch">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xECAA;" />
+                                    <TextBlock Text="Install" x:Name="InstallButtonText" />
+                                </StackPanel>
+                                <winui:SplitButton.Flyout>
+                                    <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                                        <MenuFlyoutItem Icon="Download" Text="Download installer" ToolTipService.ToolTip="Downloads the app without installing it"
+                                                        x:Name="DownloadMenuItem" Click="Download_Click"/>
+                                        <MenuFlyoutItem Text="Install with App Installer" ToolTipService.ToolTip="Installs the app using Microsoft's App Installer"
+                                                        x:Name="InstallUsingAppInstallerMenuItem" Click="InstallUsingAppInstaller_Click">
+                                            <MenuFlyoutItem.Icon>
+                                                <BitmapIcon UriSource="Assets/AppPackageAppList.png"/>
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
+                                    </MenuFlyout>
+                                </winui:SplitButton.Flyout>
+                            </winui:SplitButton>
+
+                            <winui:DropDownButton VerticalAlignment="Stretch" Click="AddToCollection_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xECCD;" />
+                                    <TextBlock Text="Add to Collection" />
+                                </StackPanel>
+                            </winui:DropDownButton>
+                        </StackPanel>
                     </Grid>
                     <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
                                 Padding="20" Spacing="20">
@@ -173,7 +161,7 @@
                                 <Setter Property="Spacing" Value="8"/>
                             </Style>
                         </StackPanel.Resources>
-                        
+
                         <!-- Screenshots -->
                         <StackPanel Visibility="{x:Bind ViewModel.Screenshots, Converter={StaticResource CollectionVisibilityConverter}}">
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Screenshots" />
@@ -234,38 +222,14 @@
                             </StackPanel>
                         </StackPanel>
 
-                        <!-- Features -->
+                        <!-- Description -->
                         <StackPanel>
-                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Features" />
-                            <ItemsControl ItemsSource="{Binding ViewModel.Package.Features}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Spacing="4" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="x:String">
-                                        <TextBlock Text="{x:Bind}" TextWrapping="Wrap" />
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                        
-                        <!-- Notes -->
-                        <StackPanel>
-                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="What's new" />
-                            <ItemsControl ItemsSource="{Binding ViewModel.Package.Notes}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Spacing="4" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="x:String">
-                                        <TextBlock Text="{x:Bind}" TextWrapping="Wrap" />
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Description" />
+                            <TextBlock x:Name="DescriptionBlock" Text="{x:Bind ViewModel.Package.Description}"
+                                       FontSize="16" TextTrimming="WordEllipsis" TextWrapping="Wrap" MaxHeight="100" />
+                            <HyperlinkButton x:Name="MoreButton" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Right"
+                                             Click="MoreButton_Click" Content="More"
+                                             Visibility="{Binding ElementName=DescriptionBlock, Path=IsTextTrimmed}" />
                         </StackPanel>
 
                         <!-- Source-specific details -->
@@ -292,62 +256,5 @@
                 </StackPanel>
             </ScrollViewer>
         </Grid>
-
-        <CommandBar x:Name="BottomAppBar" Grid.Row="1" HorizontalContentAlignment="Left" DefaultLabelPosition="Right"
-                    Visibility="Visible">
-            <CommandBar.Content>
-                <TextBlock Text="{x:Bind ViewModel.Package.Title}" ToolTipService.ToolTip="{x:Bind ViewModel.Package.Title}"
-                           HorizontalAlignment="Left" FontSize="30" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
-            </CommandBar.Content>
-
-            <CommandBar.PrimaryCommands>
-                <AppBarElementContainer VerticalContentAlignment="Center">
-                    <TextBlock Text="{x:Bind ViewModel.Package.DisplayPrice, Mode=OneWay}" VerticalAlignment="Center"
-                               FontSize="16" FontWeight="SemiBold" Padding="0,0,8,0" TextLineBounds="Tight"/>
-                </AppBarElementContainer>
-                <AppBarButton Label="Add to Collection">
-                    <AppBarButton.Icon>
-                        <FontIcon Glyph="&#xECCD;" />
-                    </AppBarButton.Icon>
-                </AppBarButton>
-                <AppBarElementContainer>
-                    <SplitButton>
-                        
-                    </SplitButton>
-                </AppBarElementContainer>
-                <AppBarButton Label="Install">
-                    <AppBarButton.Icon>
-                        <FontIcon Glyph="&#xECAA;" />
-                    </AppBarButton.Icon>
-                    <AppBarButton.Flyout>
-                        <MenuFlyout Placement="BottomEdgeAlignedRight">
-                            <MenuFlyoutItem Icon="Download" Text="Download installer" ToolTipService.ToolTip="Downloads the app without installing it"
-                                            Click="Download_Click"/>
-                            <MenuFlyoutItem Text="Install with App Installer" ToolTipService.ToolTip="Installs the app using Microsoft's App Installer"
-                                            Click="InstallUsingAppInstaller_Click">
-                                <MenuFlyoutItem.Icon>
-                                    <BitmapIcon UriSource="Assets/AppPackageAppList.png"/>
-                                </MenuFlyoutItem.Icon>
-                            </MenuFlyoutItem>
-                        </MenuFlyout>
-                    </AppBarButton.Flyout>
-                </AppBarButton>
-            </CommandBar.PrimaryCommands>
-        </CommandBar>
-        
-        <VisualStateManager.VisualStateGroups>
-            <VisualStateGroup>
-                <VisualState>
-                    <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="{StaticResource CompactModeMinWidth}" />
-                    </VisualState.StateTriggers>
-
-                    <VisualState.Setters>
-                        <Setter Target="ContentAppBar.Visibility" Value="Visible"/>
-                        <Setter Target="BottomAppBar.Visibility" Value="Collapsed"/>
-                    </VisualState.Setters>
-                </VisualState>
-            </VisualStateGroup>
-        </VisualStateManager.VisualStateGroups>
     </Grid>
 </Page>

@@ -39,8 +39,12 @@
                             <RowDefinition Height="3*"/>
                             <RowDefinition Height="1*" MinHeight="75"/>
                         </Grid.RowDefinitions>
-                        <controls:ImageEx Source="{x:Bind HeroImage}" Grid.RowSpan="2"/>
-                        <Grid Grid.Row="1" Padding="5" ColumnSpacing="10" Background="{ThemeResource SystemControlBaseHighAcrylicElementBrush}">
+                        <controls:ImageEx Grid.RowSpan="2">
+                            <controls:ImageEx.Source>
+                                <BitmapImage UriSource="{x:Bind HeroImage.Uri, TargetNullValue=//:0, Mode=OneWay}"/>
+                            </controls:ImageEx.Source>
+                        </controls:ImageEx>
+                        <Grid Grid.Row="1" Padding="8" ColumnSpacing="8" Background="{ThemeResource SystemControlBaseHighAcrylicElementBrush}">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition/>
@@ -50,8 +54,8 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Viewbox MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="100"
-                                     Grid.RowSpan="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                            <Viewbox MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="72"
+                                     Grid.RowSpan="3" HorizontalAlignment="Left" VerticalAlignment="Stretch">
                                 <Image>
                                     <Image.Source>
                                         <BitmapImage UriSource="{x:Bind AppIcon.Uri}"/>

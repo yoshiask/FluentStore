@@ -172,6 +172,21 @@ namespace FluentStore.SDK
             get => _Images;
             set => SetProperty(ref _Images, value);
         }
+
+        /// <summary>
+        /// Gets the app's icon.
+        /// </summary>
+        public abstract Task<ImageBase> GetAppIcon();
+
+        /// <summary>
+        /// Gets the app's hero image.
+        /// </summary>
+        public abstract Task<ImageBase> GetHeroImage();
+
+        /// <summary>
+        /// Gets the app's screenshots.
+        /// </summary>
+        public abstract Task<List<ImageBase>> GetScreenshots();
     }
 
     public abstract class PackageBase<TModel> : PackageBase

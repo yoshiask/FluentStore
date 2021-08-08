@@ -1,6 +1,4 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using System;
 using System.IO;
 using System.Net.Http;
@@ -21,7 +19,15 @@ namespace FluentStore.SDK
         public string Url
         {
             get => _Url;
-            set => SetProperty(ref _Url, value);
+            set
+            {
+                SetProperty(ref _Url, value);
+                try
+                {
+                    SetProperty(ref _Uri, new Uri(value));
+                }
+                catch { }
+            }
         }
 
         private int _Height;
@@ -52,23 +58,58 @@ namespace FluentStore.SDK
             set => SetProperty(ref _ForegroundColor, value);
         }
 
-        public Uri Uri => new Uri(Url);
+        private Stream _Stream;
+        public Stream Stream
+        {
+            get => _Stream;
+            set => SetProperty(ref _Stream, value);
+        }
+
+        private Uri _Uri;
+        public Uri Uri
+        {
+            get => _Uri;
+            set
+            {
+                SetProperty(ref _Uri, value);
+                SetProperty(ref _Url, value.ToString());
+            }
+        }
 
         public async Task<Stream> GetImageStreamAsync()
         {
-            var uri = new Uri(Url);
-            var client = new HttpClient();
-            var response = await client.GetAsync(Url);
-            if (!response.IsSuccessStatusCode)
-                return null;
+            if (Stream != null)
+                return Stream;
 
-            return await response.Content.ReadAsStreamAsync();
+            if (Uri.IsFile)
+            {
+                // Dangerous: Will throw on UWP if file isn't accessible
+                try
+                {
+                    if (!File.Exists(Url))
+                        return null;
+                    return File.OpenRead(Url);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                var client = new HttpClient();
+                var response = await client.GetAsync(Url);
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                return await response.Content.ReadAsStreamAsync();
+            }
         }
     }
 
-    [JsonConverter(typeof(StringEnumConverter))]
     public enum ImageType
     {
+        Unspecified,
         BoxArt,
         Logo,
         Poster,

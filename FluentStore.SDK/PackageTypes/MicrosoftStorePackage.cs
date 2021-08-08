@@ -61,20 +61,8 @@ namespace FluentStore.SDK.Packages
             AllowedPlatforms = product.AllowedPlatforms;
             WarningMessages = product.WarningMessages;
             if (product.Images != null)
-            {
                 foreach (ImageItem img in product.Images)
-                {
-                    Images.Add(new ImageBase
-                    {
-                        BackgroundColor = img.BackgroundColor,
-                        ForegroundColor = img.ForegroundColor,
-                        Url = img.Url,
-                        ImageType = (ImageType)img.ImageType,
-                        Height = img.Height,
-                        Width = img.Width
-                    });
-                }
-            }
+                    Images.Add(new MicrosoftStoreImage(img));
         }
 
         public void Update(PackageInstance packageInstance)
@@ -173,6 +161,61 @@ namespace FluentStore.SDK.Packages
             Update(installables.First());
             Status = PackageStatus.DownloadReady;
             return true;
+        }
+
+        public override async Task<ImageBase> GetAppIcon()
+        {
+            // Prefer tiles, then logos, then posters.
+            var icons = Images.FindAll(i => i.ImageType == ImageType.Tile);
+            if (icons.Count > 0)
+                goto done;
+
+            icons = Images.FindAll(i => i.ImageType == ImageType.Logo);
+            if (icons.Count > 0)
+                goto done;
+
+            icons = Images.FindAll(i => i.ImageType == ImageType.Poster);
+            if (icons.Count > 0)
+                goto done;
+
+            Guard.IsNotEmpty(icons, nameof(icons));
+
+        done:
+            return icons.OrderByDescending(i => i.Width).First();
+        }
+
+        public override async Task<ImageBase> GetHeroImage()
+        {
+            ImageBase img = null;
+            int width = 0;
+            foreach (ImageBase image in Images.FindAll(i => i.ImageType == ImageType.Hero))
+            {
+                if (image.Width > width)
+                    img = image;
+            }
+
+            return img;
+        }
+
+        public override async Task<List<ImageBase>> GetScreenshots()
+        {
+            string deviceFam = AnalyticsInfo.VersionInfo.DeviceFamily.Substring("Windows.".Length);
+            var screenshots = Images.Cast<MicrosoftStoreImage>().Where(i => i.ImageType == ImageType.Screenshot
+                && !string.IsNullOrEmpty(i.ImagePositionInfo) && i.ImagePositionInfo.StartsWith(deviceFam));
+
+            var sorted = new List<ImageBase>(screenshots.Count());
+            foreach (var screenshot in screenshots)
+            {
+                // length + 1, to skip device family name and the "/"
+                string posStr = screenshot.ImagePositionInfo.Substring(deviceFam.Length + 1);
+                int pos = int.Parse(posStr);
+                if (pos >= sorted.Count)
+                    sorted.Add(screenshot);
+                else
+                    sorted.Insert(pos, screenshot);
+            }
+
+            return sorted;
         }
 
         private List<string> _Notes = new List<string>();
@@ -277,6 +320,35 @@ namespace FluentStore.SDK.Packages
         {
             get => _StoreId;
             set => SetProperty(ref _StoreId, value);
+        }
+    }
+
+    public class MicrosoftStoreImage : ImageBase
+    {
+        public MicrosoftStoreImage(ImageItem img)
+        {
+            BackgroundColor = img.BackgroundColor;
+            ForegroundColor = img.ForegroundColor;
+            Url = img.Url;
+            ImageType = (ImageType)img.ImageType;
+            Height = img.Height;
+            Width = img.Width;
+            ImagePositionInfo = img.ImagePositionInfo;
+            Caption = img.Caption;
+        }
+
+        private string _ImagePositionInfo = "";
+        public string ImagePositionInfo
+        {
+            get => _ImagePositionInfo;
+            set => SetProperty(ref _ImagePositionInfo, value);
+        }
+
+        private string _Caption;
+        public string Caption
+        {
+            get => _Caption;
+            set => SetProperty(ref _Caption, value);
         }
     }
 }
