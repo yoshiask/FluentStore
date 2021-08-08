@@ -10,11 +10,12 @@
     <converters:StringFormatConverter x:Key="StringFormatConverter" />
 
     <DataTemplate x:Key="DefaultDisplayDateTimeTemplate" x:DataType="sys:DateTime">
-        <TextBlock Text="{x:Bind ToShortDateString()}"/>
+        <TextBlock Text="{x:Bind ToShortDateString()}" IsTextSelectionEnabled="True"/>
     </DataTemplate>
 
     <DataTemplate x:Key="DefaultDisplayDateTimeOffsetTemplate" x:DataType="sys:DateTimeOffset">
-        <TextBlock Text="{x:Bind Converter={StaticResource StringFormatConverter}, ConverterParameter='{}{0:d/M/yyy}'}"/>
+        <TextBlock Text="{x:Bind Converter={StaticResource StringFormatConverter}, ConverterParameter='{}{0:d/M/yyy}'}"
+                   IsTextSelectionEnabled="True"/>
     </DataTemplate>
 
     <DataTemplate x:Key="DefaultDisplayUriTemplate" x:DataType="sys:Uri">
@@ -32,7 +33,7 @@
     </DataTemplate>
 
     <DataTemplate x:Key="DefaultDisplayObjectTemplate" x:DataType="sys:Object">
-        <TextBlock Text="{x:Bind ToString()}" TextWrapping="Wrap"/>
+        <TextBlock Text="{x:Bind ToString()}" TextWrapping="Wrap" IsTextSelectionEnabled="True"/>
     </DataTemplate>
 
     <controls:PackageDisplayTemplateSelector x:Key="DefaultDisplayTemplateSelector"

@@ -93,7 +93,7 @@
                     <Border x:Name="HeroImageSpacer"/>
                     <Grid Grid.Row="1" Padding="20" ColumnSpacing="20" Margin="20,0" MaxHeight="300"
                           Background="{ThemeResource SystemControlAcrylicElementMediumHighBrush}"
-                          x:Name="InfoCard" CornerRadius="4">
+                          x:Name="InfoCard" CornerRadius="4" HorizontalAlignment="Left">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
@@ -224,9 +224,10 @@
 
                         <!-- Description -->
                         <StackPanel>
-                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Description" />
+                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Description"/>
                             <TextBlock x:Name="DescriptionBlock" Text="{x:Bind ViewModel.Package.Description}"
-                                       FontSize="16" TextTrimming="WordEllipsis" TextWrapping="Wrap" MaxHeight="100" />
+                                       FontSize="16" TextTrimming="WordEllipsis" TextWrapping="Wrap" MaxHeight="100"
+                                       IsTextSelectionEnabled="True"/>
                             <HyperlinkButton x:Name="MoreButton" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Right"
                                              Click="MoreButton_Click" Content="More"
                                              Visibility="{Binding ElementName=DescriptionBlock, Path=IsTextTrimmed}" />
