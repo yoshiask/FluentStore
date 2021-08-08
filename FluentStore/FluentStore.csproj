@@ -120,12 +120,8 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="AutoSuggestions.cs" />
-    <Compile Include="Controls\CompactGrid.cs" />
-    <Compile Include="Controls\IconButton.cs" />
     <Compile Include="Controls\ListViewBehavior.cs" />
     <Compile Include="Controls\PackageDisplayTemplateSelector.cs" />
-    <Compile Include="Controls\ProductCard.cs" />
     <Compile Include="Converters\CSSColorToBrushConverter.cs" />
     <Compile Include="Converters\PlatWindowsEnumToVisibility.cs" />
     <Compile Include="Helpers\AppViewModel.cs" />
@@ -199,10 +195,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="MainPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
