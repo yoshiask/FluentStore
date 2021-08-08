@@ -168,7 +168,39 @@
                     </Grid>
                     <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
                                 Padding="20" Spacing="20">
-                        <StackPanel Spacing="8">
+                        <StackPanel.Resources>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Spacing" Value="8"/>
+                            </Style>
+                        </StackPanel.Resources>
+                        
+                        <!-- Screenshots -->
+                        <StackPanel Visibility="{x:Bind ViewModel.Screenshots, Converter={StaticResource CollectionVisibilityConverter}}">
+                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Screenshots" />
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto">
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.Screenshots}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel MaxHeight="150" Orientation="Horizontal" Spacing="10" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="sdk:ImageBase">
+                                            <Image>
+                                                <Image.Source>
+                                                    <BitmapImage UriSource="{x:Bind Uri}"
+                                                                 DecodePixelHeight="{x:Bind Height}"
+                                                                 DecodePixelWidth="{x:Bind Width}"/>
+                                                </Image.Source>
+                                            </Image>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </StackPanel>
+
+                        <!-- Supported platforms -->
+                        <StackPanel>
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Available on" />
                             <StackPanel Padding="0" Spacing="0">
                                 <StackPanel.Resources>
@@ -201,31 +233,9 @@
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>
-                        <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.Screenshots, Converter={StaticResource CollectionVisibilityConverter}}">
-                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Screenshots" />
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto">
-                                <ItemsControl ItemsSource="{x:Bind ViewModel.Screenshots}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel MaxHeight="150" Orientation="Horizontal" Spacing="10" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="sdk:ImageBase">
-                                            <Image>
-                                                <Image.Source>
-                                                    <BitmapImage UriSource="{x:Bind Uri}"
-                                                                 DecodePixelHeight="{x:Bind Height}"
-                                                                 DecodePixelWidth="{x:Bind Width}"/>
-                                                </Image.Source>
-                                            </Image>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </ScrollViewer>
-                        </StackPanel>
 
-                        <StackPanel Spacing="8">
+                        <!-- Features -->
+                        <StackPanel>
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Features" />
                             <ItemsControl ItemsSource="{Binding ViewModel.Package.Features}">
                                 <ItemsControl.ItemsPanel>
@@ -240,7 +250,9 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </StackPanel>
-                        <StackPanel Spacing="8">
+                        
+                        <!-- Notes -->
+                        <StackPanel>
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="What's new" />
                             <ItemsControl ItemsSource="{Binding ViewModel.Package.Notes}">
                                 <ItemsControl.ItemsPanel>
@@ -256,6 +268,7 @@
                             </ItemsControl>
                         </StackPanel>
 
+                        <!-- Source-specific details -->
                         <!-- All properties marked with DisplayAttribute are shown here -->
                         <ItemsControl ItemsSource="{x:Bind ViewModel.DisplayProperties}">
                             <ItemsControl.ItemsPanel>
@@ -265,7 +278,7 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="attributes:DisplayInfo">
-                                    <StackPanel Spacing="8">
+                                    <StackPanel>
                                         <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="{x:Bind Title}" />
                                         <TextBlock Text="{x:Bind Value.ToString()}"/>
                                         <ContentPresenter Content="{x:Bind Value}"
