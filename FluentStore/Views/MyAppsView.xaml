@@ -10,12 +10,13 @@
     xmlns:viewmodels="using:FluentStore.ViewModels"
     xmlns:controls="using:FluentStore.Controls"
     mc:Ignorable="d"
-    Loading="Page_Loading">
+    Loading="Page_Loading"
+    x:DefaultBindMode="OneWay">
 
     <Grid>
-        <GridView ItemsSource="{x:Bind ViewModel.Apps, Mode=OneWay}"
+        <GridView ItemsSource="{x:Bind ViewModel.Apps}"
                   SelectedItem="{x:Bind ViewModel.SelectedApp, Mode=TwoWay}" SelectionMode="Single"
-                  HorizontalContentAlignment="Stretch" Padding="10"
+                  HorizontalContentAlignment="Stretch" Padding="8"
                   controls:ListViewBehaviour.FillBeforeWrap="True" controls:ListViewBehaviour.MinItemWidth="115">
             <GridView.ItemContainerStyle>
                 <Style TargetType="GridViewItem">
@@ -33,9 +34,9 @@
                         </interactivity:Interaction.Behaviors>
 
                         <Border Background="{ThemeResource SystemControlHighlightListMediumRevealBackgroundBrush}"/>
-                        <Image Source="{x:Bind IconSource, Mode=OneWay}"/>
-                        <TextBlock Text="{Binding DisplayName}" FontSize="12" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
-                                   MaxLines="2" VerticalAlignment="Bottom" Padding="10"/>
+                        <Image Source="{x:Bind IconSource}"/>
+                        <TextBlock Text="{x:Bind DisplayName}" FontSize="12" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
+                                   MaxLines="2" VerticalAlignment="Bottom" Padding="8"/>
                     </Grid>
                 </DataTemplate>
             </GridView.ItemTemplate>

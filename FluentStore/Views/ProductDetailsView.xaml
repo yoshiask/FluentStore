@@ -246,8 +246,8 @@
                                     <StackPanel>
                                         <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="{x:Bind Title}" />
                                         <TextBlock Text="{x:Bind Value.ToString()}"/>
-                                        <ContentPresenter Content="{x:Bind Value}"
-                                                          ContentTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"/>
+                                        <ContentControl Content="{x:Bind Value}"
+                                                        ContentTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
