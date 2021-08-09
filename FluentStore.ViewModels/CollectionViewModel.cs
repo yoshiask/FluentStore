@@ -19,9 +19,8 @@ namespace FluentStore.ViewModels
         {
             SetUpCommands();
         }
-        public CollectionViewModel(Collection collection)
+        public CollectionViewModel(Collection collection) : this()
         {
-            SetUpCommands();
             Collection = collection;
         }
 

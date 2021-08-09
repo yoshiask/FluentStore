@@ -251,6 +251,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Garfoot.Utilities.FluentUrn">
+      <Version>1.2.1</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection">
       <Version>5.0.2</Version>
     </PackageReference>

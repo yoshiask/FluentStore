@@ -1,5 +1,6 @@
 ﻿using FluentStore.SDK.Handlers;
 using FluentStore.SDK.Messages;
+using Garfoot.Utilities.FluentUrn;
 using Microsoft.Marketplace.Storefront.Contracts.Enums;
 using Microsoft.Toolkit.Diagnostics;
 using Microsoft.Toolkit.Mvvm.Messaging;
@@ -32,7 +33,17 @@ namespace FluentStore.SDK.Packages
             MsixBundle  = Msix | Bundle,
         }
 
-        public override string HandlerId { get; set; } = nameof(MicrosoftStoreHandler);
+        private Urn _Urn;
+        public override Urn Urn
+        {
+            get
+            {
+                if (_Urn == null)
+                    UrnBuilder.CreateUrn(MicrosoftStoreHandler.NAMESPACE_MODERNPACK + ":" + PackageFamilyName);
+                return _Urn;
+            }
+            set => _Urn = value;
+        }
 
         public override bool Equals(PackageBase other)
         {
@@ -207,6 +218,18 @@ namespace FluentStore.SDK.Packages
 
             Status = PackageStatus.Installed;
             return true;
+        }
+
+        public override async Task LaunchAsync()
+        {
+            var pkgManager = new PackageManager();
+            var pkg = pkgManager.FindPackagesForUser(string.Empty, PackageFamilyName).FirstOrDefault();
+
+            if (pkg == null) return;
+
+            var apps = await pkg.GetAppListEntriesAsync();
+            var firstApp = apps.FirstOrDefault();
+            await firstApp.LaunchAsync();
         }
 
         public override Task<bool> DownloadPackageAsync(string installerPath)

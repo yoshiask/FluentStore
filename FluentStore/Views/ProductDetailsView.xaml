@@ -159,9 +159,6 @@
                                     <StaticResource x:Key="SplitButtonBorderBrush" ResourceKey="AccentButtonBorderBrush" />
                                     <StaticResource x:Key="SplitButtonBorderBrushPointerOver" ResourceKey="AccentButtonBorderBrushPointerOver" />
                                     <StaticResource x:Key="SplitButtonBorderBrushPressed" ResourceKey="AccentButtonBorderBrushPressed" />
-                                    <!--<StaticResource x:Key="SplitButtonBorderBrushDisabled" ResourceKey="AccentButtonBorderBrushDisabled" />-->
-                                    <!--<StaticResource x:Key="SplitButtonBorderBrushDivider" ResourceKey="AccentButtonBorderBrushDivider" />-->
-
                                 </winui:SplitButton.Resources>
                             </winui:SplitButton>
 
