@@ -395,30 +395,35 @@ namespace FluentStore.Helpers
 
         public static ToastNotification GenerateProgressToast(PackageBase package)
         {
-            var content = new ToastContent()
+            var visualBinding = new ToastBindingGeneric
             {
-                Visual = new ToastVisual()
+                Children =
                 {
-                    BindingGeneric = new ToastBindingGeneric()
+                    new AdaptiveText
                     {
-                        Children =
-                        {
-                            new AdaptiveText()
-                            {
-                                Text = new BindableString("progressTitle")
-                            },
-                            new AdaptiveProgressBar()
-                            {
-                                Value = new BindableProgressBarValue("progressValue"),
-                                Title = new BindableString("progressVersion"),
-                                Status = new BindableString("progressStatus")
-                            }
-                        },
-                        AppLogoOverride = new ToastGenericAppLogo()
-                        {
-                            Source = package.Images.FindLast(i => i.ImageType == ImageType.Logo || i.ImageType == ImageType.Poster).Url
-                        }
+                        Text = new BindableString("progressTitle")
+                    },
+                    new AdaptiveProgressBar
+                    {
+                        Value = new BindableProgressBarValue("progressValue"),
+                        Title = new BindableString("progressVersion"),
+                        Status = new BindableString("progressStatus")
                     }
+                },
+            };
+            if (package.GetAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
+            {
+                visualBinding.AppLogoOverride = new ToastGenericAppLogo
+                {
+                    Source = image.Url
+                };
+            }
+
+            var content = new ToastContent
+            {
+                Visual = new ToastVisual
+                {
+                    BindingGeneric = visualBinding
                 },
                 // TODO: Add cancel and pause functionality
                 //Actions = new ToastActionsCustom()
@@ -452,47 +457,55 @@ namespace FluentStore.Helpers
 
         public static ToastNotification GenerateDownloadSuccessToast(PackageBase package, StorageFile file)
         {
-            var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
+            var builder = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
                 .AddToastActivationInfo($"action=viewEvent&packageUrn={package.Urn}&installerPath={file.Path}", ToastActivationType.Foreground)
                 .AddText(package.Title)
-                .AddText(package.Title + " is ready to install")
-                .AddAppLogoOverride(package.Images.FindLast(i => i.ImageType == ImageType.Logo).Uri, addImageQuery: false)
-                .Content;
-            return new ToastNotification(content.GetXml());
+                .AddText(package.Title + " is ready to install");
+
+            if (package.GetAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
+                builder.AddAppLogoOverride(image.Uri, addImageQuery: false);
+
+            return new ToastNotification(builder.GetXml());
         }
 
         public static ToastNotification GenerateDownloadFailureToast(PackageBase package)
         {
-            var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
+            var builder = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
                 .AddToastActivationInfo($"action=viewEvent&packageUrn={package.Urn}", ToastActivationType.Foreground)
                 .AddText(package.Title)
-                .AddText("Failed to download, please try again later")
-                .AddAppLogoOverride(package.Images.FindLast(i => i.ImageType == ImageType.Logo).Uri, addImageQuery: false)
-                .Content;
-            return new ToastNotification(content.GetXml());
+                .AddText("Failed to download, please try again later");
+
+            if (package.GetAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
+                builder.AddAppLogoOverride(image.Uri, addImageQuery: false);
+
+            return new ToastNotification(builder.GetXml());
         }
 
         public static ToastNotification GenerateInstallSuccessToast(PackageBase package)
         {
-            var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
+            var builder = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
                 .AddToastActivationInfo($"action=viewEvent&packageUrn={package.Urn}", ToastActivationType.Foreground)
                 .AddText(package.ShortTitle)
-                .AddText(package.Title + " just got installed.")
-                .AddAppLogoOverride(package.Images.FindLast(i => i.ImageType == ImageType.Logo).Uri, addImageQuery: false)
-                .Content;
-            return new ToastNotification(content.GetXml());
+                .AddText(package.Title + " just got installed.");
+
+            if (package.GetAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
+                builder.AddAppLogoOverride(image.Uri, addImageQuery: false);
+
+            return new ToastNotification(builder.GetXml());
         }
 
         public static ToastNotification GenerateInstallFailureToast(PackageBase package, Exception ex)
         {
-            var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
+            var builder = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
                 .AddToastActivationInfo($"action=viewEvent&packageUrn={package.Urn}", ToastActivationType.Foreground)
                 .AddText(package.Title)
                 .AddText(package.Title + " failed to install.")
-                .AddText(ex.Message)
-                .AddAppLogoOverride(package.Images.FindLast(i => i.ImageType == ImageType.Logo).Uri, addImageQuery: false)
-                .Content;
-            return new ToastNotification(content.GetXml());
+                .AddText(ex.Message);
+
+            if (package.GetAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
+                builder.AddAppLogoOverride(image.Uri, addImageQuery: false);
+
+            return new ToastNotification(builder.GetXml());
         }
 
         public static void HandlePackageDownloadProgressToast(PackageDownloadProgressMessage m, ToastNotification progressToast)

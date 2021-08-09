@@ -12,6 +12,7 @@ namespace FluentStoreAPI.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public string TileGlyph { get; set; }
+        public string ImageUrl { get; set; }
         public string AuthorId { get; set; }
         public List<string> Items { get; set; }
 

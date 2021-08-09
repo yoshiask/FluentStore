@@ -10,6 +10,7 @@
             <winui:XamlControlsResources.MergedDictionaries>
                 <!-- Other app resources here -->
                 <ResourceDictionary Source="/Themes/PackageDisplayTemplates.xaml"/>
+                <ResourceDictionary Source="/Themes/ImageBaseTemplates.xaml"/>
                 
                 <ResourceDictionary>
                     <helpers:Settings x:Key="settings" />

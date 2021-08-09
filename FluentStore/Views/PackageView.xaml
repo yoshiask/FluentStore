@@ -2,9 +2,8 @@
     x:Class="FluentStore.Views.PackageView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:tkcontrols="using:Microsoft.Toolkit.Uwp.UI.Controls"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="using:FluentStore.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sdk="using:FluentStore.SDK"
     xmlns:attributes="using:FluentStore.SDK.Attributes"
@@ -13,85 +12,31 @@
     xmlns:controls="using:FluentStore.Controls"
     xmlns:tkconverters="using:Microsoft.Toolkit.Uwp.UI.Converters"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
-    mc:Ignorable="d"
-    SizeChanged="Page_SizeChanged"
-    NavigationCacheMode="Disabled"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-    <Page.Resources>
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
         <tkconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <tkconverters:BoolToVisibilityConverter x:Key="NotBoolToVisibilityConverter" FalseValue="Visible" TrueValue="Collapsed"/>
         <tkconverters:CollectionVisibilityConverter x:Key="CollectionVisibilityConverter"/>
         <tkconverters:EmptyStringToObjectConverter x:Key="EmptyStringToVisibilityConverter" EmptyValue="Collapsed" NotEmptyValue="Visible"/>
         <converters:PlatWindowsEnumToVisibility x:Key="PlatWindowsEnumToVisibility"/>
-    </Page.Resources>
+    </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
-        <ParallaxView Source="{x:Bind ContentScroller}" VerticalShift="200" VerticalSourceOffsetKind="Absolute">
-            <Image x:Name="HeroImage" VerticalAlignment="Top" HorizontalAlignment="Left" Stretch="Uniform">
-                <Image.Source>
-                    <BitmapImage UriSource="{x:Bind ViewModel.HeroImage.Uri, TargetNullValue=//:0, Mode=OneWay}" ImageOpened="HeroImage_ImageOpened"/>
-                </Image.Source>
-            </Image>
-        </ParallaxView>
+
+        <ContentControl Content="{x:Bind ViewModel.HeroImage}" VerticalAlignment="Top" HorizontalAlignment="Stretch"
+                        ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"
+                        SizeChanged="HeroImage_SizeChanged"/>
 
         <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*" />
-                <ColumnDefinition Width="0*" />
-            </Grid.ColumnDefinitions>
-
-            <!--<Grid Grid.Column="1" Grid.Row="2" Grid.RowSpan="2" RowSpacing="10" Padding="0,15,15,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <TextBlock Text="Ratings and Reviews" Style="{ThemeResource NavigationViewItemHeaderTextStyle}"/>
-                <StackPanel Orientation="Horizontal" Spacing="10" Grid.Row="1">
-                    <TextBlock Text="{x:Bind ViewModel.GetAverageRatingString()}" FontSize="24" FontWeight="Bold"/>
-                    <RatingControl Value="{x:Bind ViewModel.Product.AverageRating}" IsReadOnly="True" VerticalAlignment="Bottom"/>
-                </StackPanel>
-                <Button Style="{ThemeResource AccentButtonStyle}" Padding="10" Grid.Row="1" HorizontalAlignment="Right"
-                        Visibility="Collapsed">
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <FontIcon Glyph="&#xE1CE;"/>
-                        <TextBlock Text="Rate this app"/>
-                    </StackPanel>
-                </Button>
-                <ScrollViewer Grid.Row="2">
-                    <StackPanel Spacing="10">
-                        <Grid Background="{ThemeResource SystemChromeLowColor}"
-                                ColumnSpacing="10" CornerRadius="4" Padding="15">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <PersonPicture MaxWidth="32"/>
-                            <TextBlock Text="Joe Mama" FontWeight="Bold"
-                                        Grid.Column="1" VerticalAlignment="Center"/>
-                            <TextBlock Text="July 17, 2020 2:22 AM" Foreground="{ThemeResource SystemBaseMediumHighColor}"
-                                        HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="1"/>
-                            <RatingControl Value="2.5" IsReadOnly="True" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left"/>
-                            <TextBlock Text="What does it even do?" Margin="0,5,0,0"
-                                        TextWrapping="Wrap" Grid.Row="2" Grid.Column="1" FontSize="16"/>
-                        </Grid>
-                    </StackPanel>
-                </ScrollViewer>
-            </Grid>-->
-
-            <ScrollViewer Grid.Column="0" x:Name="ContentScroller">
+            <ScrollViewer x:Name="ContentScroller">
                 <StackPanel Spacing="20">
                     <Border x:Name="HeroImageSpacer"/>
-                    <Grid Grid.Row="1" Padding="20" ColumnSpacing="20" Margin="20,0" MaxHeight="300"
+                    <Grid Padding="20" ColumnSpacing="20" Margin="20,0" MaxHeight="300"
                           Background="{ThemeResource SystemControlAcrylicElementMediumHighBrush}"
                           x:Name="InfoCard" CornerRadius="4" HorizontalAlignment="Left">
                         <Grid.RowDefinitions>
@@ -103,16 +48,13 @@
                             <ColumnDefinition Width="*" MaxWidth="125" />
                             <ColumnDefinition Width="4*" />
                         </Grid.ColumnDefinitions>
-                        
+
                         <Viewbox MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="125"
                                  HorizontalAlignment="Stretch" VerticalAlignment="Top" Grid.RowSpan="3">
-                            <Image>
-                                <Image.Source>
-                                    <BitmapImage UriSource="{x:Bind ViewModel.AppIcon.Uri}"/>
-                                </Image.Source>
-                            </Image>
+                            <ContentControl Content="{x:Bind ViewModel.AppIcon, Mode=OneWay}"
+                                            ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
                         </Viewbox>
-                        
+
                         <TextBlock Text="{x:Bind ViewModel.Package.Title}" ToolTipService.ToolTip="{x:Bind ViewModel.Package.Title}"
                                    HorizontalAlignment="Left" FontSize="30" FontWeight="Bold" TextTrimming="CharacterEllipsis"
                                    Grid.Column="1" VerticalAlignment="Bottom"/>
@@ -126,6 +68,7 @@
 
                         <StackPanel Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="2" VerticalAlignment="Bottom"
                                     Orientation="Horizontal" Spacing="8" Margin="0,16,0,0">
+                            
                             <winui:SplitButton x:Name="InstallButton" Padding="8" Click="InstallSplitButton_Click"
                                                VerticalAlignment="Stretch">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
@@ -162,12 +105,30 @@
                                 </winui:SplitButton.Resources>
                             </winui:SplitButton>
 
-                            <winui:DropDownButton VerticalAlignment="Stretch" Click="AddToCollection_Click">
+                            <winui:DropDownButton VerticalAlignment="Stretch" Click="AddToCollection_Click"
+                                                  Visibility="{x:Bind ViewModel.IsCollection, Converter={StaticResource NotBoolToVisibilityConverter}}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <FontIcon Glyph="&#xECCD;" />
                                     <TextBlock Text="Add to Collection" />
                                 </StackPanel>
                             </winui:DropDownButton>
+
+                            <Button VerticalAlignment="Stretch"
+                                    Visibility="{x:Bind ViewModel.IsCollection, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE74D;" />
+                                    <TextBlock Text="Delete" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button VerticalAlignment="Stretch"
+                                    Visibility="{x:Bind ViewModel.IsCollection, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon Glyph="&#xE70F;" />
+                                    <TextBlock Text="Edit details" />
+                                </StackPanel>
+                            </Button>
+
                         </StackPanel>
                     </Grid>
                     <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
@@ -182,64 +143,19 @@
                         <StackPanel Visibility="{x:Bind ViewModel.Screenshots, Converter={StaticResource CollectionVisibilityConverter}}">
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Screenshots" />
                             <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto">
-                                <ItemsControl ItemsSource="{x:Bind ViewModel.Screenshots}">
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.Screenshots}"
+                                              ItemTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <StackPanel MaxHeight="150" Orientation="Horizontal" Spacing="10" />
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="sdk:ImageBase">
-                                            <Image>
-                                                <Image.Source>
-                                                    <BitmapImage UriSource="{x:Bind Uri}"
-                                                                 DecodePixelHeight="{x:Bind Height}"
-                                                                 DecodePixelWidth="{x:Bind Width}"/>
-                                                </Image.Source>
-                                            </Image>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </ScrollViewer>
                         </StackPanel>
 
-                        <!-- Supported platforms -->
-                        <StackPanel>
-                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Available on" />
-                            <StackPanel Padding="0" Spacing="0">
-                                <StackPanel.Resources>
-                                    <Style TargetType="StackPanel">
-                                        <Setter Property="Padding" Value="8"/>
-                                        <Setter Property="Spacing" Value="8"/>
-                                        <Setter Property="Orientation" Value="Horizontal"/>
-                                        <Setter Property="Margin" Value="0,0,8,0"/>
-                                    </Style>
-                                </StackPanel.Resources>
-                                <StackPanel Visibility="{x:Bind ViewModel, ConverterParameter=Desktop, Converter={StaticResource PlatWindowsEnumToVisibility}}">
-                                    <FontIcon Glyph="&#xE977;" />
-                                    <TextBlock Text="PC" />
-                                </StackPanel>
-                                <StackPanel Visibility="{x:Bind ViewModel, ConverterParameter=Xbox, Converter={StaticResource PlatWindowsEnumToVisibility}}">
-                                    <FontIcon Glyph="&#xE990;" />
-                                    <TextBlock Text="Xbox One" />
-                                </StackPanel>
-                                <StackPanel Visibility="{x:Bind ViewModel, ConverterParameter=Holographic, Converter={StaticResource PlatWindowsEnumToVisibility}}">
-                                    <FontIcon FontFamily="Hololens MDL2 Assets" Glyph="&#xF132;" />
-                                    <TextBlock Text="Hololens" />
-                                </StackPanel>
-                                <StackPanel Visibility="{x:Bind ViewModel, ConverterParameter=Mobile, Converter={StaticResource PlatWindowsEnumToVisibility}}">
-                                    <FontIcon Glyph="&#xE1C9;" />
-                                    <TextBlock Text="Mobile" />
-                                </StackPanel>
-                                <StackPanel Visibility="{x:Bind ViewModel, ConverterParameter=Team, Converter={StaticResource PlatWindowsEnumToVisibility}}">
-                                    <FontIcon Glyph="&#xE8AE;" />
-                                    <TextBlock Text="Hub" />
-                                </StackPanel>
-                            </StackPanel>
-                        </StackPanel>
-
                         <!-- Description -->
-                        <StackPanel>
+                        <StackPanel Visibility="{x:Bind ViewModel.Package.Description, Converter={StaticResource EmptyStringToVisibilityConverter}}">
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Description"/>
                             <TextBlock x:Name="DescriptionBlock" Text="{x:Bind ViewModel.Package.Description}"
                                        FontSize="16" TextTrimming="WordEllipsis" TextWrapping="Wrap" MaxHeight="100"
@@ -252,7 +168,8 @@
                         <!-- Source-specific details -->
                         <!-- All properties marked with DisplayAttribute are shown here -->
                         <ItemsControl ItemsSource="{x:Bind ViewModel.DisplayProperties}"
-                                      ItemTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}">
+                                      ItemTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"
+                                      Visibility="{x:Bind ViewModel.DisplayProperties, Converter={StaticResource CollectionVisibilityConverter}}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel Spacing="20"/>
@@ -270,4 +187,5 @@
             </ScrollViewer>
         </Grid>
     </Grid>
+
 </Page>

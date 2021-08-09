@@ -14,9 +14,6 @@
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
     mc:Ignorable="d"
     NavigationCacheMode="Disabled">
-    <Page.Resources>
-        <converters:CSSColorToBrushConverter x:Name="CSSColorToBrushConverter"/>
-    </Page.Resources>
 
     <GridView ItemsSource="{x:Bind ViewModel.PackageList, Mode=OneWay}" SelectionMode="Single"
               SelectedItem="{x:Bind ViewModel.SelectedPackage, Mode=TwoWay}" Padding="10"
@@ -34,12 +31,8 @@
                         <RowDefinition Height="150"/>
                         <RowDefinition Height="150"/>
                     </Grid.RowDefinitions>
-                    <Rectangle Fill="{x:Bind AppIcon.BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}"/>
-                    <toolkit:ImageEx CacheMode="BitmapCache">
-                        <toolkit:ImageEx.Source>
-                            <BitmapImage UriSource="{x:Bind AppIcon.Uri}"/>
-                        </toolkit:ImageEx.Source>
-                    </toolkit:ImageEx>
+                    <ContentControl Content="{x:Bind AppIcon}"
+                                    ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
                     <Grid Grid.Row="1" Padding="10">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>

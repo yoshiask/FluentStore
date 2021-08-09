@@ -39,11 +39,8 @@
                             <RowDefinition Height="3*"/>
                             <RowDefinition Height="1*" MinHeight="75"/>
                         </Grid.RowDefinitions>
-                        <controls:ImageEx Grid.RowSpan="2">
-                            <controls:ImageEx.Source>
-                                <BitmapImage UriSource="{x:Bind HeroImage.Uri, TargetNullValue=//:0, Mode=OneWay}"/>
-                            </controls:ImageEx.Source>
-                        </controls:ImageEx>
+                        <ContentControl Content="{x:Bind HeroImage}" DataContext="{x:Bind HeroImage}" Grid.RowSpan="2"
+                                        ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
                         <Grid Grid.Row="1" Padding="8" ColumnSpacing="8" Background="{ThemeResource SystemControlBaseHighAcrylicElementBrush}">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -56,11 +53,8 @@
                             </Grid.ColumnDefinitions>
                             <Viewbox MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="72"
                                      Grid.RowSpan="3" HorizontalAlignment="Left" VerticalAlignment="Stretch">
-                                <Image>
-                                    <Image.Source>
-                                        <BitmapImage UriSource="{x:Bind AppIcon.Uri}"/>
-                                    </Image.Source>
-                                </Image>
+                                <ContentControl Content="{x:Bind AppIcon}"
+                                                ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
                             </Viewbox>
                             <TextBlock Text="{x:Bind Package.ShortTitle}" Grid.Column="1" FontSize="20"
                                        FontWeight="Bold" TextTrimming="CharacterEllipsis"/>

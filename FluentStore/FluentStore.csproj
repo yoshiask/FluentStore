@@ -1,318 +1,327 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProjectGuid>{207C9124-469A-45D7-8AB8-6C5FC2C0C1F3}</ProjectGuid>
-    <OutputType>AppContainerExe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FluentStore</RootNamespace>
-    <AssemblyName>FluentStore</AssemblyName>
-    <DefaultLanguage>en-US</DefaultLanguage>
-    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.19041.0</TargetPlatformVersion>
-    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-    <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <WindowsXamlEnableOverview>true</WindowsXamlEnableOverview>
-    <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <NoWarn>;2008</NoWarn>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <Optimize>true</Optimize>
-    <NoWarn>;2008</NoWarn>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-    <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\ARM\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <NoWarn>;2008</NoWarn>
-    <DebugType>full</DebugType>
-    <PlatformTarget>ARM</PlatformTarget>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
-    <OutputPath>bin\ARM\Release\</OutputPath>
-    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <Optimize>true</Optimize>
-    <NoWarn>;2008</NoWarn>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>ARM</PlatformTarget>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-    <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\ARM64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <NoWarn>;2008</NoWarn>
-    <DebugType>full</DebugType>
-    <PlatformTarget>ARM64</PlatformTarget>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-    <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM64'">
-    <OutputPath>bin\ARM64\Release\</OutputPath>
-    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <Optimize>true</Optimize>
-    <NoWarn>;2008</NoWarn>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>ARM64</PlatformTarget>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-    <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <NoWarn>;2008</NoWarn>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <Optimize>true</Optimize>
-    <NoWarn>;2008</NoWarn>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <ErrorReport>prompt</ErrorReport>
-    <Prefer32Bit>true</Prefer32Bit>
-    <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
-  </PropertyGroup>
-  <PropertyGroup>
-    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
-    <LangVersion>8</LangVersion>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\DisplayModule.xaml.cs">
-      <DependentUpon>DisplayModule.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\ListViewBehavior.cs" />
-    <Compile Include="Controls\PackageDisplayTemplateSelector.cs" />
-    <Compile Include="Converters\CSSColorToBrushConverter.cs" />
-    <Compile Include="Converters\PlatWindowsEnumToVisibility.cs" />
-    <Compile Include="Helpers\AppViewModel.cs" />
-    <Compile Include="Helpers\NavigationHelper.cs" />
-    <Compile Include="Helpers\NavigationService.cs" />
-    <Compile Include="Helpers\ObservableSettings.cs" />
-    <Compile Include="Helpers\PackageHelper.cs" />
-    <Compile Include="Helpers\PasswordVaultService.cs" />
-    <Compile Include="Helpers\RequiresSignInAttribute.cs" />
-    <Compile Include="Helpers\Settings.cs" />
-    <Compile Include="Helpers\StringEx.cs" />
-    <Compile Include="MainPage.xaml.cs">
-      <DependentUpon>MainPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Themes\PackageDisplayTemplates.xaml.cs">
-      <DependentUpon>PackageDisplayTemplates.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Auth\SignInView.xaml.cs">
-      <DependentUpon>SignInView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\CollectionView.xaml.cs">
-      <DependentUpon>CollectionView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\EditCollectionDetailsDialog.xaml.cs">
-      <DependentUpon>EditCollectionDetailsDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\HomeView.xaml.cs">
-      <DependentUpon>HomeView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\MyAppsView.xaml.cs">
-      <DependentUpon>MyAppsView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\MyCollectionsView.xaml.cs">
-      <DependentUpon>MyCollectionsView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\ProductDetailsView.xaml.cs">
-      <DependentUpon>ProductDetailsView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\ProgressDialog.xaml.cs">
-      <DependentUpon>ProgressDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\SearchResultsView.xaml.cs">
-      <DependentUpon>SearchResultsView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\SettingsView.xaml.cs">
-      <DependentUpon>SettingsView.xaml</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <AppxManifest Include="Package.appxmanifest">
-      <SubType>Designer</SubType>
-    </AppxManifest>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Assets\AppPackageAppList.targetsize-24.png" />
-    <Content Include="Assets\Square310x310Logo.scale-200.png" />
-    <Content Include="Assets\Square71x71Logo.scale-200.png" />
-    <Content Include="Properties\Default.rd.xml" />
-    <Content Include="Assets\LockScreenLogo.scale-200.png" />
-    <Content Include="Assets\SplashScreen.scale-200.png" />
-    <Content Include="Assets\Square150x150Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Content Include="Assets\StoreLogo.png" />
-    <Content Include="Assets\Wide310x150Logo.scale-200.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </ApplicationDefinition>
-    <Page Include="Controls\DisplayModule.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MainPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Themes\PackageDisplayTemplates.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Auth\SignInView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\CollectionView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\EditCollectionDetailsDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\HomeView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\MyAppsView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\MyCollectionsView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ProductDetailsView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ProgressDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\SearchResultsView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\SettingsView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Garfoot.Utilities.FluentUrn">
-      <Version>1.2.1</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection">
-      <Version>5.0.2</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
-      <Version>6.2.12</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Toolkit.Mvvm">
-      <Version>7.0.2</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications">
-      <Version>7.0.2</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Controls">
-      <Version>7.0.2</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.UI.Xaml">
-      <Version>2.6.1</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Xaml.Behaviors.Uwp.Managed">
-      <Version>2.0.1</Version>
-    </PackageReference>
-    <PackageReference Include="OwlCore">
-      <Version>0.0.21</Version>
-    </PackageReference>
-    <PackageReference Include="Refit">
-      <Version>5.2.4</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj">
-      <Project>{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}</Project>
-      <Name>FluentStore.SDK</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj">
-      <Project>{c913bcf0-3d85-4b80-af1b-eec60033ae47}</Project>
-      <Name>FluentStore.Services</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\FluentStore.ViewModels\FluentStore.ViewModels.csproj">
-      <Project>{dc3ed84a-983c-42dd-9074-26d7c7e44f90}</Project>
-      <Name>FluentStore.ViewModels</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\FluentStoreAPI\FluentStoreAPI.csproj">
-      <Project>{9918633d-4c2a-463d-a4ca-c8fc095a820c}</Project>
-      <Name>FluentStoreAPI</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj">
-      <Project>{7fc21573-6b0f-4b5b-bae5-af80546c0d79}</Project>
-      <Name>Microsoft.Marketplace.Storefront.Contracts</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\StoreLib\StoreLib\StoreLib.csproj">
-      <Project>{e13711ff-3e53-4ca4-8043-63b92673567a}</Project>
-      <Name>StoreLib</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
-    <VisualStudioVersion>14.0</VisualStudioVersion>
-  </PropertyGroup>
-  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+        <ProjectGuid>{207C9124-469A-45D7-8AB8-6C5FC2C0C1F3}</ProjectGuid>
+        <OutputType>AppContainerExe</OutputType>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <RootNamespace>FluentStore</RootNamespace>
+        <AssemblyName>FluentStore</AssemblyName>
+        <DefaultLanguage>en-US</DefaultLanguage>
+        <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
+        <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.19041.0</TargetPlatformVersion>
+        <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+        <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
+        <FileAlignment>512</FileAlignment>
+        <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+        <WindowsXamlEnableOverview>true</WindowsXamlEnableOverview>
+        <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+        <DebugSymbols>true</DebugSymbols>
+        <OutputPath>bin\x86\Debug\</OutputPath>
+        <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+        <NoWarn>;2008</NoWarn>
+        <DebugType>full</DebugType>
+        <PlatformTarget>x86</PlatformTarget>
+        <UseVSHostingProcess>false</UseVSHostingProcess>
+        <ErrorReport>prompt</ErrorReport>
+        <Prefer32Bit>true</Prefer32Bit>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+        <OutputPath>bin\x86\Release\</OutputPath>
+        <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+        <Optimize>true</Optimize>
+        <NoWarn>;2008</NoWarn>
+        <DebugType>pdbonly</DebugType>
+        <PlatformTarget>x86</PlatformTarget>
+        <UseVSHostingProcess>false</UseVSHostingProcess>
+        <ErrorReport>prompt</ErrorReport>
+        <Prefer32Bit>true</Prefer32Bit>
+        <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
+        <DebugSymbols>true</DebugSymbols>
+        <OutputPath>bin\ARM\Debug\</OutputPath>
+        <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+        <NoWarn>;2008</NoWarn>
+        <DebugType>full</DebugType>
+        <PlatformTarget>ARM</PlatformTarget>
+        <UseVSHostingProcess>false</UseVSHostingProcess>
+        <ErrorReport>prompt</ErrorReport>
+        <Prefer32Bit>true</Prefer32Bit>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM'">
+        <OutputPath>bin\ARM\Release\</OutputPath>
+        <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+        <Optimize>true</Optimize>
+        <NoWarn>;2008</NoWarn>
+        <DebugType>pdbonly</DebugType>
+        <PlatformTarget>ARM</PlatformTarget>
+        <UseVSHostingProcess>false</UseVSHostingProcess>
+        <ErrorReport>prompt</ErrorReport>
+        <Prefer32Bit>true</Prefer32Bit>
+        <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM64'">
+        <DebugSymbols>true</DebugSymbols>
+        <OutputPath>bin\ARM64\Debug\</OutputPath>
+        <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+        <NoWarn>;2008</NoWarn>
+        <DebugType>full</DebugType>
+        <PlatformTarget>ARM64</PlatformTarget>
+        <UseVSHostingProcess>false</UseVSHostingProcess>
+        <ErrorReport>prompt</ErrorReport>
+        <Prefer32Bit>true</Prefer32Bit>
+        <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM64'">
+        <OutputPath>bin\ARM64\Release\</OutputPath>
+        <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+        <Optimize>true</Optimize>
+        <NoWarn>;2008</NoWarn>
+        <DebugType>pdbonly</DebugType>
+        <PlatformTarget>ARM64</PlatformTarget>
+        <UseVSHostingProcess>false</UseVSHostingProcess>
+        <ErrorReport>prompt</ErrorReport>
+        <Prefer32Bit>true</Prefer32Bit>
+        <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+        <DebugSymbols>true</DebugSymbols>
+        <OutputPath>bin\x64\Debug\</OutputPath>
+        <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+        <NoWarn>;2008</NoWarn>
+        <DebugType>full</DebugType>
+        <PlatformTarget>x64</PlatformTarget>
+        <UseVSHostingProcess>false</UseVSHostingProcess>
+        <ErrorReport>prompt</ErrorReport>
+        <Prefer32Bit>true</Prefer32Bit>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+        <OutputPath>bin\x64\Release\</OutputPath>
+        <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+        <Optimize>true</Optimize>
+        <NoWarn>;2008</NoWarn>
+        <DebugType>pdbonly</DebugType>
+        <PlatformTarget>x64</PlatformTarget>
+        <UseVSHostingProcess>false</UseVSHostingProcess>
+        <ErrorReport>prompt</ErrorReport>
+        <Prefer32Bit>true</Prefer32Bit>
+        <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
+    </PropertyGroup>
+    <PropertyGroup>
+        <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+        <LangVersion>8</LangVersion>
+    </PropertyGroup>
+    <ItemGroup>
+        <Compile Include="App.xaml.cs">
+            <DependentUpon>App.xaml</DependentUpon>
+        </Compile>
+        <Compile Include="Controls\DisplayModule.xaml.cs">
+            <DependentUpon>DisplayModule.xaml</DependentUpon>
+        </Compile>
+        <Compile Include="Controls\ImageBaseTemplateSelector.cs" />
+        <Compile Include="Controls\ListViewBehavior.cs" />
+        <Compile Include="Controls\PackageDisplayTemplateSelector.cs" />
+        <Compile Include="Views\PackageView.xaml.cs">
+            <DependentUpon>PackageView.xaml</DependentUpon>
+        </Compile>
+        <Compile Include="Converters\CSSColorToBrushConverter.cs" />
+        <Compile Include="Converters\PlatWindowsEnumToVisibility.cs" />
+        <Compile Include="Converters\StreamToBitmapImageConverter.cs" />
+        <Compile Include="Helpers\AppViewModel.cs" />
+        <Compile Include="Helpers\NavigationHelper.cs" />
+        <Compile Include="Helpers\NavigationService.cs" />
+        <Compile Include="Helpers\ObservableSettings.cs" />
+        <Compile Include="Helpers\PackageHelper.cs" />
+        <Compile Include="Helpers\PasswordVaultService.cs" />
+        <Compile Include="Helpers\RequiresSignInAttribute.cs" />
+        <Compile Include="Helpers\Settings.cs" />
+        <Compile Include="Helpers\StringEx.cs" />
+        <Compile Include="MainPage.xaml.cs">
+            <DependentUpon>MainPage.xaml</DependentUpon>
+        </Compile>
+        <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="Themes\ImageBaseTemplates.xaml.cs">
+            <DependentUpon>ImageBaseTemplates.xaml</DependentUpon>
+        </Compile>
+        <Compile Include="Themes\PackageDisplayTemplates.xaml.cs">
+            <DependentUpon>PackageDisplayTemplates.xaml</DependentUpon>
+        </Compile>
+        <Compile Include="Views\Auth\SignInView.xaml.cs">
+            <DependentUpon>SignInView.xaml</DependentUpon>
+        </Compile>
+        <Compile Include="Views\CollectionView.xaml.cs">
+            <DependentUpon>CollectionView.xaml</DependentUpon>
+        </Compile>
+        <Compile Include="Views\EditCollectionDetailsDialog.xaml.cs">
+            <DependentUpon>EditCollectionDetailsDialog.xaml</DependentUpon>
+        </Compile>
+        <Compile Include="Views\HomeView.xaml.cs">
+            <DependentUpon>HomeView.xaml</DependentUpon>
+        </Compile>
+        <Compile Include="Views\MyAppsView.xaml.cs">
+            <DependentUpon>MyAppsView.xaml</DependentUpon>
+        </Compile>
+        <Compile Include="Views\MyCollectionsView.xaml.cs">
+            <DependentUpon>MyCollectionsView.xaml</DependentUpon>
+        </Compile>
+        <Compile Include="Views\ProgressDialog.xaml.cs">
+            <DependentUpon>ProgressDialog.xaml</DependentUpon>
+        </Compile>
+        <Compile Include="Views\SearchResultsView.xaml.cs">
+            <DependentUpon>SearchResultsView.xaml</DependentUpon>
+        </Compile>
+        <Compile Include="Views\SettingsView.xaml.cs">
+            <DependentUpon>SettingsView.xaml</DependentUpon>
+        </Compile>
+    </ItemGroup>
+    <ItemGroup>
+        <AppxManifest Include="Package.appxmanifest">
+            <SubType>Designer</SubType>
+        </AppxManifest>
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="Assets\AppPackageAppList.targetsize-24.png" />
+        <Content Include="Assets\Square310x310Logo.scale-200.png" />
+        <Content Include="Assets\Square71x71Logo.scale-200.png" />
+        <Content Include="Properties\Default.rd.xml" />
+        <Content Include="Assets\LockScreenLogo.scale-200.png" />
+        <Content Include="Assets\SplashScreen.scale-200.png" />
+        <Content Include="Assets\Square150x150Logo.scale-200.png" />
+        <Content Include="Assets\Square44x44Logo.scale-200.png" />
+        <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+        <Content Include="Assets\StoreLogo.png" />
+        <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+    </ItemGroup>
+    <ItemGroup>
+        <ApplicationDefinition Include="App.xaml">
+            <Generator>MSBuild:Compile</Generator>
+            <SubType>Designer</SubType>
+        </ApplicationDefinition>
+        <Page Include="Controls\DisplayModule.xaml">
+            <SubType>Designer</SubType>
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Include="Views\PackageView.xaml">
+            <SubType>Designer</SubType>
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Include="MainPage.xaml">
+            <Generator>MSBuild:Compile</Generator>
+            <SubType>Designer</SubType>
+        </Page>
+        <Page Include="Themes\ImageBaseTemplates.xaml">
+            <SubType>Designer</SubType>
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Include="Themes\PackageDisplayTemplates.xaml">
+            <SubType>Designer</SubType>
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Include="Views\Auth\SignInView.xaml">
+            <SubType>Designer</SubType>
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Include="Views\CollectionView.xaml">
+            <SubType>Designer</SubType>
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Include="Views\EditCollectionDetailsDialog.xaml">
+            <SubType>Designer</SubType>
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Include="Views\HomeView.xaml">
+            <SubType>Designer</SubType>
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Include="Views\MyAppsView.xaml">
+            <SubType>Designer</SubType>
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Include="Views\MyCollectionsView.xaml">
+            <SubType>Designer</SubType>
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Include="Views\ProgressDialog.xaml">
+            <SubType>Designer</SubType>
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Include="Views\SearchResultsView.xaml">
+            <SubType>Designer</SubType>
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Include="Views\SettingsView.xaml">
+            <SubType>Designer</SubType>
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Garfoot.Utilities.FluentUrn">
+            <Version>1.2.1</Version>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection">
+            <Version>5.0.2</Version>
+        </PackageReference>
+        <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
+            <Version>6.2.12</Version>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Toolkit.Mvvm">
+            <Version>7.0.2</Version>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications">
+            <Version>7.0.2</Version>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Controls">
+            <Version>7.0.2</Version>
+        </PackageReference>
+        <PackageReference Include="Microsoft.UI.Xaml">
+            <Version>2.6.1</Version>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Xaml.Behaviors.Uwp.Managed">
+            <Version>2.0.1</Version>
+        </PackageReference>
+        <PackageReference Include="OwlCore">
+            <Version>0.0.21</Version>
+        </PackageReference>
+        <PackageReference Include="Refit">
+            <Version>5.2.4</Version>
+        </PackageReference>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj">
+            <Project>{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}</Project>
+            <Name>FluentStore.SDK</Name>
+        </ProjectReference>
+        <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj">
+            <Project>{c913bcf0-3d85-4b80-af1b-eec60033ae47}</Project>
+            <Name>FluentStore.Services</Name>
+        </ProjectReference>
+        <ProjectReference Include="..\FluentStore.ViewModels\FluentStore.ViewModels.csproj">
+            <Project>{dc3ed84a-983c-42dd-9074-26d7c7e44f90}</Project>
+            <Name>FluentStore.ViewModels</Name>
+        </ProjectReference>
+        <ProjectReference Include="..\FluentStoreAPI\FluentStoreAPI.csproj">
+            <Project>{9918633d-4c2a-463d-a4ca-c8fc095a820c}</Project>
+            <Name>FluentStoreAPI</Name>
+        </ProjectReference>
+        <ProjectReference Include="..\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj">
+            <Project>{7fc21573-6b0f-4b5b-bae5-af80546c0d79}</Project>
+            <Name>Microsoft.Marketplace.Storefront.Contracts</Name>
+        </ProjectReference>
+        <ProjectReference Include="..\StoreLib\StoreLib\StoreLib.csproj">
+            <Project>{e13711ff-3e53-4ca4-8043-63b92673567a}</Project>
+            <Name>StoreLib</Name>
+        </ProjectReference>
+    </ItemGroup>
+    <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
+        <VisualStudioVersion>14.0</VisualStudioVersion>
+    </PropertyGroup>
+    <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

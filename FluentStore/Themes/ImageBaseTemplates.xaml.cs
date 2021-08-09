@@ -2,9 +2,9 @@
 
 namespace FluentStore.Themes
 {
-    public partial class PackageDisplayTemplates : ResourceDictionary
+    public partial class ImageBaseTemplates : ResourceDictionary
     {
-        public PackageDisplayTemplates()
+        public ImageBaseTemplates()
         {
             InitializeComponent();
         }

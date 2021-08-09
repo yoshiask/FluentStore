@@ -1,4 +1,5 @@
 ﻿using FluentStore.SDK.Handlers;
+using FluentStore.SDK.Images;
 using FluentStore.SDK.Messages;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Marketplace.Storefront.Contracts.Enums;
@@ -357,10 +358,10 @@ namespace FluentStore.SDK.Packages
             XPathDocument manifest = new XPathDocument(manifestStream);
             var logoNode = manifest.CreateNavigator().Select("/Package/Properties/Logo[1]").Current;
             var iconEntry = archive.GetEntry(logoNode.Value);
-            return new ImageBase
+            return new StreamImage
             {
                 ImageType = ImageType.Logo,
-                BackgroundColor = "#00000000",
+                BackgroundColor = "Transparent",
                 Stream = iconEntry.Open()
             };
         }

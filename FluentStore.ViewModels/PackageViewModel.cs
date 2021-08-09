@@ -39,6 +39,9 @@ namespace FluentStore.ViewModels
                 Screenshots = null;
                 DisplayProperties = null;
                 DisplayAdditionalInformationProperties = null;
+
+                // Update derived properties
+                IsCollection = Package.GetType() == typeof(SDK.PackageTypes.CollectionPackage);
             }
         }
 
@@ -68,6 +71,13 @@ namespace FluentStore.ViewModels
         {
             get => _SaveToCollectionCommand;
             set => SetProperty(ref _SaveToCollectionCommand, value);
+        }
+
+        private bool _IsCollection;
+        public bool IsCollection
+        {
+            get => _IsCollection;
+            private set => SetProperty(ref _IsCollection, value);
         }
 
         private ImageBase _AppIcon;

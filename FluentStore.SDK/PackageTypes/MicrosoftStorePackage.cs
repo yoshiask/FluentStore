@@ -1,4 +1,5 @@
 ﻿using FluentStore.SDK.Attributes;
+using FluentStore.SDK.Images;
 using FluentStore.SDK.Messages;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Marketplace.Storefront.Contracts.Enums;
@@ -81,7 +82,7 @@ namespace FluentStore.SDK.Packages
             get
             {
                 if (_Urn == null)
-                    UrnBuilder.CreateUrn(Handlers.MicrosoftStoreHandler.NAMESPACE_MSSTORE + ":" + StoreId);
+                    _Urn = Urn.Parse("urn:" + Handlers.MicrosoftStoreHandler.NAMESPACE_MSSTORE + ":" + StoreId);
                 return _Urn;
             }
             set => _Urn = value;
@@ -345,35 +346,6 @@ namespace FluentStore.SDK.Packages
         {
             get => _PackageId;
             set => SetProperty(ref _PackageId, value);
-        }
-    }
-
-    public class MicrosoftStoreImage : ImageBase
-    {
-        public MicrosoftStoreImage(ImageItem img)
-        {
-            BackgroundColor = img.BackgroundColor;
-            ForegroundColor = img.ForegroundColor;
-            Url = img.Url;
-            ImageType = (ImageType)img.ImageType;
-            Height = img.Height;
-            Width = img.Width;
-            ImagePositionInfo = img.ImagePositionInfo;
-            Caption = img.Caption;
-        }
-
-        private string _ImagePositionInfo = "";
-        public string ImagePositionInfo
-        {
-            get => _ImagePositionInfo;
-            set => SetProperty(ref _ImagePositionInfo, value);
-        }
-
-        private string _Caption;
-        public string Caption
-        {
-            get => _Caption;
-            set => SetProperty(ref _Caption, value);
         }
     }
 }

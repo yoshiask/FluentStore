@@ -258,7 +258,8 @@ namespace FluentStore.Converters
             { "WhiteSmoke", "#F5F5F5" },
             { "Yellow", "#FFFF00" },
             { "YellowGreen", "#9ACD32" },
-            { "transparent", "#00000000" }
+            { "Transparent", "#00000000" },
+            { "transparent", "#00000000" },
         };
     }
 }

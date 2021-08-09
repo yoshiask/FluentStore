@@ -4,6 +4,7 @@ using FluentStore.SDK.Messages;
 using FluentStore.Services;
 using FluentStore.ViewModels;
 using FluentStore.ViewModels.Messages;
+using FluentStore.Views;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
@@ -17,13 +18,8 @@ using Windows.UI.Xaml.Navigation;
 using SplitButton = Microsoft.UI.Xaml.Controls.SplitButton;
 using SplitButtonClickEventArgs = Microsoft.UI.Xaml.Controls.SplitButtonClickEventArgs;
 
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
-
 namespace FluentStore.Views
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class PackageView : Page
     {
         public PackageView()
@@ -62,7 +58,7 @@ namespace FluentStore.Views
                 bool isInstalled = false;
                 try
                 {
-                   isInstalled = await ViewModel.Package.IsPackageInstalledAsync();
+                    isInstalled = await ViewModel.Package.IsPackageInstalledAsync();
                 }
                 catch (Exception ex)
                 {
@@ -155,7 +151,7 @@ namespace FluentStore.Views
                     {
                         Content = new TextBlock
                         {
-                            Text = "An error occurred.",
+                            Text = "Please create an account or\r\nlog in to access this feature.",
                             TextWrapping = TextWrapping.Wrap
                         },
                         Placement = FlyoutPlacementMode.Bottom
@@ -219,33 +215,21 @@ namespace FluentStore.Views
             await HandleInstall(true);
         }
 
-        private void HeroImage_ImageOpened(object sender, RoutedEventArgs e)
+        private void HeroImage_SizeChanged(object sender, RoutedEventArgs e)
         {
-            UpdateHeroImageSpacer();
+            UpdateHeroImageSpacer((FrameworkElement)sender);
         }
 
-        private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void UpdateHeroImageSpacer(FrameworkElement imageElem)
         {
-            UpdateHeroImageSpacer();
-        }
+            // Height of the card including padding and spacing
+            double cardHeight = InfoCard.ActualHeight + InfoCard.Margin.Top + InfoCard.Margin.Bottom
+                + ((StackPanel)ContentScroller.Content).Spacing * 2;
 
-        private void UpdateHeroImageSpacer()
-        {
-            if (HeroImage.Source is Windows.UI.Xaml.Media.Imaging.BitmapImage bitmap && bitmap.UriSource.Host == "via.placeholder.com")
-            {
-                HeroImage.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                // Height of the card including padding and spacing
-                double cardHeight = InfoCard.ActualHeight + InfoCard.Margin.Top + InfoCard.Margin.Bottom
-                    + ((StackPanel)ContentScroller.Content).Spacing * 2;
-
-                // Required amount of additional spacing to place the card at the bottom of the hero image,
-                // or at the bottom of the page (whichever places the card higher up)
-                double offset = Math.Min(HeroImage.ActualHeight - cardHeight, ActualHeight - cardHeight);
-                HeroImageSpacer.Height = Math.Max(offset, 0);
-            }
+            // Required amount of additional spacing to place the card at the bottom of the hero image,
+            // or at the bottom of the page (whichever places the card higher up)
+            double offset = Math.Min(imageElem.ActualHeight - cardHeight, ActualHeight - cardHeight);
+            HeroImageSpacer.Height = Math.Max(offset, 0);
         }
 
         private void UpdateInstallButtonToLaunch()
@@ -256,7 +240,7 @@ namespace FluentStore.Views
             InstallButton.Click -= InstallSplitButton_Click;
             InstallButton.Click += async (SplitButton sender, SplitButtonClickEventArgs e) =>
             {
-                await ViewModel.Package.IsPackageInstalledAsync();
+                await ViewModel.Package.LaunchAsync();
             };
         }
 
