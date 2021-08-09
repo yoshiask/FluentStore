@@ -15,19 +15,6 @@
                     <helpers:Settings x:Key="settings" />
 
                     <x:Double x:Key="CompactModeMinWidth">641</x:Double>
-
-                    <StaticResource x:Key="AccentBackground" ResourceKey="SystemControlForegroundAccentBrush" />
-                    <StaticResource x:Key="AccentBackgroundPointerOver" ResourceKey="SystemAccentColorLight1" />
-                    <StaticResource x:Key="AccentBackgroundPressed" ResourceKey="SystemControlBackgroundBaseMediumLowBrush" />
-                    <StaticResource x:Key="AccentBackgroundDisabled" ResourceKey="SystemControlBackgroundBaseLowBrush" />
-                    <StaticResource x:Key="AccentForeground" ResourceKey="SystemControlBackgroundChromeWhiteBrush" />
-                    <StaticResource x:Key="AccentForegroundPointerOver" ResourceKey="SystemControlBackgroundChromeWhiteBrush" />
-                    <StaticResource x:Key="AccentForegroundPressed" ResourceKey="SystemControlHighlightBaseHighBrush" />
-                    <StaticResource x:Key="AccentForegroundDisabled" ResourceKey="SystemControlDisabledBaseMediumLowBrush" />
-                    <StaticResource x:Key="AccentBorderBrush" ResourceKey="SystemControlForegroundTransparentBrush" />
-                    <StaticResource x:Key="AccentBorderBrushPointerOver" ResourceKey="SystemControlHighlightBaseMediumLowBrush" />
-                    <StaticResource x:Key="AccentBorderBrushPressed" ResourceKey="SystemControlHighlightTransparentBrush" />
-                    <StaticResource x:Key="AccentBorderBrushDisabled" ResourceKey="SystemControlDisabledTransparentBrush" />
                 </ResourceDictionary>
             </winui:XamlControlsResources.MergedDictionaries>
         </winui:XamlControlsResources>

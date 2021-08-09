@@ -120,6 +120,9 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\DisplayModule.xaml.cs">
+      <DependentUpon>DisplayModule.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ListViewBehavior.cs" />
     <Compile Include="Controls\PackageDisplayTemplateSelector.cs" />
     <Compile Include="Converters\CSSColorToBrushConverter.cs" />
@@ -194,6 +197,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Controls\DisplayModule.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
