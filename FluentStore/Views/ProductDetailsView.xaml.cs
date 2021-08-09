@@ -4,6 +4,7 @@ using FluentStore.SDK.Messages;
 using FluentStore.Services;
 using FluentStore.ViewModels;
 using FluentStore.ViewModels.Messages;
+using Garfoot.Utilities.FluentUrn;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
@@ -136,7 +137,7 @@ namespace FluentStore.Views
                             var it = (MenuFlyoutItem)s;
                             var col = (FluentStoreAPI.Models.Collection)it.Tag;
                             col.Items ??= new System.Collections.Generic.List<string>(1);
-                            col.Items.Add(ViewModel.Package.PackageId);
+                            col.Items.Add(ViewModel.Package.Urn.ToString());
                         };
                         ((MenuFlyout)flyout).Items.Add(item);
                     }
@@ -250,15 +251,13 @@ namespace FluentStore.Views
 
         private void UpdateInstallButtonToLaunch()
         {
-            string packageId = ViewModel.Package.PackageId;
             InstallUsingAppInstallerMenuItem.IsEnabled = false;
 
             InstallButtonText.Text = "Launch";
             InstallButton.Click -= InstallSplitButton_Click;
             InstallButton.Click += async (SplitButton sender, SplitButtonClickEventArgs e) =>
             {
-                var app = await PackageHelper.GetAppByPackageFamilyNameAsync(packageId);
-                await app.LaunchAsync();
+                await ViewModel.Package.LaunchAsync();
             };
         }
 

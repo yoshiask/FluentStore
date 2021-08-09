@@ -1,4 +1,5 @@
-﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
+﻿using Garfoot.Utilities.FluentUrn;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,7 +9,15 @@ namespace FluentStore.SDK
 {
     public abstract class PackageBase : ObservableObject, IEquatable<PackageBase>
     {
-        public abstract string HandlerId { get; set; }
+        /// <summary>
+        /// A Uniform Resource Name (URN) that represents this specific package.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="Urn.NamespaceIdentifier"/> is the name of the <see cref="PackageHandlerBase"/>
+        /// that handles this package, <see cref="Urn.UnEscapedValue"/> is the handler-specific
+        /// ID of this package.
+        /// </remarks>
+        public abstract Urn Urn { get; set; }
 
         /// <summary>
         /// When overridden in a derived class, gets a value indicating whether <see cref="GetCannotBeInstalledReason"/>
@@ -33,9 +42,11 @@ namespace FluentStore.SDK
 
         public abstract Task<bool> IsPackageInstalledAsync();
 
+        public abstract Task LaunchAsync();
+
         public virtual void OnDownloaded(StorageFile file) { }
 
-        public virtual bool Equals(PackageBase other) => this.PackageId == other.PackageId;
+        public virtual bool Equals(PackageBase other) => this.Urn.Equals(other.Urn);
 
         public override string ToString() => Title;
 
@@ -79,13 +90,6 @@ namespace FluentStore.SDK
         {
             get => _PublisherId;
             set => SetProperty(ref _PublisherId, value);
-        }
-
-        private string _PackageId = Guid.NewGuid().ToString();
-        public string PackageId
-        {
-            get => _PackageId;
-            set => SetProperty(ref _PackageId, value);
         }
 
         private string _DeveloperName;

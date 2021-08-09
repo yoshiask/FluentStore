@@ -1,5 +1,7 @@
 ﻿using FluentStore.SDK.Packages;
+using Garfoot.Utilities.FluentUrn;
 using Microsoft.Marketplace.Storefront.Contracts;
+using Microsoft.Toolkit.Diagnostics;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -9,6 +11,14 @@ namespace FluentStore.SDK.Handlers
     public class MicrosoftStoreHandler : PackageHandlerBase
     {
         private readonly StorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<StorefrontApi>();
+
+        public const string NAMESPACE_MSSTORE = "microsoft-store";
+        public const string NAMESPACE_MODERNPACK = "win-modern-package";
+        public override HashSet<string> HandledNamespaces => new HashSet<string>
+        {
+            NAMESPACE_MSSTORE,
+            NAMESPACE_MODERNPACK,
+        };
 
         public override async Task<List<PackageBase>> SearchAsync(string query)
         {
@@ -45,6 +55,15 @@ namespace FluentStore.SDK.Handlers
             }
 
             return packages;
+        }
+
+        public override async Task<PackageBase> GetPackage(Urn packageUrn)
+        {
+            Guard.IsEqualTo(packageUrn.NamespaceIdentifier, NAMESPACE_MSSTORE, nameof(packageUrn));
+
+            string productId = packageUrn.GetContent<NamespaceSpecificString>().UnEscapedValue;
+            var product = (await StorefrontApi.GetProduct(productId)).Payload;
+            return new MicrosoftStorePackage(product);
         }
     }
 }

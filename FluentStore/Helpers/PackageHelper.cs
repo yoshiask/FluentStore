@@ -435,7 +435,7 @@ namespace FluentStore.Helpers
                 //        }
                 //    }
                 //},
-                Launch = $"action=viewDownload&packageName={package.PackageId}",
+                Launch = $"action=viewDownload&packageUrn={package.Urn}",
             };
 
             var notif = new ToastNotification(content.GetXml());
@@ -445,7 +445,7 @@ namespace FluentStore.Helpers
                 { "progressVersion", package.Version?.ToString() ?? string.Empty },
                 { "progressStatus", "Downloading..." }
             });
-            notif.Tag = package.PackageId;
+            notif.Tag = package.Urn.ToString();
             //notif.Group = "App Downloads";
             return notif;
         }
@@ -453,7 +453,7 @@ namespace FluentStore.Helpers
         public static ToastNotification GenerateDownloadSuccessToast(PackageBase package, StorageFile file)
         {
             var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
-                .AddToastActivationInfo($"action=viewEvent&eventId={package.PackageId}&installerPath={file.Path}", ToastActivationType.Foreground)
+                .AddToastActivationInfo($"action=viewEvent&packageUrn={package.Urn}&installerPath={file.Path}", ToastActivationType.Foreground)
                 .AddText(package.Title)
                 .AddText(package.Title + " is ready to install")
                 .AddAppLogoOverride(package.Images.FindLast(i => i.ImageType == ImageType.Logo).Uri, addImageQuery: false)
@@ -464,7 +464,7 @@ namespace FluentStore.Helpers
         public static ToastNotification GenerateDownloadFailureToast(PackageBase package)
         {
             var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
-                .AddToastActivationInfo($"action=viewEvent&eventId={package.PackageId}", ToastActivationType.Foreground)
+                .AddToastActivationInfo($"action=viewEvent&packageUrn={package.Urn}", ToastActivationType.Foreground)
                 .AddText(package.Title)
                 .AddText("Failed to download, please try again later")
                 .AddAppLogoOverride(package.Images.FindLast(i => i.ImageType == ImageType.Logo).Uri, addImageQuery: false)
@@ -475,7 +475,7 @@ namespace FluentStore.Helpers
         public static ToastNotification GenerateInstallSuccessToast(PackageBase package)
         {
             var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
-                .AddToastActivationInfo($"action=viewEvent&eventId={package.PackageId}", ToastActivationType.Foreground)
+                .AddToastActivationInfo($"action=viewEvent&packageUrn={package.Urn}", ToastActivationType.Foreground)
                 .AddText(package.ShortTitle)
                 .AddText(package.Title + " just got installed.")
                 .AddAppLogoOverride(package.Images.FindLast(i => i.ImageType == ImageType.Logo).Uri, addImageQuery: false)
@@ -486,7 +486,7 @@ namespace FluentStore.Helpers
         public static ToastNotification GenerateInstallFailureToast(PackageBase package, Exception ex)
         {
             var content = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
-                .AddToastActivationInfo($"action=viewEvent&eventId={package.PackageId}", ToastActivationType.Foreground)
+                .AddToastActivationInfo($"action=viewEvent&packageUrn={package.Urn}", ToastActivationType.Foreground)
                 .AddText(package.Title)
                 .AddText(package.Title + " failed to install.")
                 .AddText(ex.Message)

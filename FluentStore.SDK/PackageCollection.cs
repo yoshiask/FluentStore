@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Garfoot.Utilities.FluentUrn;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace FluentStore.SDK
@@ -11,9 +12,9 @@ namespace FluentStore.SDK
     /// Internally, dictionary where the key is the common package ID, and the value
     /// is a list of <see cref="PackageBase"/> from various handlers.
     /// </remarks>
-    public class PackageCollection : Dictionary<string, List<PackageBase>>
+    public class PackageCollection : Dictionary<Urn, List<PackageBase>>
     {
-        public List<string> PackageIds => Keys.ToList();
+        public List<Urn> PackageIds => Keys.ToList();
 
         /// <summary>
         /// Collapses multiple packages with identical IDs into a single <see cref="PackageBase"/>.
@@ -30,7 +31,7 @@ namespace FluentStore.SDK
         /// <summary>
         /// Determines whether the <see cref="PackageCollection"/> contains the specified package.
         /// </summary>
-        /// <param name="packageId">The package to locate in the <see cref="PackageCollection"/>.</param>
+        /// <param name="packageUrn">The package to locate in the <see cref="PackageCollection"/>.</param>
         /// <returns>
         /// true if the <see cref="PackageCollection"/> contains a package with the specified ID;
         /// otherwise, false.
@@ -41,6 +42,6 @@ namespace FluentStore.SDK
         /// <exception cref="System.ArgumentNullException">
         /// key is null.
         /// </exception>
-        public bool ContainsPackage(string packageId) => ContainsKey(packageId);
+        public bool ContainsPackage(Urn packageUrn) => ContainsKey(packageUrn);
     }
 }

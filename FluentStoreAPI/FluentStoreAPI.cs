@@ -66,8 +66,8 @@ namespace FluentStoreAPI
 
         public async Task<HomePageFeatured> GetHomePageFeaturedAsync()
         {
-            return await STORAGE_BASE_URL.AppendPathSegment("HomePage.json")
-                .SetQueryParam("alt", "media").GetJsonAsync<HomePageFeatured>();
+            var document = await GetDocument(false, "home", "featured");
+            return document.Transform<HomePageFeatured>();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using FluentStore.SDK.Attributes;
 using FluentStore.SDK.Messages;
+using Garfoot.Utilities.FluentUrn;
 using Microsoft.Marketplace.Storefront.Contracts.Enums;
 using Microsoft.Marketplace.Storefront.Contracts.V2;
 using Microsoft.Marketplace.Storefront.Contracts.V3;
@@ -40,20 +41,20 @@ namespace FluentStore.SDK.Packages
             ShortTitle = product.ShortTitle;
             Website = product.AppWebsiteUrl;
             StoreId = product.ProductId;
-            PackageId = product.PackageFamilyNames?[0] ?? StoreId;  // Unpackaged apps don't have PackageFamilyName
 
             // Set modern package properties
             PackageFamilyName = product.PackageFamilyNames?[0];
             PublisherDisplayName = product.PublisherName;
 
             // Set MS Store package properties
+            PackageId = product.PackageFamilyNames?[0] ?? StoreId;  // Unpackaged apps don't have PackageFamilyName
             Notes = product.Notes;
             Features = product.Features;
             Categories = product.Categories;
             PrivacyUrl = product.PrivacyUrl;
             Platforms = product.Platforms;
             if (product.SupportUris != null)
-                foreach (var uri in product.SupportUris)
+                foreach (SupportUri uri in product.SupportUris)
                     SupportUrls.Add(uri.Url);
             Ratings = product.ProductRatings;
             PermissionsRequested = product.PermissionsRequested;
@@ -67,9 +68,23 @@ namespace FluentStore.SDK.Packages
 
         public void Update(PackageInstance packageInstance)
         {
+            Guard.IsNotNull(packageInstance, nameof(packageInstance));
+
             Version = packageInstance.Version.ToString();
             PackageMoniker = packageInstance.PackageMoniker;
             PackageUri = packageInstance.PackageUri;
+        }
+
+        private Urn _Urn;
+        public override Urn Urn
+        {
+            get
+            {
+                if (_Urn == null)
+                    UrnBuilder.CreateUrn(Handlers.MicrosoftStoreHandler.NAMESPACE_MSSTORE + ":" + StoreId);
+                return _Urn;
+            }
+            set => _Urn = value;
         }
 
         public override bool RequiresDownloadForCompatCheck => false;
@@ -320,6 +335,16 @@ namespace FluentStore.SDK.Packages
         {
             get => _StoreId;
             set => SetProperty(ref _StoreId, value);
+        }
+
+        private string _PackageId;
+        /// <summary>
+        /// The PackageFamilyName for packaged apps, <see cref="StoreId"/> for unpackaged apps.
+        /// </summary>
+        public string PackageId
+        {
+            get => _PackageId;
+            set => SetProperty(ref _PackageId, value);
         }
     }
 

@@ -8,6 +8,8 @@ using Microsoft.Toolkit.Mvvm.Messaging;
 using FluentStore.ViewModels.Messages;
 using FluentStore.SDK.Packages;
 using Microsoft.Marketplace.Storefront.Contracts;
+using Garfoot.Utilities.FluentUrn;
+using FluentStore.SDK;
 
 namespace FluentStore.ViewModels
 {
@@ -20,6 +22,8 @@ namespace FluentStore.ViewModels
             WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Home"));
         }
 
+        private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
+
         public async Task LoadFeaturedAsync()
         {
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
@@ -31,9 +35,9 @@ namespace FluentStore.ViewModels
 
             for (int i = 0; i < featured.Carousel.Count; i++)
             {
-                string productId = featured.Carousel[i];
-                var product = (await StorefrontApi.GetProduct(productId)).Payload;
-                CarouselItems.Add(new PackageViewModel(new MicrosoftStorePackage(product)));
+                Urn packageUrn = Urn.Parse(featured.Carousel[i]);
+                var package = await PackageService.GetPackage(packageUrn);
+                CarouselItems.Add(new PackageViewModel(package));
                 if (i == 0 || (i == 1 && featured.Carousel.Count >= 3))
                     SelectedCarouselItemIndex = i;
             }

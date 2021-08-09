@@ -1,5 +1,6 @@
 ﻿using FluentStore.SDK.Handlers;
 using FluentStore.SDK.Messages;
+using Garfoot.Utilities.FluentUrn;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
 using System.Collections.Generic;
@@ -27,7 +28,9 @@ namespace FluentStore.SDK
                     {
                         var ctr = type.GetConstructor(emptyTypeList);
                         var handler = (PackageHandlerBase)ctr.Invoke(emptyObjectList);
-                        _PackageHandlers.Add(type.Name, handler);
+
+                        foreach (string ns in handler.HandledNamespaces)
+                            _PackageHandlers.Add(ns, handler);
                     }
                 }
 
@@ -47,15 +50,18 @@ namespace FluentStore.SDK
                 // Filter results already in list
                 foreach (var result in results)
                 {
-                    if (packages.ContainsKey(result.PackageId))
-                        packages[result.PackageId].Add(result);
+                    if (packages.ContainsKey(result.Urn))
+                        packages[result.Urn].Add(result);
                     else
-                        packages.Add(result.PackageId, new List<PackageBase> { result });
+                        packages.Add(result.Urn, new List<PackageBase> { result });
                 }
             }
             return packages;
         }
 
+        /// <summary>
+        /// Gets search suggestions for the given query from all package handlers.
+        /// </summary>
         public async Task<PackageCollection> GetSearchSuggestionsAsync(string query)
         {
             var packages = new PackageCollection();
@@ -65,13 +71,29 @@ namespace FluentStore.SDK
                 // Filter results already in list
                 foreach (var result in results)
                 {
-                    if (packages.ContainsKey(result.PackageId))
-                        packages[result.PackageId].Add(result);
+                    if (packages.ContainsKey(result.Urn))
+                        packages[result.Urn].Add(result);
                     else
-                        packages.Add(result.PackageId, new List<PackageBase> { result });
+                        packages.Add(result.Urn, new List<PackageBase> { result });
                 }
             }
             return packages;
+        }
+
+        /// <summary>
+        /// Gets the package with the specific <paramref name="packageUrn"/>.
+        /// </summary>
+        public async Task<PackageBase> GetPackage(Urn packageUrn)
+        {
+            string ns = packageUrn.NamespaceIdentifier;
+            if (PackageHandlers.TryGetValue(ns, out var handler))
+            {
+                return await handler.GetPackage(packageUrn);
+            }
+            else
+            {
+                throw new NotSupportedException("No package handler is registered for the namespace \"" + ns + "\".");
+            }
         }
 
 

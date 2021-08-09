@@ -6,6 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Garfoot.Utilities.FluentUrn" Version="1.2.1" />
         <PackageReference Include="Microsoft.Toolkit.Diagnostics" Version="7.0.2" />
         <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.0.2" />
         <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
