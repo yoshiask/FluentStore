@@ -144,6 +144,25 @@
                                         </MenuFlyoutItem>
                                     </MenuFlyout>
                                 </winui:SplitButton.Flyout>
+
+                                <winui:SplitButton.Resources>
+                                    <StaticResource x:Key="SplitButtonBackground" ResourceKey="AccentButtonBackground" />
+                                    <StaticResource x:Key="SplitButtonBackgroundPointerOver" ResourceKey="AccentButtonBackgroundPointerOver" />
+                                    <StaticResource x:Key="SplitButtonBackgroundPressed" ResourceKey="AccentButtonBackgroundPressed" />
+                                    <StaticResource x:Key="SplitButtonBackgroundDisabled" ResourceKey="AccentButtonBackgroundDisabled" />
+                                    <StaticResource x:Key="SplitButtonForeground" ResourceKey="AccentButtonForeground" />
+                                    <StaticResource x:Key="SplitButtonForegroundPointerOver" ResourceKey="AccentButtonForegroundPointerOver" />
+                                    <StaticResource x:Key="SplitButtonForegroundPressed" ResourceKey="AccentButtonForegroundPressed" />
+                                    <StaticResource x:Key="SplitButtonForegroundDisabled" ResourceKey="AccentButtonForegroundDisabled" />
+                                    <StaticResource x:Key="SplitButtonForegroundSecondary" ResourceKey="AccentButtonForeground" />
+                                    <StaticResource x:Key="SplitButtonForegroundSecondaryPressed" ResourceKey="AccentButtonForegroundPressed" />
+                                    <StaticResource x:Key="SplitButtonBorderBrush" ResourceKey="AccentButtonBorderBrush" />
+                                    <StaticResource x:Key="SplitButtonBorderBrushPointerOver" ResourceKey="AccentButtonBorderBrushPointerOver" />
+                                    <StaticResource x:Key="SplitButtonBorderBrushPressed" ResourceKey="AccentButtonBorderBrushPressed" />
+                                    <!--<StaticResource x:Key="SplitButtonBorderBrushDisabled" ResourceKey="AccentButtonBorderBrushDisabled" />-->
+                                    <!--<StaticResource x:Key="SplitButtonBorderBrushDivider" ResourceKey="AccentButtonBorderBrushDivider" />-->
+
+                                </winui:SplitButton.Resources>
                             </winui:SplitButton>
 
                             <winui:DropDownButton VerticalAlignment="Stretch" Click="AddToCollection_Click">
@@ -235,7 +254,8 @@
 
                         <!-- Source-specific details -->
                         <!-- All properties marked with DisplayAttribute are shown here -->
-                        <ItemsControl ItemsSource="{x:Bind ViewModel.DisplayProperties}">
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.DisplayProperties}"
+                                      ItemTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel Spacing="20"/>
@@ -243,12 +263,7 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="attributes:DisplayInfo">
-                                    <StackPanel>
-                                        <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="{x:Bind Title}" />
-                                        <TextBlock Text="{x:Bind Value.ToString()}"/>
-                                        <ContentControl Content="{x:Bind Value}"
-                                                        ContentTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"/>
-                                    </StackPanel>
+                                    <controls:DisplayModule Title="{x:Bind Title}" Value="{x:Bind Value, Mode=OneWay}"/>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>

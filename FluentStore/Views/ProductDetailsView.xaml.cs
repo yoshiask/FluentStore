@@ -117,35 +117,50 @@ namespace FluentStore.Views
             }
             else
             {
-                string userId = userService.CurrentFirebaseUser.LocalID;
-                flyout = new MenuFlyout
+                try
                 {
-                    Placement = FlyoutPlacementMode.BottomEdgeAlignedLeft
-                };
-                foreach (FluentStoreAPI.Models.Collection collection in await FSApi.GetCollectionsAsync(userId))
-                {
-                    var item = new MenuFlyoutItem
+                    string userId = userService.CurrentFirebaseUser.LocalID;
+                    flyout = new MenuFlyout
                     {
-                        Text = collection.Name,
-                        Tag = collection
+                        Placement = FlyoutPlacementMode.BottomEdgeAlignedLeft
                     };
-                    item.Click += (object s, RoutedEventArgs e) =>
+                    foreach (FluentStoreAPI.Models.Collection collection in await FSApi.GetCollectionsAsync(userId))
                     {
-                        var it = (MenuFlyoutItem)s;
-                        var col = (FluentStoreAPI.Models.Collection)it.Tag;
-                        col.Items ??= new System.Collections.Generic.List<string>(1);
-                        col.Items.Add(ViewModel.Package.PackageId);
-                    };
-                    ((MenuFlyout)flyout).Items.Add(item);
-                }
-                flyout.Closed += async (s, e) =>
-                {
-                    foreach (var it in ((MenuFlyout)s).Items)
-                    {
-                        var col = (FluentStoreAPI.Models.Collection)it.Tag;
-                        await FSApi.UpdateCollectionAsync(userId, col);
+                        var item = new MenuFlyoutItem
+                        {
+                            Text = collection.Name,
+                            Tag = collection
+                        };
+                        item.Click += (object s, RoutedEventArgs e) =>
+                        {
+                            var it = (MenuFlyoutItem)s;
+                            var col = (FluentStoreAPI.Models.Collection)it.Tag;
+                            col.Items ??= new System.Collections.Generic.List<string>(1);
+                            col.Items.Add(ViewModel.Package.PackageId);
+                        };
+                        ((MenuFlyout)flyout).Items.Add(item);
                     }
-                };
+                    flyout.Closed += async (s, e) =>
+                    {
+                        foreach (var it in ((MenuFlyout)s).Items)
+                        {
+                            var col = (FluentStoreAPI.Models.Collection)it.Tag;
+                            await FSApi.UpdateCollectionAsync(userId, col);
+                        }
+                    };
+                }
+                catch
+                {
+                    flyout = new Flyout
+                    {
+                        Content = new TextBlock
+                        {
+                            Text = "Please create an account or\r\nlog in to access this feature.",
+                            TextWrapping = TextWrapping.Wrap
+                        },
+                        Placement = FlyoutPlacementMode.Bottom
+                    };
+                }
             }
 
             flyout.ShowAt((Button)sender);
