@@ -15,6 +15,9 @@ namespace FluentStore.Controls
 
         protected override DataTemplate SelectTemplateCore(object item)
         {
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine($"SelectTemplateCore({item ?? "null"})");
+#endif
             if (item == null)
                 return Default;
 

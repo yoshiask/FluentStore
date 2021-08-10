@@ -10,6 +10,7 @@
     xmlns:viewModels="using:FluentStore.ViewModels"
     xmlns:converters="using:FluentStore.Converters"
     xmlns:controls="using:FluentStore.Controls"
+    xmlns:helpers="using:FluentStore.Helpers"
     xmlns:tkconverters="using:Microsoft.Toolkit.Uwp.UI.Converters"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
@@ -177,7 +178,14 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="attributes:DisplayInfo">
-                                    <controls:DisplayModule Title="{x:Bind Title}" Value="{x:Bind Value, Mode=OneWay}"/>
+                                    <!--<controls:DisplayModule Title="{x:Bind Title}" Value="{x:Bind Value, Mode=OneWay}"/>-->
+                                    <StackPanel>
+                                        <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="{x:Bind Title}" />
+                                        <TextBlock Text="{Binding Value}" FontWeight="ExtraLight"/>
+                                        <ContentPresenter Content="{Binding Value}" x:Name="ContentPresenterWithSelector"
+                                                          ContentTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"
+                                                          helpers:ContentPresenterEx.UpdateTemplateSelectorOnContentChange="True"/>
+                                    </StackPanel>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>

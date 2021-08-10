@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:viewmodels="using:FluentStore.ViewModels"
+    xmlns:helpers="using:FluentStore.Helpers"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
@@ -39,7 +40,8 @@
                             <RowDefinition Height="3*"/>
                             <RowDefinition Height="1*" MinHeight="75"/>
                         </Grid.RowDefinitions>
-                        <ContentControl Content="{x:Bind HeroImage}" DataContext="{x:Bind HeroImage}" Grid.RowSpan="2"
+                        <ContentControl Content="{x:Bind HeroImage}"
+                                        Grid.RowSpan="2"
                                         ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
                         <Grid Grid.Row="1" Padding="8" ColumnSpacing="8" Background="{ThemeResource SystemControlBaseHighAcrylicElementBrush}">
                             <Grid.RowDefinitions>
