@@ -1,13 +1,19 @@
-﻿using FluentStore.Helpers;
+﻿using FluentStore.Controls;
+using FluentStore.Helpers;
 using FluentStore.SDK;
+using FluentStore.SDK.Attributes;
 using FluentStore.SDK.Messages;
 using FluentStore.Services;
+using FluentStore.Themes;
 using FluentStore.ViewModels;
 using FluentStore.ViewModels.Messages;
 using FluentStore.Views;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
+using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Windows.UI.Notifications;
 using Windows.UI.Text;
@@ -26,9 +32,13 @@ namespace FluentStore.Views
         {
             InitializeComponent();
             ViewModel = new PackageViewModel();
+            DisplayModules = new ObservableCollection<UIElement>();
+
+            packageDisplayTemplateSelector = (PackageDisplayTemplateSelector)new PackageDisplayTemplates()["DefaultDisplayTemplateSelector"];
         }
 
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
+        private PackageDisplayTemplateSelector packageDisplayTemplateSelector;
 
         public PackageViewModel ViewModel
         {
@@ -37,6 +47,14 @@ namespace FluentStore.Views
         }
         public static readonly DependencyProperty ViewModelProperty =
             DependencyProperty.Register(nameof(ViewModel), typeof(PackageViewModel), typeof(PackageView), new PropertyMetadata(null));
+
+        public ObservableCollection<UIElement> DisplayModules
+        {
+            get => (ObservableCollection<UIElement>)GetValue(DisplayModulesProperty);
+            set => SetValue(DisplayModulesProperty, value);
+        }
+        public static readonly DependencyProperty DisplayModulesProperty = DependencyProperty.Register(
+            nameof(DisplayModules), typeof(ObservableCollection<UIElement>), typeof(PackageView), new PropertyMetadata(null));
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
@@ -55,6 +73,10 @@ namespace FluentStore.Views
             {
                 WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Apps"));
 
+                //DisplayProperties_CollectionChanged(ViewModel)
+                ViewModel.DisplayProperties.CollectionChanged += DisplayProperties_CollectionChanged;
+                ViewModel.DisplayProperties.Add(new DisplayInfo("Title", "Value"));
+
                 bool isInstalled = false;
                 try
                 {
@@ -66,6 +88,26 @@ namespace FluentStore.Views
                 }
                 if (isInstalled)
                     UpdateInstallButtonToLaunch();
+            }
+        }
+
+        private void DisplayProperties_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (!(sender is IEnumerable<DisplayInfo> collection))
+                return;
+
+            // TODO: Use the collection changed args to avoid clearing the entire list every time
+            DisplayModules.Clear();
+            foreach (DisplayInfo info in collection)
+            {
+                if (info == null || info.Value == null)
+                    continue;
+
+                DisplayModules.Add(new HeaderedContentControl
+                {
+                    Header = info.Title,
+                    Content = PackageDisplayTemplateSelector.CreateElement(info.Value)
+                });
             }
         }
 

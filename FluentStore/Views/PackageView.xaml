@@ -5,13 +5,9 @@
     xmlns:local="using:FluentStore.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:sdk="using:FluentStore.SDK"
-    xmlns:attributes="using:FluentStore.SDK.Attributes"
-    xmlns:viewModels="using:FluentStore.ViewModels"
     xmlns:converters="using:FluentStore.Converters"
-    xmlns:controls="using:FluentStore.Controls"
-    xmlns:helpers="using:FluentStore.Helpers"
     xmlns:tkconverters="using:Microsoft.Toolkit.Uwp.UI.Converters"
+    xmlns:tkcontrols="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
 
@@ -168,26 +164,24 @@
 
                         <!-- Source-specific details -->
                         <!-- All properties marked with DisplayAttribute are shown here -->
-                        <ItemsControl ItemsSource="{x:Bind ViewModel.DisplayProperties}"
-                                      ItemTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"
-                                      Visibility="{x:Bind ViewModel.DisplayProperties, Converter={StaticResource CollectionVisibilityConverter}}">
+                        <ItemsControl ItemsSource="{x:Bind DisplayModules}"
+                                      Visibility="{x:Bind DisplayModules, Converter={StaticResource CollectionVisibilityConverter}}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel Spacing="20"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="attributes:DisplayInfo">
-                                    <!--<controls:DisplayModule Title="{x:Bind Title}" Value="{x:Bind Value, Mode=OneWay}"/>-->
-                                    <StackPanel>
-                                        <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="{x:Bind Title}" />
-                                        <TextBlock Text="{Binding Value}" FontWeight="ExtraLight"/>
-                                        <ContentPresenter Content="{Binding Value}" x:Name="ContentPresenterWithSelector"
-                                                          ContentTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"
-                                                          helpers:ContentPresenterEx.UpdateTemplateSelectorOnContentChange="True"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
+                            <ItemsControl.Resources>
+                                <Style TargetType="tkcontrols:HeaderedContentControl">
+                                    <Setter Property="HeaderTemplate">
+                                        <Setter.Value>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding}" Style="{ThemeResource NavigationViewItemHeaderTextStyle}" />
+                                            </DataTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ItemsControl.Resources>
                         </ItemsControl>
 
                     </StackPanel>
