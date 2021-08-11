@@ -1,6 +1,5 @@
 ﻿using FluentStore.SDK.PackageTypes;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Toolkit.Diagnostics;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -19,25 +18,28 @@ namespace FluentStore.SDK.Handlers
             NAMESPACE_COLLECTION,
         };
 
-        public override async Task<PackageBase> GetPackage(Urn collectionUrn)
+        public override async Task<PackageBase> GetPackage(Urn urn)
         {
-            Guard.IsEqualTo(collectionUrn.NamespaceIdentifier, NAMESPACE_COLLECTION, nameof(collectionUrn));
-
-            string[] id = collectionUrn.GetContent<NamespaceSpecificString>().UnEscapedValue.Split(':');
-            string userId = id[0];
-            string collId = id[1];
-
-            var collection = await FSApi.GetCollectionAsync(userId, collId);
-            var items = new List<PackageBase>(collection.Items.Count);
-            foreach (string packageId in collection.Items)
+            if (urn.NamespaceIdentifier == NAMESPACE_COLLECTION)
             {
-                // Get details for each item
-                Urn packageUrn = Urn.Parse(packageId);
-                PackageBase package = await PackageService.GetPackage(packageUrn);
-                items.Add(package);
+                string[] id = urn.GetContent<NamespaceSpecificString>().UnEscapedValue.Split(':');
+                string userId = id[0];
+                string collId = id[1];
+
+                var collection = await FSApi.GetCollectionAsync(userId, collId);
+                var items = new List<PackageBase>(collection.Items.Count);
+                foreach (string packageId in collection.Items)
+                {
+                    // Get details for each item
+                    Urn packageUrn = Urn.Parse(packageId);
+                    PackageBase package = await PackageService.GetPackage(packageUrn);
+                    items.Add(package);
+                }
+
+                return new CollectionPackage(collection, items);
             }
 
-            return new CollectionPackage(collection, items);
+            return null;
         }
 
         public override async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
