@@ -53,7 +53,8 @@
                         </Viewbox>
 
                         <TextBlock Text="{x:Bind ViewModel.Package.Title}" ToolTipService.ToolTip="{x:Bind ViewModel.Package.Title}"
-                                   HorizontalAlignment="Left" FontSize="30" FontWeight="Bold" TextTrimming="CharacterEllipsis"
+                                   HorizontalAlignment="Left" FontSize="30" FontWeight="Bold"
+                                   TextTrimming="CharacterEllipsis" TextWrapping="Wrap" MaxLines="2"
                                    Grid.Column="1" VerticalAlignment="Bottom"/>
                         <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal"
                                     VerticalAlignment="Bottom" Spacing="8">
