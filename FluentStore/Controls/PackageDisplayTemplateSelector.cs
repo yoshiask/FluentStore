@@ -28,6 +28,8 @@ namespace FluentStore.Controls
                 return DateTimeOffset;
             else if (typeof(Uri).IsAssignableFrom(type))
                 return Uri;
+            else if (typeof(string).IsAssignableFrom(type))
+                return Default;
             else if (typeof(IEnumerable).IsAssignableFrom(type))
                 return Enumerable;
             else

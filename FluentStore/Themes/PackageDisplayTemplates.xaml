@@ -10,20 +10,21 @@
     <converters:StringFormatConverter x:Key="StringFormatConverter" />
 
     <DataTemplate x:Key="DefaultDisplayDateTimeTemplate" x:DataType="sys:DateTime">
-        <TextBlock Text="{x:Bind ToShortDateString()}" IsTextSelectionEnabled="True"/>
+        <!--<TextBlock Text="{x:Bind ToShortDateString()}" IsTextSelectionEnabled="True"/>-->
+        <TextBlock Text="{Binding}" IsTextSelectionEnabled="True"/>
     </DataTemplate>
 
     <DataTemplate x:Key="DefaultDisplayDateTimeOffsetTemplate" x:DataType="sys:DateTimeOffset">
-        <TextBlock Text="{x:Bind Converter={StaticResource StringFormatConverter}, ConverterParameter='{}{0:d/M/yyy}'}"
+        <TextBlock Text="{Binding Converter={StaticResource StringFormatConverter}, ConverterParameter='{}{0:d/M/yyy}'}"
                    IsTextSelectionEnabled="True"/>
     </DataTemplate>
 
     <DataTemplate x:Key="DefaultDisplayUriTemplate" x:DataType="sys:Uri">
-        <HyperlinkButton Content="{x:Bind ToString()}" NavigateUri="{x:Bind}"/>
+        <HyperlinkButton Content="{Binding}" NavigateUri="{Binding}"/>
     </DataTemplate>
 
     <DataTemplate x:Key="DefaultDisplayEnumerableTemplate" x:DataType="collections:IEnumerable">
-        <ItemsControl ItemsSource="{x:Bind}" ItemTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}">
+        <ItemsControl ItemsSource="{Binding}" ItemTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <StackPanel Spacing="4"/>
@@ -33,7 +34,7 @@
     </DataTemplate>
 
     <DataTemplate x:Key="DefaultDisplayObjectTemplate" x:DataType="sys:Object">
-        <TextBlock Text="{x:Bind ToString()}" TextWrapping="Wrap" IsTextSelectionEnabled="True"/>
+        <TextBlock Text="{Binding}" TextWrapping="Wrap" IsTextSelectionEnabled="True"/>
     </DataTemplate>
 
     <controls:PackageDisplayTemplateSelector x:Key="DefaultDisplayTemplateSelector"

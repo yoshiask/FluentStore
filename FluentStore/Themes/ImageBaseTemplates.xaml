@@ -5,41 +5,37 @@
     xmlns:controls="using:FluentStore.Controls"
     xmlns:converters="using:FluentStore.Converters"
     xmlns:sdk="using:FluentStore.SDK"
-    xmlns:images="using:FluentStore.SDK.Images"
-    x:DefaultBindMode="OneWay">
+    xmlns:images="using:FluentStore.SDK.Images">
 
     <converters:StreamToBitmapImageConverter x:Key="StreamToBitmapImageConverter"/>
     <converters:CSSColorToBrushConverter x:Name="CSSColorToBrushConverter"/>
 
     <DataTemplate x:Key="DefaultImageBaseTemplate" x:DataType="sdk:ImageBase">
         <Border VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                Background="{x:Bind BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}"/>
+                Background="{Binding BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}"/>
     </DataTemplate>
 
     <DataTemplate x:Key="DefaultFileImageTemplate" x:DataType="images:FileImage">
-        <Border Background="{x:Bind BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}">
-            <Grid>
-                <TextBlock Text="{x:Bind Url}"/>
-                <Image VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Stretch="Uniform">
-                    <Image.Source>
-                        <BitmapImage UriSource="{x:Bind Uri, TargetNullValue=//:0}"/>
-                    </Image.Source>
-                </Image>
-            </Grid>
+        <Border Background="{Binding BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}">
+            <Image VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Stretch="Uniform">
+                <Image.Source>
+                    <BitmapImage UriSource="{Binding Uri, TargetNullValue=//:0}"/>
+                </Image.Source>
+            </Image>
         </Border>
     </DataTemplate>
 
     <DataTemplate x:Key="DefaultStreamImageTemplate" x:DataType="images:StreamImage">
-        <Border Background="{x:Bind BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}">
+        <Border Background="{Binding BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}">
             <Image VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Stretch="Uniform"
-                   Source="{x:Bind Stream, Converter={StaticResource StreamToBitmapImageConverter}}"/>
+                   Source="{Binding Stream, Converter={StaticResource StreamToBitmapImageConverter}}"/>
         </Border>
     </DataTemplate>
 
     <DataTemplate x:Key="DefaultTextImageTemplate" x:DataType="images:TextImage">
-        <Border Background="{x:Bind BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}">
+        <Border Background="{Binding BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}">
             <Viewbox HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                <TextBlock Text="{x:Bind Text}" TextLineBounds="Tight" TextWrapping="NoWrap"
+                <TextBlock Text="{Binding Text}" TextLineBounds="Tight" TextWrapping="NoWrap"
                            FontSize="24" FontWeight="Bold" Padding="12"/>
             </Viewbox>
         </Border>
