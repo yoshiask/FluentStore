@@ -10,12 +10,11 @@
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
-    xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
     mc:Ignorable="d"
     NavigationCacheMode="Disabled">
 
     <GridView ItemsSource="{x:Bind ViewModel.PackageList, Mode=OneWay}" SelectionMode="Single"
-              SelectedItem="{x:Bind ViewModel.SelectedPackage, Mode=TwoWay}" Padding="10"
+              SelectedItem="{x:Bind ViewModel.SelectedPackage, Mode=TwoWay}" Padding="8"
               controls:ListViewBehaviour.FillBeforeWrap="True" controls:ListViewBehaviour.MinItemWidth="150">
         <GridView.ItemContainerStyle>
             <Style TargetType="GridViewItem">
@@ -36,18 +35,21 @@
                                         HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                         ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
                     </Border>
-                    <Grid Grid.Row="1" Padding="10">
+                    <Grid Grid.Row="1" Padding="8">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <StackPanel Spacing="5" Grid.Row="0">
+                        <StackPanel Spacing="4" Grid.Row="0">
                             <TextBlock Text="{x:Bind Package.Title}" FontWeight="SemiBold"
                                        TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxLines="2"/>
-                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="{x:Bind Package.RatingCount, Mode=OneWay}" FontSize="14" VerticalAlignment="Center"/>
-                                <Viewbox Width="90" Margin="0,0,0,-5">
-                                    <winui:RatingControl Value="{Binding Product.AverageRating, Mode=OneWay}" IsReadOnly="True">
+                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{x:Bind Package.RatingCount, Mode=OneWay}" FontSize="14" VerticalAlignment="Center"
+                                           x:Load="{x:Bind Package.HasRatingCount}"
+                                           x:Name="RatingCountBlock"/>
+                                <Viewbox x:Name="RatingBox" Width="90" Margin="0,0,0,-4"
+                                         x:Load="{x:Bind Package.HasAverageRating}">
+                                    <winui:RatingControl Value="{x:Bind Package.AverageRating, Mode=OneWay}" IsReadOnly="True">
                                         <winui:RatingControl.Resources>
                                             <SolidColorBrush x:Key="RatingControlSelectedForeground" Color="{ThemeResource SystemColorHighlightTextColor}"/>
                                         </winui:RatingControl.Resources>

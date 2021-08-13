@@ -123,29 +123,29 @@ namespace FluentStore.SDK
             set => SetProperty(ref _Version, value);
         }
 
-        private double? _AverageRating;
-        public double? AverageRating
+        private double _AverageRating = -1;
+        public double AverageRating
         {
             get => _AverageRating;
             set => SetProperty(ref _AverageRating, value);
         }
-        public bool HasAverageRating => AverageRating != null;
+        public bool HasAverageRating => AverageRating >= 0;
 
-        private int? _RatingCount;
-        public int? RatingCount
+        private int _RatingCount = -1;
+        public int RatingCount
         {
             get => _RatingCount;
             set => SetProperty(ref _RatingCount, value);
         }
-        public bool HasRatingCount => RatingCount != null;
+        public bool HasRatingCount => RatingCount >= 0;
 
-        private double? _Price;
-        public double? Price
+        private double _Price = -1;
+        public double Price
         {
             get => _Price;
             set => SetProperty(ref _Price, value);
         }
-        public bool HasPrice => Price != null;
+        public bool HasPrice => Price >= 0;
 
         private string _DisplayPrice;
         public string DisplayPrice

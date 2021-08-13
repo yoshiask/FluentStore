@@ -128,8 +128,8 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _Screenshots, value);
         }
 
-        public string AverageRatingString => Package.AverageRating.HasValue
-            ? Package.AverageRating.Value.ToString("F1")
+        public string AverageRatingString => Package.HasAverageRating
+            ? Package.AverageRating.ToString("F1")
             : string.Empty;
 
         //public bool SupportsPlatform(PlatWindows plat) => Package.AllowedPlatforms.Contains(plat);
