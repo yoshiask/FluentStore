@@ -7,8 +7,9 @@
     xmlns:sdk="using:FluentStore.SDK"
     xmlns:images="using:FluentStore.SDK.Images">
 
-    <converters:StreamToBitmapImageConverter x:Key="StreamToBitmapImageConverter"/>
-    <converters:CSSColorToBrushConverter x:Name="CSSColorToBrushConverter"/>
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Themes/CommonConverters.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
 
     <DataTemplate x:Key="DefaultImageBaseTemplate" x:DataType="sdk:ImageBase">
         <Border VerticalAlignment="Stretch" HorizontalAlignment="Stretch"

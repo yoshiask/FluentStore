@@ -9,6 +9,7 @@
         <winui:XamlControlsResources>
             <winui:XamlControlsResources.MergedDictionaries>
                 <!-- Other app resources here -->
+                <ResourceDictionary Source="/Themes/CommonConverters.xaml"/>
                 <ResourceDictionary Source="/Themes/PackageDisplayTemplates.xaml"/>
                 <ResourceDictionary Source="/Themes/ImageBaseTemplates.xaml"/>
                 

@@ -5,23 +5,9 @@
     xmlns:local="using:FluentStore.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:sdk="using:FluentStore.SDK"
     xmlns:attributes="using:FluentStore.SDK.Attributes"
-    xmlns:viewModels="using:FluentStore.ViewModels"
-    xmlns:converters="using:FluentStore.Converters"
-    xmlns:controls="using:FluentStore.Controls"
-    xmlns:helpers="using:FluentStore.Helpers"
-    xmlns:tkconverters="using:Microsoft.Toolkit.Uwp.UI.Converters"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
-
-    <Page.Resources>
-        <tkconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-        <tkconverters:BoolToVisibilityConverter x:Key="NotBoolToVisibilityConverter" FalseValue="Visible" TrueValue="Collapsed"/>
-        <tkconverters:CollectionVisibilityConverter x:Key="CollectionVisibilityConverter"/>
-        <tkconverters:EmptyStringToObjectConverter x:Key="EmptyStringToVisibilityConverter" EmptyValue="Collapsed" NotEmptyValue="Visible"/>
-        <converters:PlatWindowsEnumToVisibility x:Key="PlatWindowsEnumToVisibility"/>
-    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>

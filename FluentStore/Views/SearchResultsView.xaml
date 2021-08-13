@@ -6,7 +6,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="using:FluentStore.ViewModels"
-    xmlns:converters="using:FluentStore.Converters"
     xmlns:controls="using:FluentStore.Controls"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
@@ -31,8 +30,12 @@
                         <RowDefinition Height="150"/>
                         <RowDefinition Height="150"/>
                     </Grid.RowDefinitions>
-                    <ContentControl Content="{x:Bind AppIcon}"
-                                    ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
+                    <Border Background="{x:Bind AppIcon.BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}"
+                            VerticalAlignment="Stretch">
+                        <ContentControl Content="{x:Bind AppIcon}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                        ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
+                    </Border>
                     <Grid Grid.Row="1" Padding="10">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>

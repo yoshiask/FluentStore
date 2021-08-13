@@ -6,14 +6,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
-    xmlns:tkconverters="using:Microsoft.Toolkit.Uwp.UI.Converters"
     mc:Ignorable="d"
     SizeChanged="Page_SizeChanged"
     Background="{ThemeResource SystemControlAcrylicWindowBrush}">
-    
-    <Page.Resources>
-        <tkconverters:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
-    </Page.Resources>
 
     <winui:NavigationView x:Name="MainNav" PaneDisplayMode="LeftCompact" IsTitleBarAutoPaddingEnabled="False"
                           SelectionChanged="NavigationView_SelectionChanged" BackRequested="MainNav_BackRequested"
@@ -84,7 +79,7 @@
                            VerticalAlignment="Center" Margin="4"/>
             </Grid>
             <winui:ProgressBar IsIndeterminate="True" VerticalAlignment="Top" Grid.Row="1" 
-                               Visibility="{x:Bind ViewModel.IsPageLoading, Converter={StaticResource BoolToVisConverter}, Mode=OneWay}"/>
+                               Visibility="{x:Bind ViewModel.IsPageLoading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
             <Frame x:Name="MainFrame" Grid.Row="1"/>
         </Grid>
 

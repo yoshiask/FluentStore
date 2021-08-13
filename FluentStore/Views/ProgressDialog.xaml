@@ -12,7 +12,6 @@
     IsSecondaryButtonEnabled="False"
     PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
-    xmlns:tkconverters="using:Microsoft.Toolkit.Uwp.UI.Converters"
     Background="{ThemeResource SystemControlAcrylicElementBrush}"
     x:DefaultBindMode="OneWay">
 
@@ -20,10 +19,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <winui:XamlControlsResources/>
-                <!-- Other merged dictionaries here -->
             </ResourceDictionary.MergedDictionaries>
-            <!-- Other app resources here -->
-            <tkconverters:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
         </ResourceDictionary>
     </ContentDialog.Resources>
     

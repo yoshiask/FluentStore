@@ -11,8 +11,6 @@
     mc:Ignorable="d">
     <Page.Resources>
         <authviewmodels:SignInViewModel x:Name="ViewModel"/>
-        <tkconverters:StringVisibilityConverter x:Key="StringVisConverter"/>
-        <tkconverters:BoolToVisibilityConverter x:Key="BoolToVisConverter"/>
     </Page.Resources>
 
     <Grid x:Name="MainGrid" VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="300" Margin="10">
@@ -35,7 +33,7 @@
             <TextBlock Text="{x:Bind ViewModel.FailReason, Mode=OneWay}" IsTextSelectionEnabled="True"
                        Foreground="{ThemeResource SystemControlErrorTextForegroundBrush}" Grid.Row="1"/>
             <winui:ProgressBar IsIndeterminate="True" Grid.Row="1"
-                               Visibility="{x:Bind ViewModel.IsSigningIn, Converter={StaticResource BoolToVisConverter}, Mode=OneWay}"/>
+                               Visibility="{x:Bind ViewModel.IsSigningIn, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
             <TextBox Text="{x:Bind ViewModel.Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      PlaceholderText="Email" Grid.Row="2"/>
             <PasswordBox Password="{x:Bind ViewModel.Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
