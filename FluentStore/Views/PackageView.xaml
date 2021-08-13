@@ -15,23 +15,26 @@
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
 
-    <UserControl.Resources>
+    <Page.Resources>
         <tkconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <tkconverters:BoolToVisibilityConverter x:Key="NotBoolToVisibilityConverter" FalseValue="Visible" TrueValue="Collapsed"/>
         <tkconverters:CollectionVisibilityConverter x:Key="CollectionVisibilityConverter"/>
         <tkconverters:EmptyStringToObjectConverter x:Key="EmptyStringToVisibilityConverter" EmptyValue="Collapsed" NotEmptyValue="Visible"/>
         <converters:PlatWindowsEnumToVisibility x:Key="PlatWindowsEnumToVisibility"/>
-    </UserControl.Resources>
+    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-
-        <ContentControl Content="{x:Bind ViewModel.HeroImage}" VerticalAlignment="Top" HorizontalAlignment="Stretch"
-                        ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"
-                        SizeChanged="HeroImage_SizeChanged"/>
+        
+        <ParallaxView Source="{x:Bind ContentScroller}" VerticalShift="200" VerticalSourceOffsetKind="Absolute">
+            <ContentControl Content="{x:Bind ViewModel.HeroImage}" VerticalAlignment="Top" HorizontalAlignment="Stretch"
+                            ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"
+                            SizeChanged="HeroImage_SizeChanged"/>
+        </ParallaxView>
+        
 
         <Grid>
             <ScrollViewer x:Name="ContentScroller">
