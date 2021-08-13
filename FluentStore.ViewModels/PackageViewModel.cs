@@ -6,7 +6,6 @@ using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using ImageType = FluentStore.SDK.ImageType;
@@ -152,17 +151,17 @@ namespace FluentStore.ViewModels
             NavigationService.Navigate("PackageView", pb);
         }
 
-        private ObservableCollection<DisplayInfo> _DisplayProperties;
+        private List<DisplayInfo> _DisplayProperties;
         /// <summary>
         /// Gets the value of all properties with <see cref="DisplayAttribute"/> applied.
         /// </summary>
-        public ObservableCollection<DisplayInfo> DisplayProperties
+        public List<DisplayInfo> DisplayProperties
         {
             get
             {
                 if (_DisplayProperties == null)
                 {
-                    _DisplayProperties = new ObservableCollection<DisplayInfo>();
+                    _DisplayProperties = new List<DisplayInfo>();
                     Type type = Package.GetType();
                     foreach (PropertyInfo prop in type.GetProperties())
                     {
@@ -178,17 +177,17 @@ namespace FluentStore.ViewModels
         }
 
 
-        private ObservableCollection<DisplayAdditionalInformationInfo> _DisplayAdditionalInformationProperties;
+        private List<DisplayAdditionalInformationInfo> _DisplayAdditionalInformationProperties;
         /// <summary>
         /// Gets the value of all properties with <see cref="DisplayAdditionalInformationAttribute"/> applied.
         /// </summary>
-        public ObservableCollection<DisplayAdditionalInformationInfo> DisplayAdditionalInformationProperties
+        public List<DisplayAdditionalInformationInfo> DisplayAdditionalInformationProperties
         {
             get
             {
                 if (_DisplayAdditionalInformationProperties == null)
                 {
-                    _DisplayAdditionalInformationProperties = new ObservableCollection<DisplayAdditionalInformationInfo>();
+                    _DisplayAdditionalInformationProperties = new List<DisplayAdditionalInformationInfo>();
                     Type type = typeof(PackageBase);
                     foreach (PropertyInfo prop in type.GetProperties())
                     {
