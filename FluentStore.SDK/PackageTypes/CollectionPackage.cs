@@ -1,4 +1,5 @@
-﻿using FluentStore.SDK.Images;
+﻿using FluentStore.SDK.Attributes;
+using FluentStore.SDK.Images;
 using FluentStoreAPI.Models;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Toolkit.Diagnostics;
@@ -143,6 +144,7 @@ namespace FluentStore.SDK.PackageTypes
         }
 
         private ObservableCollection<PackageBase> _Items = new ObservableCollection<PackageBase>();
+        [Display("Apps")]
         public ObservableCollection<PackageBase> Items
         {
             get => _Items;

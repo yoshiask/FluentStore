@@ -1,5 +1,8 @@
-﻿using System;
+﻿using FluentStore.SDK;
+using FluentStore.ViewModels;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -11,13 +14,11 @@ namespace FluentStore.Controls
         public DataTemplate DateTime { get; set; }
         public DataTemplate DateTimeOffset { get; set; }
         public DataTemplate Uri { get; set; }
+        public DataTemplate PackageEnumerable { get; set; }
         public DataTemplate Enumerable { get; set; }
 
         protected override DataTemplate SelectTemplateCore(object item)
         {
-#if DEBUG
-            System.Diagnostics.Debug.WriteLine($"SelectTemplateCore({item ?? "null"})");
-#endif
             if (item == null)
                 return Default;
 
@@ -28,6 +29,10 @@ namespace FluentStore.Controls
                 return DateTimeOffset;
             else if (typeof(Uri).IsAssignableFrom(type))
                 return Uri;
+            else if (typeof(IEnumerable<PackageBase>).IsAssignableFrom(type))
+                return PackageEnumerable;
+            else if (typeof(IEnumerable<PackageViewModel>).IsAssignableFrom(type))
+                return PackageEnumerable;
             else if (typeof(string).IsAssignableFrom(type))
                 return Default;
             else if (typeof(IEnumerable).IsAssignableFrom(type))

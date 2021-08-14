@@ -7,7 +7,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
-    xmlns:viewmodels="using:FluentStore.ViewModels"
     xmlns:controls="using:FluentStore.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -26,6 +25,7 @@
         
         <GridView ItemsSource="{x:Bind ViewModel.Collections, Mode=OneWay}"
                   SelectedItem="{x:Bind ViewModel.SelectedCollection, Mode=TwoWay}" SelectionMode="Single"
+                  ItemTemplate="{StaticResource DefaultPackageCardTemplate}"
                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="10"
                   controls:ListViewBehaviour.FillBeforeWrap="True" controls:ListViewBehaviour.MinItemWidth="150">
             <GridView.ItemContainerStyle>
@@ -34,24 +34,6 @@
                     <Setter Property="VerticalContentAlignment" Value="Stretch" />
                 </Style>
             </GridView.ItemContainerStyle>
-            <GridView.ItemTemplate>
-                <DataTemplate x:DataType="viewmodels:CollectionViewModel">
-                    <Grid MaxHeight="300" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="115"/>
-                            <!--<RowDefinition Height="125"/>-->
-                        </Grid.RowDefinitions>
-                        <Border Background="{ThemeResource SystemControlHighlightListMediumRevealBackgroundBrush}"/>
-                        <Viewbox>
-                            <TextBlock Text="{x:Bind Collection.TileGlyph}" TextLineBounds="Tight"
-                                       TextWrapping="NoWrap" FontSize="24" FontWeight="Bold" Padding="12"
-                                       d:Text="FS"/>
-                        </Viewbox>
-                        <TextBlock Text="{x:Bind Collection.Name}" FontSize="12" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
-                                   MaxLines="2" VerticalAlignment="Bottom" Padding="10"/>
-                    </Grid>
-                </DataTemplate>
-            </GridView.ItemTemplate>
             <GridView.ItemContainerTransitions>
                 <TransitionCollection>
                     <AddDeleteThemeTransition/>

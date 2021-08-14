@@ -132,19 +132,19 @@ namespace FluentStore.ViewModels
 
         public void ViewPackage(object obj)
         {
-            PackageBase pb;
+            PackageViewModel pvm;
             switch (obj)
             {
                 case PackageViewModel viewModel:
-                    pb = viewModel.Package;
+                    pvm = viewModel;
                     break;
                 case PackageBase package:
-                    pb = package;
+                    pvm = new PackageViewModel(package);
                     break;
                 default:
                     throw new ArgumentException($"'{nameof(obj)}' is an invalid type: {obj.GetType().Name}");
             }
-            NavigationService.Navigate("PackageView", pb);
+            NavigationService.Navigate(pvm);
         }
 
         private List<DisplayInfo> _DisplayProperties;
@@ -207,5 +207,8 @@ namespace FluentStore.ViewModels
             }
             set => SetProperty(ref _DisplayAdditionalInformationProperties, value);
         }
+
+        public static implicit operator PackageBase(PackageViewModel pvm) => pvm.Package;
+        public static implicit operator PackageViewModel(PackageBase pb) => new PackageViewModel(pb);
     }
 }

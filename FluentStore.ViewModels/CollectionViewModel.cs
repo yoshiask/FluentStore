@@ -1,8 +1,8 @@
-﻿using FluentStore.SDK.Packages;
+﻿using FluentStore.SDK;
 using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
 using FluentStoreAPI.Models;
-using Microsoft.Marketplace.Storefront.Contracts;
+using Garfoot.Utilities.FluentUrn;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
@@ -31,7 +31,7 @@ namespace FluentStore.ViewModels
             UpdateCollectionCommand = new AsyncRelayCommand<Collection>(UpdateCollectionAsync);
         }
 
-        private readonly StorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<StorefrontApi>();
+        private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
         private readonly FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
         private readonly UserService UserService = Ioc.Default.GetRequiredService<UserService>();
@@ -128,8 +128,8 @@ namespace FluentStore.ViewModels
             foreach (string productId in Collection.Items)
             {
                 // Load the product details for each item
-                var product = (await StorefrontApi.GetProduct(productId)).Payload;
-                Items.Add(new PackageViewModel(new MicrosoftStorePackage(product)));
+                var package = await PackageService.GetPackage(Urn.Parse(productId));
+                Items.Add(new PackageViewModel(package));
             }
             
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));

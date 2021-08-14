@@ -107,16 +107,16 @@
                             <Button VerticalAlignment="Stretch"
                                     Visibility="{x:Bind ViewModel.IsCollection, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE74D;" />
-                                    <TextBlock Text="Delete" />
+                                    <FontIcon Glyph="&#xE70F;" />
+                                    <TextBlock Text="Edit details" />
                                 </StackPanel>
                             </Button>
-
+                            
                             <Button VerticalAlignment="Stretch"
                                     Visibility="{x:Bind ViewModel.IsCollection, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE70F;" />
-                                    <TextBlock Text="Edit details" />
+                                    <FontIcon Glyph="&#xE74D;" />
+                                    <TextBlock Text="Delete" />
                                 </StackPanel>
                             </Button>
 
@@ -126,7 +126,7 @@
                                 Padding="20" Spacing="20">
                         <StackPanel.Resources>
                             <Style TargetType="StackPanel">
-                                <Setter Property="Spacing" Value="8"/>
+                                <Setter Property="Spacing" Value="12"/>
                             </Style>
                         </StackPanel.Resources>
 
@@ -149,9 +149,9 @@
                         <StackPanel Visibility="{x:Bind ViewModel.Package.Description, Converter={StaticResource EmptyStringToVisibilityConverter}}">
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Description"/>
                             <TextBlock x:Name="DescriptionBlock" Text="{x:Bind ViewModel.Package.Description}"
-                                       FontSize="16" TextTrimming="WordEllipsis" TextWrapping="Wrap" MaxHeight="100"
+                                       FontSize="16" TextTrimming="WordEllipsis" TextWrapping="Wrap" MaxLines="4"
                                        IsTextSelectionEnabled="True"/>
-                            <HyperlinkButton x:Name="MoreButton" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Right"
+                            <HyperlinkButton x:Name="MoreButton" HorizontalAlignment="Right"
                                              Click="MoreButton_Click" Content="More"
                                              Visibility="{Binding ElementName=DescriptionBlock, Path=IsTextTrimmed}" />
                         </StackPanel>
@@ -162,7 +162,7 @@
                                       Visibility="{x:Bind ViewModel.DisplayProperties, Converter={StaticResource CollectionVisibilityConverter}}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <StackPanel Spacing="20"/>
+                                    <StackPanel Spacing="12"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
@@ -170,7 +170,7 @@
                                     <StackPanel>
                                         <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="{x:Bind Title}" />
                                         <ContentControl Content="{x:Bind Value}" x:Name="ContentPresenterWithSelector"
-                                                          ContentTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"/>
+                                                        ContentTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>

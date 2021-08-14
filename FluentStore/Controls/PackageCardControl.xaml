@@ -1,0 +1,53 @@
+﻿<UserControl
+    x:Class="FluentStore.Controls.PackageCardControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FluentStore.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:winui="using:Microsoft.UI.Xaml.Controls"
+    x:DefaultBindMode="OneWay"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <Grid MaxHeight="300" Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="150"/>
+            <RowDefinition Height="150"/>
+        </Grid.RowDefinitions>
+        <Border Background="{x:Bind ViewModel.AppIcon.BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}"
+                VerticalAlignment="Stretch">
+            <ContentControl Content="{x:Bind ViewModel.AppIcon}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                            ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
+        </Border>
+        <Grid Grid.Row="1" Padding="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <StackPanel Spacing="4" Grid.Row="0">
+                <TextBlock Text="{x:Bind ViewModel.Package.Title}" FontWeight="SemiBold"
+                           TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxLines="2"/>
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="{x:Bind ViewModel.Package.RatingCount}" FontSize="14" VerticalAlignment="Center"
+                               x:Name="RatingCountBlock"
+                               x:Load="{x:Bind ViewModel.Package.HasRatingCount}"/>
+                    <Viewbox x:Name="RatingBox" Width="90" Margin="0,0,0,-4"
+                             x:Load="{x:Bind ViewModel.Package.HasAverageRating}">
+                        <winui:RatingControl Value="{x:Bind ViewModel.Package.AverageRating}" IsReadOnly="True">
+                            <winui:RatingControl.Resources>
+                                <SolidColorBrush x:Key="RatingControlSelectedForeground" Color="{ThemeResource SystemColorHighlightTextColor}"/>
+                            </winui:RatingControl.Resources>
+                        </winui:RatingControl>
+                    </Viewbox>
+                </StackPanel>
+            </StackPanel>
+            <TextBlock Text="{x:Bind ViewModel.Package.DisplayPrice}"
+                       x:Name="DisplayPriceBlock" VerticalAlignment="Bottom" Grid.Row="1"
+                       x:Load="{x:Bind ViewModel.Package.HasDisplayPrice}"/>
+        </Grid>
+    </Grid>
+
+</UserControl>

@@ -14,5 +14,6 @@
     <converters:StreamToBitmapImageConverter x:Key="StreamToBitmapImageConverter"/>
     <converters:CSSColorToBrushConverter x:Name="CSSColorToBrushConverter"/>
     <converters:PlatWindowsEnumToVisibility x:Key="PlatWindowsEnumToVisibility"/>
+    <converters:PackageBaseEnumerableToViewModelEnumerable x:Key="PackageBaseEnumerableToViewModelEnumerable"/>
 
 </ResourceDictionary>

@@ -24,6 +24,10 @@
         <HyperlinkButton Content="{Binding}" NavigateUri="{Binding}"/>
     </DataTemplate>
 
+    <DataTemplate x:Key="DefaultDisplayPackageEnumerableTemplate" x:DataType="collections:IEnumerable">
+        <controls:PackageCardGridView Packages="{Binding Converter={StaticResource PackageBaseEnumerableToViewModelEnumerable}}"/>
+    </DataTemplate>
+
     <DataTemplate x:Key="DefaultDisplayEnumerableTemplate" x:DataType="collections:IEnumerable">
         <ItemsControl ItemsSource="{Binding}" ItemTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}">
             <ItemsControl.ItemsPanel>
@@ -43,6 +47,7 @@
                                              DateTime="{StaticResource DefaultDisplayDateTimeTemplate}"
                                              DateTimeOffset="{StaticResource DefaultDisplayDateTimeOffsetTemplate}"
                                              Uri="{StaticResource DefaultDisplayUriTemplate}"
+                                             PackageEnumerable="{StaticResource DefaultDisplayPackageEnumerableTemplate}"
                                              Enumerable="{StaticResource DefaultDisplayEnumerableTemplate}"/>
 
 </ResourceDictionary>

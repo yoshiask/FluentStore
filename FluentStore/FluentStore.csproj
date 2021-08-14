@@ -120,12 +120,16 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\DisplayModule.xaml.cs">
-      <DependentUpon>DisplayModule.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Controls\ImageBaseTemplateSelector.cs" />
     <Compile Include="Controls\ListViewBehavior.cs" />
+    <Compile Include="Controls\PackageCardControl.xaml.cs">
+      <DependentUpon>PackageCardControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\PackageCardGridView.xaml.cs">
+      <DependentUpon>PackageCardGridView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\PackageDisplayTemplateSelector.cs" />
+    <Compile Include="Converters\PackageBaseEnumerableToViewModelEnumerable.cs" />
     <Compile Include="Helpers\ContentPresenterEx.cs" />
     <Compile Include="Views\PackageView.xaml.cs">
       <DependentUpon>PackageView.xaml</DependentUpon>
@@ -203,7 +207,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="Controls\DisplayModule.xaml">
+    <Page Include="Controls\PackageCardControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\PackageCardGridView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
