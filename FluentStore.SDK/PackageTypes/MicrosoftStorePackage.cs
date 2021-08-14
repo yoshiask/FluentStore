@@ -259,11 +259,30 @@ namespace FluentStore.SDK.Packages
         }
 
         private string _PrivacyUrl;
-        [DisplayAdditionalInformation("Privacy url", "\uE71B")]
         public string PrivacyUrl
         {
             get => _PrivacyUrl;
-            set => SetProperty(ref _PrivacyUrl, value);
+            set
+            {
+                SetProperty(ref _PrivacyUrl, value);
+                try
+                {
+                    SetProperty(ref _PrivacyUri, new Uri(value));
+                }
+                catch { }
+            }
+        }
+
+        private Uri _PrivacyUri;
+        [DisplayAdditionalInformation("Privacy url", "\uE71B")]
+        public Uri PrivacyUri
+        {
+            get => _PrivacyUri;
+            set
+            {
+                SetProperty(ref _PrivacyUri, value);
+                SetProperty(ref _PrivacyUrl, value.ToString());
+            }
         }
 
         private List<string> _Platforms = new List<string>();

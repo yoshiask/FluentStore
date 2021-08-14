@@ -6,9 +6,7 @@ using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using ImageType = FluentStore.SDK.ImageType;
 
 namespace FluentStore.ViewModels
 {
@@ -132,8 +130,6 @@ namespace FluentStore.ViewModels
             ? Package.AverageRating.ToString("F1")
             : string.Empty;
 
-        //public bool SupportsPlatform(PlatWindows plat) => Package.AllowedPlatforms.Contains(plat);
-
         public void ViewPackage(object obj)
         {
             PackageBase pb;
@@ -166,9 +162,14 @@ namespace FluentStore.ViewModels
                     foreach (PropertyInfo prop in type.GetProperties())
                     {
                         var displayAttr = prop.GetCustomAttribute<DisplayAttribute>();
-                        if (displayAttr == null)
+                        // Filter out properties without the attribute, and ignore DisplayAdditionalInformationInfo
+                        if (displayAttr == null || displayAttr.GetType() != typeof(DisplayAttribute))
                             continue;
-                        _DisplayProperties.Add(new DisplayInfo(displayAttr, prop.GetValue(Package)));
+
+                        object value = prop.GetValue(Package);
+                        if (value == null)
+                            continue;
+                        _DisplayProperties.Add(new DisplayInfo(displayAttr, value));
                     }
                 }
                 return _DisplayProperties;
@@ -188,13 +189,18 @@ namespace FluentStore.ViewModels
                 if (_DisplayAdditionalInformationProperties == null)
                 {
                     _DisplayAdditionalInformationProperties = new List<DisplayAdditionalInformationInfo>();
-                    Type type = typeof(PackageBase);
+                    Type type = Package.GetType();
                     foreach (PropertyInfo prop in type.GetProperties())
                     {
                         var displayAttr = prop.GetCustomAttribute<DisplayAdditionalInformationAttribute>();
+                        // Filter out properties without the attribute
                         if (displayAttr == null)
                             continue;
-                        _DisplayAdditionalInformationProperties.Add(new DisplayAdditionalInformationInfo(displayAttr, prop.GetValue(Package)));
+
+                        object value = prop.GetValue(Package);
+                        if (value == null)
+                            continue;
+                        _DisplayAdditionalInformationProperties.Add(new DisplayAdditionalInformationInfo(displayAttr, value));
                     }
                 }
                 return _DisplayAdditionalInformationProperties;
