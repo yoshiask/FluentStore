@@ -44,17 +44,11 @@ namespace FluentStore.SDK
         public async Task<PackageCollection> SearchAsync(string query)
         {
             var packages = new PackageCollection();
-            foreach (var handler in PackageHandlers.Values)
+            foreach (var handler in PackageHandlers.Values.Distinct())
             {
                 var results = await handler.SearchAsync(query);
                 // Filter results already in list
-                foreach (var result in results)
-                {
-                    if (packages.ContainsKey(result.Urn))
-                        packages[result.Urn].Add(result);
-                    else
-                        packages.Add(result.Urn, new List<PackageBase> { result });
-                }
+                packages.AddPackages(results);
             }
             return packages;
         }
@@ -69,13 +63,7 @@ namespace FluentStore.SDK
             {
                 var results = await handler.GetSearchSuggestionsAsync(query);
                 // Filter results already in list
-                foreach (var result in results)
-                {
-                    if (packages.ContainsKey(result.Urn))
-                        packages[result.Urn].Add(result);
-                    else
-                        packages.Add(result.Urn, new List<PackageBase> { result });
-                }
+                packages.AddPackages(results);
             }
             return packages;
         }

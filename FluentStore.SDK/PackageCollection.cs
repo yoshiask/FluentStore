@@ -12,9 +12,11 @@ namespace FluentStore.SDK
     /// Internally, dictionary where the key is the common package ID, and the value
     /// is a list of <see cref="PackageBase"/> from various handlers.
     /// </remarks>
-    public class PackageCollection : Dictionary<Urn, List<PackageBase>>
+    public class PackageCollection : Dictionary<string, List<PackageBase>>
     {
-        public List<Urn> PackageIds => Keys.ToList();
+        public List<string> PackageIds => Keys.ToList();
+
+        public List<PackageBase> this[Urn packageUrn] => this[packageUrn.ToString()];
 
         /// <summary>
         /// Collapses multiple packages with identical IDs into a single <see cref="PackageBase"/>.
@@ -42,6 +44,20 @@ namespace FluentStore.SDK
         /// <exception cref="System.ArgumentNullException">
         /// key is null.
         /// </exception>
-        public bool ContainsPackage(Urn packageUrn) => ContainsKey(packageUrn);
+        public bool ContainsPackage(Urn packageUrn) => ContainsKey(packageUrn.ToString());
+
+        public void AddPackage(PackageBase package)
+        {
+            if (ContainsPackage(package.Urn))
+                this[package.Urn].Add(package);
+            else
+                Add(package.Urn.ToString(), new List<PackageBase> { package });
+        }
+
+        public void AddPackages(IEnumerable<PackageBase> packages)
+        {
+            foreach (PackageBase package in packages)
+                AddPackage(package);
+        }
     }
 }
