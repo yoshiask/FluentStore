@@ -145,7 +145,7 @@ namespace FluentStore.SDK.PackageTypes
         }
 
         private ObservableCollection<PackageBase> _Items = new ObservableCollection<PackageBase>();
-        [Display("Apps")]
+        [Display(Title = "Apps", Rank = 1)]
         public ObservableCollection<PackageBase> Items
         {
             get => _Items;
