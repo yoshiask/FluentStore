@@ -38,13 +38,13 @@ namespace FluentStore.SDK
 
         public abstract Task<bool> InstallAsync();
 
-        public abstract Task<bool> DownloadPackageAsync(string installerPath = null);
+        public abstract Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null);
 
         public abstract Task<bool> IsPackageInstalledAsync();
 
         public abstract Task LaunchAsync();
 
-        public virtual void OnDownloaded(StorageFile file) { }
+        public virtual void OnDownloaded(IStorageItem item) { }
 
         public virtual bool Equals(PackageBase other) => this.Urn.Equals(other.Urn);
 
@@ -67,14 +67,14 @@ namespace FluentStore.SDK
             set => SetProperty(ref _Status, value);
         }
 
-        private StorageFile _InstallerFile;
-        public StorageFile InstallerFile
+        private IStorageItem _DownloadItem;
+        public IStorageItem DownloadItem
         {
-            get => _InstallerFile;
+            get => _DownloadItem;
             set
             {
                 OnDownloaded(value);
-                SetProperty(ref _InstallerFile, value);
+                SetProperty(ref _DownloadItem, value);
             }
         }
 

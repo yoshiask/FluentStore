@@ -4,6 +4,7 @@ using FluentStore.Services;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
+using OwlCore.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -169,7 +170,12 @@ namespace FluentStore.ViewModels
                         object value = prop.GetValue(Package);
                         if (value == null)
                             continue;
-                        _DisplayProperties.Add(new DisplayInfo(displayAttr, value));
+
+                        var info = new DisplayInfo(displayAttr, value);
+                        if (displayAttr.Rank >= _DisplayProperties.Count)
+                            _DisplayProperties.Add(info);
+                        else
+                            _DisplayProperties.Insert(displayAttr.Rank, info);
                     }
                 }
                 return _DisplayProperties;
@@ -200,7 +206,12 @@ namespace FluentStore.ViewModels
                         object value = prop.GetValue(Package);
                         if (value == null)
                             continue;
-                        _DisplayAdditionalInformationProperties.Add(new DisplayAdditionalInformationInfo(displayAttr, value));
+
+                        var info = new DisplayAdditionalInformationInfo(displayAttr, value);
+                        if (displayAttr.Rank >= _DisplayAdditionalInformationProperties.Count)
+                            _DisplayAdditionalInformationProperties.Add(info);
+                        else
+                            _DisplayAdditionalInformationProperties.Insert(displayAttr.Rank, info);
                     }
                 }
                 return _DisplayAdditionalInformationProperties;

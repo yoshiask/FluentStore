@@ -1,4 +1,5 @@
 ﻿using FluentStore.SDK.Handlers;
+using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
 using FluentStore.SDK.Messages;
 using Garfoot.Utilities.FluentUrn;
@@ -15,6 +16,7 @@ using System.Xml.Linq;
 using System.Xml.XPath;
 using Windows.ApplicationModel;
 using Windows.Management.Deployment;
+using Windows.Storage;
 using Windows.System;
 using Windows.System.Profile;
 
@@ -62,10 +64,11 @@ namespace FluentStore.SDK.Packages
         public override bool RequiresDownloadForCompatCheck => true;
         public override async Task<string> GetCannotBeInstalledReason()
         {
-            Guard.IsNotNull(InstallerFile, nameof(InstallerFile));
+            Guard.IsNotNull(DownloadItem, nameof(DownloadItem));
 
             // Open package archive for reading
-            using var stream = await InstallerFile.OpenReadAsync();
+            var file = await StorageHelper.GetPackageFile(Urn);
+            using var stream = await file.OpenReadAsync();
             //var reader = new BinaryReader(stream.AsStream());
             using var archive = new ZipArchive(stream.AsStream());
 
@@ -160,7 +163,7 @@ namespace FluentStore.SDK.Packages
             if (false)//Settings.Default.UseAppInstaller || (useAppInstaller.HasValue && useAppInstaller.Value))
             {
                 // Pass the file to App Installer to install it
-                Uri launchUri = new Uri("ms-appinstaller:?source=" + InstallerFile.Path);
+                Uri launchUri = new Uri("ms-appinstaller:?source=" + DownloadItem.Path);
                 switch (await Launcher.QueryUriSupportAsync(launchUri, LaunchQuerySupportType.Uri))
                 {
                     case LaunchQuerySupportStatus.Available:
@@ -198,7 +201,7 @@ namespace FluentStore.SDK.Packages
             {
                 // Attempt to install the downloaded package
                 var result = await pkgManager.AddPackageByUriAsync(
-                    new Uri(InstallerFile.Path),
+                    new Uri(DownloadItem.Path),
                     new AddPackageOptions()
                     {
                         ForceAppShutdown = true
@@ -233,7 +236,7 @@ namespace FluentStore.SDK.Packages
             await firstApp.LaunchAsync();
         }
 
-        public override Task<bool> DownloadPackageAsync(string installerPath)
+        public override Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null)
         {
             throw new NotImplementedException();
         }
@@ -248,9 +251,9 @@ namespace FluentStore.SDK.Packages
             Guard.IsEqualTo((int)Status, (int)PackageStatus.Downloaded, nameof(Status));
             string extension = "";
             InstallerType type = InstallerType.Unknown;
+            StorageFile file = (StorageFile)DownloadItem;
 
-            string contentTypeinstallerPath = InstallerFile.Path + "_[Content_Types].xml";
-            using (var stream = await InstallerFile.OpenStreamForReadAsync())
+            using (var stream = await file.OpenStreamForReadAsync())
             {
                 var bytes = new byte[4];
                 stream.Read(bytes, 0, 4);
@@ -261,11 +264,10 @@ namespace FluentStore.SDK.Packages
                     // ZIP
                     /// Typical [not empty or spanned] ZIP archive
                     case 0x504B0304:
-                        using (var archive = ZipFile.OpenRead(InstallerFile.Path))
+                        using (var archive = ZipFile.OpenRead(DownloadItem.Path))
                         {
                             var entry = archive.GetEntry("[Content_Types].xml");
-                            entry.ExtractToFile(contentTypeinstallerPath, true);
-                            var ctypesXml = XDocument.Load(contentTypeinstallerPath);
+                            var ctypesXml = XDocument.Load(entry.Open());
                             var defaults = ctypesXml.Root.Elements().Where(e => e.Name.LocalName == "Default");
                             if (defaults.Any(d => d.Attribute("Extension").Value == "msix"))
                             {
@@ -309,19 +311,16 @@ namespace FluentStore.SDK.Packages
                 }
             }
 
-            // Perform cleanup
-            if (File.Exists(contentTypeinstallerPath))
-                File.Delete(contentTypeinstallerPath);
-
             return extension;
         }
 
         public override async Task<ImageBase> GetAppIcon()
         {
-            Guard.IsNotNull(InstallerFile, nameof(InstallerFile));
+            Guard.IsNotNull(DownloadItem, nameof(DownloadItem));
+            StorageFile file = (StorageFile)DownloadItem;
 
             // Open package archive for reading
-            using var stream = await InstallerFile.OpenReadAsync();
+            using var stream = await file.OpenReadAsync();
             using var archive = new ZipArchive(stream.AsStream());
 
             // Extract icon from manifest

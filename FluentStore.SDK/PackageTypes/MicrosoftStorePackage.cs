@@ -1,4 +1,5 @@
 ﻿using FluentStore.SDK.Attributes;
+using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
 using FluentStore.SDK.Messages;
 using Garfoot.Utilities.FluentUrn;
@@ -107,27 +108,23 @@ namespace FluentStore.SDK.Packages
             return null;
         }
 
-        public override async Task<bool> DownloadPackageAsync(string installerPath)
+        public override async Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null)
         {
             WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
             // Find the package URI
             if (!await PopulatePackageUri())
             {
                 WeakReferenceMessenger.Default.Send(new PackageFetchFailedMessage(this, new Exception("An unknown error occurred.")));
-                return false;
+                return null;
             }
             WeakReferenceMessenger.Default.Send(new PackageFetchCompletedMessage(this));
 
-            // Download the file to the app's temp directory
-            if (installerPath == null)
-                installerPath = Path.Combine(ApplicationData.Current.TemporaryFolder.Path, PackageMoniker);
-            var destinationFolder = await StorageFolder.GetFolderFromPathAsync(Path.GetDirectoryName(installerPath));
-            string fileName = Path.GetFileName(installerPath);
-            InstallerFile = await destinationFolder.CreateFileAsync(
-                fileName, CreationCollisionOption.ReplaceExisting);
+            // Create the location to download to
+            var file = await StorageHelper.CreatePackageFile(Urn, folder);
+            DownloadItem = file;
 
             BackgroundDownloader downloader = new BackgroundDownloader();
-            DownloadOperation download = downloader.CreateDownload(PackageUri, InstallerFile);
+            DownloadOperation download = downloader.CreateDownload(PackageUri, file);
             download.RangesDownloaded += (op, args) =>
             {
                 WeakReferenceMessenger.Default.Send(
@@ -144,17 +141,17 @@ namespace FluentStore.SDK.Packages
             {
                 WeakReferenceMessenger.Default.Send(new PackageDownloadFailedMessage(this,
                     new Exception($"Status code {statusCode} did not indicate success.")));
-                return false;
+                return null;
             }
             Status = PackageStatus.Downloaded;
 
             // Set the proper file type and extension
             string extension = await GetInstallerType();
             if (extension != string.Empty)
-                await InstallerFile.RenameAsync(InstallerFile.Name + extension, NameCollisionOption.ReplaceExisting);
+                await DownloadItem.RenameAsync(PackageMoniker + extension, NameCollisionOption.ReplaceExisting);
 
-            WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, InstallerFile));
-            return true;
+            WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, file));
+            return DownloadItem;
         }
 
         private async Task<bool> PopulatePackageUri()
@@ -235,7 +232,7 @@ namespace FluentStore.SDK.Packages
         }
 
         private List<string> _Notes = new List<string>();
-        [Display]
+        [Display(Title = "What's new in this version", Rank = 3)]
         public List<string> Notes
         {
             get => _Notes;
@@ -243,7 +240,7 @@ namespace FluentStore.SDK.Packages
         }
 
         private List<string> _Features = new List<string>();
-        [Display]
+        [Display(Rank = 2)]
         public List<string> Features
         {
             get => _Features;
@@ -251,7 +248,7 @@ namespace FluentStore.SDK.Packages
         }
 
         private List<string> _Categories = new List<string>();
-        [Display]
+        [DisplayAdditionalInformation(Icon = "\uE7C1")]
         public List<string> Categories
         {
             get => _Categories;
@@ -300,7 +297,7 @@ namespace FluentStore.SDK.Packages
         }
 
         private List<ProductRating> _Ratings = new List<ProductRating>();
-        [Display]
+        [Display(Rank = 1)]
         public List<ProductRating> Ratings
         {
             get => _Ratings;

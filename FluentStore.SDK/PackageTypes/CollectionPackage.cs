@@ -1,11 +1,11 @@
 ﻿using FluentStore.SDK.Attributes;
+using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
 using FluentStoreAPI.Models;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Toolkit.Diagnostics;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Threading.Tasks;
 using Windows.Storage;
 
@@ -63,16 +63,17 @@ namespace FluentStore.SDK.PackageTypes
             set => _Urn = value;
         }
 
-        public override async Task<bool> DownloadPackageAsync(string installerPath)
+        public override async Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null)
         {
-            if (installerPath == null)
-                installerPath = Path.Combine(ApplicationData.Current.TemporaryFolder.Path, Urn.ToString().Replace(':', '_'));
+            if (folder == null)
+                folder = await StorageHelper.CreatePackageDownloadFolder(Urn);
+            DownloadItem = folder;
 
             bool success = true;
             foreach (PackageBase package in Items)
-                success &= await package.DownloadPackageAsync(Path.Combine(installerPath, package.Urn.ToString().Replace(':', '_')));
+                success &= await package.DownloadPackageAsync(folder) != null;
 
-            return success;
+            return success ? folder : null;
         }
 
         public override async Task<ImageBase> GetAppIcon()

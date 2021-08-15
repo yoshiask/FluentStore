@@ -36,12 +36,12 @@ namespace FluentStore.SDK.Attributes
 
     public class DisplayAdditionalInformationInfo : DisplayInfo
     {
-        public DisplayAdditionalInformationInfo(string title, string icon, object value) : base(title, value)
+        public DisplayAdditionalInformationInfo(string title, int rank, string icon, object value) : base(title, rank, value)
         {
             Icon = icon;
         }
 
-        public DisplayAdditionalInformationInfo(DisplayAdditionalInformationAttribute attr, object value) : this(attr.Title, attr.Icon, value)
+        public DisplayAdditionalInformationInfo(DisplayAdditionalInformationAttribute attr, object value) : this(attr.Title, attr.Rank, attr.Icon, value)
         {
 
         }

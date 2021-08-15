@@ -199,7 +199,7 @@ namespace FluentStore.Views
                 RegisterPackageServiceMessages(installingDialog, totalSteps);
 
                 // Install package
-                if (await pvm.Package.DownloadPackageAsync())
+                if (await pvm.Package.DownloadPackageAsync() != null)
                     await pvm.Package.InstallAsync();
                 //await PackageHelper.InstallPackage(product, useAppInstaller ?? Settings.Default.UseAppInstaller);
             }

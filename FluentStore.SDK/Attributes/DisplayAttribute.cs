@@ -16,6 +16,15 @@ namespace FluentStore.SDK.Attributes
         public string Title { get; set; }
 
         /// <summary>
+        /// The order to display this property. Lower values will
+        /// be displayed at the top.
+        /// </summary>
+        /// <remarks>
+        /// Defaults to <see cref="uint.MaxValue"/>.
+        /// </remarks>
+        public int Rank { get; set; } = int.MaxValue;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DisplayAttribute"/> class with the
         /// specified title.
         /// </summary>
@@ -31,18 +40,20 @@ namespace FluentStore.SDK.Attributes
 
     public class DisplayInfo
     {
-        public DisplayInfo(string title, object value)
+        public DisplayInfo(string title, int rank, object value)
         {
             Title = title;
             Value = value;
+            Rank = rank;
         }
 
-        public DisplayInfo(DisplayAttribute attr, object value) : this(attr.Title, value)
+        public DisplayInfo(DisplayAttribute attr, object value) : this(attr.Title, attr.Rank, value)
         {
 
         }
 
         public string Title { get; set; }
+        public int Rank { get; set; }
         public object Value { get; set; }
     }
 }

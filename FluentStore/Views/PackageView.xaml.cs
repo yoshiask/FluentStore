@@ -312,7 +312,7 @@ namespace FluentStore.Views
             });
             progressDialog.ShowAsync();
 
-            if (await ViewModel.Package.DownloadPackageAsync())
+            if (await ViewModel.Package.DownloadPackageAsync() != null)
                 await ViewModel.Package.InstallAsync();// ViewModel.Package, useAppInstaller ?? Settings.Default.UseAppInstaller);
 
             progressDialog.Hide();
