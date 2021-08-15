@@ -57,70 +57,61 @@
                             <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.Package.Version}"/>
                         </StackPanel>
 
-                        <StackPanel Grid.Column="1" Grid.ColumnSpan="1" Grid.Row="2" VerticalAlignment="Bottom"
-                                    Orientation="Horizontal" Spacing="8" Margin="0,16,0,0">
-                            
-                            <winui:SplitButton x:Name="InstallButton" Padding="8" Click="InstallSplitButton_Click"
-                                               VerticalAlignment="Stretch">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xECAA;" />
-                                    <TextBlock Text="Install" x:Name="InstallButtonText" />
-                                </StackPanel>
-                                <winui:SplitButton.Flyout>
-                                    <MenuFlyout Placement="BottomEdgeAlignedLeft">
-                                        <MenuFlyoutItem Icon="Download" Text="Download installer" ToolTipService.ToolTip="Downloads the app without installing it"
+                        <CommandBar Grid.Column="1" Grid.Row="2" DefaultLabelPosition="Right" VerticalAlignment="Bottom">
+
+                            <AppBarElementContainer>
+                                <winui:SplitButton x:Name="InstallButton" Padding="8" Click="InstallSplitButton_Click"
+                                                   VerticalAlignment="Stretch">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xECAA;" />
+                                        <TextBlock Text="Install" x:Name="InstallButtonText" />
+                                    </StackPanel>
+                                    <winui:SplitButton.Flyout>
+                                        <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                                            <MenuFlyoutItem Icon="Download" Text="Download installer" ToolTipService.ToolTip="Downloads the app without installing it"
                                                         x:Name="DownloadMenuItem" Click="Download_Click"/>
-                                        <MenuFlyoutItem Text="Install with App Installer" ToolTipService.ToolTip="Installs the app using Microsoft's App Installer"
+                                            <MenuFlyoutItem Text="Install with App Installer" ToolTipService.ToolTip="Installs the app using Microsoft's App Installer"
                                                         x:Name="InstallUsingAppInstallerMenuItem" Click="InstallUsingAppInstaller_Click">
-                                            <MenuFlyoutItem.Icon>
-                                                <BitmapIcon UriSource="Assets/AppPackageAppList.png"/>
-                                            </MenuFlyoutItem.Icon>
-                                        </MenuFlyoutItem>
-                                    </MenuFlyout>
-                                </winui:SplitButton.Flyout>
+                                                <MenuFlyoutItem.Icon>
+                                                    <BitmapIcon UriSource="Assets/AppPackageAppList.png"/>
+                                                </MenuFlyoutItem.Icon>
+                                            </MenuFlyoutItem>
+                                        </MenuFlyout>
+                                    </winui:SplitButton.Flyout>
 
-                                <winui:SplitButton.Resources>
-                                    <StaticResource x:Key="SplitButtonBackground" ResourceKey="AccentButtonBackground" />
-                                    <StaticResource x:Key="SplitButtonBackgroundPointerOver" ResourceKey="AccentButtonBackgroundPointerOver" />
-                                    <StaticResource x:Key="SplitButtonBackgroundPressed" ResourceKey="AccentButtonBackgroundPressed" />
-                                    <StaticResource x:Key="SplitButtonBackgroundDisabled" ResourceKey="AccentButtonBackgroundDisabled" />
-                                    <StaticResource x:Key="SplitButtonForeground" ResourceKey="AccentButtonForeground" />
-                                    <StaticResource x:Key="SplitButtonForegroundPointerOver" ResourceKey="AccentButtonForegroundPointerOver" />
-                                    <StaticResource x:Key="SplitButtonForegroundPressed" ResourceKey="AccentButtonForegroundPressed" />
-                                    <StaticResource x:Key="SplitButtonForegroundDisabled" ResourceKey="AccentButtonForegroundDisabled" />
-                                    <StaticResource x:Key="SplitButtonForegroundSecondary" ResourceKey="AccentButtonForeground" />
-                                    <StaticResource x:Key="SplitButtonForegroundSecondaryPressed" ResourceKey="AccentButtonForegroundPressed" />
-                                    <StaticResource x:Key="SplitButtonBorderBrush" ResourceKey="AccentButtonBorderBrush" />
-                                    <StaticResource x:Key="SplitButtonBorderBrushPointerOver" ResourceKey="AccentButtonBorderBrushPointerOver" />
-                                    <StaticResource x:Key="SplitButtonBorderBrushPressed" ResourceKey="AccentButtonBorderBrushPressed" />
-                                </winui:SplitButton.Resources>
-                            </winui:SplitButton>
+                                    <winui:SplitButton.Resources>
+                                        <StaticResource x:Key="SplitButtonBackground" ResourceKey="AccentButtonBackground" />
+                                        <StaticResource x:Key="SplitButtonBackgroundPointerOver" ResourceKey="AccentButtonBackgroundPointerOver" />
+                                        <StaticResource x:Key="SplitButtonBackgroundPressed" ResourceKey="AccentButtonBackgroundPressed" />
+                                        <StaticResource x:Key="SplitButtonBackgroundDisabled" ResourceKey="AccentButtonBackgroundDisabled" />
+                                        <StaticResource x:Key="SplitButtonForeground" ResourceKey="AccentButtonForeground" />
+                                        <StaticResource x:Key="SplitButtonForegroundPointerOver" ResourceKey="AccentButtonForegroundPointerOver" />
+                                        <StaticResource x:Key="SplitButtonForegroundPressed" ResourceKey="AccentButtonForegroundPressed" />
+                                        <StaticResource x:Key="SplitButtonForegroundDisabled" ResourceKey="AccentButtonForegroundDisabled" />
+                                        <StaticResource x:Key="SplitButtonForegroundSecondary" ResourceKey="AccentButtonForeground" />
+                                        <StaticResource x:Key="SplitButtonForegroundSecondaryPressed" ResourceKey="AccentButtonForegroundPressed" />
+                                        <StaticResource x:Key="SplitButtonBorderBrush" ResourceKey="AccentButtonBorderBrush" />
+                                        <StaticResource x:Key="SplitButtonBorderBrushPointerOver" ResourceKey="AccentButtonBorderBrushPointerOver" />
+                                        <StaticResource x:Key="SplitButtonBorderBrushPressed" ResourceKey="AccentButtonBorderBrushPressed" />
+                                    </winui:SplitButton.Resources>
+                                </winui:SplitButton>
+                            </AppBarElementContainer>
 
-                            <winui:DropDownButton VerticalAlignment="Stretch" Click="AddToCollection_Click"
-                                                  Visibility="{x:Bind ViewModel.IsCollection, Converter={StaticResource NotBoolToVisibilityConverter}}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
+                            <AppBarButton Label="Add to Collection" Click="AddToCollection_Click"
+                                          Visibility="{x:Bind ViewModel.IsCollection, Converter={StaticResource NotBoolToVisibilityConverter}}">
+                                <AppBarButton.Icon>
                                     <FontIcon Glyph="&#xECCD;" />
-                                    <TextBlock Text="Add to Collection" />
-                                </StackPanel>
-                            </winui:DropDownButton>
+                                </AppBarButton.Icon>
+                            </AppBarButton>
 
-                            <Button VerticalAlignment="Stretch"
-                                    Visibility="{x:Bind ViewModel.IsCollection, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE70F;" />
-                                    <TextBlock Text="Edit details" />
-                                </StackPanel>
-                            </Button>
-                            
-                            <Button VerticalAlignment="Stretch"
-                                    Visibility="{x:Bind ViewModel.IsCollection, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <FontIcon Glyph="&#xE74D;" />
-                                    <TextBlock Text="Delete" />
-                                </StackPanel>
-                            </Button>
+                            <AppBarButton Label="Edit details" Icon="Edit"
+                                          Visibility="{x:Bind ViewModel.IsCollection, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
-                        </StackPanel>
+                            <AppBarButton Label="Delete" Icon="Delete"
+                                          Visibility="{x:Bind ViewModel.IsCollection, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                        </CommandBar>
+                        
                     </Grid>
                     <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
                                 Padding="20" Spacing="20">
@@ -167,10 +158,11 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="attributes:DisplayInfo">
-                                    <StackPanel>
+                                    <StackPanel HorizontalAlignment="Stretch">
                                         <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="{x:Bind Title}" />
                                         <ContentControl Content="{x:Bind Value}" x:Name="ContentPresenterWithSelector"
-                                                        ContentTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"/>
+                                                        ContentTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"
+                                                        HorizontalContentAlignment="Stretch"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>

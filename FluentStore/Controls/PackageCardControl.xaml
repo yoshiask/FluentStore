@@ -14,7 +14,7 @@
     <Grid MaxHeight="300" Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="150"/>
-            <RowDefinition Height="150"/>
+            <RowDefinition Height="100"/>
         </Grid.RowDefinitions>
         <Border Background="{x:Bind ViewModel.AppIcon.BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}"
                 VerticalAlignment="Stretch">
