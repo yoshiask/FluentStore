@@ -12,6 +12,7 @@
     <tkconverters:EmptyStringToObjectConverter x:Key="EmptyStringToVisibilityConverter" EmptyValue="Collapsed" NotEmptyValue="Visible"/>
 
     <converters:StreamToBitmapImageConverter x:Key="StreamToBitmapImageConverter"/>
+    <converters:NumberToStarGridLength x:Key="NumberToStarGridLength"/>
     <converters:CSSColorToBrushConverter x:Name="CSSColorToBrushConverter"/>
     <converters:PlatWindowsEnumToVisibility x:Key="PlatWindowsEnumToVisibility"/>
     <converters:PackageBaseEnumerableToViewModelEnumerable x:Key="PackageBaseEnumerableToViewModelEnumerable"/>

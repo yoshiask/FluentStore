@@ -129,6 +129,10 @@
       <DependentUpon>PackageCardGridView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\PackageDisplayTemplateSelector.cs" />
+    <Compile Include="Controls\RatingBarControl.xaml.cs">
+      <DependentUpon>RatingBarControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Converters\NumberToStarGridLength.cs" />
     <Compile Include="Converters\PackageBaseEnumerableToViewModelEnumerable.cs" />
     <Compile Include="Helpers\ContentPresenterEx.cs" />
     <Compile Include="Views\PackageView.xaml.cs">
@@ -209,6 +213,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\PackageCardGridView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\RatingBarControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

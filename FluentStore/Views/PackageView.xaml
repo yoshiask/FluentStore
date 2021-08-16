@@ -5,6 +5,7 @@
     xmlns:local="using:FluentStore.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:FluentStore.Controls"
     xmlns:attributes="using:FluentStore.SDK.Attributes"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     x:DefaultBindMode="OneWay"
@@ -147,6 +148,18 @@
                             <HyperlinkButton x:Name="MoreButton" HorizontalAlignment="Right"
                                              Click="MoreButton_Click" Content="More"
                                              Visibility="{Binding ElementName=DescriptionBlock, Path=IsTextTrimmed}" />
+                        </StackPanel>
+
+                        <!-- Reviews -->
+                        <StackPanel x:Name="ReviewsPanel" x:Load="{x:Bind ViewModel.Package.HasReviewSummary}">
+                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Reviews"/>
+                            <controls:RatingBarControl Visibility="{x:Bind ViewModel.Package.ReviewSummary.HasReviewCount, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                       Star1Count="{x:Bind ViewModel.Package.ReviewSummary.Star1Count}"
+                                                       Star2Count="{x:Bind ViewModel.Package.ReviewSummary.Star2Count}"
+                                                       Star3Count="{x:Bind ViewModel.Package.ReviewSummary.Star3Count}"
+                                                       Star4Count="{x:Bind ViewModel.Package.ReviewSummary.Star4Count}"
+                                                       Star5Count="{x:Bind ViewModel.Package.ReviewSummary.Star5Count}"
+                                                       HorizontalAlignment="Stretch"/>
                         </StackPanel>
 
                         <!-- Source-specific details -->
