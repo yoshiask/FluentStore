@@ -379,5 +379,14 @@ namespace FluentStore.Views
 
             flyout.ShowAt((FrameworkElement)sender);
         }
+
+        private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            string state = (Window.Current.Bounds.Width > (double)App.Current.Resources["CompactModeMinWidth"]) ? "DefaultLayout" : "CompactLayout";
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine("Change VSM state: " + state);
+#endif
+            VisualStateManager.GoToState(this, state, true);
+        }
     }
 }

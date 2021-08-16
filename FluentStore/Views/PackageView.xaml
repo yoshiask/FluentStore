@@ -9,20 +9,30 @@
     xmlns:attributes="using:FluentStore.SDK.Attributes"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     x:DefaultBindMode="OneWay"
+    SizeChanged="Page_SizeChanged"
     mc:Ignorable="d">
 
-    <Grid>
+    <Grid x:Name="RootGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
+
         <ParallaxView Source="{x:Bind ContentScroller}" VerticalShift="200" VerticalSourceOffsetKind="Absolute">
             <ContentControl Content="{x:Bind ViewModel.HeroImage}" VerticalAlignment="Top" HorizontalAlignment="Stretch"
                             ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"
-                            SizeChanged="HeroImage_SizeChanged"/>
+                            SizeChanged="HeroImage_SizeChanged">
+                <d:ContentControl.Content>
+                    <Border Background="{Binding BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}">
+                        <Image VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Stretch="Uniform">
+                            <Image.Source>
+                                <BitmapImage UriSource="https://uwpcommunity.com/assets/img/LaunchHero.jpg"/>
+                            </Image.Source>
+                        </Image>
+                    </Border>
+                </d:ContentControl.Content>
+            </ContentControl>
         </ParallaxView>
-        
 
         <Grid>
             <ScrollViewer x:Name="ContentScroller">
@@ -34,32 +44,46 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" MaxWidth="125" />
+                            <ColumnDefinition x:Name="IconCol" Width="*" MaxWidth="125" />
                             <ColumnDefinition Width="4*" />
                         </Grid.ColumnDefinitions>
 
-                        <Viewbox MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="125"
-                                 HorizontalAlignment="Stretch" VerticalAlignment="Top" Grid.RowSpan="3">
+                        <Viewbox x:Name="IconBox"
+                                 MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="125"
+                                 HorizontalAlignment="Stretch" VerticalAlignment="Top" Grid.RowSpan="4" Grid.Row="0">
                             <ContentControl Content="{x:Bind ViewModel.AppIcon, Mode=OneWay}"
-                                            ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
+                                            ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}">
+                                <d:ContentControl.Content>
+                                    <Image VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Stretch="Uniform">
+                                        <Image.Source>
+                                            <BitmapImage UriSource="/Assets/Square71x71Logo.png"/>
+                                        </Image.Source>
+                                    </Image>
+                                </d:ContentControl.Content>
+                            </ContentControl>
                         </Viewbox>
 
-                        <TextBlock Text="{x:Bind ViewModel.Package.Title}" ToolTipService.ToolTip="{x:Bind ViewModel.Package.Title}"
-                                   HorizontalAlignment="Left" FontSize="30" FontWeight="Bold"
+                        <TextBlock x:Name="TitleBlock"
+                                   Text="{x:Bind ViewModel.Package.Title}" ToolTipService.ToolTip="{x:Bind ViewModel.Package.Title}"
+                                   HorizontalAlignment="Left" FontSize="30" FontWeight="Bold" d:Text="Fluent Store"
                                    TextTrimming="CharacterEllipsis" TextWrapping="Wrap" MaxLines="2"
-                                   Grid.Column="1" VerticalAlignment="Bottom"/>
-                        <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal"
+                                   Grid.Row="1" Grid.Column="1" VerticalAlignment="Bottom"/>
+                        <StackPanel x:Name="SubheadBlock"
+                                    Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal"
                                     VerticalAlignment="Bottom" Spacing="8">
-                            <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.Package.DeveloperName}"/>
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.Package.DeveloperName}"
+                                       d:Text="Yoshi Askharoun"/>
                             <Ellipse Width="3" Height="3" VerticalAlignment="Center" Fill="{ThemeResource SystemBaseHighColor}" StrokeThickness="0"
                                      Visibility="{x:Bind ViewModel.Package.Version, Converter={StaticResource EmptyStringToVisibilityConverter}}"/>
-                            <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.Package.Version}"/>
+                            <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.Package.Version}"
+                                       d:Text="1.0.0.0"/>
                         </StackPanel>
 
-                        <CommandBar Grid.Column="1" Grid.Row="2" DefaultLabelPosition="Right"
+                        <CommandBar x:Name="ActionBar" Grid.Column="1" Grid.Row="3" DefaultLabelPosition="Right"
                                     HorizontalAlignment="Left" VerticalAlignment="Bottom">
 
                             <AppBarElementContainer>
@@ -114,7 +138,7 @@
                                           Visibility="{x:Bind ViewModel.IsCollection, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
                         </CommandBar>
-                        
+
                     </Grid>
                     <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
                                 Padding="20" Spacing="20">
@@ -187,6 +211,27 @@
                 </StackPanel>
             </ScrollViewer>
         </Grid>
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="Layouts">
+                <VisualState x:Name="DefaultLayout"/>
+                
+                <VisualState x:Name="CompactLayout">
+                    <VisualState.Setters>
+                        <Setter Target="InfoCard.HorizontalAlignment" Value="Stretch"/>
+                        <Setter Target="InfoCard.ColumnSpacing" Value="0"/>
+                        <Setter Target="IconCol.Width" Value="0*"/>
+                        <Setter Target="IconBox.(Grid.Column)" Value="1"/>
+                        <Setter Target="IconBox.(Grid.RowSpan)" Value="1"/>
+                        <Setter Target="IconBox.MaxWidth" Value="75"/>
+                        <Setter Target="TitleBlock.HorizontalAlignment" Value="Center"/>
+                        <Setter Target="SubheadBlock.HorizontalAlignment" Value="Center"/>
+                        <Setter Target="ActionBar.HorizontalAlignment" Value="Center"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
     </Grid>
 
 </Page>
