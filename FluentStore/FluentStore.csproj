@@ -159,9 +159,6 @@
     <Compile Include="Views\Auth\SignInView.xaml.cs">
       <DependentUpon>SignInView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\CollectionView.xaml.cs">
-      <DependentUpon>CollectionView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\EditCollectionDetailsDialog.xaml.cs">
       <DependentUpon>EditCollectionDetailsDialog.xaml</DependentUpon>
     </Compile>
@@ -236,10 +233,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Auth\SignInView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\CollectionView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
