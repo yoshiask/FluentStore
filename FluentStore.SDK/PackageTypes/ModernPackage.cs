@@ -19,6 +19,7 @@ using Windows.Management.Deployment;
 using Windows.Storage;
 using Windows.System;
 using Windows.System.Profile;
+using ImageType = FluentStore.SDK.Images.ImageType;
 
 namespace FluentStore.SDK.Packages
 {

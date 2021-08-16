@@ -27,10 +27,5 @@ namespace Microsoft.Marketplace.Storefront.Contracts.V2
                 catch { return null; }
             }
         }
-
-        public Uri GetSource()
-        {
-            return string.IsNullOrWhiteSpace(Url) ? new Uri("https://cdn.wallpaperhub.app/cloudcache/b/f/7/d/d/b/bf7ddbfb925701167ce8060cac808f88c641a16a.jpg") : new Uri(Url);
-        }
     }
 }

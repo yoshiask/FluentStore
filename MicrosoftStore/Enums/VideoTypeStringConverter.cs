@@ -3,12 +3,12 @@ using System;
 
 namespace Microsoft.Marketplace.Storefront.Contracts.Enums
 {
-    public class ImageTypeStringConverter : JsonConverter
+    public class VideoTypeStringConverter : JsonConverter
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ImageTypeStringConverter"/> class.
+        /// Initializes a new instance of the <see cref="VideoTypeStringConverter"/> class.
         /// </summary>
-        public ImageTypeStringConverter()
+        public VideoTypeStringConverter()
         {
         }
 
@@ -58,16 +58,16 @@ namespace Microsoft.Marketplace.Storefront.Contracts.Enums
                         return Parse(reader.Value?.ToString());
 
                     case JsonToken.Integer:
-                        return (ImageType)reader.Value;
+                        return (VideoType)reader.Value;
 
                     case JsonToken.Null:
                     default:
-                        return ImageType.Unspecified;
+                        return VideoType.Unspecified;
                 }
             }
             catch (Exception ex)
             {
-                throw new JsonSerializationException($"Error converting value {reader.Value} to type '{nameof(ImageType)}'.", ex);
+                throw new JsonSerializationException($"Error converting value {reader.Value} to type '{nameof(VideoType)}'.", ex);
             }
         }
 
@@ -80,15 +80,15 @@ namespace Microsoft.Marketplace.Storefront.Contracts.Enums
         /// </returns>
         public override bool CanConvert(Type objectType)
         {
-            return objectType == typeof(ImageType);
+            return objectType == typeof(VideoType);
         }
 
-        public static ImageType Parse(string enumText)
+        public static VideoType Parse(string enumText)
         {
-            if (Enum.TryParse<ImageType>(enumText, true, out var imageType))
-                return imageType;
+            if (Enum.TryParse<VideoType>(enumText, true, out var VideoType))
+                return VideoType;
             else
-                return ImageType.Unspecified;
+                return VideoType.Unspecified;
         }
     }
 }

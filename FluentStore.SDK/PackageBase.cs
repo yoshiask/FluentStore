@@ -1,4 +1,6 @@
-﻿using Garfoot.Utilities.FluentUrn;
+﻿using FluentStore.SDK.Images;
+using FluentStore.SDK.Models;
+using Garfoot.Utilities.FluentUrn;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
@@ -123,21 +125,13 @@ namespace FluentStore.SDK
             set => SetProperty(ref _Version, value);
         }
 
-        private double _AverageRating = -1;
-        public double AverageRating
+        private ReviewSummary _ReviewSummary = default(ReviewSummary);
+        public ReviewSummary ReviewSummary
         {
-            get => _AverageRating;
-            set => SetProperty(ref _AverageRating, value);
+            get => _ReviewSummary;
+            set => SetProperty(ref _ReviewSummary, value);
         }
-        public bool HasAverageRating => AverageRating >= 0;
-
-        private int _RatingCount = -1;
-        public int RatingCount
-        {
-            get => _RatingCount;
-            set => SetProperty(ref _RatingCount, value);
-        }
-        public bool HasRatingCount => RatingCount >= 0;
+        public bool HasReviewSummary => ReviewSummary != default(ReviewSummary);
 
         private double _Price = -1;
         public double Price

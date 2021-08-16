@@ -1,6 +1,6 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 
-namespace FluentStore.SDK
+namespace FluentStore.SDK.Images
 {
     public class ImageBase : ObservableObject
     {

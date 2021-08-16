@@ -27,12 +27,21 @@ namespace FluentStore.SDK.Handlers
             foreach (var product in firstPage.Payload.SearchResults)
             {
                 // Get the full product details
-                var item = await StorefrontApi.GetProduct(product.ProductId);
-                var candidate = item.Payload;
-                if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
+                var page = await StorefrontApi.GetPage(product.ProductId);
+                if (!page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ProductDetails>(out var details))
+                    continue;
+
+                var package = new MicrosoftStorePackage(details);
+                if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.RatingSummary>(out var ratingSummary))
                 {
-                    packages.Add(new MicrosoftStorePackage(candidate));
+                    package.Update(ratingSummary);
+                    if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ReviewList>(out var reviewList))
+                    {
+                        package.Update(reviewList);
+                    }
                 }
+
+                packages.Add(package);
             }
 
             return packages;
@@ -46,12 +55,21 @@ namespace FluentStore.SDK.Handlers
             foreach (var product in suggs.Payload.AssetSuggestions)
             {
                 // Get the full product details
-                var item = await StorefrontApi.GetProduct(product.ProductId);
-                var candidate = item.Payload;
-                if (candidate?.PackageFamilyNames != null && candidate?.ProductId != null)
+                var page = await StorefrontApi.GetPage(product.ProductId);
+                if (!page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ProductDetails>(out var details))
+                    continue;
+
+                var package = new MicrosoftStorePackage(details);
+                if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.RatingSummary>(out var ratingSummary))
                 {
-                    packages.Add(new MicrosoftStorePackage(candidate));
+                    package.Update(ratingSummary);
+                    if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ReviewList>(out var reviewList))
+                    {
+                        package.Update(reviewList);
+                    }
                 }
+
+                packages.Add(package);
             }
 
             return packages;
@@ -62,8 +80,21 @@ namespace FluentStore.SDK.Handlers
             Guard.IsEqualTo(packageUrn.NamespaceIdentifier, NAMESPACE_MSSTORE, nameof(packageUrn));
 
             string productId = packageUrn.GetContent<NamespaceSpecificString>().UnEscapedValue;
-            var product = (await StorefrontApi.GetProduct(productId)).Payload;
-            return new MicrosoftStorePackage(product);
+            var page = await StorefrontApi.GetPage(productId);
+            if (!page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ProductDetails>(out var details))
+                return null;
+
+            var package = new MicrosoftStorePackage(details);
+            if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.RatingSummary>(out var ratingSummary))
+            {
+                package.Update(ratingSummary);
+                if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ReviewList>(out var reviewList))
+                {
+                    package.Update(reviewList);
+                }
+            }
+
+            return package;
         }
     }
 }

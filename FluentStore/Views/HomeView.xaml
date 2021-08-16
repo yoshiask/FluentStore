@@ -61,17 +61,24 @@
                             <TextBlock Text="{x:Bind Package.ShortTitle}" Grid.Column="1" FontSize="20"
                                        FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
                             <TextBlock Text="{x:Bind Package.DeveloperName}" Grid.Column="1" Grid.Row="1"/>
-                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="10">
-                                <TextBlock Text="{x:Bind Package.RatingCount}" FontSize="14" VerticalAlignment="Center"/>
-                                <winui:RatingControl Value="{Binding Package.AverageRating}" IsReadOnly="True">
-                                    <winui:RatingControl.Resources>
-                                        <SolidColorBrush x:Key="RatingControlSelectedForeground" Color="{ThemeResource SystemColorHighlightTextColor}"/>
-                                    </winui:RatingControl.Resources>
-                                </winui:RatingControl>
+                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                                        x:Name="ReviewPanel"
+                                        x:Load="{x:Bind Package.HasReviewSummary}">
+                                <TextBlock Text="{x:Bind Package.ReviewSummary.ReviewCount}" FontSize="14" VerticalAlignment="Center"
+                                           x:Name="RatingCountBlock"
+                                           x:Load="{x:Bind Package.ReviewSummary.HasReviewCount}"/>
+                                <Viewbox x:Name="RatingBox" Width="90" Margin="0,0,0,-4"
+                                         x:Load="{x:Bind Package.ReviewSummary.HasAverageRating}">
+                                    <winui:RatingControl Value="{x:Bind Package.ReviewSummary.AverageRating}" IsReadOnly="True">
+                                        <winui:RatingControl.Resources>
+                                            <SolidColorBrush x:Key="RatingControlSelectedForeground" Color="{ThemeResource SystemColorHighlightTextColor}"/>
+                                        </winui:RatingControl.Resources>
+                                    </winui:RatingControl>
+                                </Viewbox>
                             </StackPanel>
                             <Button Grid.Column="1" Grid.RowSpan="3" HorizontalAlignment="Right"
-                                    Margin="0,0,10,0" Style="{ThemeResource AccentButtonStyle}"
-                                    FontWeight="SemiBold" Padding="10" Content="{x:Bind Package.DisplayPrice}"
+                                    Margin="0,0,8,0" Style="{ThemeResource AccentButtonStyle}"
+                                    FontWeight="SemiBold" Padding="8" Content="{x:Bind Package.DisplayPrice}"
                                     Command="{x:Bind ViewProductCommand}" CommandParameter="{x:Bind Package}"/>
                         </Grid>
                     </Grid>

@@ -1,5 +1,4 @@
-﻿using FluentStore.SDK;
-using FluentStore.SDK.Images;
+﻿using FluentStore.SDK.Images;
 using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;

@@ -1,4 +1,6 @@
-﻿namespace FluentStore.SDK.Images
+﻿using FluentStore.SDK.Models;
+
+namespace FluentStore.SDK.Images
 {
     public class TextImage : ImageBase
     {

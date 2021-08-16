@@ -29,7 +29,7 @@ namespace Microsoft.Marketplace.Storefront.Contracts.V3
         public string NavItemId { get; set; }
         public string DeviceFamilyDisallowedReason { get; set; }
         public string BuiltFor { get; set; }
-        public List<V2.VideoItem> Trailers { get; set; }
+        public List<VideoItem> Trailers { get; set; }
         public string RevisionId { get; set; }
         public string PdpBackgroundColor { get; set; }
         public bool ContainsDownloadPackage { get; set; }

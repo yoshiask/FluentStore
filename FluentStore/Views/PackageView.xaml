@@ -57,7 +57,8 @@
                             <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.Package.Version}"/>
                         </StackPanel>
 
-                        <CommandBar Grid.Column="1" Grid.Row="2" DefaultLabelPosition="Right" VerticalAlignment="Bottom">
+                        <CommandBar Grid.Column="1" Grid.Row="2" DefaultLabelPosition="Right"
+                                    HorizontalAlignment="Left" VerticalAlignment="Bottom">
 
                             <AppBarElementContainer>
                                 <winui:SplitButton x:Name="InstallButton" Padding="8" Click="InstallSplitButton_Click"

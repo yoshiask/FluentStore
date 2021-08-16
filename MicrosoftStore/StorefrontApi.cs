@@ -13,11 +13,11 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         /// <summary>
         /// Get all the page details for the given product.
         /// </summary>
-        public async Task<List<ResponseItem>> GetPage(string productId, CultureInfo culture = null)
+        public async Task<ResponseItemList> GetPage(string productId, CultureInfo culture = null)
         {
             string json = await GetStorefrontBase(culture).AppendPathSegments("pages", "pdp")
-                    .SetQueryParam("productId", productId).GetStringAsync();
-            return JsonConvert.DeserializeObject<List<ResponseItem>>(json, Constants.DefaultJsonSettings);
+                .SetQueryParam("productId", productId).GetStringAsync();
+            return JsonConvert.DeserializeObject<ResponseItemList>(json, Constants.DefaultJsonSettings);
         }
 
         /// <summary>

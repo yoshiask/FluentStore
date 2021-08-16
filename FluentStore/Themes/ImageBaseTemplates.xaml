@@ -3,15 +3,13 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:FluentStore.Controls"
-    xmlns:converters="using:FluentStore.Converters"
-    xmlns:sdk="using:FluentStore.SDK"
     xmlns:images="using:FluentStore.SDK.Images">
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/Themes/CommonConverters.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
-    <DataTemplate x:Key="DefaultImageBaseTemplate" x:DataType="sdk:ImageBase">
+    <DataTemplate x:Key="DefaultImageBaseTemplate" x:DataType="images:ImageBase">
         <Border VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                 Background="{Binding BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}"/>
     </DataTemplate>

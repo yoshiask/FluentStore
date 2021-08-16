@@ -2,6 +2,7 @@
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
 using FluentStore.SDK.Messages;
+using FluentStore.SDK.Models;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Marketplace.Storefront.Contracts.Enums;
 using Microsoft.Marketplace.Storefront.Contracts.V2;
@@ -11,7 +12,6 @@ using Microsoft.Toolkit.Mvvm.Messaging;
 using StoreLib.Models;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Networking.BackgroundTransfer;
@@ -36,8 +36,11 @@ namespace FluentStore.SDK.Packages
             ReleaseDate = product.LastUpdateDateUtc;
             Description = product.Description;
             Version = product.Version;
-            AverageRating = product.AverageRating;
-            RatingCount = product.RatingCount;
+            ReviewSummary = new ReviewSummary
+            {
+                AverageRating = product.AverageRating,
+                ReviewCount = product.RatingCount
+            };
             Price = product.Price;
             DisplayPrice = product.DisplayPrice;
             ShortTitle = product.ShortTitle;
@@ -66,6 +69,54 @@ namespace FluentStore.SDK.Packages
             if (product.Images != null)
                 foreach (ImageItem img in product.Images)
                     Images.Add(new MicrosoftStoreImage(img));
+        }
+        
+        public void Update(RatingSummary ratingSummary)
+        {
+            Guard.IsNotNull(ratingSummary, nameof(ratingSummary));
+
+            ReviewSummary = new ReviewSummary
+            {
+                AverageRating = ratingSummary.AverageRating,
+                ReviewCount = ratingSummary.ReviewCount,
+                Star1Count = ratingSummary.Star1Count,
+                Star2Count = ratingSummary.Star2Count,
+                Star3Count = ratingSummary.Star3Count,
+                Star4Count = ratingSummary.Star4Count,
+                Star5Count = ratingSummary.Star5Count,
+                Star1ReviewCount = ratingSummary.Star1ReviewCount,
+                Star2ReviewCount = ratingSummary.Star2ReviewCount,
+                Star3ReviewCount = ratingSummary.Star3ReviewCount,
+                Star4ReviewCount = ratingSummary.Star4ReviewCount,
+                Star5ReviewCount = ratingSummary.Star5ReviewCount
+            };
+        }
+
+        public void Update(ReviewList reviewList)
+        {
+            Guard.IsNotNull(reviewList, nameof(reviewList));
+            Guard.IsNotNull(ReviewSummary, nameof(ReviewSummary));
+
+            ReviewSummary.Reviews = new List<Models.Review>();
+            foreach (Microsoft.Marketplace.Storefront.Contracts.V3.Review msReview in reviewList.Reviews)
+            {
+                Models.Review review = new Models.Review
+                {
+                    Title = msReview.Title,
+                    ReviewId = msReview.ReviewId.ToString(),
+                    IsRevised = msReview.IsRevised,
+                    Rating = (int)msReview.Rating,
+                    ReviewerName = msReview.ReviewerName,
+                    ReviewText = msReview.ReviewText,
+                    Locale = msReview.Locale,
+                    Market = msReview.Market,
+                    HelpfulNegative = msReview.HelpfulNegative,
+                    HelpfulPositive = msReview.HelpfulPositive,
+                    SubmittedDateTimeUtc = msReview.SubmittedDateTimeUtc,
+                    UpdatedSinceResponse = msReview.UpdatedSinceResponse,
+                };
+                ReviewSummary.Reviews.Add(review);
+            }
         }
 
         public void Update(PackageInstance packageInstance)
@@ -179,15 +230,15 @@ namespace FluentStore.SDK.Packages
         public override async Task<ImageBase> GetAppIcon()
         {
             // Prefer tiles, then logos, then posters.
-            var icons = Images.FindAll(i => i.ImageType == ImageType.Tile);
+            var icons = Images.FindAll(i => i.ImageType == SDK.Images.ImageType.Tile);
             if (icons.Count > 0)
                 goto done;
 
-            icons = Images.FindAll(i => i.ImageType == ImageType.Logo);
+            icons = Images.FindAll(i => i.ImageType == SDK.Images.ImageType.Logo);
             if (icons.Count > 0)
                 goto done;
 
-            icons = Images.FindAll(i => i.ImageType == ImageType.Poster);
+            icons = Images.FindAll(i => i.ImageType == SDK.Images.ImageType.Poster);
             if (icons.Count > 0)
                 goto done;
 
@@ -201,7 +252,7 @@ namespace FluentStore.SDK.Packages
         {
             ImageBase img = null;
             int width = 0;
-            foreach (ImageBase image in Images.FindAll(i => i.ImageType == ImageType.Hero))
+            foreach (ImageBase image in Images.FindAll(i => i.ImageType == SDK.Images.ImageType.Hero))
             {
                 if (image.Width > width)
                     img = image;
@@ -213,7 +264,7 @@ namespace FluentStore.SDK.Packages
         public override async Task<List<ImageBase>> GetScreenshots()
         {
             string deviceFam = AnalyticsInfo.VersionInfo.DeviceFamily.Substring("Windows.".Length);
-            var screenshots = Images.Cast<MicrosoftStoreImage>().Where(i => i.ImageType == ImageType.Screenshot
+            var screenshots = Images.Cast<MicrosoftStoreImage>().Where(i => i.ImageType == SDK.Images.ImageType.Screenshot
                 && !string.IsNullOrEmpty(i.ImagePositionInfo) && i.ImagePositionInfo.StartsWith(deviceFam));
 
             var sorted = new List<ImageBase>(screenshots.Count());
@@ -297,7 +348,6 @@ namespace FluentStore.SDK.Packages
         }
 
         private List<ProductRating> _Ratings = new List<ProductRating>();
-        [Display(Rank = 1)]
         public List<ProductRating> Ratings
         {
             get => _Ratings;

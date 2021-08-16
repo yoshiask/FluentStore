@@ -1,10 +1,10 @@
 ﻿using FluentStore.SDK;
 using FluentStore.SDK.Attributes;
+using FluentStore.SDK.Images;
 using FluentStore.Services;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
-using OwlCore.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -127,8 +127,8 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _Screenshots, value);
         }
 
-        public string AverageRatingString => Package.HasAverageRating
-            ? Package.AverageRating.ToString("F1")
+        public string AverageRatingString => Package.HasReviewSummary && Package.ReviewSummary.HasAverageRating
+            ? Package.ReviewSummary.AverageRating.ToString("F1")
             : string.Empty;
 
         public void ViewPackage(object obj)

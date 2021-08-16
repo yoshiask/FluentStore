@@ -151,10 +151,15 @@
                                     <StackPanel Spacing="5" Grid.Row="0">
                                         <TextBlock Text="{x:Bind Package.Title}" FontWeight="SemiBold"
                                                    TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxLines="2"/>
-                                        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="10">
-                                            <TextBlock Text="{x:Bind Package.RatingCount, Mode=OneWay}" FontSize="14" VerticalAlignment="Center"/>
-                                            <Viewbox Width="90" Margin="0,0,0,-5">
-                                                <winui:RatingControl Value="{Binding Product.AverageRating, Mode=OneWay}" IsReadOnly="True">
+                                        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                                                    x:Name="ReviewPanel"
+                                                    x:Load="{x:Bind Package.HasReviewSummary}">
+                                            <TextBlock Text="{x:Bind Package.ReviewSummary.ReviewCount}" FontSize="14" VerticalAlignment="Center"
+                                                       x:Name="RatingCountBlock"
+                                                       x:Load="{x:Bind Package.ReviewSummary.HasReviewCount}"/>
+                                            <Viewbox x:Name="RatingBox" Width="90" Margin="0,0,0,-4"
+                                                     x:Load="{x:Bind Package.ReviewSummary.HasAverageRating}">
+                                                <winui:RatingControl Value="{x:Bind Package.ReviewSummary.AverageRating}" IsReadOnly="True">
                                                     <winui:RatingControl.Resources>
                                                         <SolidColorBrush x:Key="RatingControlSelectedForeground" Color="{ThemeResource SystemColorHighlightTextColor}"/>
                                                     </winui:RatingControl.Resources>

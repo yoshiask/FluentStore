@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using FluentStore.SDK.Models;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Images
