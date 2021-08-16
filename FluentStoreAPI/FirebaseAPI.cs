@@ -34,6 +34,13 @@ namespace FluentStoreAPI
             return respose.ResponseMessage.IsSuccessStatusCode;
         }
 
+        private async Task<bool> DeleteUserDocument(string userId, string bucket, string documentId)
+        {
+            var respose = await GetFirestoreBase().AppendPathSegments("users", userId, bucket, documentId)
+                .WithOAuthBearerToken(Token).DeleteAsync();
+            return respose.ResponseMessage.IsSuccessStatusCode;
+        }
+
         private async Task<List<Document>> GetUserBucket(string userId, string bucket)
         {
             var respose = await GetFirestoreBase().AppendPathSegments("users", userId, bucket)

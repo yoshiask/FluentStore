@@ -47,6 +47,18 @@ namespace FluentStore.Services
             Navigate(type, parameter);
         }
 
+        public void NavigateBack()
+        {
+            if (CurrentFrame.CanGoBack)
+                CurrentFrame.GoBack();
+        }
+
+        public void NavigateForward()
+        {
+            if (CurrentFrame.CanGoForward)
+                CurrentFrame.GoForward();
+        }
+
 
         public void AppNavigate(Type page)
         {
@@ -79,6 +91,18 @@ namespace FluentStore.Services
             Type type = Type.GetType("FluentStore.Views." + vmName);
             Guard.IsNotNull(type, nameof(type));
             AppNavigate(type, parameter);
+        }
+
+        public void AppNavigateBack()
+        {
+            if (AppFrame.CanGoBack)
+                AppFrame.GoBack();
+        }
+
+        public void AppNavigateForward()
+        {
+            if (AppFrame.CanGoForward)
+                AppFrame.GoForward();
         }
 
 

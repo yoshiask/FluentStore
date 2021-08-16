@@ -47,5 +47,10 @@ namespace FluentStoreAPI
             return await UpdateUserDocument(userId, "collections",
                 collection.Id.ToString(), Models.Firebase.Document.Untransform(collection));
         }
+
+        public async Task<bool> DeleteCollectionAsync(string userId, string collectionId)
+        {
+            return await DeleteUserDocument(userId, "collections", collectionId);
+        }
     }
 }

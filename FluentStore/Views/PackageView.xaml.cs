@@ -4,7 +4,6 @@ using FluentStore.SDK.Messages;
 using FluentStore.Services;
 using FluentStore.ViewModels;
 using FluentStore.ViewModels.Messages;
-using FluentStore.Views;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
@@ -28,7 +27,9 @@ namespace FluentStore.Views
             ViewModel = new PackageViewModel();
         }
 
-        private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
+        FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
+        UserService UserService = Ioc.Default.GetRequiredService<UserService>();
+        INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
 
         public PackageViewModel ViewModel
         {
@@ -96,10 +97,8 @@ namespace FluentStore.Views
 
         private async void AddToCollection_Click(object sender, RoutedEventArgs e)
         {
-            var FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
-            var userService = Ioc.Default.GetRequiredService<UserService>();
             FlyoutBase flyout;
-            if (!userService.IsLoggedIn)
+            if (!UserService.IsLoggedIn)
             {
                 flyout = new Flyout
                 {
@@ -115,7 +114,7 @@ namespace FluentStore.Views
             {
                 try
                 {
-                    string userId = userService.CurrentFirebaseUser.LocalID;
+                    string userId = UserService.CurrentFirebaseUser.LocalID;
                     flyout = new MenuFlyout
                     {
                         Placement = FlyoutPlacementMode.BottomEdgeAlignedLeft
@@ -160,11 +159,6 @@ namespace FluentStore.Views
             }
 
             flyout.ShowAt((Button)sender);
-        }
-
-        private async void InstallButton_Click(object sender, RoutedEventArgs e)
-        {
-            await HandleInstall(false);
         }
 
         private async void InstallSplitButton_Click(SplitButton sender, SplitButtonClickEventArgs e)
@@ -318,6 +312,72 @@ namespace FluentStore.Views
             progressDialog.Hide();
             InstallButton.IsEnabled = true;
             WeakReferenceMessenger.Default.UnregisterAll(this);
+        }
+
+        private async void EditCollection_Click(object sender, RoutedEventArgs e)
+        {
+            FluentStoreAPI.Models.Collection collection = ((SDK.PackageTypes.CollectionPackage)ViewModel.Package).Model;
+            var editDialog = new EditCollectionDetailsDialog(collection);
+
+            if (await editDialog.ShowAsync() == ContentDialogResult.Primary)
+            {
+                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+                // User wants to save
+                await FSApi.UpdateCollectionAsync(UserService.CurrentFirebaseUser.LocalID, editDialog.Collection);
+                await ViewModel.Refresh();
+                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+            }
+        }
+
+        private void DeleteCollection_Click(object sender, RoutedEventArgs e)
+        {
+            FlyoutBase flyout;
+            if (!UserService.IsLoggedIn)
+            {
+                flyout = new Flyout
+                {
+                    Content = new TextBlock
+                    {
+                        Text = "Please create an account or\r\nlog in to access this feature.",
+                        TextWrapping = TextWrapping.Wrap
+                    },
+                    Placement = FlyoutPlacementMode.Bottom
+                };
+            }
+            else
+            {
+                var button = new Button
+                {
+                    Content = "Yes, delete forever",
+                };
+                flyout = new Flyout
+                {
+                    Content = new StackPanel
+                    {
+                        Spacing = 8,
+                        Children =
+                        {
+                            new TextBlock
+                            {
+                                Text = $"You are about to delete \"{ViewModel.Package.Title}\".\r\nDo you want to continue?",
+                                TextWrapping = TextWrapping.Wrap
+                            },
+                            button
+                        }
+                    },
+                    Placement = FlyoutPlacementMode.Bottom
+                };
+                button.Click += async (object sender, RoutedEventArgs e) =>
+                {
+                    string userId = UserService.CurrentFirebaseUser.LocalID;
+                    // 0, urn; 1, namespace; 2, userId; 3, collectionId
+                    string collectionId = ViewModel.Package.Urn.ToString().Split(':')[3];
+                    if (await FSApi.DeleteCollectionAsync(userId, collectionId))
+                        NavigationService.NavigateBack();
+                };
+            }
+
+            flyout.ShowAt((FrameworkElement)sender);
         }
     }
 }

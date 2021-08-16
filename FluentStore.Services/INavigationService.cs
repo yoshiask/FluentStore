@@ -15,6 +15,10 @@ namespace FluentStore.Services
 
         void Navigate(object parameter);
 
+        void NavigateBack();
+
+        void NavigateForward();
+
         void AppNavigate(Type page);
 
         void AppNavigate(Type page, object parameter);
@@ -24,6 +28,10 @@ namespace FluentStore.Services
         void AppNavigate(string page, object parameter);
 
         void AppNavigate(object parameter);
+
+        void AppNavigateBack();
+
+        void AppNavigateForward();
 
         Task<bool> OpenInBrowser(string url);
 

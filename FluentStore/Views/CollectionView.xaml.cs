@@ -237,8 +237,10 @@ namespace FluentStore.Views
             var editDialog = new EditCollectionDetailsDialog(ViewModel.Collection);
             if (await editDialog.ShowAsync() == ContentDialogResult.Primary)
             {
+                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
                 // User wants to save
                 await ViewModel.UpdateCollectionAsync(editDialog.Collection);
+                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
             }
         }
     }

@@ -2,12 +2,15 @@
 using FluentStore.SDK.Attributes;
 using FluentStore.SDK.Images;
 using FluentStore.Services;
+using FluentStore.ViewModels.Messages;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
+using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace FluentStore.ViewModels
 {
@@ -16,6 +19,7 @@ namespace FluentStore.ViewModels
         public PackageViewModel()
         {
             ViewProductCommand = new RelayCommand<object>(ViewPackage);
+            RefreshCommand = new AsyncRelayCommand(Refresh);
         }
         public PackageViewModel(PackageBase package) : this()
         {
@@ -23,6 +27,7 @@ namespace FluentStore.ViewModels
         }
 
         private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
+        private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
         private PackageBase _Package;
         public PackageBase Package
@@ -70,6 +75,13 @@ namespace FluentStore.ViewModels
         {
             get => _SaveToCollectionCommand;
             set => SetProperty(ref _SaveToCollectionCommand, value);
+        }
+
+        private IAsyncRelayCommand _RefreshCommand;
+        public IAsyncRelayCommand RefreshCommand
+        {
+            get => _RefreshCommand;
+            set => SetProperty(ref _RefreshCommand, value);
         }
 
         private bool _IsCollection;
@@ -146,6 +158,13 @@ namespace FluentStore.ViewModels
                     throw new ArgumentException($"'{nameof(obj)}' is an invalid type: {obj.GetType().Name}");
             }
             NavigationService.Navigate(pvm);
+        }
+
+        public async Task Refresh()
+        {
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+            Package = await PackageService.GetPackage(Package.Urn);
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
 
         private List<DisplayInfo> _DisplayProperties;
