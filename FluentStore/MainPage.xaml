@@ -15,7 +15,7 @@
                           Grid.Row="1">
 
         <winui:NavigationView.PaneHeader>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <StackPanel x:Name="HeaderBranding" Orientation="Horizontal" HorizontalAlignment="Left">
                 <Viewbox>
                     <Image Source="/Assets/Square71x71Logo.png"/>
                 </Viewbox>
@@ -107,6 +107,7 @@
                     <VisualState.Setters>
                         <Setter Target="MainNav.PaneDisplayMode" Value="Top"/>
                         <Setter Target="MainNav.IsTitleBarAutoPaddingEnabled" Value="True"/>
+                        <Setter Target="HeaderBranding.HorizontalAlignment" Value="Center"/>
                         <Setter Target="TitlebarRow.Height" Value="0"/>
                         <Setter Target="SignInButton.CornerRadius" Value="4"/>
                         <Setter Target="UserButton.CornerRadius" Value="4"/>
