@@ -72,7 +72,7 @@ namespace FluentStore.SDK.Packages
                 return new FileImage
                 {
                     Url = Model.IconUrl,
-                    ImageType = ImageType.Logo
+                    ImageType = SDK.Images.ImageType.Logo
                 };
             }
             else

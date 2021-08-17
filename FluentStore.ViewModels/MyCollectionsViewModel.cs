@@ -1,5 +1,5 @@
 ﻿using FluentStore.SDK;
-using FluentStore.SDK.PackageTypes;
+using FluentStore.SDK.Packages;
 using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
 using FluentStoreAPI.Models;
@@ -65,9 +65,6 @@ namespace FluentStore.ViewModels
 
         public async Task UpdateCollectionAsync(Collection newCollection)
         {
-            // Make sure collection has a unique ID
-            if (newCollection.Id == Guid.Empty)
-                newCollection.Id = Guid.NewGuid();
             await FSApi.UpdateCollectionAsync(UserService.CurrentFirebaseUser.LocalID, newCollection);
             await LoadCollectionsAsync();
         }
@@ -83,7 +80,7 @@ namespace FluentStore.ViewModels
 
                 // Get the author's display name
                 var authorProfile = await FSApi.GetUserProfileAsync(collection.AuthorId);
-                package.DeveloperName = authorProfile.DisplayName;
+                package.Update(authorProfile);
 
                 // Load items
                 foreach (string urn in collection.Items)
