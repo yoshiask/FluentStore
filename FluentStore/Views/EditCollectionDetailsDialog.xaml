@@ -17,19 +17,22 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition MinHeight="100"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBox x:Name="NameBox" PlaceholderText="Name" Header="Name"
                  ToolTipService.ToolTip="The name of the collection." Grid.Row="0"/>
+        <TextBox x:Name="ImageUrlBox" PlaceholderText="Image link" Header="Icon"
+                 ToolTipService.ToolTip="A link to an image to be used as an icon." Grid.Row="1"/>
         <TextBox x:Name="TileGlyphBox" PlaceholderText="Short indicator" Header="Short indicator"
-                 ToolTipService.ToolTip="Text to be shown on the collection's tile." Grid.Row="1"/>
+                 ToolTipService.ToolTip="Text to be shown on the collection's tile if no image is provided." Grid.Row="2"/>
         <TextBox x:Name="DescriptionBox" PlaceholderText="Description" Header="Description"
-                 AcceptsReturn="True" TextWrapping="Wrap" Grid.Row="2"
+                 AcceptsReturn="True" TextWrapping="Wrap" Grid.Row="3"
                  ToolTipService.ToolTip="A description of the collection."/>
         <ToggleSwitch x:Name="IsPublicSwitch" OnContent="Public" OffContent="Private"
-                      ToolTipService.ToolTip="Determines if this collection is visible to others." Grid.Row="3"/>
+                      ToolTipService.ToolTip="Determines if this collection is visible to others." Grid.Row="4"/>
     </Grid>
     
 </ContentDialog>

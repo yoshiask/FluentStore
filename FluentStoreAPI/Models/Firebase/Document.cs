@@ -47,25 +47,30 @@ namespace FluentStoreAPI.Models.Firebase
                 fieldType = fieldType.Split(new[] { '.' }).Last();
             }
 
+            JToken fieldToken = field[fieldType];
             switch (fieldType.Replace("Value", ""))
             {
                 case "boolean":
-                    fieldValue = field["booleanValue"].ToObject<bool>();
+                    fieldValue = fieldToken.ToObject<bool>();
                     break;
                 case "string":
-                    fieldValue = field["stringValue"].ToObject<string>();
+                    fieldValue = fieldToken.ToObject<string>();
                     break;
                 case "number":
-                    fieldValue = field["numberValue"].ToObject<double>();
+                    fieldValue = fieldToken.ToObject<double>();
                     break;
                 case "map":
-                    fieldValue = field["mapValue"]["fields"];
+                    fieldValue = fieldToken["fields"];
                     break;
                 case "array":
-                    fieldValue = field["arrayValue"]["values"].Select(item => TransformField(item)).ToList();
+                    var jarray = fieldToken["values"];
+                    if (jarray != null && jarray.HasValues)
+                        fieldValue = jarray.Select(item => TransformField(item)).ToList();
+                    else
+                        fieldValue = null;
                     break;
                 case "timestamp":
-                    fieldValue = field["timestampValue"].ToObject<DateTimeOffset>();
+                    fieldValue = fieldToken.ToObject<DateTimeOffset>();
                     break;
                 case "null":
                     fieldValue = null;

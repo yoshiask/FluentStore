@@ -1,6 +1,7 @@
 ﻿using FluentStoreAPI.Models;
 using Flurl;
 using Flurl.Http;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -44,6 +45,13 @@ namespace FluentStoreAPI
 
         public async Task<bool> UpdateCollectionAsync(string userId, Collection collection)
         {
+            // Make sure collection has a unique ID
+            if (collection.Id == Guid.Empty)
+                collection.Id = Guid.NewGuid();
+
+            // Set author to current user
+            collection.AuthorId = userId;
+
             return await UpdateUserDocument(userId, "collections",
                 collection.Id.ToString(), Models.Firebase.Document.Untransform(collection));
         }

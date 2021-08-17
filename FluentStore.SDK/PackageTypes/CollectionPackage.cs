@@ -28,7 +28,6 @@ namespace FluentStore.SDK.Packages
 
             // Set base properties
             Title = collection.Name;
-            TileGlyph = collection.TileGlyph;
             PublisherId = collection.AuthorId;
             //ReleaseDate = collection.LastUpdateDateUtc;
             Description = collection.Description;
@@ -78,22 +77,32 @@ namespace FluentStore.SDK.Packages
 
         public override async Task<ImageBase> GetAppIcon()
         {
-            if (string.IsNullOrEmpty(ImageUrl))
+            ImageBase image;
+            if (string.IsNullOrEmpty(Model.ImageUrl))
             {
-                return new TextImage
+                if (!string.IsNullOrEmpty(Model.TileGlyph))
                 {
-                    Text = TileGlyph,
-                    ImageType = ImageType.Tile,
-                };
+                    image = new TextImage
+                    {
+                        Text = Model.TileGlyph,
+                        ImageType = ImageType.Tile,
+                    };
+                }
+                else
+                {
+                    image = TextImage.CreateFromName(Title, ImageType.Tile);
+                }
             }
             else
             {
-                return new FileImage
+                image = new FileImage
                 {
-                    Url = ImageUrl,
+                    Url = Model.ImageUrl,
                     ImageType = ImageType.Logo,
                 };
             }
+
+            return image;
         }
 
         public override async Task<ImageBase> GetHeroImage()
@@ -128,20 +137,6 @@ namespace FluentStore.SDK.Packages
             // Is there better UX for this?
             foreach (PackageBase package in Items)
                 await package.LaunchAsync();
-        }
-
-        private string _TileGlyph;
-        public string TileGlyph
-        {
-            get => _TileGlyph;
-            set => SetProperty(ref _TileGlyph, value);
-        }
-
-        private string _ImageUrl;
-        public string ImageUrl
-        {
-            get => _ImageUrl;
-            set => SetProperty(ref _ImageUrl, value);
         }
 
         private ObservableCollection<PackageBase> _Items = new ObservableCollection<PackageBase>();

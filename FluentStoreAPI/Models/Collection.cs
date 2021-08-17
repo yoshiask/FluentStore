@@ -14,7 +14,7 @@ namespace FluentStoreAPI.Models
         public string TileGlyph { get; set; }
         public string ImageUrl { get; set; }
         public string AuthorId { get; set; }
-        public List<string> Items { get; set; }
+        public List<string> Items { get; set; } = new List<string>();
 
         /// <summary>
         /// Used by <see cref="Document"/> for deserialization

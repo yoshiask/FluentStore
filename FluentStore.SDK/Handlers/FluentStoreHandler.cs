@@ -1,4 +1,4 @@
-﻿using FluentStore.SDK.PackageTypes;
+﻿using FluentStore.SDK.Packages;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using System.Collections.Generic;
@@ -27,6 +27,7 @@ namespace FluentStore.SDK.Handlers
                 string collId = id[1];
 
                 var collection = await FSApi.GetCollectionAsync(userId, collId);
+                var authorProfile = await FSApi.GetUserProfileAsync(userId);
                 var items = new List<PackageBase>(collection.Items.Count);
                 foreach (string packageId in collection.Items)
                 {
@@ -36,7 +37,9 @@ namespace FluentStore.SDK.Handlers
                     items.Add(package);
                 }
 
-                return new CollectionPackage(collection, items);
+                var collectionPack = new CollectionPackage(collection, items);
+                collectionPack.Update(authorProfile);
+                return collectionPack;
             }
 
             return null;
