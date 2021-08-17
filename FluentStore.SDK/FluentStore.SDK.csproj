@@ -15,6 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\API\WinGetRun\WinGetRun.csproj" />
         <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
         <ProjectReference Include="..\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
         <ProjectReference Include="..\StoreLib\StoreLib\StoreLib.csproj" />

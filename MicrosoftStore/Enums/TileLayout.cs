@@ -8,6 +8,7 @@ namespace Microsoft.Marketplace.Storefront.Contracts.Enums
     {
         Portrait, 
         Poster, 
-        Square
+        Square,
+        Circular,
     };
 }

@@ -301,11 +301,12 @@
     <PackageReference Include="OwlCore">
       <Version>0.0.21</Version>
     </PackageReference>
-    <PackageReference Include="Refit">
-      <Version>5.2.4</Version>
-    </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\API\WinGetRun\WinGetRun.csproj">
+      <Project>{24521084-12c2-4290-b715-44cb563cb3dc}</Project>
+      <Name>WinGetRun</Name>
+    </ProjectReference>
     <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj">
       <Project>{3E69F7C4-C118-4E8A-BD1A-093B2196FB95}</Project>
       <Name>FluentStore.SDK</Name>

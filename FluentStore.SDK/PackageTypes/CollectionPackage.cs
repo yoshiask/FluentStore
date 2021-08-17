@@ -9,7 +9,7 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Windows.Storage;
 
-namespace FluentStore.SDK.PackageTypes
+namespace FluentStore.SDK.Packages
 {
     public class CollectionPackage : PackageBase<Collection>
     {

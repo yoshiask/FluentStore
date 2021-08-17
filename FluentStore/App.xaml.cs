@@ -29,6 +29,17 @@ namespace FluentStore
 
             Services = ConfigureServices();
             Ioc.Default.ConfigureServices(Services);
+
+            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("Firefox").Text);
+            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("Firefox Nightly").Text);
+            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("Files").Text);
+            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("LaTeX").Text);
+            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName(".NET SDK Preview").Text);
+            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("Accessibility Insights For Windows").Text);
+            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("AppInstallerFileBuilder").Text);
+            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("Azure CLI").Text);
+            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("Azure Cosmos Emulator").Text);
+            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("Azure Data Studio").Text);
         }
 
         /// <summary>
@@ -119,6 +130,7 @@ namespace FluentStore
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
             services.AddSingleton(new FluentStoreAPI.FluentStoreAPI());
+            services.AddSingleton(new WinGetRun.WinGetApi());
             services.AddSingleton(typeof(UserService));
             services.AddSingleton(typeof(LoggerService));
             services.AddSingleton(new SDK.PackageService());

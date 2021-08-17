@@ -23,7 +23,7 @@ namespace FluentStore.SDK.Handlers
         public override async Task<List<PackageBase>> SearchAsync(string query)
         {
             var packages = new List<PackageBase>();
-            var firstPage = await StorefrontApi.Search(query, "apps", "Windows.Desktop");
+            var firstPage = await StorefrontApi.Search(query, "apps", Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily);
             foreach (var product in firstPage.Payload.SearchResults)
             {
                 // Get the full product details

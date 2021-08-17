@@ -11,6 +11,34 @@ namespace FluentStore.SDK
 {
     public abstract class PackageBase : ObservableObject, IEquatable<PackageBase>
     {
+        public PackageBase() { }
+
+        /// <summary>
+        /// Copies the properties of the supplied <see cref="PackageBase"/> to a new instance.
+        /// </summary>
+        public static TPackage Copy<TPackage>(TPackage other) where TPackage : PackageBase, new()
+        {
+            return new TPackage
+            {
+                Urn = other.Urn,
+                Model = other.Model,
+                Status = other.Status,
+                DownloadItem = other.DownloadItem,
+                Title = other.Title,
+                PublisherId = other.PublisherId,
+                DeveloperName = other.DeveloperName,
+                ReleaseDate = other.ReleaseDate,
+                Description = other.Description,
+                Version = other.Version,
+                ReviewSummary = other.ReviewSummary,
+                Price = other.Price,
+                DisplayPrice = other.DisplayPrice,
+                ShortTitle = other.ShortTitle,
+                Website = other.Website,
+                Images = other.Images,
+            };
+        }
+
         /// <summary>
         /// A Uniform Resource Name (URN) that represents this specific package.
         /// </summary>

@@ -27,10 +27,24 @@ namespace FluentStore.SDK
                         .Where(t => t.Namespace == "FluentStore.SDK.Handlers" && t.IsClass && t.IsPublic))
                     {
                         var ctr = type.GetConstructor(emptyTypeList);
-                        var handler = (PackageHandlerBase)ctr.Invoke(emptyObjectList);
+                        if (ctr == null)
+                            continue;
+                        try
+                        {
+                            var handler = (PackageHandlerBase)ctr.Invoke(emptyObjectList);
+                            if (handler == null)
+                                continue;
 
-                        foreach (string ns in handler.HandledNamespaces)
-                            _PackageHandlers.Add(ns, handler);
+                            foreach (string ns in handler.HandledNamespaces)
+                                _PackageHandlers.Add(ns, handler);
+                        }
+                        catch (Exception ex)
+                        {
+#if DEBUG
+                            System.Diagnostics.Debug.WriteLine(ex);
+#endif
+                            continue;
+                        }
                     }
                 }
 

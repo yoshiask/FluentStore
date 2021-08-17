@@ -22,6 +22,7 @@ namespace FluentStore.SDK.Packages
 {
     public class MicrosoftStorePackage : ModernPackage<ProductDetails>
     {
+        public MicrosoftStorePackage() { }
         public MicrosoftStorePackage(ProductDetails product) => Update(product);
 
         public void Update(ProductDetails product)
