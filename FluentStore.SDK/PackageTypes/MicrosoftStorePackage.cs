@@ -14,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.Networking.BackgroundTransfer;
 using Windows.Storage;
 using Windows.System.Profile;
 
@@ -171,38 +170,15 @@ namespace FluentStore.SDK.Packages
             }
             WeakReferenceMessenger.Default.Send(new PackageFetchCompletedMessage(this));
 
-            // Create the location to download to
-            var file = await StorageHelper.CreatePackageFile(Urn, folder);
-            DownloadItem = file;
-
-            BackgroundDownloader downloader = new BackgroundDownloader();
-            DownloadOperation download = downloader.CreateDownload(PackageUri, file);
-            download.RangesDownloaded += (op, args) =>
-            {
-                WeakReferenceMessenger.Default.Send(
-                    new PackageDownloadProgressMessage(this, op.Progress.BytesReceived, op.Progress.TotalBytesToReceive));
-            };
-
-            // Start download
-            WeakReferenceMessenger.Default.Send(new PackageDownloadStartedMessage(this));
-            await download.StartAsync();
-
-            // Verify success code
-            uint statusCode = download.GetResponseInformation().StatusCode;
-            if (statusCode < 200 || statusCode >= 300)
-            {
-                WeakReferenceMessenger.Default.Send(new PackageDownloadFailedMessage(this,
-                    new Exception($"Status code {statusCode} did not indicate success.")));
-                return null;
-            }
-            Status = PackageStatus.Downloaded;
+            // Download package
+            await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
 
             // Set the proper file type and extension
             string extension = await GetInstallerType();
             if (extension != string.Empty)
                 await DownloadItem.RenameAsync(PackageMoniker + extension, NameCollisionOption.ReplaceExisting);
 
-            WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, file));
+            WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, (StorageFile)DownloadItem));
             return DownloadItem;
         }
 

@@ -1,14 +1,15 @@
-﻿using FluentStore.SDK.Images;
+﻿using FluentStore.SDK.Helpers;
+using FluentStore.SDK.Images;
+using FluentStore.SDK.Messages;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Marketplace.Storefront.Contracts.Enums;
 using Microsoft.Toolkit.Diagnostics;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Windows.Management.Deployment;
 using Windows.Storage;
-using Windows.System.Profile;
 using WinGetRun;
 using WinGetRun.Models;
 
@@ -51,14 +52,30 @@ namespace FluentStore.SDK.Packages
             set => _Urn = value;
         }
 
-        public override Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null)
+        public override async Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null)
         {
-            throw new NotImplementedException();
+            WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
+            // Find the package URI
+            if (!await PopulatePackageUri())
+            {
+                WeakReferenceMessenger.Default.Send(new PackageFetchFailedMessage(this, new Exception("An unknown error occurred.")));
+                return null;
+            }
+            WeakReferenceMessenger.Default.Send(new PackageFetchCompletedMessage(this));
+
+            // Download package
+            await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
+
+            // Set the proper file name
+            await DownloadItem.RenameAsync(System.IO.Path.GetFileName(PackageUri.ToString()), NameCollisionOption.ReplaceExisting);
+
+            WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, (StorageFile)DownloadItem));
+            return DownloadItem;
         }
 
         private async Task<bool> PopulatePackageUri()
         {
-            Manifest = await WinGetApi.GetManifest(PackageId, Version);
+            Manifest = await WinGetApi.GetManifest(Urn.GetContent<NamespaceSpecificString>().UnEscapedValue, Version);
             PackageUri = new Uri(Manifest.Installers[0].Url);
 
             Status = PackageStatus.DownloadReady;
@@ -72,7 +89,7 @@ namespace FluentStore.SDK.Packages
                 return new FileImage
                 {
                     Url = Model.IconUrl,
-                    ImageType = SDK.Images.ImageType.Logo
+                    ImageType = ImageType.Logo
                 };
             }
             else
@@ -91,9 +108,13 @@ namespace FluentStore.SDK.Packages
             return new List<ImageBase>();
         }
 
-        public override Task<bool> InstallAsync()
+        public override async Task<bool> InstallAsync()
         {
-            throw new NotImplementedException();
+            // Make sure installer is downloaded
+            Guard.IsEqualTo((int)Status, (int)PackageStatus.Downloaded, nameof(Status));
+
+            // TODO: Use full trust component to start installer in slient mode
+            return false;
         }
 
         public override Task<bool> IsPackageInstalledAsync()

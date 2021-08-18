@@ -1,9 +1,12 @@
-﻿using Garfoot.Utilities.FluentUrn;
+﻿using FluentStore.SDK.Messages;
+using Garfoot.Utilities.FluentUrn;
 using Microsoft.Toolkit.Diagnostics;
+using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Networking.BackgroundTransfer;
 using Windows.Storage;
 
 namespace FluentStore.SDK.Helpers
@@ -62,6 +65,36 @@ namespace FluentStore.SDK.Helpers
             return urnStr.Replace(":", "_");
             byte[] hashBytes = SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(urnStr));
             return BitConverter.ToString(hashBytes).Replace("-", "");
+        }
+
+        public static async Task BackgroundDownloadPackage(PackageBase package, Uri downloadUri, StorageFolder folder = null)
+        {
+            // Create the location to download to
+            var file = await CreatePackageFile(package.Urn, folder);
+            package.DownloadItem = file;
+
+            BackgroundDownloader downloader = new BackgroundDownloader();
+            DownloadOperation download = downloader.CreateDownload(downloadUri, file);
+            download.RangesDownloaded += (op, args) =>
+            {
+                WeakReferenceMessenger.Default.Send(
+                    new PackageDownloadProgressMessage(package, op.Progress.BytesReceived, op.Progress.TotalBytesToReceive));
+            };
+
+            // Start download
+            WeakReferenceMessenger.Default.Send(new PackageDownloadStartedMessage(package));
+            await download.StartAsync();
+
+            // Verify success code
+            uint statusCode = download.GetResponseInformation().StatusCode;
+            if (statusCode < 200 || statusCode >= 300)
+            {
+                WeakReferenceMessenger.Default.Send(new PackageDownloadFailedMessage(package,
+                    new Exception($"Status code {statusCode} did not indicate success.")));
+                package.Status = PackageStatus.DownloadReady;
+                return;
+            }
+            package.Status = PackageStatus.Downloaded;
         }
     }
 }
