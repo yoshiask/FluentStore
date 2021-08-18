@@ -1,4 +1,5 @@
 ﻿using FluentStore.SDK;
+using FluentStore.SDK.Handlers;
 using FluentStore.SDK.Packages;
 using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
@@ -76,7 +77,7 @@ namespace FluentStore.ViewModels
             var collections = await FSApi.GetCollectionsAsync(UserService.CurrentFirebaseUser.LocalID);
             foreach (Collection collection in collections)
             {
-                CollectionPackage package = new CollectionPackage(collection);
+                CollectionPackage package = new CollectionPackage(FluentStoreHandler.GetImageStatic(), collection);
 
                 // Get the author's display name
                 var authorProfile = await FSApi.GetUserProfileAsync(collection.AuthorId);

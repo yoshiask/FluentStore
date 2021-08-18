@@ -13,8 +13,9 @@ namespace FluentStore.SDK.Packages
 {
     public class CollectionPackage : PackageBase<Collection>
     {
-        public CollectionPackage(Collection collection = null, IEnumerable<PackageBase> items = null)
+        public CollectionPackage(ImageBase handlerImage, Collection collection = null, IEnumerable<PackageBase> items = null)
         {
+            HandlerImage = handlerImage;
             if (collection != null)
                 Update(collection);
             if (items != null)

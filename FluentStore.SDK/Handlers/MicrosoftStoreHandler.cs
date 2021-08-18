@@ -1,4 +1,5 @@
-﻿using FluentStore.SDK.Packages;
+﻿using FluentStore.SDK.Images;
+using FluentStore.SDK.Packages;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Marketplace.Storefront.Contracts;
 using Microsoft.Toolkit.Diagnostics;
@@ -31,7 +32,7 @@ namespace FluentStore.SDK.Handlers
                 if (!page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ProductDetails>(out var details))
                     continue;
 
-                var package = new MicrosoftStorePackage(details);
+                var package = new MicrosoftStorePackage(Image, details);
                 if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.RatingSummary>(out var ratingSummary))
                 {
                     package.Update(ratingSummary);
@@ -59,7 +60,7 @@ namespace FluentStore.SDK.Handlers
                 if (!page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ProductDetails>(out var details))
                     continue;
 
-                var package = new MicrosoftStorePackage(details);
+                var package = new MicrosoftStorePackage(Image, details);
                 if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.RatingSummary>(out var ratingSummary))
                 {
                     package.Update(ratingSummary);
@@ -84,7 +85,7 @@ namespace FluentStore.SDK.Handlers
             if (!page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ProductDetails>(out var details))
                 return null;
 
-            var package = new MicrosoftStorePackage(details);
+            var package = new MicrosoftStorePackage(Image, details);
             if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.RatingSummary>(out var ratingSummary))
             {
                 package.Update(ratingSummary);
@@ -95,6 +96,15 @@ namespace FluentStore.SDK.Handlers
             }
 
             return package;
+        }
+        
+        public override ImageBase GetImage()
+        {
+            return new TextImage
+            {
+                Text = "\uE14D",
+                FontFamily = "Segoe MDL2 Assets"
+            };
         }
     }
 }

@@ -19,8 +19,12 @@ namespace FluentStore.SDK.Packages
     {
         private readonly WinGetApi WinGetApi = Ioc.Default.GetRequiredService<WinGetApi>();
 
-        public WinGetPackage() { }
-        public WinGetPackage(Package pack) => Update(pack);
+        public WinGetPackage(ImageBase handlerImage, Package pack = null)
+        {
+            HandlerImage = handlerImage;
+            if (pack != null)
+                Update(pack);
+        }
 
         public void Update(Package pack)
         {

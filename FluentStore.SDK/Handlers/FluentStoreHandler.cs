@@ -1,4 +1,5 @@
-﻿using FluentStore.SDK.Packages;
+﻿using FluentStore.SDK.Images;
+using FluentStore.SDK.Packages;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using System.Collections.Generic;
@@ -37,7 +38,7 @@ namespace FluentStore.SDK.Handlers
                     items.Add(package);
                 }
 
-                var collectionPack = new CollectionPackage(collection, items);
+                var collectionPack = new CollectionPackage(Image, collection, items);
                 collectionPack.Update(authorProfile);
                 return collectionPack;
             }
@@ -55,6 +56,15 @@ namespace FluentStore.SDK.Handlers
         {
             // TODO
             return new List<PackageBase>();
+        }
+
+        public override ImageBase GetImage() => GetImageStatic();
+        public static ImageBase GetImageStatic()
+        {
+            return new TextImage
+            {
+                Text = "FS"
+            };
         }
     }
 }

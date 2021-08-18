@@ -108,6 +108,13 @@ namespace FluentStore.SDK
             }
         }
 
+        private ImageBase _HandlerImage;
+        public ImageBase HandlerImage
+        {
+            get => _HandlerImage;
+            set => SetProperty(ref _HandlerImage, value);
+        }
+
         private string _Title;
         public string Title
         {

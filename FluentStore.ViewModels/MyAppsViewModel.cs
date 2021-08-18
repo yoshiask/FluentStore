@@ -1,5 +1,8 @@
-﻿using FluentStore.Services;
+﻿using FluentStore.SDK;
+using FluentStore.SDK.Handlers;
+using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
+using Garfoot.Utilities.FluentUrn;
 using Microsoft.Marketplace.Storefront.Contracts;
 using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
@@ -22,7 +25,7 @@ namespace FluentStore.ViewModels
         }
 
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
-        private readonly StorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<StorefrontApi>();
+        private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
         private ObservableCollection<AppViewModelBase> _Apps;
         public ObservableCollection<AppViewModelBase> Apps
@@ -65,12 +68,11 @@ namespace FluentStore.ViewModels
             if (dcat.ProductListing != null && dcat.ProductListing.Products.Count > 0)
             {
                 var dcatProd = dcat.ProductListing.Products[0];
-                var item = await StorefrontApi.GetProduct(dcatProd.ProductId);
-                var product = item.Payload;
-                if (product?.PackageFamilyNames != null && product?.ProductId != null)
+                var package = await PackageService.GetPackage(Urn.Parse($"urn:{MicrosoftStoreHandler.NAMESPACE_MSSTORE}:{dcatProd.ProductId}"));
+                if (package != null)
                 {
                     WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
-                    NavService.Navigate("PackageView", new SDK.Packages.MicrosoftStorePackage(product));
+                    NavService.Navigate("PackageView", package);
                 }
             }
         }

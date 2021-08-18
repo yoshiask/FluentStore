@@ -1,4 +1,5 @@
-﻿using FluentStore.SDK.Packages;
+﻿using FluentStore.SDK.Images;
+using FluentStore.SDK.Packages;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Toolkit.Diagnostics;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
@@ -24,7 +25,7 @@ namespace FluentStore.SDK.Handlers
             Guard.IsEqualTo(packageUrn.NamespaceIdentifier, NAMESPACE_WINGET, nameof(packageUrn));
 
             var package = await WinGetApi.GetPackage(packageUrn.GetContent<NamespaceSpecificString>().UnEscapedValue);
-            return new WinGetPackage(package);
+            return new WinGetPackage(Image, package);
         }
 
         public override async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
@@ -36,7 +37,7 @@ namespace FluentStore.SDK.Handlers
             };
             var firstPage = await WinGetApi.SearchPackages(query: query, pageOptions: pageOptions);
             foreach (Package wgPackage in firstPage.Packages)
-                packages.Add(new WinGetPackage(wgPackage));
+                packages.Add(new WinGetPackage(Image, wgPackage));
 
             return packages;
         }
@@ -46,9 +47,18 @@ namespace FluentStore.SDK.Handlers
             var packages = new List<PackageBase>();
             var firstPage = await WinGetApi.SearchPackages(query: query);
             foreach (Package wgPackage in firstPage.Packages)
-                packages.Add(new WinGetPackage(wgPackage));
+                packages.Add(new WinGetPackage(Image, wgPackage));
 
             return packages;
+        }
+
+        public override ImageBase GetImage()
+        {
+            return new TextImage
+            {
+                Text = "\uE756",
+                FontFamily = "Segoe MDL2 Assets"
+            };
         }
     }
 }

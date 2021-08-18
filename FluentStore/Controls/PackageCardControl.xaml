@@ -14,7 +14,7 @@
     <Grid Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}" MaxHeight="300">
         <Grid.RowDefinitions>
             <RowDefinition Height="150"/>
-            <RowDefinition Height="100"/>
+            <RowDefinition Height="150"/>
         </Grid.RowDefinitions>
         <Border Background="{x:Bind ViewModel.AppIcon.BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}"
                 VerticalAlignment="Stretch">
@@ -49,6 +49,11 @@
             <TextBlock Text="{x:Bind ViewModel.Package.DisplayPrice}"
                        x:Name="DisplayPriceBlock" VerticalAlignment="Bottom" Grid.Row="1"
                        x:Load="{x:Bind ViewModel.Package.HasDisplayPrice}"/>
+
+            <ContentControl Content="{x:Bind ViewModel.Package.HandlerImage}" MaxHeight="32" Margin="-8"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                            HorizontalAlignment="Right" VerticalAlignment="Stretch" Grid.Row="1"
+                            ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
         </Grid>
     </Grid>
 
