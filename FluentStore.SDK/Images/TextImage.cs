@@ -11,6 +11,13 @@ namespace FluentStore.SDK.Images
             set => SetProperty(ref _Text, value);
         }
 
+        private string _FontFamily = "Segoe UI";
+        public string FontFamily
+        {
+            get => _FontFamily;
+            set => SetProperty(ref _FontFamily, value);
+        }
+
         public static TextImage CreateFromName(string name, ImageType imageType = ImageType.Unspecified)
         {
             string text = string.Empty;

@@ -34,7 +34,8 @@
     <DataTemplate x:Key="DefaultTextImageTemplate" x:DataType="images:TextImage">
         <Border Background="{Binding BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}">
             <Viewbox HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                <TextBlock Text="{Binding Text}" TextLineBounds="Tight" TextWrapping="NoWrap"
+                <TextBlock Text="{Binding Text}" FontFamily="{Binding FontFamily, Converter={StaticResource NameToFontFamilyConverter}}"
+                           TextLineBounds="Tight" TextWrapping="NoWrap"
                            FontSize="24" FontWeight="Bold" Padding="12"/>
             </Viewbox>
         </Border>
