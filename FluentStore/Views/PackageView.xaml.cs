@@ -1,4 +1,6 @@
 ﻿using FluentStore.Helpers;
+using FluentStore.Helpers.Continuity;
+using FluentStore.Helpers.Continuity.Extensions;
 using FluentStore.SDK;
 using FluentStore.SDK.Messages;
 using FluentStore.Services;
@@ -7,12 +9,14 @@ using FluentStore.ViewModels.Messages;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
+using System.Numerics;
 using System.Threading.Tasks;
 using Windows.UI.Notifications;
 using Windows.UI.Text;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
+using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 using SplitButton = Microsoft.UI.Xaml.Controls.SplitButton;
 using SplitButtonClickEventArgs = Microsoft.UI.Xaml.Controls.SplitButtonClickEventArgs;
@@ -24,6 +28,8 @@ namespace FluentStore.Views
         public PackageView()
         {
             InitializeComponent();
+            SetUpAnimations();
+
             ViewModel = new PackageViewModel();
         }
 
@@ -383,13 +389,38 @@ namespace FluentStore.Views
             flyout.ShowAt((FrameworkElement)sender);
         }
 
-        private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+        private async void Page_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             string state = (Window.Current.Bounds.Width > (double)App.Current.Resources["CompactModeMinWidth"]) ? "DefaultLayout" : "CompactLayout";
-#if DEBUG
-            System.Diagnostics.Debug.WriteLine("Change VSM state: " + state);
-#endif
-            VisualStateManager.GoToState(this, state, true);
+            if (Layouts.CurrentState?.Name != state)
+            {
+                VisualStateManager.GoToState(this, state, true);
+            }
+        }
+
+        private void SetUpAnimations()
+        {
+            var compositor = this.Visual().Compositor;
+
+            // Create background visuals.
+            //var infoCardVisual = compositor.CreateSpriteVisual();
+            //var infoCardVisualBrush = infoCardVisual.Brush = compositor.CreateBackdropBrush();
+            //InfoCard.SetChildVisual(infoCardVisual);
+
+            // Sync background visual dimensions.
+            //InfoCard.SizeChanged += (s, e) => infoCardVisual.Size = e.NewSize.ToVector2();
+
+            // Enable implilcit Offset and Size animations.
+            var easing = compositor.EaseOutSine();
+
+            IconBox.EnableImplicitAnimation(VisualPropertyType.All, 400, easing: easing);
+            TitleBlock.EnableImplicitAnimation(VisualPropertyType.All, 100, easing: easing);
+            SubheadBlock.EnableImplicitAnimation(VisualPropertyType.All, 100, easing: easing);
+            ActionBar.EnableImplicitAnimation(VisualPropertyType.All, 100, easing: easing);
+
+            // Enable implicit Visible/Collapsed animations.
+            ProgressGrid.EnableFluidVisibilityAnimation(axis: AnimationAxis.Y,
+                showFromScale: Vector2.UnitX, hideToScale: Vector2.UnitX, showDuration: 400, hideDuration: 250);
         }
     }
 }

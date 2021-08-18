@@ -136,6 +136,19 @@
     <Compile Include="Converters\NumberToStarGridLength.cs" />
     <Compile Include="Converters\PackageBaseEnumerableToViewModelEnumerable.cs" />
     <Compile Include="Helpers\ContentPresenterEx.cs" />
+    <Compile Include="Helpers\Continuity\AnimationExtensions.cs" />
+    <Compile Include="Helpers\Continuity\CompositionExtensions.Clip.cs" />
+    <Compile Include="Helpers\Continuity\CompositionExtensions.Implicit.cs" />
+    <Compile Include="Helpers\Continuity\CompositionExtensions.Offset.cs" />
+    <Compile Include="Helpers\Continuity\CompositionExtensions.Opacity.cs" />
+    <Compile Include="Helpers\Continuity\CompositionExtensions.Rotation.cs" />
+    <Compile Include="Helpers\Continuity\CompositionExtensions.Scale.cs" />
+    <Compile Include="Helpers\Continuity\CompositionExtensions.Shadow.cs" />
+    <Compile Include="Helpers\Continuity\CompositionExtensions.Size.cs" />
+    <Compile Include="Helpers\Continuity\CompositionExtensions.Translation.cs" />
+    <Compile Include="Helpers\Continuity\EasingExtensions.cs" />
+    <Compile Include="Helpers\Continuity\Enums.cs" />
+    <Compile Include="Helpers\Continuity\UtilExtensions.cs" />
     <Compile Include="Views\PackageView.xaml.cs">
       <DependentUpon>PackageView.xaml</DependentUpon>
     </Compile>
