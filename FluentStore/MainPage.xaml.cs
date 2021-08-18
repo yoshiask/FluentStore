@@ -114,8 +114,11 @@ namespace FluentStore
 
         private async void controlsSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            if (args.CheckCurrent() && args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
+            if (args.CheckCurrent() && !string.IsNullOrWhiteSpace(ViewModel.SearchBoxText)
+                && args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
+            {
                 await ViewModel.GetSearchSuggestionsAsync();
+            }
         }
 
         private async void controlsSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
