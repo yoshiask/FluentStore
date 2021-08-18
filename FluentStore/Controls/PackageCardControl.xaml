@@ -11,7 +11,7 @@
     d:DesignHeight="300"
     d:DesignWidth="400">
 
-    <Grid MaxHeight="300" Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
+    <Grid Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}" MaxHeight="300">
         <Grid.RowDefinitions>
             <RowDefinition Height="150"/>
             <RowDefinition Height="100"/>

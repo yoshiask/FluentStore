@@ -29,10 +29,10 @@ namespace FluentStore.Controls
 
         public ObservableCollection<PackageViewModel> Packages
         {
-            get => (ObservableCollection<PackageViewModel>)GetValue(ViewModelsProperty);
-            set => SetValue(ViewModelsProperty, value);
+            get => (ObservableCollection<PackageViewModel>)GetValue(PackagesProperty);
+            set => SetValue(PackagesProperty, value);
         }
-        public static readonly DependencyProperty ViewModelsProperty = DependencyProperty.Register(
+        public static readonly DependencyProperty PackagesProperty = DependencyProperty.Register(
             nameof(Packages), typeof(ObservableCollection<PackageViewModel>), typeof(PackageCardGridView), new PropertyMetadata(null));
 
         public PackageViewModel SelectedPackage
