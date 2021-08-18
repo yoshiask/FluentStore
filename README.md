@@ -5,7 +5,7 @@
 Fluent Store is a unifying frontend for Windows app stores and package managers. You can search all repositories at once, pick out an app, and install it without ever opening a browser or command prompt. With a Fluent Store Social account, you can create collections of apps to install or share in one click.
 
 Other features include:
-- Graphical interface for [WinGet](https://github.com/microsoft/winget-cli) and [Chocolatey](https://chocolatey.org)
+- Graphical interface for [WinGet](https://github.com/microsoft/winget-cli)
 - Download Microsoft Store apps without installing them
 - Find Microsoft Store listings for installed apps (including some system apps)
 
