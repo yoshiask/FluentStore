@@ -133,7 +133,7 @@ namespace FluentStore.ViewModels
             }
             else
             {
-                SearchSuggestions = new ObservableCollection<PackageBase>(r.Collapse());
+                SearchSuggestions = new ObservableCollection<PackageBase>(r);
             }
         }
 

@@ -114,7 +114,7 @@ namespace FluentStore.ViewModels
 
             PackageList.Clear();
             var results = await PackageService.SearchAsync(Query);
-            PackageList = new ObservableCollection<PackageViewModel>(results.Collapse().Select(p => new PackageViewModel(p)));
+            PackageList = new ObservableCollection<PackageViewModel>(results.Select(p => new PackageViewModel(p)));
 
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }

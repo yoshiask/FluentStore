@@ -1,5 +1,8 @@
 ﻿using FluentStore.SDK.Handlers;
 using FluentStore.SDK.Messages;
+using FuzzySharp;
+using FuzzySharp.Extractor;
+using FuzzySharp.SimilarityRatio;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
@@ -55,31 +58,39 @@ namespace FluentStore.SDK
         /// <summary>
         /// Performs a search across all package handlers with the given query.
         /// </summary>
-        public async Task<PackageCollection> SearchAsync(string query)
+        public async Task<List<PackageBase>> SearchAsync(string query)
         {
-            var packages = new PackageCollection();
+            var packages = new List<PackageBase>();
             foreach (var handler in PackageHandlers.Values.Distinct())
             {
                 var results = await handler.SearchAsync(query);
                 // Filter results already in list
-                packages.AddPackages(results);
+                packages.AddRange(results);
             }
-            return packages;
+
+            // Fuzzy search to resort by relevance
+            var scorer = ScorerCache.Get<FuzzySharp.SimilarityRatio.Scorer.StrategySensitive.TokenDifferenceScorer>();
+            return Process.ExtractSorted(query, packages.Select(p => p.Title + " - " + p.DeveloperName), scorer: scorer)
+                .Select(r => packages.ElementAt(r.Index)).ToList();
         }
 
         /// <summary>
         /// Gets search suggestions for the given query from all package handlers.
         /// </summary>
-        public async Task<PackageCollection> GetSearchSuggestionsAsync(string query)
+        public async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
         {
-            var packages = new PackageCollection();
+            var packages = new List<PackageBase>();
             foreach (var handler in PackageHandlers.Values)
             {
                 var results = await handler.GetSearchSuggestionsAsync(query);
                 // Filter results already in list
-                packages.AddPackages(results);
+                packages.AddRange(results);
             }
-            return packages;
+
+            // Fuzzy search to resort by relevance
+            var scorer = ScorerCache.Get<FuzzySharp.SimilarityRatio.Scorer.StrategySensitive.TokenDifferenceScorer>();
+            return Process.ExtractSorted(query, packages.Select(p => p.Title + " - " + p.DeveloperName), scorer: scorer)
+                .Select(r => packages.ElementAt(r.Index)).ToList();
         }
 
         /// <summary>
