@@ -19,9 +19,9 @@
         </Grid.RowDefinitions>
 
         <ParallaxView Source="{x:Bind ContentScroller}" VerticalShift="200" VerticalSourceOffsetKind="Absolute">
-            <ContentControl Content="{x:Bind ViewModel.HeroImage}" VerticalAlignment="Top" HorizontalAlignment="Stretch"
-                            ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"
-                            SizeChanged="HeroImage_SizeChanged">
+            <ContentControl x:Name="HeroImage" SizeChanged="HeroImage_SizeChanged"
+                            Content="{x:Bind ViewModel.HeroImage}" VerticalAlignment="Top" HorizontalAlignment="Stretch"
+                            ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}">
                 <d:ContentControl.Content>
                     <Border Background="{Binding BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}">
                         <Image VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Stretch="Uniform">
@@ -39,18 +39,22 @@
                 <StackPanel Spacing="20">
                     <Border x:Name="HeroImageSpacer"/>
                     <Grid Padding="20" ColumnSpacing="20" Margin="20,0" MaxHeight="300"
-                          Background="{ThemeResource SystemControlAcrylicElementMediumHighBrush}"
-                          x:Name="InfoCard" CornerRadius="4" HorizontalAlignment="Left">
+                          x:Name="InfoCard" CornerRadius="4" HorizontalAlignment="Left"
+                          SizeChanged="InfoCard_SizeChanged">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition x:Name="IconCol" Width="*" MaxWidth="125" />
                             <ColumnDefinition Width="4*" />
                         </Grid.ColumnDefinitions>
+
+                        <Border x:Name="BackgroundFill" Grid.RowSpan="4" Grid.ColumnSpan="2" Margin="-20"
+                                Background="{ThemeResource SystemControlChromeHighAcrylicElementMediumBrush}"/>
 
                         <Viewbox x:Name="IconBox"
                                  MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="125"
@@ -138,6 +142,22 @@
                                           Visibility="{x:Bind ViewModel.IsCollection, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
                         </CommandBar>
+
+                        <Grid x:Name="ProgressGrid" Grid.Row="4" Grid.ColumnSpan="2" Margin="-20,0,-20,-20" Padding="20" Visibility="Collapsed"
+                              RowSpacing="4" ColumnSpacing="4" Background="{ThemeResource SystemControlChromeLowAcrylicElementBrush}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="ProgressLabel" d:Text="Downloading package..."/>
+                            <TextBlock x:Name="ProgressText" HorizontalAlignment="Right" Grid.Column="1" d:Text="50%"/>
+                            <winui:ProgressBar x:Name="ProgressIndicator" Grid.Row="1" Grid.ColumnSpan="2"
+                                               IsIndeterminate="True" d:Value="0.53" Maximum="1"/>
+                        </Grid>
 
                     </Grid>
                     <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
@@ -227,6 +247,17 @@
                         <Setter Target="TitleBlock.HorizontalAlignment" Value="Center"/>
                         <Setter Target="SubheadBlock.HorizontalAlignment" Value="Center"/>
                         <Setter Target="ActionBar.HorizontalAlignment" Value="Center"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+
+            <VisualStateGroup x:Name="ProgressStates">
+                <VisualState x:Name="NoAction"/>
+
+                <VisualState x:Name="Progress">
+                    <VisualState.Setters>
+                        <Setter Target="ProgressGrid.Visibility" Value="Visible"/>
+                        <Setter Target="BackgroundFill.Margin" Value="-20,-20,-20,0"/>
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>

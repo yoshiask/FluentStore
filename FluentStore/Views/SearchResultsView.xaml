@@ -8,37 +8,9 @@
     xmlns:controls="using:FluentStore.Controls"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
-    mc:Ignorable="d"
-    NavigationCacheMode="Disabled">
+    x:DefaultBindMode="TwoWay"
+    mc:Ignorable="d">
 
-    <GridView ItemsSource="{x:Bind ViewModel.PackageList, Mode=OneWay}" SelectionMode="Single"
-              SelectedItem="{x:Bind ViewModel.SelectedPackage, Mode=TwoWay}" Padding="8"
-              ItemTemplate="{StaticResource DefaultPackageCardTemplate}"
-              controls:ListViewBehaviour.FillBeforeWrap="True" controls:ListViewBehaviour.MinItemWidth="150">
-        <GridView.ItemContainerStyle>
-            <Style TargetType="GridViewItem">
-                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                <Setter Property="VerticalContentAlignment" Value="Stretch" />
-            </Style>
-        </GridView.ItemContainerStyle>
+    <controls:PackageCardGridView Packages="{x:Bind ViewModel.PackageList}" SelectedPackage="{x:Bind ViewModel.SelectedPackage}"/>
 
-        <GridView.Transitions>
-            <TransitionCollection>
-                <RepositionThemeTransition/>
-            </TransitionCollection>
-        </GridView.Transitions>
-        <GridView.ItemContainerTransitions>
-            <TransitionCollection>
-                <AddDeleteThemeTransition/>
-                <PopupThemeTransition/>
-            </TransitionCollection>
-        </GridView.ItemContainerTransitions>
-
-        <interactivity:Interaction.Behaviors>
-            <core:EventTriggerBehavior EventName="SelectionChanged">
-                <core:InvokeCommandAction Command="{x:Bind ViewModel.ViewProductCommand}"/>
-            </core:EventTriggerBehavior>
-        </interactivity:Interaction.Behaviors>
-    </GridView>
-    
 </Page>

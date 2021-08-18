@@ -170,12 +170,7 @@ namespace FluentStore.Views
         {
             InstallButton.IsEnabled = false;
 
-            ProgressDialog progressDialog = new ProgressDialog()
-            {
-                Title = ViewModel.Package.Title,
-                Body = "Fetching packages..."
-            };
-            RegisterPackageServiceMessages(progressDialog);
+            RegisterPackageServiceMessages();
             WeakReferenceMessenger.Default.Unregister<PackageDownloadCompletedMessage>(this);
             WeakReferenceMessenger.Default.Register<PackageDownloadCompletedMessage>(this, async (r, m) =>
             {
@@ -195,11 +190,11 @@ namespace FluentStore.Views
                     await file.MoveAndReplaceAsync(userFile);
                 }
             });
-            progressDialog.ShowAsync();
+            VisualStateManager.GoToState(this, "Progress", true);
 
             await ViewModel.Package.DownloadPackageAsync();
 
-            progressDialog.Hide();
+            VisualStateManager.GoToState(this, "NoAction", true);
             InstallButton.IsEnabled = true;
             WeakReferenceMessenger.Default.UnregisterAll(this);
         }
@@ -212,6 +207,11 @@ namespace FluentStore.Views
         private void HeroImage_SizeChanged(object sender, RoutedEventArgs e)
         {
             UpdateHeroImageSpacer((FrameworkElement)sender);
+        }
+
+        private void InfoCard_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateHeroImageSpacer(HeroImage);
         }
 
         private void UpdateHeroImageSpacer(FrameworkElement imageElem)
@@ -238,16 +238,17 @@ namespace FluentStore.Views
             };
         }
 
-        public ToastNotification RegisterPackageServiceMessages(ProgressDialog progressDialog)
+        public ToastNotification RegisterPackageServiceMessages()
         {
             var progressToast = PackageHelper.GenerateProgressToast(ViewModel.Package);
             WeakReferenceMessenger.Default.Register<PackageFetchStartedMessage>(this, (r, m) =>
             {
-                progressDialog.Body = "Fetching packages...";
+                ProgressIndicator.IsIndeterminate = true;
+                ProgressLabel.Text = "Fetching packages...";
             });
             WeakReferenceMessenger.Default.Register<PackageFetchFailedMessage>(this, async (r, m) =>
             {
-                progressDialog.Hide();
+                VisualStateManager.GoToState(this, "NoAction", true);
                 var noPackagesDialog = new ContentDialog()
                 {
                     Title = m.Package.Title,
@@ -258,27 +259,34 @@ namespace FluentStore.Views
             });
             WeakReferenceMessenger.Default.Register<PackageDownloadStartedMessage>(this, (r, m) =>
             {
-                progressDialog.Body = "Downloading package...";
+                ProgressLabel.Text = "Downloading package...";
 
                 PackageHelper.HandlePackageDownloadStartedToast(m, progressToast);
             });
             WeakReferenceMessenger.Default.Register<PackageDownloadProgressMessage>(this, async (r, m) =>
             {
-                double prog = m.Downloaded / m.Total;
-                await progressDialog.SetProgressAsync(prog);
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
+                   () =>
+                   {
+                       double prog = m.Downloaded / m.Total;
+                       ProgressIndicator.IsIndeterminate = false;
+                       ProgressIndicator.Value = prog;
+                       ProgressText.Text = $"{prog * 100:##0}%";
+                   });
 
                 PackageHelper.HandlePackageDownloadProgressToast(m, progressToast);
             });
             WeakReferenceMessenger.Default.Register<PackageInstallProgressMessage>(this, async (r, m) =>
             {
-                progressDialog.IsIndeterminate = true;
-                progressDialog.Body = "Installing package...";
+                ProgressIndicator.IsIndeterminate = true;
+                ProgressText.Text = string.Empty;
+                ProgressLabel.Text = "Installing package...";
 
                 PackageHelper.HandlePackageInstallProgressToast(m, progressToast);
             });
             WeakReferenceMessenger.Default.Register<PackageInstallCompletedMessage>(this, (r, m) =>
             {
-                progressDialog.Hide();
+                VisualStateManager.GoToState(this, "NoAction", true);
 
                 PackageHelper.HandlePackageInstallCompletedToast(m, progressToast);
             });
@@ -290,26 +298,21 @@ namespace FluentStore.Views
         {
             InstallButton.IsEnabled = false;
 
-            ProgressDialog progressDialog = new ProgressDialog()
-            {
-                Title = ViewModel.Package.Title,
-                Body = "Fetching packages..."
-            };
-            var progressToast = RegisterPackageServiceMessages(progressDialog);
+            var progressToast = RegisterPackageServiceMessages();
             WeakReferenceMessenger.Default.Unregister<PackageInstallCompletedMessage>(this);
             WeakReferenceMessenger.Default.Register<PackageInstallCompletedMessage>(this, (r, m) =>
             {
                 UpdateInstallButtonToLaunch();
-                progressDialog.Hide();
+                VisualStateManager.GoToState(this, "NoAction", true);
 
                 PackageHelper.HandlePackageInstallCompletedToast(m, progressToast);
             });
-            progressDialog.ShowAsync();
+            VisualStateManager.GoToState(this, "Progress", true);
 
             if (await ViewModel.Package.DownloadPackageAsync() != null)
-                await ViewModel.Package.InstallAsync();// ViewModel.Package, useAppInstaller ?? Settings.Default.UseAppInstaller);
+                await ViewModel.Package.InstallAsync();
 
-            progressDialog.Hide();
+            VisualStateManager.GoToState(this, "NoAction", true);
             InstallButton.IsEnabled = true;
             WeakReferenceMessenger.Default.UnregisterAll(this);
         }
