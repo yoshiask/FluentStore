@@ -156,7 +156,6 @@
     <Compile Include="Converters\PlatWindowsEnumToVisibility.cs" />
     <Compile Include="Converters\StreamToBitmapImageConverter.cs" />
     <Compile Include="Helpers\AppViewModel.cs" />
-    <Compile Include="Helpers\NavigationHelper.cs" />
     <Compile Include="Helpers\NavigationService.cs" />
     <Compile Include="Helpers\ObservableSettings.cs" />
     <Compile Include="Helpers\PackageHelper.cs" />
@@ -338,6 +337,9 @@
       <Project>{e13711ff-3e53-4ca4-8043-63b92673567a}</Project>
       <Name>StoreLib</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Assets\PackageHandlerIcons\" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

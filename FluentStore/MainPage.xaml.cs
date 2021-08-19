@@ -1,5 +1,6 @@
 ﻿using FluentStore.Helpers;
 using FluentStore.SDK;
+using FluentStore.Services;
 using FluentStore.ViewModels;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using System;
@@ -19,8 +20,8 @@ namespace FluentStore
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private Services.NavigationService NavService { get; } = Ioc.Default.GetService<Services.INavigationService>() as Services.NavigationService;
-        private Services.UserService UserService { get; } = Ioc.Default.GetService<Services.UserService>();
+        private NavigationService NavService { get; } = Ioc.Default.GetService<INavigationService>() as NavigationService;
+        private UserService UserService { get; } = Ioc.Default.GetService<UserService>();
         
         public ShellViewModel ViewModel
         {
@@ -35,16 +36,15 @@ namespace FluentStore
             this.InitializeComponent();
 
             MainFrame.Navigated += MainFrame_Navigated;
-            NavigationHelper.PageFrame = MainFrame;
             NavService.CurrentFrame = MainFrame;
 
-            foreach(PageInfo page in NavigationHelper.Pages)
+            foreach(PageInfo page in NavService.Pages)
             {
                 MainNav.MenuItems.Add(page.NavViewItem);
             }
             MainNav.SelectedItem = MainNav.MenuItems[0];
 
-            Services.UserService.OnLoginStateChanged += UserService_OnLoginStateChanged;
+            UserService.OnLoginStateChanged += UserService_OnLoginStateChanged;
             UserService.TrySignIn(false);
         }
 
@@ -155,7 +155,7 @@ namespace FluentStore
                     return;
                 }
 
-                var page = NavigationHelper.Pages.Find((info) => info.PageType == e.SourcePageType);
+                var page = NavService.Pages.Find((info) => info.PageType == e.SourcePageType);
                 if (page == null)
                 {
                     MainNav.SelectedItem = null;
@@ -184,7 +184,7 @@ namespace FluentStore
                 return;
             }
 
-            PageInfo pageInfo = NavigationHelper.Pages.Find((info) => info == navItem.Tag);
+            PageInfo pageInfo = NavService.Pages.Find((info) => info == navItem.Tag);
             if (pageInfo == null)
             {
                 NavService.Navigate(typeof(Views.HomeView));
