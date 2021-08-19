@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Flurl;
+using System;
 using System.Threading.Tasks;
 
 namespace FluentStore.Services
@@ -36,5 +37,7 @@ namespace FluentStore.Services
         Task<bool> OpenInBrowser(string url);
 
         Task<bool> OpenInBrowser(Uri uri);
+
+        Tuple<Type, object> ParseProtocol(Url ptcl);
     }
 }

@@ -36,6 +36,7 @@ namespace FluentStore.Views
         FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
         UserService UserService = Ioc.Default.GetRequiredService<UserService>();
         INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
+        PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
         public PackageViewModel ViewModel
         {
@@ -48,14 +49,21 @@ namespace FluentStore.Views
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
+            object param = e.Parameter;
 
-            if (e.Parameter is PackageBase package)
+            if (param is PackageBase package)
             {
-                ViewModel.Package = package;
+                ViewModel = new PackageViewModel(package);
             }
-            else if (e.Parameter is PackageViewModel vm)
+            else if (param is PackageViewModel vm)
             {
                 ViewModel = vm;
+            }
+            else if (param is Garfoot.Utilities.FluentUrn.Urn urn)
+            {
+                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+                ViewModel = new PackageViewModel(await PackageService.GetPackage(urn));
+                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
             }
 
             if (ViewModel?.Package != null)

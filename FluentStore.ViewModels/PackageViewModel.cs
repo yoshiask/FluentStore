@@ -99,7 +99,7 @@ namespace FluentStore.ViewModels
                 if (_AppIcon == null && Package != null)
                 {
                     // Yes, this will block the UI thread. Hopefully it's not for too long.
-                    AppIcon = Package.GetAppIcon()?.Result;
+                    AppIcon = Package?.GetAppIcon()?.Result;
                 }
 
                 return _AppIcon;
@@ -115,7 +115,7 @@ namespace FluentStore.ViewModels
                 if (_HeroImage == null)
                 {
                     // Yes, this will block the UI thread. Hopefully it's not for too long.
-                    HeroImage = Package.GetHeroImage()?.Result;
+                    HeroImage = Package?.GetHeroImage()?.Result;
                 }
 
                 return _HeroImage;
@@ -128,10 +128,10 @@ namespace FluentStore.ViewModels
         {
             get
             {
-                if (_Screenshots == null && Package != null)
+                if (_Screenshots == null)
                 {
                     // Yes, this will block the UI thread. Hopefully it's not for too long.
-                    Screenshots = Package.GetScreenshots()?.Result;
+                    Screenshots = Package?.GetScreenshots()?.Result;
                 }
 
                 return _Screenshots;
@@ -139,7 +139,7 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _Screenshots, value);
         }
 
-        public string AverageRatingString => Package.HasReviewSummary && Package.ReviewSummary.HasAverageRating
+        public string AverageRatingString => Package != null && Package.HasReviewSummary && Package.ReviewSummary.HasAverageRating
             ? Package.ReviewSummary.AverageRating.ToString("F1")
             : string.Empty;
 
@@ -178,6 +178,9 @@ namespace FluentStore.ViewModels
                 if (_DisplayProperties == null)
                 {
                     _DisplayProperties = new List<DisplayInfo>();
+                    if (Package == null)
+                        return _DisplayProperties;
+
                     Type type = Package.GetType();
                     foreach (PropertyInfo prop in type.GetProperties())
                     {
@@ -214,6 +217,9 @@ namespace FluentStore.ViewModels
                 if (_DisplayAdditionalInformationProperties == null)
                 {
                     _DisplayAdditionalInformationProperties = new List<DisplayAdditionalInformationInfo>();
+                    if (Package == null)
+                        return _DisplayAdditionalInformationProperties;
+
                     Type type = Package.GetType();
                     foreach (PropertyInfo prop in type.GetProperties())
                     {

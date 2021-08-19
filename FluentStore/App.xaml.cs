@@ -29,26 +29,19 @@ namespace FluentStore
 
             Services = ConfigureServices();
             Ioc.Default.ConfigureServices(Services);
-
-            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("Firefox").Text);
-            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("Firefox Nightly").Text);
-            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("Files").Text);
-            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("LaTeX").Text);
-            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName(".NET SDK Preview").Text);
-            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("Accessibility Insights For Windows").Text);
-            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("AppInstallerFileBuilder").Text);
-            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("Azure CLI").Text);
-            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("Azure Cosmos Emulator").Text);
-            System.Diagnostics.Debug.WriteLine(SDK.Images.TextImage.CreateFromName("Azure Data Studio").Text);
         }
 
-        /// <summary>
-        /// Invoked when the application is launched normally by the end user.  Other entry points
-        /// will be used such as when the application is launched to open a specific file.
-        /// </summary>
-        /// <param name="e">Details about the launch request and process.</param>
+        /// <inheritdoc/>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
+            OnActivated(e);
+        }
+
+        /// <inheritdoc/>
+        protected override void OnActivated(IActivatedEventArgs args)
+        {
+            var navService = Ioc.Default.GetService<INavigationService>() as NavigationService;
+
             ExtendIntoTitlebar();
             Frame rootFrame = Window.Current.Content as Frame;
 
@@ -61,7 +54,7 @@ namespace FluentStore
 
                 rootFrame.NavigationFailed += OnNavigationFailed;
 
-                if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
+                if (args.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
                     //TODO: Load state from previously suspended application
                 }
@@ -69,20 +62,33 @@ namespace FluentStore
                 // Place the frame in the current Window
                 Window.Current.Content = rootFrame;
             }
-            (Ioc.Default.GetService<INavigationService>() as NavigationService).AppFrame = rootFrame;
+            navService.AppFrame = rootFrame;
+            Tuple<Type, object> destination = new Tuple<Type, object>(typeof(Views.HomeView), null);
 
-            if (e.PrelaunchActivated == false)
+            if (args is LaunchActivatedEventArgs launchArgs && launchArgs.PrelaunchActivated == false)
             {
                 if (rootFrame.Content == null)
                 {
                     // When the navigation stack isn't restored navigate to the first page,
                     // configuring the new page by passing required information as a navigation
                     // parameter
-                    rootFrame.Navigate(typeof(MainPage), e.Arguments);
+                    destination = navService.ParseProtocol(launchArgs.Arguments);
                 }
                 // Ensure the current window is active
                 Window.Current.Activate();
             }
+
+            if (args.Kind == ActivationKind.Protocol)
+            {
+                ProtocolActivatedEventArgs ptclArgs = args as ProtocolActivatedEventArgs;
+                // The received URI is eventArgs.Uri.AbsoluteUri
+
+                destination = navService.ParseProtocol(new Flurl.Url(ptclArgs.Uri));
+            }
+            rootFrame.Navigate(typeof(MainPage), destination);
+
+            // Ensure the current window is active
+            Window.Current.Activate();
         }
 
         /// <summary>

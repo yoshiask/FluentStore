@@ -47,6 +47,14 @@
         </uap:DefaultTile >
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
+      <Extensions>
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="fluentstore">
+            <uap:Logo>Assets\Square71x71Logo.png</uap:Logo>
+            <uap:DisplayName>Fluent Store</uap:DisplayName>
+          </uap:Protocol>
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
 

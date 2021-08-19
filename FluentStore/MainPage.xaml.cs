@@ -48,6 +48,12 @@ namespace FluentStore
             UserService.TrySignIn(false);
         }
 
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            if (e.Parameter is Tuple<Type, object> navArgs)
+                NavService.Navigate(navArgs.Item1, navArgs.Item2);
+        }
+
         private void UserService_OnLoginStateChanged(bool isLoggedIn)
         {
             if (isLoggedIn)

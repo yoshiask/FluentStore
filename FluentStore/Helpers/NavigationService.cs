@@ -134,6 +134,7 @@ namespace FluentStore.Services
         public Tuple<Type, object> ParseProtocol(Url ptcl)
         {
             Type destination = typeof(HomeView);
+            object parameter = null;
             var defaultResult = new Tuple<Type, object>(destination, null);
 
             if (ptcl == null || string.IsNullOrWhiteSpace(ptcl.Path))
@@ -141,46 +142,30 @@ namespace FluentStore.Services
 
             try
             {
-                string scheme = ptcl.Path.Split(":")[0];
-                string path;
-                switch (scheme)
+                switch (ptcl.Host)
                 {
-                    case "http":
-                        path = ptcl.ToString().Remove(0, 23);
+                    case "package":
+                        destination = typeof(PackageView);
+                        parameter = Garfoot.Utilities.FluentUrn.Urn.Parse(ptcl.PathSegments[0]);
                         break;
 
-                    case "https":
-                        path = ptcl.ToString().Remove(0, 24);
-                        break;
+                    case "web":
 
-                    case "fluentstore":
-                        path = ptcl.ToString().Remove(0, scheme.Length + 3);
                         break;
 
                     default:
-                        // Unrecognized protocol
-                        return defaultResult;
-                }
-                if (path.StartsWith("/"))
-                    path = path.Remove(0, 1);
-                var queryParams = ptcl.QueryParams;
-
-                string rootPath = path.Split('/', StringSplitOptions.RemoveEmptyEntries)[0];
-                switch (rootPath)
-                {
-                    //case "nointernet":
-                    //    return new Tuple<Type, object>(typeof(Views.Subviews.NoInternetPage), queryParams);
-
-                    default:
-                        PageInfo pageInfo = Pages.Find(p => p.Path == rootPath);
-                        destination = pageInfo != null ? pageInfo.PageType : typeof(HomeView);
-                        return new Tuple<Type, object>(destination, queryParams);
+                        PageInfo pageInfo = Pages.Find(p => p.Path == ptcl.Host);
+                        destination = pageInfo?.PageType ?? typeof(HomeView);
+                        parameter = ptcl.QueryParams;
+                        break;
                 }
             }
             catch
             {
                 return defaultResult;
             }
+
+            return new Tuple<Type, object>(destination, parameter);
         }
 
 
