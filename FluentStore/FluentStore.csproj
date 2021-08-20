@@ -158,6 +158,9 @@
     <Compile Include="Helpers\Continuity\EasingExtensions.cs" />
     <Compile Include="Helpers\Continuity\Enums.cs" />
     <Compile Include="Helpers\Continuity\UtilExtensions.cs" />
+    <Compile Include="Views\Auth\EditProfileDialog.xaml.cs">
+      <DependentUpon>EditProfileDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\PackageView.xaml.cs">
       <DependentUpon>PackageView.xaml</DependentUpon>
     </Compile>
@@ -341,6 +344,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Themes\CommonConverters.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Auth\EditProfileDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

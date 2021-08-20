@@ -114,13 +114,6 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _SignOutCommand, value);
         }
 
-        private IAsyncRelayCommand _EditProfileCommand;
-        public IAsyncRelayCommand EditProfileCommand
-        {
-            get => _EditProfileCommand;
-            set => SetProperty(ref _EditProfileCommand, value);
-        }
-
         public async Task GetSearchSuggestionsAsync()
         {
             var r = await PackageService.GetSearchSuggestionsAsync(SearchBoxText);

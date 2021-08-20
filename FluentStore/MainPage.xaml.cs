@@ -22,6 +22,7 @@ namespace FluentStore
     {
         private NavigationService NavService { get; } = Ioc.Default.GetService<INavigationService>() as NavigationService;
         private UserService UserService { get; } = Ioc.Default.GetService<UserService>();
+        private FluentStoreAPI.FluentStoreAPI FSApi { get; } = Ioc.Default.GetService<FluentStoreAPI.FluentStoreAPI>();
         
         public ShellViewModel ViewModel
         {
@@ -224,6 +225,19 @@ namespace FluentStore
         private void CoreTitleBar_LayoutMetricsChanged(Windows.ApplicationModel.Core.CoreApplicationViewTitleBar sender, object args)
         {
             //TitlebarRow.Height = new GridLength(sender.Height);
+        }
+
+        private async void EditProfileMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var editDialog = new Views.Auth.EditProfileDialog(UserService.CurrentProfile);
+
+            if (await editDialog.ShowAsync() == ContentDialogResult.Primary)
+            {
+                //WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+                // User wants to save
+                await FSApi.UpdateUserProfileAsync(UserService.CurrentUser.LocalID, editDialog.Profile);
+                //WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+            }
         }
     }
 }
