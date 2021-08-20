@@ -10,7 +10,7 @@
   <Identity
     Name="52374YoshiAskharoun.FluentStore"
     Publisher="CN=CD3113F3-18EB-4B8D-9D8A-C6D373E7A464"
-    Version="1.0.0.0" />
+    Version="0.1.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="ebd259da-e239-4bd6-ac53-7016f6b39d60" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
