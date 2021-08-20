@@ -3,7 +3,7 @@
 REM Configuration
 
 REM MSBuild from Visual Studio (can probably leave unchanged unless not using Community 2019)
-SET MSIXSIGNERMSBUILD=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe
+SET MSIXSIGNERMSBUILD=D:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe
 
 REM Path to your app .sln file
 SET MSIXSIGNERSLN=D:\Repos\yoshiask\FluentStore\FluentStore.sln
