@@ -83,7 +83,7 @@ namespace FluentStore
                 ProtocolActivatedEventArgs ptclArgs = args as ProtocolActivatedEventArgs;
                 // The received URI is eventArgs.Uri.AbsoluteUri
 
-                destination = navService.ParseProtocol(new Flurl.Url(ptclArgs.Uri));
+                destination = navService.ParseProtocol(ptclArgs.Uri);
             }
             rootFrame.Navigate(typeof(MainPage), destination);
 

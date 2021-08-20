@@ -29,8 +29,8 @@ namespace FluentStore
             get => (ShellViewModel)GetValue(ViewModelProperty);
             set => SetValue(ViewModelProperty, value);
         }
-        public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register(nameof(ViewModel), typeof(ShellViewModel), typeof(MainPage), new PropertyMetadata(new ShellViewModel()));
+        public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(
+            nameof(ViewModel), typeof(ShellViewModel), typeof(MainPage), new PropertyMetadata(new ShellViewModel()));
 
         public MainPage()
         {
@@ -41,7 +41,7 @@ namespace FluentStore
 
             foreach(PageInfo page in NavService.Pages)
             {
-                MainNav.MenuItems.Add(page.NavViewItem);
+                MainNav.MenuItems.Add(page.GetNavigationViewItem());
             }
             MainNav.SelectedItem = MainNav.MenuItems[0];
 
