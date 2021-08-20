@@ -31,6 +31,8 @@ namespace FluentStore.SDK
 
         public abstract Task<PackageBase> GetPackageFromUrl(Url url);
 
+        public abstract Url GetUrlFromPackage(PackageBase package);
+
         public bool Equals(PackageHandlerBase x, PackageHandlerBase y) => x.GetType() == y.GetType();
 
         public int GetHashCode(PackageHandlerBase obj) => obj.GetType().GetHashCode();

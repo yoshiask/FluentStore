@@ -9,8 +9,10 @@ using FluentStore.ViewModels.Messages;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
+using System.IO;
 using System.Numerics;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.UI.Notifications;
 using Windows.UI.Text;
 using Windows.UI.Xaml;
@@ -222,6 +224,47 @@ namespace FluentStore.Views
         private async void InstallUsingAppInstaller_Click(object sender, RoutedEventArgs e)
         {
             await HandleInstall(true);
+        }
+
+        private async void ShareButton_Click(SplitButton sender, SplitButtonClickEventArgs args)
+        {
+            DataTransferManager dataTransferManager = DataTransferManager.GetForCurrentView();
+            dataTransferManager.DataRequested += async (sender, args) =>
+            {
+                Flurl.Url appUrl = "fluentstore://package/" + ViewModel.Package.Urn.ToString();
+                await ShareDataRequested(sender, args, appUrl);
+            };
+            DataTransferManager.ShowShareUI();
+        }
+
+        private async void ShareWebLink_Click(object sender, RoutedEventArgs e)
+        {
+            DataTransferManager dataTransferManager = DataTransferManager.GetForCurrentView();
+            dataTransferManager.DataRequested += async (sender, args) =>
+            {
+                Flurl.Url appUrl = PackageService.GetUrlForPackage(ViewModel.Package);
+                await ShareDataRequested(sender, args, appUrl);
+            };
+            DataTransferManager.ShowShareUI();
+        }
+
+        private async Task ShareDataRequested(DataTransferManager sender, DataRequestedEventArgs args, Flurl.Url appUrl)
+        {
+            var appUri = appUrl.ToUri();
+            DataPackage linkPackage = new DataPackage();
+            linkPackage.SetApplicationLink(appUri);
+            //Clipboard.SetContent(linkPackage);
+
+            DataRequest request = args.Request;
+            request.Data.SetWebLink(appUri);
+            request.Data.Properties.Title = "Share App";
+            request.Data.Properties.Description = ViewModel.Package.ShortTitle;
+            request.Data.Properties.ContentSourceApplicationLink = appUri;
+            if (typeof(SDK.Images.StreamImage).IsAssignableFrom(ViewModel.AppIcon.GetType()))
+            {
+                var img = (SDK.Images.StreamImage)ViewModel.AppIcon;
+                //request.Data.Properties.Thumbnail = (await img.GetImageStreamAsync()).AsRandomAccessStream();
+            }
         }
 
         private void HeroImage_SizeChanged(object sender, RoutedEventArgs e)

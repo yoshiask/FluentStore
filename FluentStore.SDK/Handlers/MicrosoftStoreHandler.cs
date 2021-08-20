@@ -119,5 +119,12 @@ namespace FluentStore.SDK.Handlers
 
             return await GetPackage(Urn.Parse($"urn:{NAMESPACE_MSSTORE}:{m.Groups["id"]}"));
         }
+
+        public override Url GetUrlFromPackage(PackageBase package)
+        {
+            if (!(package is MicrosoftStorePackage msPackage))
+                throw new System.ArgumentException();
+            return "https://www.microsoft.com/store/apps/" + msPackage.StoreId;
+        }
     }
 }

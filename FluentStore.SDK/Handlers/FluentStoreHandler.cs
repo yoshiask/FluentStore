@@ -73,5 +73,10 @@ namespace FluentStore.SDK.Handlers
             // Fluent Store does not have a website
             return null;
         }
+
+        public override Url GetUrlFromPackage(PackageBase package)
+        {
+            return "fluentstore://package/" + package.Urn.ToString();
+        }
     }
 }

@@ -73,5 +73,19 @@ namespace FluentStore.SDK.Handlers
 
             return await GetPackage(Urn.Parse($"urn:{NAMESPACE_WINGET}:{m.Groups["publisherId"]}.{m.Groups["packageId"]}"));
         }
+
+        public override Url GetUrlFromPackage(PackageBase package)
+        {
+            if (!(package is WinGetPackage wgPackage))
+                throw new System.ArgumentException();
+
+            char sortChar = wgPackage.PublisherId[0];
+            string url = $"https://github.com/microsoft/winget-pkgs/tree/master/manifests/{sortChar}/{wgPackage.PublisherId}/{wgPackage.PublisherId}";
+
+            if (wgPackage.Version != null)
+                url += "/" + wgPackage.Version;
+
+            return url;
+        }
     }
 }

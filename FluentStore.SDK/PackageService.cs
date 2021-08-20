@@ -125,6 +125,22 @@ namespace FluentStore.SDK
             return package;
         }
 
+        /// <summary>
+        /// Gets the URL of the package on the source website.
+        /// </summary>
+        public Url GetUrlForPackage(PackageBase package)
+        {
+            string ns = package.Urn.NamespaceIdentifier;
+            if (PackageHandlers.TryGetValue(ns, out var handler))
+            {
+                return handler.GetUrlFromPackage(package);
+            }
+            else
+            {
+                throw new NotSupportedException("No package handler is registered for the namespace \"" + ns + "\".");
+            }
+        }
+
 
         // Callbacks
 
