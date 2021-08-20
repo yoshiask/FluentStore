@@ -1,7 +1,7 @@
 ﻿using FluentStore.SDK.Handlers;
 using FluentStore.SDK.Messages;
+using Flurl;
 using FuzzySharp;
-using FuzzySharp.Extractor;
 using FuzzySharp.SimilarityRatio;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Toolkit.Mvvm.Messaging;
@@ -107,6 +107,22 @@ namespace FluentStore.SDK
             {
                 throw new NotSupportedException("No package handler is registered for the namespace \"" + ns + "\".");
             }
+        }
+
+        /// <summary>
+        /// Gets the package associated with the specified URL.
+        /// </summary>
+        public async Task<PackageBase> GetPackageFromUrl(Url url)
+        {
+            PackageBase package = null;
+            foreach (PackageHandlerBase handler in PackageHandlers.Values.Distinct())
+            {
+                package = await handler.GetPackageFromUrl(url);
+                if (package != null)
+                    break;
+            }
+
+            return package;
         }
 
 

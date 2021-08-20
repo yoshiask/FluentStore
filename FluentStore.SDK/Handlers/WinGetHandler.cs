@@ -1,9 +1,11 @@
 ﻿using FluentStore.SDK.Images;
 using FluentStore.SDK.Packages;
+using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Toolkit.Diagnostics;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WinGetRun;
 using WinGetRun.Models;
@@ -59,6 +61,17 @@ namespace FluentStore.SDK.Handlers
                 Text = "\uE756",
                 FontFamily = "Segoe MDL2 Assets"
             };
+        }
+
+        public override async Task<PackageBase> GetPackageFromUrl(Url url)
+        {
+            Regex rx = new Regex(@"^https:\/\/((www\.)?github|raw\.githubusercontent)\.com\/microsoft\/winget-pkgs(\/(blob|tree))?\/master\/manifests\/[0-9a-z]\/(?<publisherId>[^\/\s]+)\/(?<packageId>[^\/\s]+)",
+                RegexOptions.IgnoreCase);
+            Match m = rx.Match(url.ToString());
+            if (!m.Success)
+                return null;
+
+            return await GetPackage(Urn.Parse($"urn:{NAMESPACE_WINGET}:{m.Groups["publisherId"]}.{m.Groups["packageId"]}"));
         }
     }
 }

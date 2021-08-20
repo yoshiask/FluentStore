@@ -65,6 +65,12 @@ namespace FluentStore.Views
                 ViewModel = new PackageViewModel(await PackageService.GetPackage(urn));
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
             }
+            else if (param is Flurl.Url url)
+            {
+                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+                ViewModel = new PackageViewModel(await PackageService.GetPackageFromUrl(url));
+                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+            }
 
             if (ViewModel?.Package != null)
             {

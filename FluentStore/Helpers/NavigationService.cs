@@ -150,7 +150,8 @@ namespace FluentStore.Services
                         break;
 
                     case "web":
-
+                        destination = typeof(PackageView);
+                        parameter = (Url)ptcl.Path.Substring(1);
                         break;
 
                     default:

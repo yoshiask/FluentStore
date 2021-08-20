@@ -1,10 +1,12 @@
 ﻿using FluentStore.SDK.Images;
 using FluentStore.SDK.Packages;
+using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Marketplace.Storefront.Contracts;
 using Microsoft.Toolkit.Diagnostics;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Handlers
@@ -105,6 +107,17 @@ namespace FluentStore.SDK.Handlers
                 Text = "\uE14D",
                 FontFamily = "Segoe MDL2 Assets"
             };
+        }
+
+        public override async Task<PackageBase> GetPackageFromUrl(Url url)
+        {
+            Regex rx = new Regex(@"^https?:\/\/(?:www\.)?microsoft\.com\/(?:store\/apps|(?<locale>[a-z]{2}-[a-z]{2})\/p\/.+)\/(?<id>\w{12})",
+                RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            Match m = rx.Match(url.ToString());
+            if (!m.Success)
+                return null;
+
+            return await GetPackage(Urn.Parse($"urn:{NAMESPACE_MSSTORE}:{m.Groups["id"]}"));
         }
     }
 }

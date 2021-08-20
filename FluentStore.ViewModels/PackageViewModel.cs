@@ -45,7 +45,7 @@ namespace FluentStore.ViewModels
                 DisplayAdditionalInformationProperties = null;
 
                 // Update derived properties
-                IsCollection = Package.GetType() == typeof(SDK.Packages.CollectionPackage);
+                IsCollection = Package != null && Package.GetType() == typeof(SDK.Packages.CollectionPackage);
             }
         }
 

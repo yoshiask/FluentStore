@@ -1,5 +1,6 @@
 ﻿using FluentStore.SDK.Images;
 using FluentStore.SDK.Packages;
+using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using System.Collections.Generic;
@@ -65,6 +66,12 @@ namespace FluentStore.SDK.Handlers
             {
                 Text = "FS"
             };
+        }
+
+        public override async Task<PackageBase> GetPackageFromUrl(Url url)
+        {
+            // Fluent Store does not have a website
+            return null;
         }
     }
 }

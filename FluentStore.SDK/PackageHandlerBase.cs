@@ -1,4 +1,5 @@
 ﻿using FluentStore.SDK.Images;
+using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -27,6 +28,8 @@ namespace FluentStore.SDK
         public abstract Task<List<PackageBase>> GetSearchSuggestionsAsync(string query);
 
         public abstract Task<PackageBase> GetPackage(Urn packageUrn);
+
+        public abstract Task<PackageBase> GetPackageFromUrl(Url url);
 
         public bool Equals(PackageHandlerBase x, PackageHandlerBase y) => x.GetType() == y.GetType();
 
