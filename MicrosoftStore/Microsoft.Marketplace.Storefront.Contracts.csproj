@@ -4,7 +4,7 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
         <LangVersion>8</LangVersion>
-        <Platforms>AnyCPU;x64;x86</Platforms>
+        <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Flurl.Http" Version="3.2.0" />
