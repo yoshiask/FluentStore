@@ -13,19 +13,19 @@
 
 // Page 1: Disclaimer page
 
-#define DISCLAIMER_PAGE_HEADING L"Note that this installs a blank app"
-#define DISCLAIMER_PAGE_CONTENT L"This app does nothing and is intended only to demonstrate the installer."
+#define DISCLAIMER_PAGE_HEADING L"Important notice"
+#define DISCLAIMER_PAGE_CONTENT L"Fluent Store is not affiliated with any of the services it provides access to, with the exception of those that are explicitly branded with \"Fluent Store\"."
 #define DISCLAIMER_ACCEPT_BUTTON L"I understand"
 #define DISCLAIMER_CANCEL_BUTTON L"Cancel"
-#define DISCLAIMER_FOOTER L"<A HREF=\"https://github.com/yoshiask/FluentStore\">My website</A>"
+#define DISCLAIMER_FOOTER L"<A HREF=\"https://github.com/yoshiask/FluentStore\">View source code</A>"
 
 // Page 2: License page
 
 #define LICENSE_PAGE_HEADING L"Review the license"
-#define LICENSE_PAGE_CONTENT L"\u00A9 Copyright 2021\r\n\r\nYou could put anything here."
+#define LICENSE_PAGE_CONTENT L"Fluent Store is licensed under the Mozillia Public License 2.0 (MPL 2.0). Please view the current license by clicking the link in the footer."
 #define LICENSE_AGREE_BUTTON L"I agree"
 #define LICENSE_DISAGREE_BUTTON L"Cancel"
-#define LICENSE_FOOTER L"<A HREF=\"https://github.com/yoshiask/FluentStore\">Link to copyright information</A>"
+#define LICENSE_FOOTER L"<A HREF=\"https://github.com/yoshiask/FluentStore/blob/master/LICENSE\">View current license</A>"
 
 // Page 3: Confirmation page
 
@@ -33,14 +33,14 @@
 #define CONFIRMATION_PAGE_CONTENT L"Fluent Store is ready to install."
 #define CONFIRMATION_INSTALL_BUTTON L"Install"
 #define CONFIRMATION_CANCEL_BUTTON L"Cancel"
-#define CONFIRMATION_FOOTER L"<A HREF=\"https://github.com/yoshiask/FluentStore\">My website</A>"
+#define CONFIRMATION_FOOTER L"<A HREF=\"https://github.com/yoshiask/FluentStore\">View source code</A>"
 
 // Page 4: Installation in progress page
 
 #define INSTALLATION_PAGE_HEADING L"Fluent Store is installing"
 #define INSTALLATION_PAGE_CONTENT L"Thank you for your patience."
 #define INSTALLATION_CANCEL_BUTTON L"Cancel"
-#define INSTALLATION_FOOTER L"<A HREF=\"https://github.com/yoshiask/FluentStore\">My website</A>"
+#define INSTALLATION_FOOTER L"<A HREF=\"https://github.com/yoshiask/FluentStore\">View source code</A>"
 
 // Page 5: Success page
 
@@ -48,10 +48,10 @@
 #define SUCCESS_PAGE_CONTENT L"Fluent Store has been installed."
 #define SUCCESS_LAUNCH_BUTTON L"Launch Fluent Store"
 #define SUCCESS_CLOSE_BUTTON L"Close"
-#define SUCCESS_FOOTER L"<A HREF=\"https://github.com/yoshiask/FluentStore\">My website</A>"
+#define SUCCESS_FOOTER L"<A HREF=\"https://github.com/yoshiask/FluentStore\">View source code</A>"
 
 // Failure page
 
-#define FAILURE_FOOTER L"<A HREF=\"https://github.com/yoshiask/FluentStore\">Perhaps a link to report the issue</A>"
+#define FAILURE_FOOTER L"<A HREF=\"https://github.com/yoshiask/FluentStore/issues/new\">Report issue</A>"
 
 // Error messages are not currently translatable from this page

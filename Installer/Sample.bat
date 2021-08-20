@@ -9,7 +9,7 @@ REM Path to your app .sln file
 SET MSIXSIGNERSLN=D:\Repos\yoshiask\FluentStore\FluentStore.sln
 
 REM Name of package output before architecture (see Visual Studio folder output after making app packages)
-SET MSIXSIGNERBEFORE=My Blank App_1.0.0.0_
+SET MSIXSIGNERBEFORE=FluentStore_0.1.0.0_
 
 REM Name of package output after architecture (see Visual Studio folder output after making app packages)
 SET MSIXSIGNERAFTER=_Test
