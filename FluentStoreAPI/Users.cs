@@ -9,13 +9,11 @@ namespace FluentStoreAPI
 {
     public partial class FluentStoreAPI
     {
-        public async Task<User> GetUserAsync(string userId)
+        public async Task<Models.Firebase.UserSignInResponse> SignUpAndCreateProfileAsync(string email, string password, Profile profile)
         {
-            var fbCollections = await GetFirestoreBase().AppendPathSegments("users", userId)
-                .WithOAuthBearerToken(Token).GetJsonAsync<Newtonsoft.Json.Linq.JObject>();
-            var doc = fbCollections.ToObject<Models.Firebase.Document>();
-
-            return doc.Transform<User>();
+            var signInResponse = await SignUpAsync(email, password);
+            await UpdateUserProfileAsync(signInResponse.LocalID, profile);
+            return signInResponse;
         }
 
         public async Task<Profile> GetUserProfileAsync(string userId)
@@ -24,6 +22,11 @@ namespace FluentStoreAPI
                 .WithOAuthBearerToken(Token).GetJsonAsync<Newtonsoft.Json.Linq.JObject>();
 
             return fbProfile.ToObject<Models.Firebase.Document>().Transform<Profile>();
+        }
+
+        public async Task<bool> UpdateUserProfileAsync(string userId, Profile profile)
+        {
+            return await UpdateUserDocument(userId, Models.Firebase.Document.Untransform(profile), "public", "profile");
         }
 
         public async Task<List<Collection>> GetCollectionsAsync(string userId)

@@ -134,7 +134,7 @@ namespace FluentStore.Views
             {
                 try
                 {
-                    string userId = UserService.CurrentFirebaseUser.LocalID;
+                    string userId = UserService.CurrentUser.LocalID;
                     flyout = new MenuFlyout
                     {
                         Placement = FlyoutPlacementMode.BottomEdgeAlignedLeft
@@ -346,7 +346,7 @@ namespace FluentStore.Views
             {
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
                 // User wants to save
-                await FSApi.UpdateCollectionAsync(UserService.CurrentFirebaseUser.LocalID, editDialog.Collection);
+                await FSApi.UpdateCollectionAsync(UserService.CurrentUser.LocalID, editDialog.Collection);
                 await ViewModel.Refresh();
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
             }
@@ -392,7 +392,7 @@ namespace FluentStore.Views
                 };
                 button.Click += async (object sender, RoutedEventArgs e) =>
                 {
-                    string userId = UserService.CurrentFirebaseUser.LocalID;
+                    string userId = UserService.CurrentUser.LocalID;
                     // 0, urn; 1, namespace; 2, userId; 3, collectionId
                     string collectionId = ViewModel.Package.Urn.ToString().Split(':')[3];
                     if (await FSApi.DeleteCollectionAsync(userId, collectionId))

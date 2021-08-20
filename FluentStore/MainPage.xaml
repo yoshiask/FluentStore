@@ -42,7 +42,7 @@
                     <Button.Content>
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <SymbolIcon Symbol="Contact"/>
-                            <TextBlock x:Name="UserProfileName" Text="{x:Bind UserService.CurrentFirebaseUser.Email}"
+                            <TextBlock x:Name="UserProfileName" Text="{x:Bind UserService.CurrentUser.Email}"
                                            VerticalAlignment="Center" TextLineBounds="Tight"/>
                         </StackPanel>
                     </Button.Content>

@@ -66,7 +66,7 @@ namespace FluentStoreAPI
 
         public async Task<HomePageFeatured> GetHomePageFeaturedAsync()
         {
-            var document = await GetDocument(false, "home", "featured");
+            var document = await GetDocument(false, "featured", "home");
             return document.Transform<HomePageFeatured>();
         }
     }

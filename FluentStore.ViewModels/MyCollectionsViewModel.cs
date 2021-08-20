@@ -66,7 +66,7 @@ namespace FluentStore.ViewModels
 
         public async Task UpdateCollectionAsync(Collection newCollection)
         {
-            await FSApi.UpdateCollectionAsync(UserService.CurrentFirebaseUser.LocalID, newCollection);
+            await FSApi.UpdateCollectionAsync(UserService.CurrentUser.LocalID, newCollection);
             await LoadCollectionsAsync();
         }
 
@@ -74,7 +74,8 @@ namespace FluentStore.ViewModels
         {
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
 
-            var collections = await FSApi.GetCollectionsAsync(UserService.CurrentFirebaseUser.LocalID);
+            Collections.Clear();
+            var collections = await FSApi.GetCollectionsAsync(UserService.CurrentUser.LocalID);
             foreach (Collection collection in collections)
             {
                 CollectionPackage package = new CollectionPackage(FluentStoreHandler.GetImageStatic(), collection);

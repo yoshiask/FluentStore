@@ -10,17 +10,10 @@ namespace FluentStore.Services
     public class UserService : ObservableObject
     {
         private User _CurrentFirebaseUser;
-        public User CurrentFirebaseUser
+        public User CurrentUser
         {
             get => _CurrentFirebaseUser;
             internal set => SetProperty(ref _CurrentFirebaseUser, value);
-        }
-
-        private FluentStoreAPI.Models.User _CurrentUser;
-        public FluentStoreAPI.Models.User CurrentUser
-        {
-            get => _CurrentUser;
-            set => SetProperty(ref _CurrentUser, value);
         }
 
         private FluentStoreAPI.Models.Profile _CurrentProfile;
@@ -69,13 +62,10 @@ namespace FluentStore.Services
                     }
                 }
 
-                FSApi.Token = token;
-                FSApi.RefreshToken = refreshToken;
-                CurrentFirebaseUser = (await FSApi.GetCurrentUserDataAsync()).First();
-                CurrentUser = await FSApi.GetUserAsync(CurrentFirebaseUser.LocalID);
-                CurrentProfile = await FSApi.GetUserProfileAsync(CurrentFirebaseUser.LocalID);
+                CurrentUser = (await FSApi.GetCurrentUserDataAsync()).First();
+                CurrentProfile = await FSApi.GetUserProfileAsync(CurrentUser.LocalID);
 
-                PasswordVaultService.Add(new CredentialBase(CurrentFirebaseUser.LocalID, refreshToken));
+                PasswordVaultService.Add(new CredentialBase(CurrentUser.LocalID, refreshToken));
 
                 IsLoggedIn = true;
             }
@@ -119,12 +109,12 @@ namespace FluentStore.Services
 
         public void SignOut()
         {
-            PasswordVaultService.Remove(new CredentialBase(CurrentFirebaseUser.LocalID, FSApi.RefreshToken));
+            PasswordVaultService.Remove(new CredentialBase(CurrentUser.LocalID, FSApi.RefreshToken));
 
             IsLoggedIn = false;
             FSApi.Token = null;
             FSApi.RefreshToken = null;
-            CurrentFirebaseUser = null;
+            CurrentUser = null;
         }
     }
 }

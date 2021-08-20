@@ -18,16 +18,20 @@ namespace FluentStoreAPI
 
         public async Task<UserSignInResponse> SignUpAsync(string email, string password)
         {
-            var response = await GetIdentityTKBase().AppendPathSegment("accounts:signUp")
-                .PostJsonAsync(new { email, password, returnSecureToken = true });
-            return await ConvertToResult<UserSignInResponse>(response);
+            var request = GetIdentityTKBase().AppendPathSegment("accounts:signUp");
+            var response = await ConvertToResult<UserSignInResponse>(await request.PostJsonAsync(new { email, password, returnSecureToken = true }));
+            Token = response.IDToken;
+            RefreshToken = response.RefreshToken;
+            return response;
         }
 
         public async Task<UserSignInResponse> SignInAsync(string email, string password)
         {
-            var response = await GetIdentityTKBase().AppendPathSegment("accounts:signInWithPassword")
-                .PostJsonAsync(new { email, password, returnSecureToken = true });
-            return await ConvertToResult<UserSignInResponse>(response);
+            var request = GetIdentityTKBase().AppendPathSegment("accounts:signInWithPassword");
+            var response = await ConvertToResult<UserSignInResponse>(await request.PostJsonAsync(new { email, password, returnSecureToken = true }));
+            Token = response.IDToken;
+            RefreshToken = response.RefreshToken;
+            return response;
         }
 
         /// <summary>
@@ -48,9 +52,11 @@ namespace FluentStoreAPI
                 returnSecureToken = true,
                 returnIdpCredential
             };
-            var response = await GetIdentityTKBase().AppendPathSegment("accounts:signInWithIdp")
-                .PostJsonAsync(payload);
-            return await ConvertToResult<OAuthUserSignInResponse>(response);
+            var request = GetIdentityTKBase().AppendPathSegment("accounts:signInWithIdp");
+            var response = await ConvertToResult<OAuthUserSignInResponse>(await request.PostJsonAsync(payload));
+            Token = response.IDToken;
+            RefreshToken = response.RefreshToken;
+            return response;
         }
 
         /// <summary>
