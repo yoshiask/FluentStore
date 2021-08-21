@@ -1,105 +1,16 @@
 ﻿using FluentStore.SDK;
 using FluentStore.SDK.Messages;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Marketplace.Storefront.Contracts.V3;
 using Microsoft.Toolkit.Uwp.Notifications;
-using StoreLib.Models;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using Windows.ApplicationModel.Core;
-using Windows.Management.Deployment;
-using Windows.Networking.BackgroundTransfer;
 using Windows.Storage;
-using Windows.System;
 using Windows.UI.Notifications;
 
 namespace FluentStore.Helpers
 {
     public static class PackageHelper
     {
-        public static PackageInstance GetLatestDesktopPackage(List<PackageInstance> packages, string family, ProductDetails product)
-        {
-            List<PackageInstance> installables = packages.FindAll(p => p.Version.Revision != 70);
-            if (installables.Count <= 0)
-                return null;
-            // TODO: Add addtional checks that might take longer that the user can enable 
-            // if they are having issues
-            return installables.OrderByDescending(p => p.Version).First();
-        }
-
-        public static async Task<List<AppListEntry>> GetInstalledPackages()
-        {
-            PackageManager pkgManager = new PackageManager();
-            var allEntries = await Task.WhenAll(pkgManager.FindPackagesForUser("")
-                .Select(async pkg => await pkg.GetAppListEntriesAsync()));
-            return allEntries.Select(e => e.FirstOrDefault()).Where(e => e != null).ToList();
-        }
-
-        public static async Task<AppListEntry> GetAppByPackageFamilyNameAsync(string packageFamilyName)
-        {
-            var pkgManager = new PackageManager();
-            var pkg = pkgManager.FindPackagesForUser("", packageFamilyName).FirstOrDefault();
-
-            if (pkg == null) return null;
-
-            var apps = await pkg.GetAppListEntriesAsync();
-            var firstApp = apps.FirstOrDefault();
-            return firstApp;
-        }
-
-        public static bool IsFiletype(string file, params string[] exts)
-        {
-            foreach (string ext in exts)
-            {
-                if (Path.GetExtension(file) == ext)
-                    return true;
-            }
-            return false;
-        }
-
-        private static readonly Uri dummyUri = new Uri("mailto:dummy@seznam.cz");
-        /// <summary>
-        /// Check if target <paramref name="packageName"/> is installed on this device.
-        /// </summary>
-        /// <param name="packageName">Package name in format: "949FFEAB.Email.cz_refxrrjvvv3cw"</param>
-        /// <returns>True is app is installed on this device, false otherwise.</returns>
-        public static async Task<bool> IsAppInstalledAsync(string packageName)
-        {
-            try
-            {
-                bool appInstalled;
-                LaunchQuerySupportStatus result = await Launcher.QueryUriSupportAsync(dummyUri, LaunchQuerySupportType.Uri, packageName);
-                switch (result)
-                {
-                    case LaunchQuerySupportStatus.Available:
-                    case LaunchQuerySupportStatus.NotSupported:
-                        appInstalled = true;
-                        break;
-                    //case LaunchQuerySupportStatus.AppNotInstalled:
-                    //case LaunchQuerySupportStatus.AppUnavailable:
-                    //case LaunchQuerySupportStatus.Unknown:
-                    default:
-                        appInstalled = false;
-                        break;
-                }
-
-                Debug.WriteLine($"App {packageName}, query status: {result}, installed: {appInstalled}");
-                return appInstalled;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error checking if app {packageName} is installed. Error: {ex}");
-                return false;
-            }
-        }
-
         public static ToastNotification GenerateProgressToast(PackageBase package)
         {
             var visualBinding = new ToastBindingGeneric

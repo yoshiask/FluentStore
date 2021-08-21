@@ -28,8 +28,8 @@ namespace FluentStore.Views
             get => (MyAppsViewModel)GetValue(ViewModelProperty);
             set => SetValue(ViewModelProperty, value);
         }
-        public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register(nameof(ViewModel), typeof(MyAppsViewModel), typeof(MyAppsView), new PropertyMetadata(null));
+        public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(
+            nameof(ViewModel), typeof(MyAppsViewModel), typeof(MyAppsView), new PropertyMetadata(null));
 
         private async void Page_Loading(FrameworkElement sender, object args)
         {
@@ -49,13 +49,11 @@ namespace FluentStore.Views
                         await app.LoadIconSourceAsync();
 
                         ViewModel.Apps.Add(app);
-                        //appsList.Add(app);
                     });
                 }
             }
 
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
-            //ViewModel.Apps = appsList;
         }
     }
 }
