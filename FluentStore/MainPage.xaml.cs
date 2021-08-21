@@ -213,6 +213,7 @@ namespace FluentStore
             {
                 var coreTitleBar = Windows.ApplicationModel.Core.CoreApplication.GetCurrentView().TitleBar;
                 coreTitleBar.LayoutMetricsChanged += CoreTitleBar_LayoutMetricsChanged;
+                VisualStateManager.GoToState(this, "CompactLayout", true);
                 // Set XAML element as a draggable region.
                 Window.Current.SetTitleBar(TitlebarGrid);
             }
@@ -220,6 +221,7 @@ namespace FluentStore
             {
                 var coreTitleBar = Windows.ApplicationModel.Core.CoreApplication.GetCurrentView().TitleBar;
                 coreTitleBar.LayoutMetricsChanged -= CoreTitleBar_LayoutMetricsChanged;
+                VisualStateManager.GoToState(this, "DefaultLayout", true);
                 // Set XAML element as a draggable region.
                 Window.Current.SetTitleBar(null);
             }

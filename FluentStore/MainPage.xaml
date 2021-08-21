@@ -10,12 +10,12 @@
     SizeChanged="Page_SizeChanged"
     Background="{ThemeResource SystemControlAcrylicWindowBrush}">
 
-    <winui:NavigationView x:Name="MainNav" PaneDisplayMode="LeftCompact" IsTitleBarAutoPaddingEnabled="False"
+    <winui:NavigationView x:Name="MainNav" PaneDisplayMode="Top" IsTitleBarAutoPaddingEnabled="True"
                           SelectionChanged="NavigationView_SelectionChanged" BackRequested="MainNav_BackRequested"
                           Grid.Row="1">
 
         <winui:NavigationView.PaneHeader>
-            <StackPanel x:Name="HeaderBranding" Orientation="Horizontal" HorizontalAlignment="Left">
+            <StackPanel x:Name="HeaderBranding" Orientation="Horizontal" HorizontalAlignment="Center">
                 <Viewbox>
                     <Image Source="/Assets/Square71x71Logo.png"/>
                 </Viewbox>
@@ -27,7 +27,7 @@
         <winui:NavigationView.PaneFooter>
             <Grid>
                 <Button x:Name="SignInButton" Visibility="Visible" Command="{x:Bind ViewModel.SignInCommand}"
-                        Style="{ThemeResource AccentButtonStyle}" CornerRadius="0"
+                        Style="{ThemeResource AccentButtonStyle}" CornerRadius="4"
                         ToolTipService.ToolTip="Sign in" AutomationProperties.Name="Sign in"
                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
                     <StackPanel Spacing="8" Orientation="Horizontal">
@@ -37,7 +37,7 @@
                 </Button>
 
                 <Button x:Name="UserButton" Visibility="Collapsed" Background="Transparent"
-                        CornerRadius="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                        CornerRadius="4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
                         x:DefaultBindMode="OneWay">
                     <Button.Content>
                         <SymbolIcon Symbol="Contact"/>
@@ -63,10 +63,9 @@
             </Grid>
         </winui:NavigationView.PaneFooter>
 
-        <!--SystemControlChromeMediumLowAcrylicWindowMediumBrush-->
         <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
             <Grid.RowDefinitions>
-                <RowDefinition x:Name="TitlebarRow" Height="40"/>
+                <RowDefinition x:Name="TitlebarRow" Height="0"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
@@ -95,18 +94,16 @@
 
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
-                <VisualState>
-                    <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="{StaticResource CompactModeMinWidth}" />
-                    </VisualState.StateTriggers>
+                <VisualState x:Name="DefaultLayout"/>
 
+                <VisualState x:Name="CompactLayout">
                     <VisualState.Setters>
-                        <Setter Target="MainNav.PaneDisplayMode" Value="Top"/>
-                        <Setter Target="MainNav.IsTitleBarAutoPaddingEnabled" Value="True"/>
-                        <Setter Target="HeaderBranding.HorizontalAlignment" Value="Center"/>
-                        <Setter Target="TitlebarRow.Height" Value="0"/>
-                        <Setter Target="SignInButton.CornerRadius" Value="4"/>
-                        <Setter Target="UserButton.CornerRadius" Value="4"/>
+                        <Setter Target="MainNav.PaneDisplayMode" Value="LeftCompact"/>
+                        <Setter Target="MainNav.IsTitleBarAutoPaddingEnabled" Value="False"/>
+                        <Setter Target="HeaderBranding.HorizontalAlignment" Value="Left"/>
+                        <Setter Target="TitlebarRow.Height" Value="40"/>
+                        <Setter Target="SignInButton.CornerRadius" Value="0"/>
+                        <Setter Target="UserButton.CornerRadius" Value="0"/>
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
