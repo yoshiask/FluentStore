@@ -141,6 +141,12 @@
     <Compile Include="Controls\RatingBarControl.xaml.cs">
       <DependentUpon>RatingBarControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\SVSettingsControl\SettingsBlockControl.xaml.cs">
+      <DependentUpon>SettingsBlockControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SVSettingsControl\SettingsDisplayControl.xaml.cs">
+      <DependentUpon>SettingsDisplayControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Converters\NameToFontFamilyConverter.cs" />
     <Compile Include="Converters\NumberToStarGridLength.cs" />
     <Compile Include="Converters\PackageBaseEnumerableToViewModelEnumerable.cs" />
@@ -489,7 +495,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\SVSettingsControl\SettingsBlockControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\SVSettingsControl\SettingsDisplayControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Themes\CommonConverters.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\ToggleSwitchRightStyle.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

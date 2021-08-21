@@ -5,18 +5,27 @@
     xmlns:local="using:FluentStore.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:FluentStore.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
 	DataContext="{StaticResource settings}">
 
 	<ScrollViewer Padding="8">
 		<StackPanel Spacing="4">
-            <StackPanel>
-                <CheckBox Content="Use search exclusion filter" IsChecked="{Binding Default.UseExclusionFilter, Mode=TwoWay}"/>
-                <TextBox Text="{Binding Default.ExclusionFilter, Mode=TwoWay}" Header="Search exclusion filter"
-                         ToolTipService.ToolTip="A regular expression used to filter out unwanted search suggestions and results."
-                         IsEnabled="{Binding Default.UseExclusionFilter}"/>
-            </StackPanel>
-		</StackPanel>
+
+            <controls:SettingsBlockControl Title="Search exclusion filter"
+                                           Description="A regular expression used to filter out unwanted search suggestions and results.">
+                <controls:SettingsBlockControl.Icon>
+                    <FontIcon Glyph="&#xF6FA;"/>
+                </controls:SettingsBlockControl.Icon>
+                <controls:SettingsBlockControl.ExpandableContent>
+                    <TextBox Text="{Binding Default.ExclusionFilter, Mode=TwoWay}" Margin="16"
+                             IsEnabled="{Binding Default.UseExclusionFilter}"/>
+                </controls:SettingsBlockControl.ExpandableContent>
+                <ToggleSwitch IsOn="{Binding Default.UseExclusionFilter, Mode=TwoWay}" Style="{ThemeResource ToggleSwitchRightStyle}"
+                              OnContent="On" OffContent="Off"/>
+            </controls:SettingsBlockControl>
+
+        </StackPanel>
 	</ScrollViewer>
 </Page>

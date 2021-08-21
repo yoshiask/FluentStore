@@ -23,6 +23,7 @@
                            TextLineBounds="TrimToBaseline" VerticalAlignment="Bottom"
                            d:Text="404"/>
                 <TextBlock Text="{x:Bind ErrorTitle}" FontSize="24" TextWrapping="Wrap" VerticalAlignment="Top"
+                           Visibility="{x:Bind ErrorTitle, Converter={StaticResource EmptyStringToCollapsedConverter}}"
                            d:Text="Page not found"/>
             </StackPanel>
 
@@ -30,7 +31,7 @@
 
         <TextBlock d:Text="The requested resource could not be found but may be available in the future. Subsequent requests by the client are permissible."
                    Text="{x:Bind ErrorMessage}" TextWrapping="Wrap" IsTextSelectionEnabled="True"
-                   Visibility="{x:Bind ErrorMessage, Converter={StaticResource EmptyStringToVisibilityConverter}}"/>
+                   Visibility="{x:Bind ErrorMessage, Converter={StaticResource EmptyStringToCollapsedConverter}}"/>
     </StackPanel>
 
 </Page>

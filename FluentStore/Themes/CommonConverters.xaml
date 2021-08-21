@@ -7,9 +7,15 @@
     <tkconverters:StringFormatConverter x:Key="StringFormatConverter" />
     <tkconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     <tkconverters:CollectionVisibilityConverter x:Key="CollectionVisibilityConverter"/>
-    <tkconverters:StringVisibilityConverter x:Key="StringVisibilityConverter"/>
+    <tkconverters:EmptyCollectionToObjectConverter x:Key="EmptyCollectionToFalseConverter" EmptyValue="False" NotEmptyValue="True"/>
     <tkconverters:BoolToVisibilityConverter x:Key="NotBoolToVisibilityConverter" FalseValue="Visible" TrueValue="Collapsed"/>
-    <tkconverters:EmptyStringToObjectConverter x:Key="EmptyStringToVisibilityConverter" EmptyValue="Collapsed" NotEmptyValue="Visible"/>
+    <tkconverters:EmptyStringToObjectConverter x:Key="EmptyStringToCollapsedConverter" EmptyValue="Collapsed" NotEmptyValue="Visible"/>
+    <tkconverters:EmptyStringToObjectConverter x:Key="EmptyStringToVisibleConverter" EmptyValue="Visible" NotEmptyValue="Collapsed"/>
+    <tkconverters:EmptyStringToObjectConverter x:Key="EmptyStringToTrueConverter" EmptyValue="True" NotEmptyValue="False"/>
+    <tkconverters:EmptyStringToObjectConverter x:Key="EmptyStringToFalseConverter" EmptyValue="False" NotEmptyValue="True"/>
+    <tkconverters:BoolNegationConverter x:Key="NotBoolConverter"/>
+    <tkconverters:EmptyObjectToObjectConverter x:Key="NullToFalseConverter" EmptyValue="False" NotEmptyValue="True"/>
+    <tkconverters:EmptyObjectToObjectConverter x:Key="NullToTrueConverter" EmptyValue="True" NotEmptyValue="False"/>
 
     <converters:StreamToBitmapImageConverter x:Key="StreamToBitmapImageConverter"/>
     <converters:NameToFontFamilyConverter x:Key="NameToFontFamilyConverter"/>

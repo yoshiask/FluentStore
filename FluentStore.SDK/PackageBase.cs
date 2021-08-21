@@ -160,13 +160,13 @@ namespace FluentStore.SDK
             set => SetProperty(ref _Version, value);
         }
 
-        private ReviewSummary _ReviewSummary = default(ReviewSummary);
+        private ReviewSummary _ReviewSummary;
         public ReviewSummary ReviewSummary
         {
             get => _ReviewSummary;
             set => SetProperty(ref _ReviewSummary, value);
         }
-        public bool HasReviewSummary => ReviewSummary != default(ReviewSummary);
+        public bool HasReviewSummary => ReviewSummary != null;
 
         private double _Price = -1;
         public double Price
