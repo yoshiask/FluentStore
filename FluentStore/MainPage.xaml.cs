@@ -136,6 +136,9 @@ namespace FluentStore
             }
             else if (!string.IsNullOrEmpty(args.QueryText))
             {
+                // Switching pages, hacky way to close the suggestions menu
+                sender.IsEnabled = false;
+                sender.IsEnabled = true;
                 NavService.Navigate(typeof(Views.SearchResultsView), args.QueryText);
             }
         }
