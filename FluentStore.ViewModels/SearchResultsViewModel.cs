@@ -51,11 +51,8 @@ namespace FluentStore.ViewModels
             }
         }
 
-        public SearchResultsViewModel(string query)
+        public SearchResultsViewModel(string query) : this()
         {
-            //PopulateProductDetailsCommand = new AsyncRelayCommand(PopulateProductDetailsAsync);
-            GetResultsCommand = new AsyncRelayCommand(GetResultsAsync);
-            ViewProductCommand = new AsyncRelayCommand(ViewProduct);
             Query = query;
         }
 
@@ -110,13 +107,20 @@ namespace FluentStore.ViewModels
 
         public async Task GetResultsAsync()
         {
-            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+            try
+            {
+                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
 
-            PackageList.Clear();
-            var results = await PackageService.SearchAsync(Query);
-            PackageList = new ObservableCollection<PackageViewModel>(results.Select(p => new PackageViewModel(p)));
+                PackageList.Clear();
+                var results = await PackageService.SearchAsync(Query);
+                PackageList = new ObservableCollection<PackageViewModel>(results.Select(p => new PackageViewModel(p)));
 
-            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+            }
+            catch (Flurl.Http.FlurlHttpException ex)
+            {
+                NavService.ShowHttpErrorPage(ex);
+            }
         }
 
         public async Task ViewProduct()

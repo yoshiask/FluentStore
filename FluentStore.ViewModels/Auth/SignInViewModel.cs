@@ -92,7 +92,7 @@ namespace FluentStore.ViewModels.Auth
             {
                 IsSigningIn = true;
                 FailReason = null;
-                var resp = await FSApi.SignUpAndCreateProfileAsync(Email, Password, new FluentStoreAPI.Models.Profile { DisplayName = "Alex" });
+                var resp = await FSApi.SignUpAndCreateProfileAsync(Email, Password, new FluentStoreAPI.Models.Profile { DisplayName = Email });
                 if (await UserService.SignInAsync(resp.IDToken, resp.RefreshToken))
                     NavService.Navigate("HomeView");
             }

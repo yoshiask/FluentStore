@@ -62,19 +62,36 @@ namespace FluentStore.ViewModels
             // TODO: This really shouldn't have to make two separate API calls.
             // Is there a better way to get the product ID using the package family name?
 
-            // Get the full product details
-            var dcat = DisplayCatalogHandler.ProductionConfig();
-            await dcat.QueryDCATAsync(SelectedApp.PackageFamilyName, IdentiferType.PackageFamilyName);
-            if (dcat.ProductListing != null && dcat.ProductListing.Products.Count > 0)
+            try
             {
-                var dcatProd = dcat.ProductListing.Products[0];
-                var package = await PackageService.GetPackage(Urn.Parse($"urn:{MicrosoftStoreHandler.NAMESPACE_MSSTORE}:{dcatProd.ProductId}"));
-                if (package != null)
+                // Get the full product details
+                var dcat = DisplayCatalogHandler.ProductionConfig();
+                await dcat.QueryDCATAsync(SelectedApp.PackageFamilyName, IdentiferType.PackageFamilyName);
+                if (dcat.ProductListing != null && dcat.ProductListing.Products.Count > 0)
                 {
-                    WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
-                    NavService.Navigate("PackageView", package);
+                    var dcatProd = dcat.ProductListing.Products[0];
+                    var package = await PackageService.GetPackage(Urn.Parse($"urn:{MicrosoftStoreHandler.NAMESPACE_MSSTORE}:{dcatProd.ProductId}"));
+                    if (package != null)
+                    {
+                        WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+                        NavService.Navigate("PackageView", package);
+                        return;
+                    }
                 }
             }
+            catch (Flurl.Http.FlurlHttpException ex)
+            {
+                NavService.ShowHttpErrorPage(ex);
+            }
+            catch (System.Exception ex)
+            {
+                // TODO: Show error message (likely from StoreLib)
+                throw;
+            }
+
+            // No package was found for that package family name
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+            NavService.ShowHttpErrorPage(404, "That app could not be found. It may be private or not listed in the Microsoft Store.");
         }
     }
 

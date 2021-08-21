@@ -66,8 +66,18 @@ namespace FluentStore.ViewModels
 
         public async Task UpdateCollectionAsync(Collection newCollection)
         {
-            await FSApi.UpdateCollectionAsync(UserService.CurrentUser.LocalID, newCollection);
-            await LoadCollectionsAsync();
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+            try
+            {
+                await FSApi.UpdateCollectionAsync(UserService.CurrentUser.LocalID, newCollection);
+                await LoadCollectionsAsync();
+            }
+            catch (Flurl.Http.FlurlHttpException ex)
+            {
+                // TODO: Show error in InfoBar
+                NavService.ShowHttpErrorPage(ex);
+            }
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
 
         public async Task LoadCollectionsAsync()
@@ -75,24 +85,32 @@ namespace FluentStore.ViewModels
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
 
             Collections.Clear();
-            var collections = await FSApi.GetCollectionsAsync(UserService.CurrentUser.LocalID);
-            foreach (Collection collection in collections)
+            try
             {
-                CollectionPackage package = new CollectionPackage(FluentStoreHandler.GetImageStatic(), collection);
-
-                // Get the author's display name
-                var authorProfile = await FSApi.GetUserProfileAsync(collection.AuthorId);
-                package.Update(authorProfile);
-
-                // Load items
-                foreach (string urn in collection.Items)
+                var collections = await FSApi.GetCollectionsAsync(UserService.CurrentUser.LocalID);
+                foreach (Collection collection in collections)
                 {
-                    // Load the product details for each item
-                    var item = await PackageService.GetPackage(Urn.Parse(urn));
-                    package.Items.Add(item);
-                }
+                    CollectionPackage package = new CollectionPackage(FluentStoreHandler.GetImageStatic(), collection);
 
-                Collections.Add(new PackageViewModel(package));
+                    // Get the author's display name
+                    var authorProfile = await FSApi.GetUserProfileAsync(collection.AuthorId);
+                    package.Update(authorProfile);
+
+                    // Load items
+                    foreach (string urn in collection.Items)
+                    {
+                        // Load the product details for each item
+                        var item = await PackageService.GetPackage(Urn.Parse(urn));
+                        package.Items.Add(item);
+                    }
+
+                    Collections.Add(new PackageViewModel(package));
+                }
+            }
+            catch (Flurl.Http.FlurlHttpException ex)
+            {
+                Collections.Clear();
+                NavService.ShowHttpErrorPage(ex);
             }
 
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));

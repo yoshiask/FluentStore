@@ -30,20 +30,7 @@ namespace FluentStore.SDK.Handlers
             foreach (var product in firstPage.Payload.SearchResults)
             {
                 // Get the full product details
-                var page = await StorefrontApi.GetPage(product.ProductId);
-                if (!page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ProductDetails>(out var details))
-                    continue;
-
-                var package = new MicrosoftStorePackage(Image, details);
-                if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.RatingSummary>(out var ratingSummary))
-                {
-                    package.Update(ratingSummary);
-                    if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ReviewList>(out var reviewList))
-                    {
-                        package.Update(reviewList);
-                    }
-                }
-
+                var package = await GetPackageFromPage(product.ProductId);
                 packages.Add(package);
             }
 
@@ -58,20 +45,7 @@ namespace FluentStore.SDK.Handlers
             foreach (var product in suggs.Payload.AssetSuggestions)
             {
                 // Get the full product details
-                var page = await StorefrontApi.GetPage(product.ProductId);
-                if (!page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ProductDetails>(out var details))
-                    continue;
-
-                var package = new MicrosoftStorePackage(Image, details);
-                if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.RatingSummary>(out var ratingSummary))
-                {
-                    package.Update(ratingSummary);
-                    if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ReviewList>(out var reviewList))
-                    {
-                        package.Update(reviewList);
-                    }
-                }
-
+                var package = await GetPackageFromPage(product.ProductId);
                 packages.Add(package);
             }
 
@@ -83,9 +57,25 @@ namespace FluentStore.SDK.Handlers
             Guard.IsEqualTo(packageUrn.NamespaceIdentifier, NAMESPACE_MSSTORE, nameof(packageUrn));
 
             string productId = packageUrn.GetContent<NamespaceSpecificString>().UnEscapedValue;
+            return await GetPackageFromPage(productId);
+        }
+
+        private async Task<MicrosoftStorePackage> GetPackageFromPage(string productId)
+        {
             var page = await StorefrontApi.GetPage(productId);
+
             if (!page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ProductDetails>(out var details))
+            {
+                // The Storefront API doesn't return 404 if the request was valid
+                // but no such produdct exists, so it has to be caught manually.
+                if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V1.ErrorResponse>(out var error))
+                {
+                    var NavService = Ioc.Default.GetRequiredService<Services.INavigationService>();
+                    uint code = uint.Parse(error.ErrorCode, System.Globalization.NumberStyles.AllowHexSpecifier);
+                    NavService.ShowHttpErrorPage(404, error.ErrorDescription);
+                }
                 return null;
+            }
 
             var package = new MicrosoftStorePackage(Image, details);
             if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.RatingSummary>(out var ratingSummary))

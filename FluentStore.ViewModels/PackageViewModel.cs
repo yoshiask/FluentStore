@@ -163,7 +163,15 @@ namespace FluentStore.ViewModels
         public async Task Refresh()
         {
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
-            Package = await PackageService.GetPackage(Package.Urn);
+            try
+            {
+                Package = await PackageService.GetPackage(Package.Urn);
+            }
+            catch (Flurl.Http.FlurlHttpException ex)
+            {
+                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+                NavigationService.ShowHttpErrorPage(ex);
+            }
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
 

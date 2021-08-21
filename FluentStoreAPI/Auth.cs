@@ -65,9 +65,16 @@ namespace FluentStoreAPI
         /// <remarks>Note that this does *not* update <see cref="Token"/> or <see cref="RefreshToken"/></remarks>
         public async Task<UseRefreshTokenResponse> UseRefreshToken()
         {
-            var response = await "https://securetoken.googleapis.com/v1/token".SetQueryParam("key", KEY)
-                .PostUrlEncodedAsync(new { grant_type = "refresh_token", refresh_token = RefreshToken });
-            return await ConvertToResult<UseRefreshTokenResponse>(response);
+            var request = "https://securetoken.googleapis.com/v1/token".SetQueryParam("key", KEY);
+            var payload = new
+            {
+                grant_type = "refresh_token",
+                refresh_token = RefreshToken
+            };
+            var response = await ConvertToResult<UseRefreshTokenResponse>(await request.PostUrlEncodedAsync(payload));
+            Token = response.IDToken;
+            RefreshToken = response.RefreshToken;
+            return response;
         }
 
         /// <summary>

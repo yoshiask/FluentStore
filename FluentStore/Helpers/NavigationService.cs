@@ -78,7 +78,7 @@ namespace FluentStore.Services
                 return;
             string paramName = parameter.GetType().Name;
             string vmName = paramName.ReplaceLastOccurrence("ViewModel", "") + "View";
-            Type type = Type.GetType("FluentStore.Views." + vmName);
+            Type type = ResolveType(vmName);
             Guard.IsNotNull(type, nameof(type));
             Navigate(type, parameter);
         }
@@ -124,7 +124,7 @@ namespace FluentStore.Services
         {
             string paramName = parameter.GetType().Name;
             string vmName = paramName.ReplaceLastOccurrence("Model", "");
-            Type type = Type.GetType("FluentStore.Views." + vmName);
+            Type type = ResolveType(vmName);
             Guard.IsNotNull(type, nameof(type));
             AppNavigate(type, parameter);
         }

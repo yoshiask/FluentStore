@@ -64,13 +64,29 @@ namespace FluentStore.Views
             else if (param is Garfoot.Utilities.FluentUrn.Urn urn)
             {
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
-                ViewModel = new PackageViewModel(await PackageService.GetPackage(urn));
+                try
+                {
+                    ViewModel = new PackageViewModel(await PackageService.GetPackage(urn));
+                }
+                catch (Flurl.Http.FlurlHttpException ex)
+                {
+                    WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+                    NavigationService.ShowHttpErrorPage(ex);
+                }
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
             }
             else if (param is Flurl.Url url)
             {
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
-                ViewModel = new PackageViewModel(await PackageService.GetPackageFromUrl(url));
+                try
+                {
+                    ViewModel = new PackageViewModel(await PackageService.GetPackageFromUrl(url));
+                }
+                catch (Flurl.Http.FlurlHttpException ex)
+                {
+                    WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+                    NavigationService.ShowHttpErrorPage(ex);
+                }
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
             }
 
@@ -166,6 +182,15 @@ namespace FluentStore.Views
                         }
                     };
                 }
+                catch (Flurl.Http.FlurlHttpException ex)
+                {
+                    var errorPage = new HttpErrorPage(ex.StatusCode ?? 418, ex.Message);
+                    flyout = new Flyout
+                    {
+                        Content = errorPage,
+                        Placement = FlyoutPlacementMode.Bottom
+                    };
+                }
                 catch
                 {
                     flyout = new Flyout
@@ -214,11 +239,21 @@ namespace FluentStore.Views
             });
             VisualStateManager.GoToState(this, "Progress", true);
 
-            await ViewModel.Package.DownloadPackageAsync();
-
-            VisualStateManager.GoToState(this, "NoAction", true);
-            InstallButton.IsEnabled = true;
-            WeakReferenceMessenger.Default.UnregisterAll(this);
+            try
+            {
+                await ViewModel.Package.DownloadPackageAsync();
+                InstallButton.IsEnabled = true;
+                // TODO: Show success message
+            }
+            catch
+            {
+                // TODO: Show error message
+            }
+            finally
+            {
+                VisualStateManager.GoToState(this, "NoAction", true);
+                WeakReferenceMessenger.Default.UnregisterAll(this);
+            }
         }
 
         private async void InstallUsingAppInstaller_Click(object sender, RoutedEventArgs e)
@@ -372,12 +407,24 @@ namespace FluentStore.Views
             });
             VisualStateManager.GoToState(this, "Progress", true);
 
-            if (await ViewModel.Package.DownloadPackageAsync() != null)
-                await ViewModel.Package.InstallAsync();
-
-            VisualStateManager.GoToState(this, "NoAction", true);
-            InstallButton.IsEnabled = true;
-            WeakReferenceMessenger.Default.UnregisterAll(this);
+            try
+            {
+                if (await ViewModel.Package.DownloadPackageAsync() != null)
+                {
+                    await ViewModel.Package.InstallAsync();
+                    InstallButton.IsEnabled = true;
+                    // TODO: Show success message
+                }
+            }
+            catch
+            {
+                // TODO: Show error message
+            }
+            finally
+            {
+                VisualStateManager.GoToState(this, "NoAction", true);
+                WeakReferenceMessenger.Default.UnregisterAll(this);
+            }
         }
 
         private async void EditCollection_Click(object sender, RoutedEventArgs e)
@@ -387,11 +434,18 @@ namespace FluentStore.Views
 
             if (await editDialog.ShowAsync() == ContentDialogResult.Primary)
             {
-                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
-                // User wants to save
-                await FSApi.UpdateCollectionAsync(UserService.CurrentUser.LocalID, editDialog.Collection);
-                await ViewModel.Refresh();
-                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+                try
+                {
+                    WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+                    // User wants to save
+                    await FSApi.UpdateCollectionAsync(UserService.CurrentUser.LocalID, editDialog.Collection);
+                    await ViewModel.Refresh();
+                    WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+                }
+                catch (Flurl.Http.FlurlHttpException ex)
+                {
+                    // TODO: Show error message
+                }
             }
         }
 
@@ -438,21 +492,25 @@ namespace FluentStore.Views
                     string userId = UserService.CurrentUser.LocalID;
                     // 0, urn; 1, namespace; 2, userId; 3, collectionId
                     string collectionId = ViewModel.Package.Urn.ToString().Split(':')[3];
-                    if (await FSApi.DeleteCollectionAsync(userId, collectionId))
-                        NavigationService.NavigateBack();
+                    try
+                    {
+                        if (await FSApi.DeleteCollectionAsync(userId, collectionId))
+                            NavigationService.NavigateBack();
+                    }
+                    catch (Flurl.Http.FlurlHttpException ex)
+                    {
+                        // TODO: Show error message
+                    }
                 };
             }
 
             flyout.ShowAt((FrameworkElement)sender);
         }
 
-        private async void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             string state = (Window.Current.Bounds.Width > (double)App.Current.Resources["CompactModeMinWidth"]) ? "DefaultLayout" : "CompactLayout";
-            if (Layouts.CurrentState?.Name != state)
-            {
-                VisualStateManager.GoToState(this, state, true);
-            }
+            VisualStateManager.GoToState(this, state, true);
         }
 
         private void SetUpAnimations()

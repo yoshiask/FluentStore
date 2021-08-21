@@ -38,6 +38,20 @@ namespace FluentStore.Services
 
         public abstract void AppNavigateForward();
 
+        public void ShowHttpErrorPage(int errorCode, string errorMessage = null)
+        {
+            Navigate("HttpErrorPage", (errorCode, errorMessage));
+        }
+
+        public void ShowHttpErrorPage(Flurl.Http.FlurlHttpException flurlEx, string errorMessage = null)
+        {
+            int errorCode = 418;
+            if (flurlEx.StatusCode.HasValue)
+                errorCode = flurlEx.StatusCode.Value;
+            errorMessage ??= flurlEx.Message;
+            ShowHttpErrorPage(errorCode, errorMessage);
+        }
+
         public abstract Task<bool> OpenInBrowser(string url);
 
         public abstract Task<bool> OpenInBrowser(Uri uri);

@@ -116,17 +116,25 @@ namespace FluentStore.ViewModels
 
         public async Task GetSearchSuggestionsAsync()
         {
-            var r = await PackageService.GetSearchSuggestionsAsync(SearchBoxText);
-            if (r == null || r.Count <= 0)
+            try
             {
-                SearchSuggestions = new ObservableCollection<PackageBase>
+                var r = await PackageService.GetSearchSuggestionsAsync(SearchBoxText);
+                if (r == null || r.Count <= 0)
+                {
+                    SearchSuggestions = new ObservableCollection<PackageBase>
                 {
                     new SDK.Packages.ModernPackage<object> { Title = "No results found" }
                 };
+                }
+                else
+                {
+                    SearchSuggestions = new ObservableCollection<PackageBase>(r);
+                }
             }
-            else
+            catch (Flurl.Http.FlurlHttpException ex)
             {
-                SearchSuggestions = new ObservableCollection<PackageBase>(r);
+                // TODO: Should this really navigate to a different page?
+                NavService.ShowHttpErrorPage(ex);
             }
         }
 
