@@ -39,7 +39,7 @@
                 <StackPanel Spacing="20">
                     <Border x:Name="HeroImageSpacer"/>
                     <Grid Padding="20" ColumnSpacing="20" Margin="20,0" MaxHeight="300"
-                          x:Name="InfoCard" CornerRadius="4" HorizontalAlignment="Left"
+                          x:Name="InfoCard" CornerRadius="4" HorizontalAlignment="Stretch"
                           SizeChanged="InfoCard_SizeChanged">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />

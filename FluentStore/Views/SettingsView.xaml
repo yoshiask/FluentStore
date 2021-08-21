@@ -22,8 +22,7 @@
                     <TextBox Text="{Binding Default.ExclusionFilter, Mode=TwoWay}" Margin="16"
                              IsEnabled="{Binding Default.UseExclusionFilter}"/>
                 </controls:SettingsBlockControl.ExpandableContent>
-                <ToggleSwitch IsOn="{Binding Default.UseExclusionFilter, Mode=TwoWay}" Style="{ThemeResource ToggleSwitchRightStyle}"
-                              OnContent="On" OffContent="Off"/>
+                <ToggleSwitch IsOn="{Binding Default.UseExclusionFilter, Mode=TwoWay}" Style="{ThemeResource ToggleSwitchRightStyle}"/>
             </controls:SettingsBlockControl>
 
         </StackPanel>
