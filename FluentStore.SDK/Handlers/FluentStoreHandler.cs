@@ -62,9 +62,9 @@ namespace FluentStore.SDK.Handlers
         public override ImageBase GetImage() => GetImageStatic();
         public static ImageBase GetImageStatic()
         {
-            return new TextImage
+            return new FileImage
             {
-                Text = "FS"
+                Url = "ms-appx:///Assets/Square71x71Logo.png"
             };
         }
 

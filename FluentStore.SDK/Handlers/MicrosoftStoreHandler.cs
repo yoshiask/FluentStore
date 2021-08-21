@@ -93,10 +93,9 @@ namespace FluentStore.SDK.Handlers
         
         public override ImageBase GetImage()
         {
-            return new TextImage
+            return new FileImage
             {
-                Text = "\uE14D",
-                FontFamily = "Segoe MDL2 Assets"
+                Url = "ms-appx:///Assets/PackageHandlerIcons/MicrosoftStoreHandler/StoreAppList.png"
             };
         }
 
