@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using FluentStore.SDK;
+using System.Linq;
 
 namespace FluentStore.ViewModels
 {
@@ -14,7 +15,7 @@ namespace FluentStore.ViewModels
         public ShellViewModel()
         {
             GetSearchSuggestionsCommand = new AsyncRelayCommand(GetSearchSuggestionsAsync);
-            SubmitQueryCommand = new AsyncRelayCommand<PackageBase>(SubmitQueryAsync);
+            SubmitQueryCommand = new AsyncRelayCommand<PackageViewModel>(SubmitQueryAsync);
             SignInCommand = new AsyncRelayCommand(SignInAsync);
             SignOutCommand = new RelayCommand(UserService.SignOut);
 
@@ -51,8 +52,8 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _IsPageLoading, value);
         }
 
-        private ObservableCollection<PackageBase> _SearchSuggestions = new ObservableCollection<PackageBase>();
-        public ObservableCollection<PackageBase> SearchSuggestions
+        private ObservableCollection<PackageViewModel> _SearchSuggestions = new ObservableCollection<PackageViewModel>();
+        public ObservableCollection<PackageViewModel> SearchSuggestions
         {
             get => _SearchSuggestions;
             set => SetProperty(ref _SearchSuggestions, value);
@@ -65,8 +66,8 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _SearchBoxText, value);
         }
 
-        private PackageBase _SelectedPackage;
-        public PackageBase SelectedPackage
+        private PackageViewModel _SelectedPackage;
+        public PackageViewModel SelectedPackage
         {
             get => _SelectedPackage;
             set => SetProperty(ref _SelectedPackage, value);
@@ -86,8 +87,8 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _GetSearchSuggestionsCommand, value);
         }
 
-        private IAsyncRelayCommand<PackageBase> _SubmitQueryCommand;
-        public IAsyncRelayCommand<PackageBase> SubmitQueryCommand
+        private IAsyncRelayCommand<PackageViewModel> _SubmitQueryCommand;
+        public IAsyncRelayCommand<PackageViewModel> SubmitQueryCommand
         {
             get => _SubmitQueryCommand;
             set => SetProperty(ref _SubmitQueryCommand, value);
@@ -121,14 +122,14 @@ namespace FluentStore.ViewModels
                 var r = await PackageService.GetSearchSuggestionsAsync(SearchBoxText);
                 if (r == null || r.Count <= 0)
                 {
-                    SearchSuggestions = new ObservableCollection<PackageBase>
-                {
-                    new SDK.Packages.ModernPackage<object> { Title = "No results found" }
-                };
+                    SearchSuggestions = new ObservableCollection<PackageViewModel>
+                    {
+                        new PackageViewModel(new SDK.Packages.ModernPackage<object> { Title = "No results found" })
+                    };
                 }
                 else
                 {
-                    SearchSuggestions = new ObservableCollection<PackageBase>(r);
+                    SearchSuggestions = new ObservableCollection<PackageViewModel>(r.Select(pb => new PackageViewModel(pb)));
                 }
             }
             catch (Flurl.Http.FlurlHttpException ex)
@@ -138,10 +139,12 @@ namespace FluentStore.ViewModels
             }
         }
 
-        public async Task SubmitQueryAsync(PackageBase package)
+        public async Task SubmitQueryAsync(PackageViewModel pvm)
         {
-            SelectedPackage = package;
-            NavService.Navigate("PackageView", SelectedPackage);
+            SelectedPackage = pvm;
+
+            // No need to try-catch this, ViewPackage does this internally
+            await pvm.ViewPackage();
         }
 
         public async Task SignInAsync() => await UserService.TrySignIn();

@@ -61,7 +61,31 @@ namespace FluentStore.ViewModels
 
         public async Task ViewCollectionAsync()
         {
-            NavService.Navigate(SelectedCollection);
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+
+            try
+            {
+                // Get the author's display name
+                var package = (CollectionPackage)SelectedCollection.Package;
+                var authorProfile = await FSApi.GetUserProfileAsync(package.Model.AuthorId);
+                package.Update(authorProfile);
+
+                // Load items
+                foreach (string urn in package.Model.Items)
+                {
+                    // Load the product details for each item
+                    var item = await PackageService.GetPackage(Urn.Parse(urn));
+                    package.Items.Add(item);
+                }
+
+                NavService.Navigate(SelectedCollection);
+            }
+            catch (Flurl.Http.FlurlHttpException ex)
+            {
+                NavService.ShowHttpErrorPage(ex);
+            }
+
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
 
         public async Task UpdateCollectionAsync(Collection newCollection)
@@ -91,19 +115,6 @@ namespace FluentStore.ViewModels
                 foreach (Collection collection in collections)
                 {
                     CollectionPackage package = new CollectionPackage(FluentStoreHandler.GetImageStatic(), collection);
-
-                    // Get the author's display name
-                    var authorProfile = await FSApi.GetUserProfileAsync(collection.AuthorId);
-                    package.Update(authorProfile);
-
-                    // Load items
-                    foreach (string urn in collection.Items)
-                    {
-                        // Load the product details for each item
-                        var item = await PackageService.GetPackage(Urn.Parse(urn));
-                        package.Items.Add(item);
-                    }
-
                     Collections.Add(new PackageViewModel(package));
                 }
             }

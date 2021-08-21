@@ -125,13 +125,11 @@ namespace FluentStore.ViewModels
 
         public async Task ViewProduct()
         {
-            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
-
             GetResultsCommand.Cancel();
             UpdateResultsList = false;
 
-            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
-            NavService.Navigate("PackageView", SelectedPackage);
+            // No need to try-catch this, ViewPackage does this internally
+            await SelectedPackage.ViewPackage();
         }
     }
 }

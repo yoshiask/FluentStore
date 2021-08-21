@@ -7,6 +7,7 @@ using Garfoot.Utilities.FluentUrn;
 using Microsoft.Marketplace.Storefront.Contracts.Enums;
 using Microsoft.Marketplace.Storefront.Contracts.V2;
 using Microsoft.Marketplace.Storefront.Contracts.V3;
+using Microsoft.Marketplace.Storefront.Contracts.V8.One;
 using Microsoft.Toolkit.Diagnostics;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using StoreLib.Models;
@@ -21,11 +22,67 @@ namespace FluentStore.SDK.Packages
 {
     public class MicrosoftStorePackage : ModernPackage<ProductDetails>
     {
-        public MicrosoftStorePackage(ImageBase handlerImage, ProductDetails product = null)
+        public MicrosoftStorePackage(ImageBase handlerImage, CardModel card = null, ProductSummary summary = null, ProductDetails product = null)
         {
             HandlerImage = handlerImage;
+            if (card != null)
+                Update(card);
+            if (summary != null)
+                Update(summary);
             if (product != null)
                 Update(product);
+        }
+
+        public void Update(CardModel card)
+        {
+            Guard.IsNotNull(card, nameof(card));
+            //Model = product;
+
+            // Set base properties
+            Title = card.Title;
+            Description = card.LongDescription;
+            ReviewSummary = new ReviewSummary
+            {
+                AverageRating = card.AverageRating,
+                // TODO: Parse into int. Examples:
+                // 2K -> 2000; 1.2M -> 1200000
+                //ReviewCount = card.RatingsCount
+            };
+            Price = card.Price;
+            DisplayPrice = card.DisplayPrice;
+            StoreId = card.ProductId;
+
+            // Set modern package properties
+            PackageFamilyName = card.PackageFamilyNames?[0];
+
+            // Set MS Store package properties
+            PackageId = PackageFamilyName ?? StoreId;  // Unpackaged apps don't have PackageFamilyName
+            Categories = card.Categories;
+            Images.Clear();
+            if (card.Images != null)
+                foreach (ImageItem img in card.Images)
+                    Images.Add(new MicrosoftStoreImage(img));
+        }
+
+        public void Update(ProductSummary summary)
+        {
+            Guard.IsNotNull(summary, nameof(summary));
+
+            // Set base properties
+            Title = summary.Title;
+            ReviewSummary = new ReviewSummary
+            {
+                AverageRating = summary.AverageRating,
+                ReviewCount = summary.RatingCount
+            };
+            Price = summary.Price;
+            StoreId = summary.ProductId;
+
+            // Set MS Store package properties
+            Images.Clear();
+            if (summary.Images != null)
+                foreach (ImageItem img in summary.Images)
+                    Images.Add(new MicrosoftStoreImage(img));
         }
 
         public void Update(ProductDetails product)
@@ -70,6 +127,7 @@ namespace FluentStore.SDK.Packages
             PackageAndDeviceCapabilities = product.PackageAndDeviceCapabilities;
             AllowedPlatforms = product.AllowedPlatforms;
             WarningMessages = product.WarningMessages;
+            Images.Clear();
             if (product.Images != null)
                 foreach (ImageItem img in product.Images)
                     Images.Add(new MicrosoftStoreImage(img));

@@ -234,10 +234,35 @@ namespace FluentStore.SDK
 
     public enum PackageStatus
     {
-        Unknown         = 0xFFFF,
-        None            = 0,
-        DownloadReady   = 1,
-        Downloaded      = 2,
-        Installed       = 3
+        None,
+
+        /// <summary>
+        /// Only the basic details have been retrieved from the source.
+        /// Suitable for search suggestions and results.
+        /// </summary>
+        BasicDetails,
+
+        /// <summary>
+        /// All details immediately available for the package have been retrieved from the source.
+        /// Suitable for PackageView.
+        /// </summary>
+        Details,
+
+        /// <summary>
+        /// The package is ready to be downloaded.
+        /// </summary>
+        DownloadReady,
+
+        /// <summary>
+        /// The package has been successfully downloaded, and <see cref="PackageBase.DownloadItem"/> has been populated.
+        /// </summary>
+        Downloaded,
+
+        /// <summary>
+        /// The package has been successfully installed.
+        /// </summary>
+        Installed,
+
+        Unknown = 0xFFFF,
     }
 }

@@ -18,7 +18,7 @@ namespace FluentStore.ViewModels
     {
         public PackageViewModel()
         {
-            ViewProductCommand = new RelayCommand<object>(ViewPackage);
+            ViewProductCommand = new AsyncRelayCommand<object>(ViewPackage);
             RefreshCommand = new AsyncRelayCommand(Refresh);
         }
         public PackageViewModel(PackageBase package) : this()
@@ -49,8 +49,8 @@ namespace FluentStore.ViewModels
             }
         }
 
-        private IRelayCommand<object> _ViewProductCommand;
-        public IRelayCommand<object> ViewProductCommand
+        private IAsyncRelayCommand<object> _ViewProductCommand;
+        public IAsyncRelayCommand<object> ViewProductCommand
         {
             get => _ViewProductCommand;
             set => SetProperty(ref _ViewProductCommand, value);
@@ -143,20 +143,34 @@ namespace FluentStore.ViewModels
             ? Package.ReviewSummary.AverageRating.ToString("F1")
             : string.Empty;
 
-        public void ViewPackage(object obj)
+        public async Task ViewPackage(object obj = null)
         {
             PackageViewModel pvm;
-            switch (obj)
+            if (obj == null)
             {
-                case PackageViewModel viewModel:
-                    pvm = viewModel;
-                    break;
-                case PackageBase package:
-                    pvm = new PackageViewModel(package);
-                    break;
-                default:
-                    throw new ArgumentException($"'{nameof(obj)}' is an invalid type: {obj.GetType().Name}");
+                pvm = this;
             }
+            else
+            {
+                switch (obj)
+                {
+                    case PackageViewModel viewModel:
+                        pvm = viewModel;
+                        break;
+                    case PackageBase package:
+                        pvm = new PackageViewModel(package);
+                        break;
+                    default:
+                        throw new ArgumentException($"'{nameof(obj)}' is an invalid type: {obj.GetType().Name}");
+                }
+            }
+
+            if (pvm.Package.Status < PackageStatus.Details)
+            {
+                // Load all details
+                await Refresh();
+            }
+
             NavigationService.Navigate(pvm);
         }
 
@@ -213,7 +227,6 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _DisplayProperties, value);
         }
 
-
         private List<DisplayAdditionalInformationInfo> _DisplayAdditionalInformationProperties;
         /// <summary>
         /// Gets the value of all properties with <see cref="DisplayAdditionalInformationAttribute"/> applied.
@@ -254,5 +267,7 @@ namespace FluentStore.ViewModels
 
         public static implicit operator PackageBase(PackageViewModel pvm) => pvm.Package;
         public static implicit operator PackageViewModel(PackageBase pb) => new PackageViewModel(pb);
+
+        public override string ToString() => Package.ToString();
     }
 }

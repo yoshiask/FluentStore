@@ -29,8 +29,8 @@ namespace FluentStore.SDK.Handlers
             var firstPage = await StorefrontApi.Search(query, "apps", Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily);
             foreach (var product in firstPage.Payload.SearchResults)
             {
-                // Get the full product details
-                var package = await GetPackageFromPage(product.ProductId);
+                var package = new MicrosoftStorePackage(Image, product);
+                package.Status = PackageStatus.BasicDetails;
                 packages.Add(package);
             }
 
@@ -44,8 +44,8 @@ namespace FluentStore.SDK.Handlers
 
             foreach (var product in suggs.Payload.AssetSuggestions)
             {
-                // Get the full product details
-                var package = await GetPackageFromPage(product.ProductId);
+                var package = new MicrosoftStorePackage(Image, summary: product);
+                package.Status = PackageStatus.BasicDetails;
                 packages.Add(package);
             }
 
@@ -77,7 +77,7 @@ namespace FluentStore.SDK.Handlers
                 return null;
             }
 
-            var package = new MicrosoftStorePackage(Image, details);
+            var package = new MicrosoftStorePackage(Image, product: details);
             if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.RatingSummary>(out var ratingSummary))
             {
                 package.Update(ratingSummary);
@@ -87,6 +87,7 @@ namespace FluentStore.SDK.Handlers
                 }
             }
 
+            package.Status = PackageStatus.Details;
             return package;
         }
         

@@ -80,7 +80,7 @@ namespace FluentStore.SDK
         public async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
         {
             var packages = new List<PackageBase>();
-            foreach (var handler in PackageHandlers.Values)
+            foreach (var handler in PackageHandlers.Values.Distinct())
             {
                 var results = await handler.GetSearchSuggestionsAsync(query);
                 // Filter results already in list

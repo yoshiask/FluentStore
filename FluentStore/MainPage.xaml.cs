@@ -130,9 +130,9 @@ namespace FluentStore
 
         private async void controlsSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
-            if (args.ChosenSuggestion != null && args.ChosenSuggestion is PackageBase package)
+            if (args.ChosenSuggestion != null && args.ChosenSuggestion is PackageViewModel vm)
             {
-                await ViewModel.SubmitQueryAsync(package);
+                await ViewModel.SubmitQueryAsync(vm);
             }
             else if (!string.IsNullOrEmpty(args.QueryText))
             {
