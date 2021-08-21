@@ -232,7 +232,7 @@ namespace FluentStore.SDK.Packages
         public override async Task<ImageBase> GetHeroImage()
         {
             ImageBase img = null;
-            int width = 0;
+            int width = -1;
             foreach (ImageBase image in Images.FindAll(i => i.ImageType == SDK.Images.ImageType.Hero))
             {
                 if (image.Width > width)

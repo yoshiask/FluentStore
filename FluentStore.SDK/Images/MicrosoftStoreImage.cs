@@ -1,11 +1,20 @@
 ﻿using Microsoft.Marketplace.Storefront.Contracts.V2;
+using Microsoft.Toolkit.Diagnostics;
 
 namespace FluentStore.SDK.Images
 {
     public class MicrosoftStoreImage : FileImage
     {
-        public MicrosoftStoreImage(ImageItem img)
+        public MicrosoftStoreImage(ImageItem img = null)
         {
+            if (img != null)
+                Update(img);
+        }
+
+        public void Update(ImageItem img)
+        {
+            Guard.IsNotNull(img, nameof(img));
+
             BackgroundColor = img.BackgroundColor;
             ForegroundColor = img.ForegroundColor;
             Url = img.Url;
