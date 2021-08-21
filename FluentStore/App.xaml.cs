@@ -5,7 +5,9 @@ using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Core;
+using Windows.System;
 using Windows.UI;
+using Windows.UI.Core;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -18,6 +20,8 @@ namespace FluentStore
     /// </summary>
     sealed partial class App : Application
     {
+        private NavigationService NavService;
+
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -40,8 +44,7 @@ namespace FluentStore
         /// <inheritdoc/>
         protected override void OnActivated(IActivatedEventArgs args)
         {
-            var navService = Ioc.Default.GetService<INavigationService>() as NavigationService;
-
+            NavService = Ioc.Default.GetService<INavigationService>() as NavigationService;
             ExtendIntoTitlebar();
             Frame rootFrame = Window.Current.Content as Frame;
 
@@ -54,6 +57,15 @@ namespace FluentStore
 
                 rootFrame.NavigationFailed += OnNavigationFailed;
 
+                // Add support for accelerator keys. 
+                // Listen to the window directly so the app responds
+                // to accelerator keys regardless of which element has focus.
+                Window.Current.CoreWindow.Dispatcher.AcceleratorKeyActivated += CoreDispatcher_AcceleratorKeyActivated;
+                // Add support for system back requests. 
+                SystemNavigationManager.GetForCurrentView().BackRequested += System_BackRequested;
+                // Add support for mouse navigation buttons. 
+                Window.Current.CoreWindow.PointerPressed += CoreWindow_PointerPressed;
+
                 if (args.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
                     //TODO: Load state from previously suspended application
@@ -62,7 +74,7 @@ namespace FluentStore
                 // Place the frame in the current Window
                 Window.Current.Content = rootFrame;
             }
-            navService.AppFrame = rootFrame;
+            NavService.AppFrame = rootFrame;
             Tuple<Type, object> destination = new Tuple<Type, object>(typeof(Views.HomeView), null);
 
             if (args is LaunchActivatedEventArgs launchArgs && launchArgs.PrelaunchActivated == false)
@@ -72,7 +84,7 @@ namespace FluentStore
                     // When the navigation stack isn't restored navigate to the first page,
                     // configuring the new page by passing required information as a navigation
                     // parameter
-                    destination = navService.ParseProtocol(launchArgs.Arguments);
+                    destination = NavService.ParseProtocol(launchArgs.Arguments);
                 }
                 // Ensure the current window is active
                 Window.Current.Activate();
@@ -83,7 +95,7 @@ namespace FluentStore
                 ProtocolActivatedEventArgs ptclArgs = args as ProtocolActivatedEventArgs;
                 // The received URI is eventArgs.Uri.AbsoluteUri
 
-                destination = navService.ParseProtocol(ptclArgs.Uri);
+                destination = NavService.ParseProtocol(ptclArgs.Uri);
             }
             rootFrame.Navigate(typeof(MainPage), destination);
 
@@ -152,6 +164,97 @@ namespace FluentStore
             ApplicationView.GetForCurrentView().TitleBar.ButtonForegroundColor = (Color)App.Current.Resources["SystemBaseHighColor"];
             ApplicationView.GetForCurrentView().TitleBar.ButtonBackgroundColor = Colors.Transparent;
             ApplicationView.GetForCurrentView().TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+        }
+
+        /// <summary>
+        /// Invoked on every keystroke, including system keys such as Alt key combinations.
+        /// Used to detect keyboard navigation between pages even when the page itself
+        /// doesn't have focus.
+        /// </summary>
+        private void CoreDispatcher_AcceleratorKeyActivated(CoreDispatcher sender, AcceleratorKeyEventArgs e)
+        {
+            // When Alt+Left are pressed navigate back.
+            // When Alt+Right are pressed navigate forward.
+            if (e.EventType == CoreAcceleratorKeyEventType.SystemKeyDown
+                && (e.VirtualKey == VirtualKey.Left || e.VirtualKey == VirtualKey.Right)
+                && e.KeyStatus.IsMenuKeyDown && !e.Handled)
+            {
+                if (e.VirtualKey == VirtualKey.Left)
+                {
+                    if (NavService.CurrentFrame.CanGoBack)
+                    {
+                        NavService.NavigateBack();
+                        e.Handled = true;
+                    }
+                    else
+                    {
+                        e.Handled = false;
+                    }
+                }
+                else if (e.VirtualKey == VirtualKey.Right)
+                {
+                    if (NavService.CurrentFrame.CanGoForward)
+                    {
+                        NavService.NavigateForward();
+                        e.Handled = true;
+                    }
+                    else
+                    {
+                        e.Handled = false;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle system back requests.
+        /// </summary>
+        private void System_BackRequested(object sender, BackRequestedEventArgs e)
+        {
+            if (!e.Handled)
+            {
+                if (NavService.CurrentFrame.CanGoBack)
+                {
+                    NavService.NavigateBack();
+                    e.Handled = true;
+                }
+                else
+                {
+                    e.Handled = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle mouse back button.
+        /// </summary>
+        private void CoreWindow_PointerPressed(CoreWindow sender, PointerEventArgs e)
+        {
+            // For this event, e.Handled arrives as 'true'.
+            if (e.CurrentPoint.Properties.IsXButton1Pressed)
+            {
+                if (NavService.CurrentFrame.CanGoBack)
+                {
+                    NavService.NavigateBack();
+                    e.Handled = false;
+                }
+                else
+                {
+                    e.Handled = true;
+                }
+            }
+            else if (e.CurrentPoint.Properties.IsXButton2Pressed)
+            {
+                if (NavService.CurrentFrame.CanGoForward)
+                {
+                    NavService.NavigateForward();
+                    e.Handled = false;
+                }
+                else
+                {
+                    e.Handled = true;
+                }
+            }
         }
     }
 }

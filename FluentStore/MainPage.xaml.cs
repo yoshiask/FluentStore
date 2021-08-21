@@ -94,29 +94,18 @@ namespace FluentStore
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            OnBackRequested();
-        }
-
-        // Handles system-level BackRequested events and page-level back button Click events
-        private bool OnBackRequested()
-        {
-            if (MainFrame.CanGoBack)
-            {
-                MainFrame.GoBack();
-                return true;
-            }
-            return false;
+            NavService.NavigateBack();
         }
 
         private void BackInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
         {
-            OnBackRequested();
+            NavService.NavigateBack();
             args.Handled = true;
         }
 
         private void MainNav_BackRequested(Microsoft.UI.Xaml.Controls.NavigationView sender, Microsoft.UI.Xaml.Controls.NavigationViewBackRequestedEventArgs args)
         {
-            OnBackRequested();
+            NavService.NavigateBack();
         }
 
         private async void controlsSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
