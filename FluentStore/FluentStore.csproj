@@ -129,6 +129,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\HttpErrorFlyout.cs" />
     <Compile Include="Controls\ImageBaseTemplateSelector.cs" />
     <Compile Include="Controls\ListViewBehavior.cs" />
     <Compile Include="Controls\PackageCardControl.xaml.cs">

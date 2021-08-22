@@ -18,6 +18,7 @@ namespace FluentStore.Views
         public HttpErrorPage(int errorCode, string errorMessage = null) : this()
         {
             ErrorCode = errorCode;
+            UpdateErrorTitle(this);
             ErrorMessage = errorMessage;
         }
 
@@ -27,7 +28,7 @@ namespace FluentStore.Views
             set => SetValue(ErrorCodeProperty, value);
         }
         public static readonly DependencyProperty ErrorCodeProperty = DependencyProperty.Register(
-            nameof(ErrorCode), typeof(int), typeof(HttpErrorPage), new PropertyMetadata(418));
+            nameof(ErrorCode), typeof(int), typeof(HttpErrorPage), new PropertyMetadata(418, OnErrorCodeChanged));
 
         public string ErrorMessage
         {
@@ -45,6 +46,14 @@ namespace FluentStore.Views
         public static readonly DependencyProperty ErrorTitleProperty = DependencyProperty.Register(
             nameof(ErrorTitle), typeof(string), typeof(HttpErrorPage), new PropertyMetadata(string.Empty));
 
+        protected static void UpdateErrorTitle(HttpErrorPage page, int? errorCode = null)
+        {
+            // Set error message to HTTP status code names as listed by IANA
+            // https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
+            if (HttpStatusCodes.TryGetValue(errorCode ?? page.ErrorCode, out string ianaErrorMessage))
+                page.ErrorTitle = ianaErrorMessage;
+        }
+
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             if (e.Parameter is (int errorCode, string errorMessage))
@@ -52,11 +61,11 @@ namespace FluentStore.Views
                 ErrorCode = errorCode;
                 ErrorMessage = errorMessage;
             }
+        }
 
-            // Set error message to HTTP status code names as listed by IANA
-            // https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
-            if (HttpStatusCodes.TryGetValue(ErrorCode, out string ianaErrorMessage))
-                ErrorTitle = ianaErrorMessage;
+        private static void OnErrorCodeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            UpdateErrorTitle((HttpErrorPage)d, e.NewValue as int?);
         }
 
         public static readonly Dictionary<int, string> HttpStatusCodes = new Dictionary<int, string>
