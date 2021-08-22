@@ -118,7 +118,9 @@ namespace FluentStore.SDK.Packages
             Guard.IsEqualTo((int)Status, (int)PackageStatus.Downloaded, nameof(Status));
 
             // TODO: Use full trust component to start installer in slient mode
-            return false;
+            bool isSuccess = false;
+
+            return isSuccess;
         }
 
         public override Task<bool> IsPackageInstalledAsync()
