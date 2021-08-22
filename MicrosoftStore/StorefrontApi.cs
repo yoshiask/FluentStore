@@ -32,10 +32,21 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         /// <summary>
         /// Gets trending recommendation cards of home page.
         /// </summary>
-        public async Task<ResponseItem<V4.CollectionDetail>> GetHomeRecommendations(int pageSize = 15, CultureInfo culture = null)
+        public async Task<ResponseItem<V4.CollectionDetail>> GetHomeRecommendations(int pageSize = 15, string deviceFamily = "Windows.Desktop", CultureInfo culture = null)
         {
             return await GetStorefrontBase(culture).AppendPathSegments("recommendations", "collections", "Collection", "TrendingHomeColl1")
-                .SetQueryParam("cardsEnabled", true).SetQueryParam("deviceFamily", "Windows.Desktop")
+                .SetQueryParam("cardsEnabled", true).SetQueryParam("deviceFamily", deviceFamily)
+                .GetJsonAsync<ResponseItem<V4.CollectionDetail>>();
+        }
+
+        /// <summary>
+        /// Gets the cards displayed at the top of the Home page in the Microsoft Store Preview app.
+        /// </summary>
+        public async Task<ResponseItem<V4.CollectionDetail>> GetHomeSpotlight(int pageSize = 15, string deviceFamily = "Windows.Desktop", CultureInfo culture = null)
+        {
+            return await GetStorefrontBase(culture).AppendPathSegments("ems", "curated", "HomeSpotlight")
+                .SetQueryParam("cardsEnabled", true).SetQueryParam("deviceFamily", deviceFamily)
+                .SetQueryParam("placementId", 10837389)
                 .GetJsonAsync<ResponseItem<V4.CollectionDetail>>();
         }
 

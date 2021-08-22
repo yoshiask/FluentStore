@@ -22,7 +22,7 @@ namespace FluentStore.Views
             get => (HomeViewModel)GetValue(ViewModelProperty);
             set => SetValue(ViewModelProperty, value);
         }
-        public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register(nameof(ViewModel), typeof(HomeViewModel), typeof(HomeView), new PropertyMetadata(null));
+        public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(nameof(ViewModel),
+            typeof(HomeViewModel), typeof(HomeView), new PropertyMetadata(null));
     }
 }

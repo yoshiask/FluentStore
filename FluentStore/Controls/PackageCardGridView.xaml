@@ -16,6 +16,12 @@
               HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="8"
               controls:ListViewBehaviour.FillBeforeWrap="True" controls:ListViewBehaviour.MinItemWidth="150">
 
+        <GridView.ItemsPanel>
+            <ItemsPanelTemplate>
+                <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="{Binding MaxRows}"/>
+            </ItemsPanelTemplate>
+        </GridView.ItemsPanel>
+
         <GridView.ItemContainerStyle>
             <Style TargetType="GridViewItem" BasedOn="{StaticResource DefaultGridViewItemStyle}">
                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>

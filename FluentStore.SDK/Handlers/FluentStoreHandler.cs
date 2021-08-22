@@ -20,6 +20,13 @@ namespace FluentStore.SDK.Handlers
             NAMESPACE_COLLECTION,
         };
 
+        public override string DisplayName => "Fluent Store";
+
+        public override async Task<List<PackageBase>> GetFeaturedPackagesAsync()
+        {
+            return new List<PackageBase>(0);
+        }
+
         public override async Task<PackageBase> GetPackage(Urn urn)
         {
             if (urn.NamespaceIdentifier == NAMESPACE_COLLECTION)
@@ -35,7 +42,7 @@ namespace FluentStore.SDK.Handlers
                 {
                     // Get details for each item
                     Urn packageUrn = Urn.Parse(packageId);
-                    PackageBase package = await PackageService.GetPackage(packageUrn);
+                    PackageBase package = await PackageService.GetPackageAsync(packageUrn);
                     items.Add(package);
                 }
 

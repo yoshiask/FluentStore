@@ -11,6 +11,7 @@ using Microsoft.Marketplace.Storefront.Contracts;
 using Garfoot.Utilities.FluentUrn;
 using FluentStore.SDK;
 using FluentStore.Services;
+using FluentStore.SDK.Models;
 
 namespace FluentStore.ViewModels
 {
@@ -40,9 +41,9 @@ namespace FluentStore.ViewModels
                 for (int i = 0; i < featured.Carousel.Count; i++)
                 {
                     Urn packageUrn = Urn.Parse(featured.Carousel[i]);
-                    var package = await PackageService.GetPackage(packageUrn);
+                    var package = await PackageService.GetPackageAsync(packageUrn);
                     CarouselItems.Add(new PackageViewModel(package));
-                    if (i == 0 || (i == 1 && featured.Carousel.Count >= 3))
+                    if (i == 0)
                         SelectedCarouselItemIndex = i;
                 }
 
@@ -107,13 +108,16 @@ namespace FluentStore.ViewModels
                 CarouselItems.Add(new PackageViewModel(fakeFSPackage));
 #endif
 
-                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+                // Load featured packages from other sources
+                var rawFeatured = await PackageService.GetFeaturedPackagesAsync();
+                FeaturedPackages = new ObservableCollection<HandlerPackageListPair>(rawFeatured);
             }
             catch (Flurl.Http.FlurlHttpException ex)
             {
-                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
                 NavService.ShowHttpErrorPage(ex);
             }
+
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
 
         private readonly StorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<StorefrontApi>();
@@ -145,6 +149,14 @@ namespace FluentStore.ViewModels
         {
             get => _SelectedCarouselItem;
             set => SetProperty(ref _SelectedCarouselItem, value);
+        }
+
+
+        private ObservableCollection<HandlerPackageListPair> _FeaturedPackages;
+        public ObservableCollection<HandlerPackageListPair> FeaturedPackages
+        {
+            get => _FeaturedPackages;
+            set => SetProperty(ref _FeaturedPackages, value);
         }
     }
 }

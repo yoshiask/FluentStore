@@ -66,7 +66,7 @@ namespace FluentStore.Views
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
                 try
                 {
-                    ViewModel = new PackageViewModel(await PackageService.GetPackage(urn));
+                    ViewModel = new PackageViewModel(await PackageService.GetPackageAsync(urn));
                 }
                 catch (Flurl.Http.FlurlHttpException ex)
                 {
@@ -80,7 +80,7 @@ namespace FluentStore.Views
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
                 try
                 {
-                    ViewModel = new PackageViewModel(await PackageService.GetPackageFromUrl(url));
+                    ViewModel = new PackageViewModel(await PackageService.GetPackageFromUrlAsync(url));
                 }
                 catch (Flurl.Http.FlurlHttpException ex)
                 {
@@ -302,7 +302,7 @@ namespace FluentStore.Views
             DataTransferManager dataTransferManager = DataTransferManager.GetForCurrentView();
             dataTransferManager.DataRequested += async (sender, args) =>
             {
-                Flurl.Url appUrl = PackageService.GetUrlForPackage(ViewModel.Package);
+                Flurl.Url appUrl = PackageService.GetUrlForPackageAsync(ViewModel.Package);
                 await ShareDataRequested(sender, args, appUrl);
             };
             DataTransferManager.ShowShareUI();

@@ -10,5 +10,6 @@ namespace Microsoft.Marketplace.Storefront.Contracts.Enums
         Poster, 
         Square,
         Circular,
+        BaseLandscape,
     };
 }

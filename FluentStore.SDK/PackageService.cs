@@ -1,10 +1,9 @@
 ﻿using FluentStore.SDK.Handlers;
-using FluentStore.SDK.Messages;
+using FluentStore.SDK.Models;
 using Flurl;
 using FuzzySharp;
 using FuzzySharp.SimilarityRatio;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,6 +55,24 @@ namespace FluentStore.SDK
         }
 
         /// <summary>
+        /// Gets a list of featured packages from each package handler.
+        /// </summary>
+        public async Task<List<HandlerPackageListPair>> GetFeaturedPackagesAsync()
+        {
+            var lists = new List<HandlerPackageListPair>();
+
+            foreach (var handler in PackageHandlers.Values.Distinct())
+            {
+                var results = await handler.GetFeaturedPackagesAsync();
+                if (results.Count <= 0)
+                    continue;
+                lists.Add(new HandlerPackageListPair(handler, results));
+            }
+
+            return lists;
+        }
+
+        /// <summary>
         /// Performs a search across all package handlers with the given query.
         /// </summary>
         public async Task<List<PackageBase>> SearchAsync(string query)
@@ -96,7 +113,7 @@ namespace FluentStore.SDK
         /// <summary>
         /// Gets the package with the specific <paramref name="packageUrn"/>.
         /// </summary>
-        public async Task<PackageBase> GetPackage(Urn packageUrn)
+        public async Task<PackageBase> GetPackageAsync(Urn packageUrn)
         {
             string ns = packageUrn.NamespaceIdentifier;
             if (PackageHandlers.TryGetValue(ns, out var handler))
@@ -112,7 +129,7 @@ namespace FluentStore.SDK
         /// <summary>
         /// Gets the package associated with the specified URL.
         /// </summary>
-        public async Task<PackageBase> GetPackageFromUrl(Url url)
+        public async Task<PackageBase> GetPackageFromUrlAsync(Url url)
         {
             PackageBase package = null;
             foreach (PackageHandlerBase handler in PackageHandlers.Values.Distinct())
@@ -128,7 +145,7 @@ namespace FluentStore.SDK
         /// <summary>
         /// Gets the URL of the package on the source website.
         /// </summary>
-        public Url GetUrlForPackage(PackageBase package)
+        public Url GetUrlForPackageAsync(PackageBase package)
         {
             string ns = package.Urn.NamespaceIdentifier;
             if (PackageHandlers.TryGetValue(ns, out var handler))

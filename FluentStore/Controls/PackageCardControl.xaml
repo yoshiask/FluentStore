@@ -38,11 +38,7 @@
                                x:Load="{x:Bind ViewModel.Package.ReviewSummary.HasReviewCount}"/>
                     <Viewbox x:Name="RatingBox" Width="90" Margin="0,0,0,-4"
                              x:Load="{x:Bind ViewModel.Package.ReviewSummary.HasAverageRating}">
-                        <winui:RatingControl Value="{x:Bind ViewModel.Package.ReviewSummary.AverageRating}" IsReadOnly="True">
-                            <winui:RatingControl.Resources>
-                                <SolidColorBrush x:Key="RatingControlSelectedForeground" Color="{ThemeResource SystemColorHighlightTextColor}"/>
-                            </winui:RatingControl.Resources>
-                        </winui:RatingControl>
+                        <winui:RatingControl Value="{x:Bind ViewModel.Package.ReviewSummary.AverageRating}" IsReadOnly="True"/>
                     </Viewbox>
                 </StackPanel>
             </StackPanel>

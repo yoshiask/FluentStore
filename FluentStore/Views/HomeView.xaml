@@ -5,13 +5,15 @@
     xmlns:local="using:FluentStore.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:tkcontrols="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:viewmodels="using:FluentStore.ViewModels"
-    xmlns:helpers="using:FluentStore.Helpers"
+    xmlns:sdkmodels="using:FluentStore.SDK.Models"
+    xmlns:controls="using:FluentStore.Controls"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    NavigationCacheMode="Required">
 
     <interactivity:Interaction.Behaviors>
         <core:EventTriggerBehavior EventName="Loading">
@@ -21,27 +23,25 @@
     
     <Grid>
         <Grid.RowDefinitions>
-            <!-- TODO: Properly handle short windows -->
-            <RowDefinition Height="*" MinHeight="300"/>
+            <RowDefinition Height="*" MinHeight="100"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <controls:Carousel x:Name="FeaturedCarousel" ItemsSource="{x:Bind ViewModel.CarouselItems}"
+        <tkcontrols:Carousel x:Name="FeaturedCarousel" ItemsSource="{x:Bind ViewModel.CarouselItems}"
                            SelectedIndex="{x:Bind ViewModel.SelectedCarouselItemIndex, Mode=TwoWay}"
                            SelectedItem="{x:Bind ViewModel.SelectedCarouselItem, Mode=TwoWay}"
-                           ItemMargin="16" ItemDepth="200">
-            <controls:Carousel.EasingFunction>
+                           ItemMargin="16" ItemDepth="200" ManipulationMode="None">
+            <tkcontrols:Carousel.EasingFunction>
                 <CubicEase EasingMode="EaseOut" />
-            </controls:Carousel.EasingFunction>
+            </tkcontrols:Carousel.EasingFunction>
 
-            <controls:Carousel.ItemTemplate>
+            <tkcontrols:Carousel.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:PackageViewModel">
                     <Grid Padding="0,16">
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="3*"/>
-                            <RowDefinition Height="1*" MinHeight="75"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="100"/>
                         </Grid.RowDefinitions>
-                        <ContentControl Content="{x:Bind HeroImage}"
-                                        Grid.RowSpan="2"
+                        <ContentControl Content="{x:Bind HeroImage}" Grid.RowSpan="2"
                                         ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
                         <Grid Grid.Row="1" Padding="8" ColumnSpacing="8" Background="{ThemeResource SystemControlBaseHighAcrylicElementBrush}">
                             <Grid.RowDefinitions>
@@ -69,11 +69,8 @@
                                            x:Load="{x:Bind Package.ReviewSummary.HasReviewCount}"/>
                                 <Viewbox x:Name="RatingBox" Width="90" Margin="0,0,0,-4"
                                          x:Load="{x:Bind Package.ReviewSummary.HasAverageRating}">
-                                    <winui:RatingControl Value="{x:Bind Package.ReviewSummary.AverageRating}" IsReadOnly="True">
-                                        <winui:RatingControl.Resources>
-                                            <SolidColorBrush x:Key="RatingControlSelectedForeground" Color="{ThemeResource SystemColorHighlightTextColor}"/>
-                                        </winui:RatingControl.Resources>
-                                    </winui:RatingControl>
+                                    <winui:RatingControl Value="{x:Bind Package.ReviewSummary.AverageRating}" IsReadOnly="True"
+                                                         Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"/>
                                 </Viewbox>
                             </StackPanel>
                             <Button Grid.Column="1" Grid.RowSpan="3" HorizontalAlignment="Right"
@@ -83,7 +80,28 @@
                         </Grid>
                     </Grid>
                 </DataTemplate>
-            </controls:Carousel.ItemTemplate>
-        </controls:Carousel>
+            </tkcontrols:Carousel.ItemTemplate>
+        </tkcontrols:Carousel>
+
+        <ScrollViewer Grid.Row="1">
+            <ItemsControl ItemsSource="{x:Bind ViewModel.FeaturedPackages, Mode=OneWay}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="12"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="sdkmodels:HandlerPackageListPair">
+                        <StackPanel HorizontalAlignment="Stretch" Spacing="0">
+                            <TextBlock Text="{x:Bind PackageHandler.DisplayName}" FontSize="16" FontWeight="Bold"
+                                       VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            <controls:PackageCardGridView Packages="{x:Bind Packages, Converter={StaticResource PackageBaseEnumerableToViewModelEnumerable}}"
+                                                          MaxRows="1" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        
     </Grid>
 </Page>

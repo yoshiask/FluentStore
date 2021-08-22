@@ -179,7 +179,7 @@ namespace FluentStore.ViewModels
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
             try
             {
-                Package = await PackageService.GetPackage(Package.Urn);
+                Package = await PackageService.GetPackageAsync(Package.Urn);
             }
             catch (Flurl.Http.FlurlHttpException ex)
             {

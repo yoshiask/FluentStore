@@ -74,7 +74,7 @@ namespace FluentStore.ViewModels
                 foreach (string urn in package.Model.Items)
                 {
                     // Load the product details for each item
-                    var item = await PackageService.GetPackage(Urn.Parse(urn));
+                    var item = await PackageService.GetPackageAsync(Urn.Parse(urn));
                     package.Items.Add(item);
                 }
 

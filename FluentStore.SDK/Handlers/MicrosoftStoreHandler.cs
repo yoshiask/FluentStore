@@ -23,6 +23,24 @@ namespace FluentStore.SDK.Handlers
             NAMESPACE_MODERNPACK,
         };
 
+        public override string DisplayName => "Microsoft Store";
+
+        public override async Task<List<PackageBase>> GetFeaturedPackagesAsync()
+        {
+            var packages = new List<PackageBase>();
+            var firstPage = await StorefrontApi.GetHomeSpotlight(deviceFamily: Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily);
+            foreach (var card in firstPage.Payload.Cards)
+            {
+                if (card.ProductId.Length != 12 || card.TypeTag != "app")
+                    continue;
+                var package = new MicrosoftStorePackage(Image, card);
+                package.Status = PackageStatus.BasicDetails;
+                packages.Add(package);
+            }
+
+            return packages;
+        }
+
         public override async Task<List<PackageBase>> SearchAsync(string query)
         {
             var packages = new List<PackageBase>();

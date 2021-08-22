@@ -70,7 +70,7 @@ namespace FluentStore.ViewModels
                 if (dcat.ProductListing != null && dcat.ProductListing.Products.Count > 0)
                 {
                     var dcatProd = dcat.ProductListing.Products[0];
-                    var package = await PackageService.GetPackage(Urn.Parse($"urn:{MicrosoftStoreHandler.NAMESPACE_MSSTORE}:{dcatProd.ProductId}"));
+                    var package = await PackageService.GetPackageAsync(Urn.Parse($"urn:{MicrosoftStoreHandler.NAMESPACE_MSSTORE}:{dcatProd.ProductId}"));
                     if (package != null)
                     {
                         WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));

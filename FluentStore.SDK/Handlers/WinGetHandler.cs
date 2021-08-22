@@ -22,6 +22,18 @@ namespace FluentStore.SDK.Handlers
             NAMESPACE_WINGET
         };
 
+        public override string DisplayName => "WinGet";
+
+        public override async Task<List<PackageBase>> GetFeaturedPackagesAsync()
+        {
+            var packages = new List<PackageBase>();
+            var featured = await WinGetApi.GetFeatured();
+            foreach (Package wgPackage in featured)
+                packages.Add(new WinGetPackage(Image, wgPackage));
+
+            return packages;
+        }
+
         public override async Task<PackageBase> GetPackage(Urn packageUrn)
         {
             Guard.IsEqualTo(packageUrn.NamespaceIdentifier, NAMESPACE_WINGET, nameof(packageUrn));

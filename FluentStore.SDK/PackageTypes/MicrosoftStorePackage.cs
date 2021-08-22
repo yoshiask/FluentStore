@@ -40,7 +40,7 @@ namespace FluentStore.SDK.Packages
 
             // Set base properties
             Title = card.Title;
-            Description = card.LongDescription;
+            Description = card.Description ?? card.LongDescription;
             ReviewSummary = new ReviewSummary
             {
                 AverageRating = card.AverageRating,

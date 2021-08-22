@@ -21,7 +21,11 @@ namespace FluentStore.SDK
             }
         }
 
+        public abstract string DisplayName { get; }
+
         public abstract ImageBase GetImage();
+
+        public abstract Task<List<PackageBase>> GetFeaturedPackagesAsync();
 
         public abstract Task<List<PackageBase>> SearchAsync(string query);
 

@@ -20,6 +20,7 @@ namespace Microsoft.Marketplace.Storefront.Contracts.V8.One
         public string AvailableDevicesNarratorText { get; set; }
         public string TypeTag { get; set; }
         public string LongDescription { get; set; }
+        public string Description { get; set; }
         public string ProductFamilyName { get; set; }
         public bool IsGamingAppOnly { get; set; }
         public List<string> Categories { get; set; }
