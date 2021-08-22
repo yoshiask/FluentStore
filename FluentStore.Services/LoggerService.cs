@@ -25,7 +25,7 @@ namespace FluentStore.Services
             Debug.WriteLine("=== WARN ===");
             Log(message, filePath, memberName, lineNumber);
             Debug.WriteLine(ex.ToString());
-            Debug.WriteLine("=== ========= ===");
+            Debug.WriteLine("=== ==== ===");
         }
 
         /// <summary>
