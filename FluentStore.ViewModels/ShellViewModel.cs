@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using FluentStore.SDK;
 using System.Linq;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace FluentStore.ViewModels
 {
@@ -37,6 +39,7 @@ namespace FluentStore.ViewModels
         private readonly UserService UserService = Ioc.Default.GetRequiredService<UserService>();
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
+        private readonly ISettingsService Settings = Ioc.Default.GetRequiredService<ISettingsService>();
 
         private string _PageHeader;
         public string PageHeader
@@ -119,8 +122,16 @@ namespace FluentStore.ViewModels
         {
             try
             {
-                var r = await PackageService.GetSearchSuggestionsAsync(SearchBoxText);
-                if (r == null || r.Count <= 0)
+                IEnumerable<PackageBase> results = await PackageService.GetSearchSuggestionsAsync(SearchBoxText);
+
+                if (Settings.UseExclusionFilter)
+                {
+                    // Filter out unwanted search results
+                    Regex exclusionFilter = new Regex(Settings.ExclusionFilter, RegexOptions.Compiled);
+                    results = results.Where(pb => !exclusionFilter.IsMatch(pb.Title));
+                }
+
+                if (results.Count() <= 0)
                 {
                     SearchSuggestions = new ObservableCollection<PackageViewModel>
                     {
@@ -129,7 +140,7 @@ namespace FluentStore.ViewModels
                 }
                 else
                 {
-                    SearchSuggestions = new ObservableCollection<PackageViewModel>(r.Select(pb => new PackageViewModel(pb)));
+                    SearchSuggestions = new ObservableCollection<PackageViewModel>(results.Select(pb => new PackageViewModel(pb)));
                 }
             }
             catch (Flurl.Http.FlurlHttpException ex)

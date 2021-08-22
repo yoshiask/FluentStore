@@ -140,6 +140,7 @@ namespace FluentStore
             services.AddSingleton(typeof(UserService));
             services.AddSingleton(typeof(LoggerService));
             services.AddSingleton(new SDK.PackageService());
+            services.AddSingleton<ISettingsService>(Helpers.Settings.Default);
 
             return services.BuildServiceProvider();
         }

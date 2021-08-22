@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FluentStore.Services;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -38,26 +39,11 @@ namespace FluentStore.Helpers
             if (settings.Values.ContainsKey(propertyName))
                 return (T)settings.Values[propertyName];
 
-            var attributes = GetType().GetTypeInfo().GetDeclaredProperty(propertyName).CustomAttributes.Where(ca => ca.AttributeType == typeof(DefaultSettingValueAttribute)).ToList();
+            var attributes = GetType().GetInterface(nameof(ISettingsService)).GetProperty(propertyName).CustomAttributes.Where(ca => ca.AttributeType == typeof(DefaultSettingValueAttribute)).ToList();
             if (attributes.Count == 1)
                 return (T)attributes[0].NamedArguments[0].TypedValue.Value;
 
             return default(T);
-        }
-
-        [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-        public sealed class DefaultSettingValueAttribute : Attribute
-        {
-            public DefaultSettingValueAttribute()
-            {
-            }
-
-            public DefaultSettingValueAttribute(object value)
-            {
-                Value = value;
-            }
-
-            public object Value { get; set; }
         }
     }
 }

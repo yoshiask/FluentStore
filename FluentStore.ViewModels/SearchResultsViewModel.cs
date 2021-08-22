@@ -5,9 +5,11 @@ using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Input;
 using Microsoft.Toolkit.Mvvm.Messaging;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace FluentStore.ViewModels
@@ -58,6 +60,7 @@ namespace FluentStore.ViewModels
 
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
+        private readonly ISettingsService Settings = Ioc.Default.GetRequiredService<ISettingsService>();
 
         private string _Query;
         public string Query
@@ -112,7 +115,15 @@ namespace FluentStore.ViewModels
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
 
                 PackageList.Clear();
-                var results = await PackageService.SearchAsync(Query);
+                IEnumerable<PackageBase> results = await PackageService.SearchAsync(Query);
+
+                if (Settings.UseExclusionFilter)
+                {
+                    // Filter out unwanted search results
+                    Regex exclusionFilter = new Regex(Settings.ExclusionFilter, RegexOptions.Compiled);
+                    results = results.Where(pb => !exclusionFilter.IsMatch(pb.Title));
+                }
+
                 PackageList = new ObservableCollection<PackageViewModel>(results.Select(p => new PackageViewModel(p)));
 
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
