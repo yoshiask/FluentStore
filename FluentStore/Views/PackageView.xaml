@@ -100,13 +100,7 @@
                                     <winui:SplitButton.Flyout>
                                         <MenuFlyout Placement="BottomEdgeAlignedLeft">
                                             <MenuFlyoutItem Icon="Download" Text="Download installer" ToolTipService.ToolTip="Downloads the app without installing it"
-                                                        x:Name="DownloadMenuItem" Click="Download_Click"/>
-                                            <MenuFlyoutItem Text="Install with App Installer" ToolTipService.ToolTip="Installs the app using Microsoft's App Installer"
-                                                        x:Name="InstallUsingAppInstallerMenuItem" Click="InstallUsingAppInstaller_Click">
-                                                <MenuFlyoutItem.Icon>
-                                                    <BitmapIcon UriSource="Assets/AppPackageAppList.png"/>
-                                                </MenuFlyoutItem.Icon>
-                                            </MenuFlyoutItem>
+                                                            x:Name="DownloadMenuItem" Click="Download_Click"/>
                                         </MenuFlyout>
                                     </winui:SplitButton.Flyout>
 

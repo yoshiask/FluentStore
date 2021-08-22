@@ -210,7 +210,37 @@ namespace FluentStore.Views
 
         private async void InstallSplitButton_Click(SplitButton sender, SplitButtonClickEventArgs e)
         {
-            await HandleInstall(false);
+            InstallButton.IsEnabled = false;
+
+            var progressToast = RegisterPackageServiceMessages();
+            WeakReferenceMessenger.Default.Unregister<PackageInstallCompletedMessage>(this);
+            WeakReferenceMessenger.Default.Register<PackageInstallCompletedMessage>(this, (r, m) =>
+            {
+                UpdateInstallButtonToLaunch();
+                VisualStateManager.GoToState(this, "NoAction", true);
+
+                PackageHelper.HandlePackageInstallCompletedToast(m, progressToast);
+            });
+            VisualStateManager.GoToState(this, "Progress", true);
+
+            try
+            {
+                if (await ViewModel.Package.DownloadPackageAsync() != null)
+                {
+                    await ViewModel.Package.InstallAsync();
+                    InstallButton.IsEnabled = true;
+                    // TODO: Show success message
+                }
+            }
+            catch
+            {
+                // TODO: Show error message
+            }
+            finally
+            {
+                VisualStateManager.GoToState(this, "NoAction", true);
+                WeakReferenceMessenger.Default.UnregisterAll(this);
+            }
         }
 
         private async void Download_Click(object sender, RoutedEventArgs e)
@@ -254,11 +284,6 @@ namespace FluentStore.Views
                 VisualStateManager.GoToState(this, "NoAction", true);
                 WeakReferenceMessenger.Default.UnregisterAll(this);
             }
-        }
-
-        private async void InstallUsingAppInstaller_Click(object sender, RoutedEventArgs e)
-        {
-            await HandleInstall(true);
         }
 
         private async void ShareButton_Click(SplitButton sender, SplitButtonClickEventArgs args)
@@ -326,8 +351,6 @@ namespace FluentStore.Views
 
         private void UpdateInstallButtonToLaunch()
         {
-            InstallUsingAppInstallerMenuItem.IsEnabled = false;
-
             InstallButtonText.Text = "Launch";
             InstallButton.Click -= InstallSplitButton_Click;
             InstallButton.Click += async (SplitButton sender, SplitButtonClickEventArgs e) =>
@@ -390,41 +413,6 @@ namespace FluentStore.Views
             });
 
             return progressToast;
-        }
-
-        public async Task HandleInstall(bool? useAppInstaller = null)
-        {
-            InstallButton.IsEnabled = false;
-
-            var progressToast = RegisterPackageServiceMessages();
-            WeakReferenceMessenger.Default.Unregister<PackageInstallCompletedMessage>(this);
-            WeakReferenceMessenger.Default.Register<PackageInstallCompletedMessage>(this, (r, m) =>
-            {
-                UpdateInstallButtonToLaunch();
-                VisualStateManager.GoToState(this, "NoAction", true);
-
-                PackageHelper.HandlePackageInstallCompletedToast(m, progressToast);
-            });
-            VisualStateManager.GoToState(this, "Progress", true);
-
-            try
-            {
-                if (await ViewModel.Package.DownloadPackageAsync() != null)
-                {
-                    await ViewModel.Package.InstallAsync();
-                    InstallButton.IsEnabled = true;
-                    // TODO: Show success message
-                }
-            }
-            catch
-            {
-                // TODO: Show error message
-            }
-            finally
-            {
-                VisualStateManager.GoToState(this, "NoAction", true);
-                WeakReferenceMessenger.Default.UnregisterAll(this);
-            }
         }
 
         private async void EditCollection_Click(object sender, RoutedEventArgs e)

@@ -5,9 +5,6 @@ namespace FluentStore.Services
 {
     public interface ISettingsService
     {
-        [DefaultSettingValue(Value = false)]
-        public bool UseAppInstaller { get; set; }
-
         [DefaultSettingValue(Value = @"\s?(?i)guide(?-i)\s?")]
         public string ExclusionFilter { get; set; }
 

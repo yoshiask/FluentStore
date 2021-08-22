@@ -216,7 +216,6 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\AppPackageAppList.targetsize-24.png" />
     <Content Include="Assets\constrast-black\SplashScreen.scale-100_contrast-black.png" />
     <Content Include="Assets\constrast-black\SplashScreen.scale-125_contrast-black.png" />
     <Content Include="Assets\constrast-black\SplashScreen.scale-150_contrast-black.png" />

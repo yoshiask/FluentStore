@@ -13,12 +13,6 @@ namespace FluentStore.Helpers
         {
         }
 
-        public bool UseAppInstaller
-        {
-            get => Get<bool>();
-            set => Set(value);
-        }
-
         public string ExclusionFilter
         {
             get => Get<string>();

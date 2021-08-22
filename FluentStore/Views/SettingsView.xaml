@@ -11,8 +11,7 @@
 
 	<ScrollViewer Padding="8">
 		<StackPanel Spacing="4">
-			<StackPanel>
-                <CheckBox Content="Use App Installer" IsChecked="{Binding Default.UseAppInstaller, Mode=TwoWay}"/>
+            <StackPanel>
                 <CheckBox Content="Use search exclusion filter" IsChecked="{Binding Default.UseExclusionFilter, Mode=TwoWay}"/>
                 <TextBox Text="{Binding Default.ExclusionFilter, Mode=TwoWay}" Header="Search exclusion filter"
                          ToolTipService.ToolTip="A regular expression used to filter out unwanted search suggestions and results."
