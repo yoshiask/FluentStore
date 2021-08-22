@@ -11,8 +11,7 @@
     Background="{ThemeResource SystemControlAcrylicWindowBrush}">
 
     <winui:NavigationView x:Name="MainNav" PaneDisplayMode="Top" IsTitleBarAutoPaddingEnabled="True"
-                          SelectionChanged="NavigationView_SelectionChanged" BackRequested="MainNav_BackRequested"
-                          Grid.Row="1">
+                          SelectionChanged="NavigationView_SelectionChanged" BackRequested="MainNav_BackRequested">
 
         <winui:NavigationView.PaneHeader>
             <StackPanel x:Name="HeaderBranding" Orientation="Horizontal" HorizontalAlignment="Center">
