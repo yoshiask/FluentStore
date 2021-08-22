@@ -59,6 +59,13 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _LoadCollectionsCommand, value);
         }
 
+        private bool _ShowNewCollectionTip = false;
+        public bool ShowNewCollectionTip
+        {
+            get => _ShowNewCollectionTip;
+            set => SetProperty(ref _ShowNewCollectionTip, value);
+        }
+
         public async Task ViewCollectionAsync()
         {
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
@@ -125,6 +132,8 @@ namespace FluentStore.ViewModels
             }
 
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+
+            ShowNewCollectionTip = Collections.Count <= 0;
         }
     }
 }

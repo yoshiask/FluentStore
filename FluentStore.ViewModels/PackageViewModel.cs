@@ -18,7 +18,7 @@ namespace FluentStore.ViewModels
     {
         public PackageViewModel()
         {
-            ViewProductCommand = new AsyncRelayCommand<object>(ViewPackage);
+            ViewPackageCommand = new AsyncRelayCommand<object>(ViewPackage);
             RefreshCommand = new AsyncRelayCommand(Refresh);
         }
         public PackageViewModel(PackageBase package) : this()
@@ -49,11 +49,11 @@ namespace FluentStore.ViewModels
             }
         }
 
-        private IAsyncRelayCommand<object> _ViewProductCommand;
-        public IAsyncRelayCommand<object> ViewProductCommand
+        private IAsyncRelayCommand<object> _ViewPackageCommand;
+        public IAsyncRelayCommand<object> ViewPackageCommand
         {
-            get => _ViewProductCommand;
-            set => SetProperty(ref _ViewProductCommand, value);
+            get => _ViewPackageCommand;
+            set => SetProperty(ref _ViewPackageCommand, value);
         }
 
         private IAsyncRelayCommand<object> _DownloadCommand;

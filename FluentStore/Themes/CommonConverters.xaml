@@ -8,6 +8,7 @@
     <tkconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     <tkconverters:CollectionVisibilityConverter x:Key="CollectionVisibilityConverter"/>
     <tkconverters:EmptyCollectionToObjectConverter x:Key="EmptyCollectionToFalseConverter" EmptyValue="False" NotEmptyValue="True"/>
+    <tkconverters:EmptyCollectionToObjectConverter x:Key="EmptyCollectionToTrueConverter" EmptyValue="True" NotEmptyValue="False"/>
     <tkconverters:BoolToVisibilityConverter x:Key="NotBoolToVisibilityConverter" FalseValue="Visible" TrueValue="Collapsed"/>
     <tkconverters:EmptyStringToObjectConverter x:Key="EmptyStringToCollapsedConverter" EmptyValue="Collapsed" NotEmptyValue="Visible"/>
     <tkconverters:EmptyStringToObjectConverter x:Key="EmptyStringToVisibleConverter" EmptyValue="Visible" NotEmptyValue="Collapsed"/>

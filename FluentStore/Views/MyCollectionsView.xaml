@@ -8,6 +8,7 @@
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:controls="using:FluentStore.Controls"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -22,41 +23,24 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
-        <GridView ItemsSource="{x:Bind ViewModel.Collections, Mode=OneWay}"
-                  SelectedItem="{x:Bind ViewModel.SelectedCollection, Mode=TwoWay}" SelectionMode="Single"
-                  ItemTemplate="{StaticResource DefaultPackageCardTemplate}"
-                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="10"
-                  controls:ListViewBehaviour.FillBeforeWrap="True" controls:ListViewBehaviour.MinItemWidth="150">
-            <GridView.ItemContainerStyle>
-                <Style TargetType="GridViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Setter Property="VerticalContentAlignment" Value="Stretch" />
-                </Style>
-            </GridView.ItemContainerStyle>
-            <GridView.ItemContainerTransitions>
-                <TransitionCollection>
-                    <AddDeleteThemeTransition/>
-                    <RepositionThemeTransition IsStaggeringEnabled="False"/>
-                    <PopupThemeTransition/>
-                </TransitionCollection>
-            </GridView.ItemContainerTransitions>
-            <GridView.Transitions>
-                <TransitionCollection>
-                    <ReorderThemeTransition/>
-                </TransitionCollection>
-            </GridView.Transitions>
 
-            <interactivity:Interaction.Behaviors>
-                <core:EventTriggerBehavior EventName="SelectionChanged">
-                    <core:InvokeCommandAction Command="{x:Bind ViewModel.ViewCollectionCommand}"/>
-                </core:EventTriggerBehavior>
-            </interactivity:Interaction.Behaviors>
-        </GridView>
+        <controls:PackageCardGridView Packages="{x:Bind ViewModel.Collections, Mode=OneWay}"
+                                      SelectedPackage="{x:Bind ViewModel.SelectedCollection, Mode=TwoWay}"
+                                      ViewPackageCommand="{x:Bind ViewModel.ViewCollectionCommand}"/>
 
         <CommandBar Grid.Row="1" DefaultLabelPosition="Right">
-            <AppBarButton Icon="Add" Label="New" Click="NewButton_Click"/>
+            <AppBarButton x:Name="NewCollectionButton" Icon="Add" Label="New" Click="NewButton_Click"/>
         </CommandBar>
+
+        <muxc:TeachingTip x:Name="NewCollectionTip"
+                          Target="{x:Bind NewCollectionButton}"
+                          Title="Create your first collection"
+                          Subtitle="Collections allow you to share, download, or install many apps at once."
+                          IsOpen="{x:Bind ViewModel.ShowNewCollectionTip, Mode=OneWay}">
+            <muxc:TeachingTip.IconSource>
+                <muxc:SymbolIconSource Symbol="List" />
+            </muxc:TeachingTip.IconSource>
+        </muxc:TeachingTip>
     </Grid>
     
 </Page>

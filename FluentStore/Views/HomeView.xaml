@@ -76,7 +76,7 @@
                             <Button Grid.Column="1" Grid.RowSpan="3" HorizontalAlignment="Right"
                                     Margin="0,0,8,0" Style="{ThemeResource AccentButtonStyle}"
                                     FontWeight="SemiBold" Padding="8" Content="{x:Bind Package.DisplayPrice}"
-                                    Command="{x:Bind ViewProductCommand}" CommandParameter="{x:Bind Package}"/>
+                                    Command="{x:Bind ViewPackageCommand}" CommandParameter="{x:Bind Package}"/>
                         </Grid>
                     </Grid>
                 </DataTemplate>

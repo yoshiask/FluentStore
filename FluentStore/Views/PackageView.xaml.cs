@@ -18,6 +18,7 @@ using Windows.UI.Text;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
+using Windows.UI.Xaml.Documents;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 using SplitButton = Microsoft.UI.Xaml.Controls.SplitButton;
@@ -153,43 +154,74 @@ namespace FluentStore.Views
                 try
                 {
                     string userId = UserService.CurrentUser.LocalID;
-                    flyout = new MenuFlyout
+                    var collections = await FSApi.GetCollectionsAsync(userId);
+                    if (collections.Count > 0)
                     {
-                        Placement = FlyoutPlacementMode.BottomEdgeAlignedLeft
-                    };
-                    foreach (FluentStoreAPI.Models.Collection collection in await FSApi.GetCollectionsAsync(userId))
-                    {
-                        var item = new MenuFlyoutItem
+                        flyout = new MenuFlyout
                         {
-                            Text = collection.Name,
-                            Tag = collection
+                            Placement = FlyoutPlacementMode.BottomEdgeAlignedLeft
                         };
-                        item.Click += (object s, RoutedEventArgs e) =>
+                        foreach (FluentStoreAPI.Models.Collection collection in collections)
                         {
-                            var it = (MenuFlyoutItem)s;
-                            var col = (FluentStoreAPI.Models.Collection)it.Tag;
-                            col.Items ??= new System.Collections.Generic.List<string>(1);
-                            col.Items.Add(ViewModel.Package.Urn.ToString());
-                        };
-                        ((MenuFlyout)flyout).Items.Add(item);
-                    }
-                    flyout.Closed += async (s, e) =>
-                    {
-                        foreach (var it in ((MenuFlyout)s).Items)
-                        {
-                            var col = (FluentStoreAPI.Models.Collection)it.Tag;
-                            await FSApi.UpdateCollectionAsync(userId, col);
+                            var item = new MenuFlyoutItem
+                            {
+                                Text = collection.Name,
+                                Tag = collection
+                            };
+                            item.Click += (object s, RoutedEventArgs e) =>
+                            {
+                                var it = (MenuFlyoutItem)s;
+                                var col = (FluentStoreAPI.Models.Collection)it.Tag;
+                                col.Items ??= new System.Collections.Generic.List<string>(1);
+                                col.Items.Add(ViewModel.Package.Urn.ToString());
+                            };
+                            ((MenuFlyout)flyout).Items.Add(item);
                         }
-                    };
+                        flyout.Closed += async (s, e) =>
+                        {
+                            foreach (var it in ((MenuFlyout)s).Items)
+                            {
+                                var col = (FluentStoreAPI.Models.Collection)it.Tag;
+                                await FSApi.UpdateCollectionAsync(userId, col);
+                            }
+                        };
+                    }
+                    else
+                    {
+                        var myCollectionsLink = new Hyperlink
+                        {
+                            Inlines =
+                            {
+                                new Run { Text = "My Collections" }
+                            },
+                        };
+                        myCollectionsLink.Click += (sender, args) =>
+                        {
+                            NavigationService.Navigate(typeof(MyCollectionsView));
+                        };
+                        var noCollectionsContent = new TextBlock
+                        {
+                            TextWrapping = TextWrapping.Wrap,
+                            Inlines =
+                            {
+                                new Run { Text = "You don't have any collections." },
+                                new LineBreak(),
+                                new Run { Text = "Go to " },
+                                myCollectionsLink,
+                                new Run { Text = " to create one." }
+                            }
+                        };
+
+                        flyout = new Flyout
+                        {
+                            Content = noCollectionsContent,
+                            Placement = FlyoutPlacementMode.Bottom
+                        };
+                    }
                 }
                 catch (Flurl.Http.FlurlHttpException ex)
                 {
-                    var errorPage = new HttpErrorPage(ex.StatusCode ?? 418, ex.Message);
-                    flyout = new Flyout
-                    {
-                        Content = errorPage,
-                        Placement = FlyoutPlacementMode.Bottom
-                    };
+                    flyout = new Controls.HttpErrorFlyout(ex.StatusCode ?? 418, ex.Message);
                 }
                 catch
                 {

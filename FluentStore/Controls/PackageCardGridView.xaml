@@ -5,7 +5,6 @@
     xmlns:controls="using:FluentStore.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:viewmodels="using:FluentStore.ViewModels"
     x:DefaultBindMode="OneWay"
     mc:Ignorable="d"
     d:DesignHeight="300"
@@ -15,12 +14,6 @@
               SelectionChanged="GridView_SelectionChanged" SelectedItem="{x:Bind SelectedPackage, Mode=TwoWay}" SelectionMode="Single"
               HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="8"
               controls:ListViewBehaviour.FillBeforeWrap="True" controls:ListViewBehaviour.MinItemWidth="150">
-
-        <GridView.ItemsPanel>
-            <ItemsPanelTemplate>
-                <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="{Binding MaxRows}"/>
-            </ItemsPanelTemplate>
-        </GridView.ItemsPanel>
 
         <GridView.ItemContainerStyle>
             <Style TargetType="GridViewItem" BasedOn="{StaticResource DefaultGridViewItemStyle}">

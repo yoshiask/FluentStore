@@ -1,5 +1,6 @@
 ﻿using FluentStore.ViewModels;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -39,12 +40,25 @@ namespace FluentStore.Controls
         public static readonly DependencyProperty MaxRowsProperty = DependencyProperty.Register(
             nameof(MaxRows), typeof(int), typeof(PackageCardGridView), new PropertyMetadata(-1));
 
+        public ICommand ViewPackageCommand
+        {
+            get => (ICommand)GetValue(ViewPackageCommandProperty);
+            set => SetValue(ViewPackageCommandProperty, value);
+        }
+        public static readonly DependencyProperty ViewPackageCommandProperty = DependencyProperty.Register(
+            nameof(ViewPackageCommand), typeof(ICommand), typeof(PackageCardGridView), new PropertyMetadata(null));
+
         private async void GridView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count > 0)
             {
                 var pvm = (PackageViewModel)e.AddedItems[0];
-                await pvm.ViewPackage();
+                if (ViewPackageCommand != null && ViewPackageCommand.CanExecute(null))
+                    ViewPackageCommand.Execute(null);
+                else if (pvm.ViewPackageCommand != null && pvm.ViewPackageCommand.CanExecute(null))
+                    await pvm.ViewPackageCommand.ExecuteAsync(null);
+                else
+                    await pvm.ViewPackage();
             }
         }
     }
