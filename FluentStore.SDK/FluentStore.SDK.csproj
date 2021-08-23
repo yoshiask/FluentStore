@@ -4,6 +4,7 @@
         <TargetFrameworks>netstandard2.0;uap10.0.19041</TargetFrameworks>
         <LangVersion>8</LangVersion>
         <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>

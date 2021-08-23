@@ -50,7 +50,8 @@
     <Capabilities>
         <Capability Name="internetClient" />
         <rescap:Capability Name="packageManagement" />
-        <rescap:Capability Name="packageQuery"/>
+        <rescap:Capability Name="packageQuery" />
         <rescap:Capability Name="runFullTrust" />
+        <rescap:Capability Name="broadFileSystemAccess" />
     </Capabilities>
 </Package>

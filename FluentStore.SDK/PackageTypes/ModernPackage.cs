@@ -2,6 +2,7 @@
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
 using FluentStore.SDK.Messages;
+using FluentStore.SDK.Models;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Marketplace.Storefront.Contracts.Enums;
 using Microsoft.Toolkit.Diagnostics;
@@ -25,18 +26,6 @@ namespace FluentStore.SDK.Packages
 {
     public class ModernPackage<TModel> : PackageBase<TModel>
     {
-        [Flags]
-        public enum InstallerType
-        {
-            Unknown     = 0b0000,
-            AppX        = 0b0010,
-            Msix        = 0b0100,
-            Bundle      = 0b0001,
-
-            AppXBundle  = AppX | Bundle,
-            MsixBundle  = Msix | Bundle,
-        }
-
         private Urn _Urn;
         public override Urn Urn
         {
@@ -66,79 +55,16 @@ namespace FluentStore.SDK.Packages
         public override async Task<string> GetCannotBeInstalledReason()
         {
             Guard.IsNotNull(DownloadItem, nameof(DownloadItem));
-
-            // Open package archive for reading
-            var file = await StorageHelper.GetPackageFile(Urn);
-            using var stream = await file.OpenReadAsync();
-            //var reader = new BinaryReader(stream.AsStream());
-            using var archive = new ZipArchive(stream.AsStream());
-
-            // Extract metadata from manifest
-            List<ProcessorArchitecture> architectures = new List<ProcessorArchitecture>();
-            if (Type.HasFlag(InstallerType.Bundle))
-            {
-                var bundleManifestEntry = archive.GetEntry("AppxManifest\\AppxBundleManifest.xml");
-                using var bundleManifestStream = bundleManifestEntry.Open();
-                XPathDocument bundleManifest = new XPathDocument(bundleManifestStream);
-                var archNodes = bundleManifest.CreateNavigator().Select("//Package/@Architecture");
-                do
-                {
-                    var archNode = archNodes.Current;
-                    architectures.Add((ProcessorArchitecture)Enum.Parse(typeof(ProcessorArchitecture), archNode.Value, true));
-                } while (archNodes.MoveNext());
-            }
-            else
-            {
-                var manifestEntry = archive.GetEntry("AppxManifest.xml");
-                using var manifestStream = manifestEntry.Open();
-                XPathDocument manifest = new XPathDocument(manifestStream);
-                var archNode = manifest.CreateNavigator().SelectSingleNode("//Identity/@ProcessorArchitecture");
-                architectures.Add((ProcessorArchitecture)Enum.Parse(typeof(ProcessorArchitecture), archNode.Value, true));
-            }
-
-            // Check Windows platform
-            PlatWindows? currentPlat = PlatWindowsStringConverter.Parse(AnalyticsInfo.VersionInfo.DeviceFamily);
-            if (!currentPlat.HasValue)
-            {
-                return "Cannot identify the current Windows platform.";
-            }
-            //else if (!AllowedPlatforms.Contains(currentPlat.Value))
-            //{
-            //    return Title + " does not support " + currentPlat.ToString();
-            //}
-
-            // Check CPU architecture
-            var curArch = Package.Current.Id.Architecture;
-            if (!architectures.Contains(curArch))
-            {
-                return Title + " does not support " + curArch.ToString();
-            }
-
-            return null;
+            return await PackagedInstallerHelper.GetCannotBeInstalledReason(
+                (IStorageFile)DownloadItem, Type.HasFlag(InstallerType.Bundle));
         }
 
-        private static readonly Uri dummyUri = new Uri("mailto:dummy@uwpcommunity.com");
         public override async Task<bool> IsPackageInstalledAsync()
         {
+            Guard.IsNotNull(PackageFamilyName, nameof(PackageFamilyName));
             try
             {
-                bool appInstalled;
-                LaunchQuerySupportStatus result = await Launcher.QueryUriSupportAsync(dummyUri, LaunchQuerySupportType.Uri, PackageFamilyName);
-                switch (result)
-                {
-                    case LaunchQuerySupportStatus.Available:
-                    case LaunchQuerySupportStatus.NotSupported:
-                        appInstalled = true;
-                        break;
-                    //case LaunchQuerySupportStatus.AppNotInstalled:
-                    //case LaunchQuerySupportStatus.AppUnavailable:
-                    //case LaunchQuerySupportStatus.Unknown:
-                    default:
-                        appInstalled = false;
-                        break;
-                }
-
-                return appInstalled;
+                return await PackagedInstallerHelper.IsInstalled(PackageFamilyName);
             }
             catch (Exception ex)
             {
@@ -152,50 +78,21 @@ namespace FluentStore.SDK.Packages
             // Make sure installer is downloaded
             Guard.IsEqualTo((int)Status, (int)PackageStatus.Downloaded, nameof(Status));
 
-            bool isSuccess = true;
-            PackageManager pkgManager = new PackageManager();
-            Progress<DeploymentProgress> progressCallback = new Progress<DeploymentProgress>(prog =>
+            if (await PackagedInstallerHelper.Install(this))
             {
-                WeakReferenceMessenger.Default.Send(new PackageInstallProgressMessage(this, prog.percentage / 100));
-            });
-
-            WeakReferenceMessenger.Default.Send(new PackageInstallStartedMessage(this));
-
-            // Attempt to install the downloaded package
-            // WinRT never sends a progress callback, so don't bother registering one
-            var result = await pkgManager.AddPackageByUriAsync(
-                new Uri(DownloadItem.Path),
-                new AddPackageOptions()
-                {
-                    ForceAppShutdown = true
-                }
-            );
-
-            if (!result.IsRegistered)
+                Status = PackageStatus.Installed;
+                return true;
+            }
+            else
             {
-                WeakReferenceMessenger.Default.Send(new PackageInstallFailedMessage(this, new Exception(result.ErrorText)));
                 return false;
             }
-            isSuccess = result.IsRegistered;
-            //await InstallerFile.DeleteAsync();
-
-            // Fire the success callback
-            WeakReferenceMessenger.Default.Send(new PackageInstallCompletedMessage(this));
-
-            Status = PackageStatus.Installed;
-            return true;
         }
 
         public override async Task LaunchAsync()
         {
-            var pkgManager = new PackageManager();
-            var pkg = pkgManager.FindPackagesForUser(string.Empty, PackageFamilyName).FirstOrDefault();
-
-            if (pkg == null) return;
-
-            var apps = await pkg.GetAppListEntriesAsync();
-            var firstApp = apps.FirstOrDefault();
-            await firstApp.LaunchAsync();
+            Guard.IsNotNull(PackageFamilyName, nameof(PackageFamilyName));
+            await PackagedInstallerHelper.Launch(PackageFamilyName);
         }
 
         public override Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null)
@@ -211,120 +108,15 @@ namespace FluentStore.SDK.Packages
         public async Task<string> GetInstallerType()
         {
             Guard.IsEqualTo((int)Status, (int)PackageStatus.Downloaded, nameof(Status));
-            string extension = "";
-            InstallerType type = InstallerType.Unknown;
-            StorageFile file = (StorageFile)DownloadItem;
-
-            using (var stream = await file.OpenStreamForReadAsync())
-            {
-                var bytes = new byte[4];
-                stream.Read(bytes, 0, 4);
-                uint magicNumber = (uint)((bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3]);
-
-                switch (magicNumber)
-                {
-                    // ZIP
-                    /// Typical [not empty or spanned] ZIP archive
-                    case 0x504B0304:
-                        using (var archive = ZipFile.OpenRead(DownloadItem.Path))
-                        {
-                            var entry = archive.GetEntry("[Content_Types].xml");
-                            var ctypesXml = XDocument.Load(entry.Open());
-                            var defaults = ctypesXml.Root.Elements().Where(e => e.Name.LocalName == "Default");
-                            if (defaults.Any(d => d.Attribute("Extension").Value == "msix"))
-                            {
-                                // Package contains one or more MSIX packages
-                                extension += ".msix";
-                                type |= InstallerType.Msix;
-                            }
-                            else if (defaults.Any(d => d.Attribute("Extension").Value == "appx"))
-                            {
-                                // Package contains one or more APPX packages
-                                extension += ".appx";
-                                type |= InstallerType.AppX;
-                            }
-                            if (defaults.Any(d => d.Attribute("ContentType").Value == "application/vnd.ms-appx.bundlemanifest+xml"))
-                            {
-                                // Package is a bundle
-                                extension += "bundle";
-                                type |= InstallerType.Bundle;
-                            }
-
-                            if (extension == string.Empty)
-                            {
-                                // We're not sure exactly what kind of package it is, but it's definitely
-                                // a package archive. Even if it's not actually an appxbundle, it will
-                                // likely still work.
-                                extension = ".appxbundle";
-                                type = InstallerType.AppXBundle;
-                            }
-                        }
-                        break;
-
-                    // EMSIX, EAAPX, EMSIXBUNDLE, EAPPXBUNDLE
-                    /// An encrypted installer [bundle]?
-                    case 0x45584248:
-                        // This means the downloaded file wasn't a zip archive.
-                        // Some inspection of a hex dump of the file leads me to believe that this means
-                        // the installer is encrypted. There's probably nothing that can be done about this,
-                        // but since it's a known case, let's leave this here.
-                        extension = ".eappxbundle";
-                        break;
-                }
-            }
-
-            return extension;
+            Type = await PackagedInstallerHelper.GetInstallerType((StorageFile)DownloadItem);
+            return Type.ToString().ToLower();
         }
 
         public override async Task<ImageBase> GetAppIcon()
         {
             Guard.IsNotNull(DownloadItem, nameof(DownloadItem));
-            StorageFile file = (StorageFile)DownloadItem;
-
-            // Open package archive for reading
-            using var stream = await file.OpenReadAsync();
-            using var archive = new ZipArchive(stream.AsStream());
-
-            // Extract icon from manifest
-            ZipArchive packArchive;
-            if (Type.HasFlag(InstallerType.Bundle))
-            {
-                // Get the smallest application APPX/MSIX
-                var bundleManifestEntry = archive.GetEntry("AppxManifest\\AppxBundleManifest.xml");
-                using var bundleManifestStream = bundleManifestEntry.Open();
-                XPathDocument bundleManifest = new XPathDocument(bundleManifestStream);
-                var packageNodes = bundleManifest.CreateNavigator().Select("/Bundle/Packages/Package[@Type=\"application\"]");
-                XPathNavigator smallestPackEntry = null;
-                long smallestPackSize = long.MaxValue;
-                do
-                {
-                    var packEntry = packageNodes.Current;
-                    long packSize = long.Parse(packEntry.GetAttribute("Size", string.Empty));
-                    if (packSize < smallestPackSize)
-                        smallestPackEntry = packEntry;
-                } while (packageNodes.MoveNext());
-
-                // Open the APPX/MSIX
-                using Stream packStream = archive.GetEntry(smallestPackEntry.GetAttribute("FileName", string.Empty)).Open();
-                packArchive = new ZipArchive(packStream);
-            }
-            else
-            {
-                packArchive = archive;
-            }
-
-            // Get the app icon
-            var manifestEntry = archive.GetEntry("AppxManifest.xml");
-            using var manifestStream = manifestEntry.Open();
-            XPathDocument manifest = new XPathDocument(manifestStream);
-            var logoNode = manifest.CreateNavigator().Select("/Package/Properties/Logo[1]").Current;
-            var iconEntry = archive.GetEntry(logoNode.Value);
-            return new StreamImage
-            {
-                ImageType = ImageType.Logo,
-                BackgroundColor = "Transparent",
-                Stream = iconEntry.Open()
-            };
+            return await PackagedInstallerHelper.GetAppIcon(
+                (StorageFile)DownloadItem, Type.HasFlag(InstallerType.Bundle));
         }
 
         public override async Task<ImageBase> GetHeroImage()

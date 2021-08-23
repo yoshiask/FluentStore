@@ -118,14 +118,42 @@ namespace FluentStore.SDK.Packages
             Guard.IsEqualTo((int)Status, (int)PackageStatus.Downloaded, nameof(Status));
             bool isSuccess = false;
 
-#if WINDOWS_UWP
-            // TODO: Use full trust component to start installer in slient mode
-            if (ApiInformation.IsApiContractPresent("Windows.ApplicationModel.FullTrustAppContract", 1, 0))
-            {
-                await Windows.ApplicationModel.FullTrustProcessLauncher.LaunchFullTrustProcessForCurrentAppAsync();
-            }
-#endif
+            // Get installer for current architecture
+            var sysArch = Windows.ApplicationModel.Package.Current.Id.Architecture;
+            var installerInfo = Manifest.Installers.Find(i => sysArch == i.Arch.ToWinRTArch());
+            if (installerInfo == null)
+                installerInfo = Manifest.Installers.Find(i => i.Arch == WinGetRun.Enums.InstallerArchitecture.X86
+                    || i.Arch == WinGetRun.Enums.InstallerArchitecture.Neutral);
+            if (installerInfo == null)
+                throw new PlatformNotSupportedException($"Your computer's architecture is {sysArch}, which is not supported by this package.");
 
+            switch (installerInfo.InstallerType)
+            {
+                case WinGetRun.Enums.InstallerType.Appx:
+                case WinGetRun.Enums.InstallerType.Msix:
+                    isSuccess = await PackagedInstallerHelper.Install(this);
+                    break;
+
+                default:
+#if WINDOWS_UWP
+                    // TODO: Use full trust component to start installer in slient mode
+                    var args = installerInfo.Switches?.Silent ?? Manifest.Switches?.Silent;
+                    try
+                    {
+                        await Win32Helpers.InvokeWin32ComponentAsync(DownloadItem.Path, args, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        var logger = Ioc.Default.GetRequiredService<Services.LoggerService>();
+                        logger.UnhandledException(ex, "Exception from Win32 component");
+                        throw;
+                    }
+#endif
+                    break;
+            }
+
+            if (isSuccess)
+                Status = PackageStatus.Installed;
             return isSuccess;
         }
 
