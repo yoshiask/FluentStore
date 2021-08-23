@@ -1,7 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="MSBuild.Sdk.Extras">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFrameworks>netstandard2.0;uap10.0.19041</TargetFrameworks>
         <LangVersion>8</LangVersion>
         <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
     </PropertyGroup>
@@ -11,9 +11,19 @@
         <PackageReference Include="Garfoot.Utilities.FluentUrn" Version="1.2.1" />
         <PackageReference Include="Microsoft.Toolkit.Diagnostics" Version="7.0.2" />
         <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.0.2" />
-        <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
         <PackageReference Include="OwlCore" Version="0.0.21" />
         <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
+    </ItemGroup>
+
+    <ItemGroup Condition=" !$(TargetFramework.StartsWith('uap')) ">
+        <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
+    </ItemGroup>
+
+    <ItemGroup Condition=" $(TargetFramework.StartsWith('uap')) ">
+        <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.12" />
+        <SDKReference Include="WindowsDesktop, Version=10.0.19041.0">
+            <Name>Windows Desktop Extensions for the UWP</Name>
+        </SDKReference>
     </ItemGroup>
 
     <ItemGroup>
