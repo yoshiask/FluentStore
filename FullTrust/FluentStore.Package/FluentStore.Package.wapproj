@@ -54,22 +54,52 @@
     <TargetPlatformVersion>10.0.19041.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
+    <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <EntryPointProjectUniqueName>..\..\FluentStore\FluentStore.csproj</EntryPointProjectUniqueName>
+    <GenerateTemporaryStoreCertificate>True</GenerateTemporaryStoreCertificate>
+    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+    <PackageCertificateThumbprint>5EC41115D1E1B49D0BFD6A3EB7AA318726E17A2D</PackageCertificateThumbprint>
+    <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
+    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
+    <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
+    <GenerateTestArtifacts>True</GenerateTestArtifacts>
+    <AppxBundlePlatforms>x86|x64|arm|arm64</AppxBundlePlatforms>
+    <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <AppxBundle>Always</AppxBundle>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AppxBundle>Always</AppxBundle>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <AppxBundle>Always</AppxBundle>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <AppxBundle>Always</AppxBundle>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <AppxBundle>Always</AppxBundle>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <AppxBundle>Always</AppxBundle>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <AppxBundle>Always</AppxBundle>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <AppxBundle>Always</AppxBundle>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <AppxBundle>Always</AppxBundle>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AppxBundle>Always</AppxBundle>
   </PropertyGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Images\SplashScreen.scale-200.png" />
-    <Content Include="Images\LockScreenLogo.scale-200.png" />
-    <Content Include="Images\Square150x150Logo.scale-200.png" />
-    <Content Include="Images\Square44x44Logo.scale-200.png" />
-    <Content Include="Images\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Content Include="Images\StoreLogo.png" />
-    <Content Include="Images\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.targets" />
   <ItemGroup>
@@ -79,5 +109,117 @@
   <ItemGroup>
     <ProjectReference Include="..\..\FluentStore\FluentStore.csproj" />
     <ProjectReference Include="..\FluentStore.FullTrust\FluentStore.FullTrust.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Images\contrast-black\SplashScreen.scale-100_contrast-black.png" />
+    <Content Include="Images\contrast-black\SplashScreen.scale-125_contrast-black.png" />
+    <Content Include="Images\contrast-black\SplashScreen.scale-150_contrast-black.png" />
+    <Content Include="Images\contrast-black\SplashScreen.scale-200_contrast-black.png" />
+    <Content Include="Images\contrast-black\SplashScreen.scale-400_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square150x150Logo.scale-100_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square150x150Logo.scale-125_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square150x150Logo.scale-150_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square150x150Logo.scale-200_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square150x150Logo.scale-400_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square310x310Logo.scale-100_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square310x310Logo.scale-125_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square310x310Logo.scale-150_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square310x310Logo.scale-200_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square310x310Logo.scale-400_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square44x44Logo.scale-100_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square44x44Logo.scale-125_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square44x44Logo.scale-150_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square44x44Logo.scale-200_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square44x44Logo.scale-400_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square44x44Logo.targetsize-24_altform-unplated_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square71x71Logo.scale-100_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square71x71Logo.scale-125_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square71x71Logo.scale-150_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square71x71Logo.scale-200_contrast-black.png" />
+    <Content Include="Images\contrast-black\Square71x71Logo.scale-400_contrast-black.png" />
+    <Content Include="Images\contrast-black\StoreLogo.scale-100_contrast-black.png" />
+    <Content Include="Images\contrast-black\StoreLogo.scale-125_contrast-black.png" />
+    <Content Include="Images\contrast-black\StoreLogo.scale-150_contrast-black.png" />
+    <Content Include="Images\contrast-black\StoreLogo.scale-200_contrast-black.png" />
+    <Content Include="Images\contrast-black\StoreLogo.scale-400_contrast-black.png" />
+    <Content Include="Images\contrast-black\Wide310x150Logo.scale-100_contrast-black.png" />
+    <Content Include="Images\contrast-black\Wide310x150Logo.scale-125_contrast-black.png" />
+    <Content Include="Images\contrast-black\Wide310x150Logo.scale-150_contrast-black.png" />
+    <Content Include="Images\contrast-black\Wide310x150Logo.scale-200_contrast-black.png" />
+    <Content Include="Images\contrast-black\Wide310x150Logo.scale-400_contrast-black.png" />
+    <Content Include="Images\contrast-white\SplashScreen.scale-100_contrast-white.png" />
+    <Content Include="Images\contrast-white\SplashScreen.scale-125_contrast-white.png" />
+    <Content Include="Images\contrast-white\SplashScreen.scale-150_contrast-white.png" />
+    <Content Include="Images\contrast-white\SplashScreen.scale-200_contrast-white.png" />
+    <Content Include="Images\contrast-white\SplashScreen.scale-400_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square150x150Logo.scale-100_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square150x150Logo.scale-125_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square150x150Logo.scale-150_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square150x150Logo.scale-200_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square150x150Logo.scale-400_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square310x310Logo.scale-100_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square310x310Logo.scale-125_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square310x310Logo.scale-150_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square310x310Logo.scale-200_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square310x310Logo.scale-400_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square44x44Logo.scale-100_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square44x44Logo.scale-125_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square44x44Logo.scale-150_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square44x44Logo.scale-200_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square44x44Logo.scale-400_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square44x44Logo.targetsize-24_altform-unplated_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square71x71Logo.scale-100_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square71x71Logo.scale-125_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square71x71Logo.scale-150_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square71x71Logo.scale-200_contrast-white.png" />
+    <Content Include="Images\contrast-white\Square71x71Logo.scale-400_contrast-white.png" />
+    <Content Include="Images\contrast-white\StoreLogo.scale-100_contrast-white.png" />
+    <Content Include="Images\contrast-white\StoreLogo.scale-125_contrast-white.png" />
+    <Content Include="Images\contrast-white\StoreLogo.scale-150_contrast-white.png" />
+    <Content Include="Images\contrast-white\StoreLogo.scale-200_contrast-white.png" />
+    <Content Include="Images\contrast-white\StoreLogo.scale-400_contrast-white.png" />
+    <Content Include="Images\contrast-white\Wide310x150Logo.scale-100_contrast-white.png" />
+    <Content Include="Images\contrast-white\Wide310x150Logo.scale-125_contrast-white.png" />
+    <Content Include="Images\contrast-white\Wide310x150Logo.scale-150_contrast-white.png" />
+    <Content Include="Images\contrast-white\Wide310x150Logo.scale-200_contrast-white.png" />
+    <Content Include="Images\contrast-white\Wide310x150Logo.scale-400_contrast-white.png" />
+    <Content Include="Images\LockScreenLogo.scale-200.png" />
+    <Content Include="Images\SplashScreen.scale-100.png" />
+    <Content Include="Images\SplashScreen.scale-125.png" />
+    <Content Include="Images\SplashScreen.scale-150.png" />
+    <Content Include="Images\SplashScreen.scale-200.png" />
+    <Content Include="Images\SplashScreen.scale-400.png" />
+    <Content Include="Images\Square150x150Logo.scale-100.png" />
+    <Content Include="Images\Square150x150Logo.scale-125.png" />
+    <Content Include="Images\Square150x150Logo.scale-150.png" />
+    <Content Include="Images\Square150x150Logo.scale-200.png" />
+    <Content Include="Images\Square150x150Logo.scale-400.png" />
+    <Content Include="Images\Square310x310Logo.scale-100.png" />
+    <Content Include="Images\Square310x310Logo.scale-125.png" />
+    <Content Include="Images\Square310x310Logo.scale-150.png" />
+    <Content Include="Images\Square310x310Logo.scale-200.png" />
+    <Content Include="Images\Square310x310Logo.scale-400.png" />
+    <Content Include="Images\Square44x44Logo.scale-100.png" />
+    <Content Include="Images\Square44x44Logo.scale-125.png" />
+    <Content Include="Images\Square44x44Logo.scale-150.png" />
+    <Content Include="Images\Square44x44Logo.scale-200.png" />
+    <Content Include="Images\Square44x44Logo.scale-400.png" />
+    <Content Include="Images\Square44x44Logo.targetsize-24_altform-unplated.png" />
+    <Content Include="Images\Square71x71Logo.scale-100.png" />
+    <Content Include="Images\Square71x71Logo.scale-125.png" />
+    <Content Include="Images\Square71x71Logo.scale-150.png" />
+    <Content Include="Images\Square71x71Logo.scale-200.png" />
+    <Content Include="Images\Square71x71Logo.scale-400.png" />
+    <Content Include="Images\StoreLogo.scale-100.png" />
+    <Content Include="Images\StoreLogo.scale-125.png" />
+    <Content Include="Images\StoreLogo.scale-150.png" />
+    <Content Include="Images\StoreLogo.scale-200.png" />
+    <Content Include="Images\StoreLogo.scale-400.png" />
+    <Content Include="Images\Wide310x150Logo.scale-100.png" />
+    <Content Include="Images\Wide310x150Logo.scale-125.png" />
+    <Content Include="Images\Wide310x150Logo.scale-150.png" />
+    <Content Include="Images\Wide310x150Logo.scale-200.png" />
+    <Content Include="Images\Wide310x150Logo.scale-400.png" />
+    <None Include="Package.StoreAssociation.xml" />
   </ItemGroup>
 </Project>

@@ -6,13 +6,13 @@
          IgnorableNamespaces="uap rescap">
 
     <Identity
-        Name="2d17f127-1f14-4452-bb9d-a8ee3f01ab31"
-        Publisher="CN=jjask"
+        Name="52374YoshiAskharoun.FluentStore"
+        Publisher="CN=CD3113F3-18EB-4B8D-9D8A-C6D373E7A464"
         Version="1.0.0.0" />
 
     <Properties>
-        <DisplayName>FluentStore.Package</DisplayName>
-        <PublisherDisplayName>jjask</PublisherDisplayName>
+        <DisplayName>Fluent Store</DisplayName>
+        <PublisherDisplayName>Joshua Askharoun</PublisherDisplayName>
         <Logo>Images\StoreLogo.png</Logo>
     </Properties>
 
@@ -30,12 +30,18 @@
             Executable="$targetnametoken$.exe"
             EntryPoint="$targetentrypoint$">
             <uap:VisualElements
-                DisplayName="FluentStore.Package"
-                Description="FluentStore.Package"
+                DisplayName="Fluent Store"
+                Description="A unifying frontend for Windows app stores and package managers."
                 BackgroundColor="transparent"
                 Square150x150Logo="Images\Square150x150Logo.png"
                 Square44x44Logo="Images\Square44x44Logo.png">
-                <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png" />
+                <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png"  Square310x310Logo="Images\Square310x310Logo.png" Square71x71Logo="Images\Square71x71Logo.png" ShortName="Fluent Store">
+                    <uap:ShowNameOnTiles>
+                        <uap:ShowOn Tile="square310x310Logo"/>
+                        <uap:ShowOn Tile="square150x150Logo"/>
+                        <uap:ShowOn Tile="wide310x150Logo"/>
+                    </uap:ShowNameOnTiles>
+                </uap:DefaultTile >
                 <uap:SplashScreen Image="Images\SplashScreen.png" />
             </uap:VisualElements>
             <Extensions>
@@ -43,6 +49,12 @@
                     xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
                     Category="windows.fullTrustProcess"
                     Executable="FluentStore.FullTrust\FluentStore.FullTrust.exe" />
+                <uap:Extension Category="windows.protocol">
+                    <uap:Protocol Name="fluentstore">
+                        <uap:Logo>Images\Square71x71Logo.png</uap:Logo>
+                        <uap:DisplayName>Fluent Store</uap:DisplayName>
+                    </uap:Protocol>
+                </uap:Extension>
             </Extensions>
         </Application>
     </Applications>
