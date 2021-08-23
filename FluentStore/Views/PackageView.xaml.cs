@@ -255,21 +255,44 @@ namespace FluentStore.Views
             });
             VisualStateManager.GoToState(this, "Progress", true);
 
+            Flyout flyout = null;
             try
             {
                 if (await ViewModel.Package.DownloadPackageAsync() != null)
                 {
-                    await ViewModel.Package.InstallAsync();
+                    bool installed = await ViewModel.Package.InstallAsync();
                     InstallButton.IsEnabled = true;
-                    // TODO: Show success message
+                    if (installed)
+                    {
+                        // Show success
+                        flyout = new Flyout
+                        {
+                            Content = new TextBlock
+                            {
+                                Text = "Install succeeded!"
+                            }
+                        };
+                    }
+                    else
+                    {
+                        // Show error
+                        flyout = new Controls.HttpErrorFlyout(418, "Package was not installed, an unknown error occurred.");
+                    }
                 }
             }
-            catch
+            catch (Flurl.Http.FlurlHttpException ex)
             {
-                // TODO: Show error message
+                // TODO: Use InfoBar
+                flyout = new Controls.HttpErrorFlyout(ex.StatusCode ?? 418, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // TODO: Use InfoBar
+                flyout = new Controls.HttpErrorFlyout(418, ex.Message);
             }
             finally
             {
+                flyout.ShowAt(InstallButton);
                 VisualStateManager.GoToState(this, "NoAction", true);
                 WeakReferenceMessenger.Default.UnregisterAll(this);
             }
@@ -301,51 +324,58 @@ namespace FluentStore.Views
             });
             VisualStateManager.GoToState(this, "Progress", true);
 
+            Flyout flyout = null;
             try
             {
-                await ViewModel.Package.DownloadPackageAsync();
-                InstallButton.IsEnabled = true;
+                var storageItem = await ViewModel.Package.DownloadPackageAsync();
+                InstallButton.IsEnabled = storageItem == null;
                 // TODO: Show success message
             }
-            catch
+            catch (Flurl.Http.FlurlHttpException ex)
             {
-                // TODO: Show error message
+                // TODO: Use InfoBar
+                flyout = new Controls.HttpErrorFlyout(ex.StatusCode ?? 418, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // TODO: Use InfoBar
+                flyout = new Controls.HttpErrorFlyout(418, ex.Message);
             }
             finally
             {
+                flyout.ShowAt(InstallButton);
                 VisualStateManager.GoToState(this, "NoAction", true);
                 WeakReferenceMessenger.Default.UnregisterAll(this);
             }
         }
 
-        private async void ShareButton_Click(SplitButton sender, SplitButtonClickEventArgs args)
+        private void ShareButton_Click(SplitButton sender, SplitButtonClickEventArgs args)
         {
             DataTransferManager dataTransferManager = DataTransferManager.GetForCurrentView();
-            dataTransferManager.DataRequested += async (sender, args) =>
+            dataTransferManager.DataRequested += (sender, args) =>
             {
                 Flurl.Url appUrl = "fluentstore://package/" + ViewModel.Package.Urn.ToString();
-                await ShareDataRequested(sender, args, appUrl);
+                ShareDataRequested(sender, args, appUrl);
             };
             DataTransferManager.ShowShareUI();
         }
 
-        private async void ShareWebLink_Click(object sender, RoutedEventArgs e)
+        private void ShareWebLink_Click(object sender, RoutedEventArgs e)
         {
             DataTransferManager dataTransferManager = DataTransferManager.GetForCurrentView();
-            dataTransferManager.DataRequested += async (sender, args) =>
+            dataTransferManager.DataRequested += (sender, args) =>
             {
                 Flurl.Url appUrl = PackageService.GetUrlForPackageAsync(ViewModel.Package);
-                await ShareDataRequested(sender, args, appUrl);
+                ShareDataRequested(sender, args, appUrl);
             };
             DataTransferManager.ShowShareUI();
         }
 
-        private async Task ShareDataRequested(DataTransferManager sender, DataRequestedEventArgs args, Flurl.Url appUrl)
+        private void ShareDataRequested(DataTransferManager sender, DataRequestedEventArgs args, Flurl.Url appUrl)
         {
             var appUri = appUrl.ToUri();
             DataPackage linkPackage = new DataPackage();
             linkPackage.SetApplicationLink(appUri);
-            //Clipboard.SetContent(linkPackage);
 
             DataRequest request = args.Request;
             request.Data.SetWebLink(appUri);
@@ -355,7 +385,6 @@ namespace FluentStore.Views
             if (typeof(SDK.Images.StreamImage).IsAssignableFrom(ViewModel.AppIcon.GetType()))
             {
                 var img = (SDK.Images.StreamImage)ViewModel.AppIcon;
-                //request.Data.Properties.Thumbnail = (await img.GetImageStreamAsync()).AsRandomAccessStream();
             }
         }
 
@@ -464,7 +493,8 @@ namespace FluentStore.Views
                 }
                 catch (Flurl.Http.FlurlHttpException ex)
                 {
-                    // TODO: Show error message
+                    new Controls.HttpErrorFlyout(ex.StatusCode ?? 418, ex.Message)
+                        .ShowAt(InstallButton);
                 }
             }
         }

@@ -161,62 +161,23 @@ namespace FluentStore.SDK.Packages
 
             WeakReferenceMessenger.Default.Send(new PackageInstallStartedMessage(this));
 
-            if (false)//Settings.Default.UseAppInstaller || (useAppInstaller.HasValue && useAppInstaller.Value))
-            {
-                // Pass the file to App Installer to install it
-                Uri launchUri = new Uri("ms-appinstaller:?source=" + DownloadItem.Path);
-                switch (await Launcher.QueryUriSupportAsync(launchUri, LaunchQuerySupportType.Uri))
+            // Attempt to install the downloaded package
+            // WinRT never sends a progress callback, so don't bother registering one
+            var result = await pkgManager.AddPackageByUriAsync(
+                new Uri(DownloadItem.Path),
+                new AddPackageOptions()
                 {
-                    case LaunchQuerySupportStatus.Available:
-                        isSuccess = await Launcher.LaunchUriAsync(launchUri);
-                        if (!isSuccess)
-                        {
-                            WeakReferenceMessenger.Default.Send(new PackageInstallFailedMessage(
-                                this, new Exception("Failed to launch App Installer.")));
-                            return false;
-                            //finalNotif = GenerateInstallFailureToast(package, product, new Exception("Failed to launch App Installer."));
-                        }
-                        break;
-
-                    case LaunchQuerySupportStatus.AppNotInstalled:
-                        //finalNotif = GenerateInstallFailureToast(package, product, new Exception("App Installer is not available on this device."));
-                        WeakReferenceMessenger.Default.Send(new PackageInstallFailedMessage(
-                                this, new Exception("App Installer is not available on this device.")));
-                        return false;
-
-                    case LaunchQuerySupportStatus.AppUnavailable:
-                        //finalNotif = GenerateInstallFailureToast(package, product, new Exception("App Installer is not available right now, try again later."));
-                        WeakReferenceMessenger.Default.Send(new PackageInstallFailedMessage(
-                                this, new Exception("App Installer is not available right now, try again later.")));
-                        return false;
-
-                    case LaunchQuerySupportStatus.Unknown:
-                    default:
-                        //finalNotif = GenerateInstallFailureToast(package, product, new Exception("An unknown error occured."));
-                        WeakReferenceMessenger.Default.Send(new PackageInstallFailedMessage(
-                            this, new Exception("An unknown error occured.")));
-                        return false;
+                    ForceAppShutdown = true
                 }
-            }
-            else
+            );
+
+            if (!result.IsRegistered)
             {
-                // Attempt to install the downloaded package
-                var result = await pkgManager.AddPackageByUriAsync(
-                    new Uri(DownloadItem.Path),
-                    new AddPackageOptions()
-                    {
-                        ForceAppShutdown = true
-                    }
-                ).AsTask(progressCallback);
-
-                if (!result.IsRegistered)
-                {
-                    WeakReferenceMessenger.Default.Send(new PackageInstallFailedMessage(this, new Exception(result.ErrorText)));
-                    return false;
-                }
-                isSuccess = result.IsRegistered;
-                //await InstallerFile.DeleteAsync();
+                WeakReferenceMessenger.Default.Send(new PackageInstallFailedMessage(this, new Exception(result.ErrorText)));
+                return false;
             }
+            isSuccess = result.IsRegistered;
+            //await InstallerFile.DeleteAsync();
 
             // Fire the success callback
             WeakReferenceMessenger.Default.Send(new PackageInstallCompletedMessage(this));

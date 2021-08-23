@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31515.178
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31606.5
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentStore", "FluentStore\FluentStore.csproj", "{207C9124-469A-45D7-8AB8-6C5FC2C0C1F3}"
 EndProject
@@ -26,10 +26,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentStore.FullTrust", "FullTrust\FluentStore.FullTrust\FluentStore.FullTrust.csproj", "{96A6225C-2509-4FFF-BF27-759CF916B75D}"
 EndProject
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "FluentStore.Package", "FullTrust\FluentStore.Package\FluentStore.Package.wapproj", "{05E2EDE8-73F6-4BC8-9549-95183F665BB5}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{1F4B9BEC-EEA5-4D26-9890-F8F5419303D2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentStore.SDK", "Core\FluentStore.SDK\FluentStore.SDK.csproj", "{D8F8B945-1046-4A9F-8F36-3D657E0BB011}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -261,26 +257,6 @@ Global
 		{05E2EDE8-73F6-4BC8-9549-95183F665BB5}.Release|x86.ActiveCfg = Release|x86
 		{05E2EDE8-73F6-4BC8-9549-95183F665BB5}.Release|x86.Build.0 = Release|x86
 		{05E2EDE8-73F6-4BC8-9549-95183F665BB5}.Release|x86.Deploy.0 = Release|x86
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Debug|ARM.ActiveCfg = Debug|ARM
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Debug|ARM.Build.0 = Debug|ARM
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Debug|ARM64.ActiveCfg = Debug|ARM64
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Debug|ARM64.Build.0 = Debug|ARM64
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Debug|x64.ActiveCfg = Debug|x64
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Debug|x64.Build.0 = Debug|x64
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Debug|x86.ActiveCfg = Debug|x86
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Debug|x86.Build.0 = Debug|x86
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Release|ARM.ActiveCfg = Release|ARM
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Release|ARM.Build.0 = Release|ARM
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Release|ARM64.ActiveCfg = Release|ARM64
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Release|ARM64.Build.0 = Release|ARM64
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Release|x64.ActiveCfg = Release|x64
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Release|x64.Build.0 = Release|x64
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Release|x86.ActiveCfg = Release|x86
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -291,7 +267,6 @@ Global
 		{24521084-12C2-4290-B715-44CB563CB3DC} = {A6FEC513-6706-44AF-B200-D40836E32C19}
 		{96A6225C-2509-4FFF-BF27-759CF916B75D} = {2141956E-E348-44D8-B446-52FEA54D8E80}
 		{05E2EDE8-73F6-4BC8-9549-95183F665BB5} = {2141956E-E348-44D8-B446-52FEA54D8E80}
-		{D8F8B945-1046-4A9F-8F36-3D657E0BB011} = {1F4B9BEC-EEA5-4D26-9890-F8F5419303D2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DAB9771E-34BB-4E5E-95EA-D7538346B7C4}

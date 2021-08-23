@@ -49,6 +49,8 @@
 
     <Capabilities>
         <Capability Name="internetClient" />
+        <rescap:Capability Name="packageManagement" />
+        <rescap:Capability Name="packageQuery"/>
         <rescap:Capability Name="runFullTrust" />
     </Capabilities>
 </Package>
