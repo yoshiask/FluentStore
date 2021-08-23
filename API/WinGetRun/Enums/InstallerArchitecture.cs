@@ -2,7 +2,7 @@
 
 namespace WinGetRun.Enums
 {
-    [JsonConverter(typeof(StringEnumCamelCaseConverter))]
+    [JsonConverter(typeof(EnumIgnoreCaseStringConverter<InstallerArchitecture>))]
     public enum InstallerArchitecture
     {
         X86 = 0,

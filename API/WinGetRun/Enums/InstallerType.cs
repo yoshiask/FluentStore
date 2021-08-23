@@ -2,7 +2,7 @@
 
 namespace WinGetRun.Enums
 {
-    [JsonConverter(typeof(StringEnumCamelCaseConverter))]
+    [JsonConverter(typeof(EnumIgnoreCaseStringConverter<InstallerType>))]
     public enum InstallerType
     {
         Msix = 0,

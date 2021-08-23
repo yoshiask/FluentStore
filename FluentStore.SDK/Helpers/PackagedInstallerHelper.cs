@@ -10,6 +10,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using Windows.ApplicationModel;
@@ -35,7 +36,7 @@ namespace FluentStore.SDK.Helpers
             List<ProcessorArchitecture> architectures = new List<ProcessorArchitecture>();
             if (isBundle)
             {
-                var bundleManifestEntry = archive.GetEntry("AppxManifest\\AppxBundleManifest.xml");
+                var bundleManifestEntry = archive.GetEntry("AppxMetadata/AppxBundleManifest.xml");
                 using var bundleManifestStream = bundleManifestEntry.Open();
                 XPathDocument bundleManifest = new XPathDocument(bundleManifestStream);
                 var archNodes = bundleManifest.CreateNavigator().Select("//Package/@Architecture");
@@ -217,10 +218,17 @@ namespace FluentStore.SDK.Helpers
             if (isBundle)
             {
                 // Get the smallest application APPX/MSIX
-                var bundleManifestEntry = archive.GetEntry("AppxManifest\\AppxBundleManifest.xml");
+                var bundleManifestEntry = archive.GetEntry("AppxMetadata/AppxBundleManifest.xml");
                 using var bundleManifestStream = bundleManifestEntry.Open();
-                XPathDocument bundleManifest = new XPathDocument(bundleManifestStream);
-                var packageNodes = bundleManifest.CreateNavigator().Select("/Bundle/Packages/Package[@Type=\"application\"]");
+                XmlDocument bundleManifest = new XmlDocument();
+                bundleManifest.Load(bundleManifestStream);
+
+                // Load namespace
+                var defaultBundleNs = bundleManifest.DocumentElement.NamespaceURI;
+                var bnsmgr = new XmlNamespaceManager(bundleManifest.NameTable);
+                const string bd = "default";
+
+                var packageNodes = bundleManifest.CreateNavigator().Select($"/{bd}:Bundle/{bd}:Packages/{bd}:Package[@Type=\"application\"]");
                 XPathNavigator smallestPackEntry = null;
                 long smallestPackSize = long.MaxValue;
                 do
@@ -243,8 +251,15 @@ namespace FluentStore.SDK.Helpers
             // Get the app icon
             var manifestEntry = archive.GetEntry("AppxManifest.xml");
             using var manifestStream = manifestEntry.Open();
-            XPathDocument manifest = new XPathDocument(manifestStream);
-            var logoNode = manifest.CreateNavigator().Select("/Package/Properties/Logo[1]").Current;
+            XmlDocument manifest = new XmlDocument();
+            manifest.Load(manifestStream);
+
+            // Load namespace
+            var defaultNs = manifest.DocumentElement.NamespaceURI;
+            var nsmgr = new XmlNamespaceManager(manifest.NameTable);
+            const string d = "default";
+
+            var logoNode = manifest.CreateNavigator().Select($"/{d}:Package/{d}:Properties/{d}:Logo[1]", nsmgr).Current;
             var iconEntry = archive.GetEntry(logoNode.Value);
             return new StreamImage
             {
@@ -252,6 +267,31 @@ namespace FluentStore.SDK.Helpers
                 BackgroundColor = "Transparent",
                 Stream = iconEntry.Open()
             };
+        }
+
+        public static async Task<string> GetPackageFamilyName(IStorageFile installerFile, bool isBundle)
+        {
+            Guard.IsNotNull(installerFile, nameof(installerFile));
+
+            // Open package archive for reading
+            using var stream = await installerFile.OpenReadAsync();
+            using var archive = new ZipArchive(stream.AsStream());
+
+            // Extract metadata from manifest
+            ZipArchiveEntry manifestEntry = archive.GetEntry(
+                isBundle ? "AppxMetadata/AppxBundleManifest.xml" : "AppxManifest.xml");
+            using var manifestStream = manifestEntry.Open();
+            XmlDocument manifest = new XmlDocument();
+            manifest.Load(manifestStream);
+
+            // Load namespace
+            var defaultNs = manifest.DocumentElement.NamespaceURI;
+            var nsmgr = new XmlNamespaceManager(manifest.NameTable);
+            const string d = "default";
+            nsmgr.AddNamespace(d, defaultNs);
+
+            var nameNode = manifest.SelectSingleNode($"//{d}:Identity/@Name", nsmgr);
+            return nameNode.Value;
         }
     }
 }

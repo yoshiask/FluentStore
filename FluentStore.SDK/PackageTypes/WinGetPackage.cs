@@ -120,27 +120,31 @@ namespace FluentStore.SDK.Packages
 
             // Get installer for current architecture
             var sysArch = Windows.ApplicationModel.Package.Current.Id.Architecture;
-            var installerInfo = Manifest.Installers.Find(i => sysArch == i.Arch.ToWinRTArch());
-            if (installerInfo == null)
-                installerInfo = Manifest.Installers.Find(i => i.Arch == WinGetRun.Enums.InstallerArchitecture.X86
+            Installer = Manifest.Installers.Find(i => sysArch == i.Arch.ToWinRTArch());
+            if (Installer == null)
+                Installer = Manifest.Installers.Find(i => i.Arch == WinGetRun.Enums.InstallerArchitecture.X86
                     || i.Arch == WinGetRun.Enums.InstallerArchitecture.Neutral);
-            if (installerInfo == null)
+            if (Installer == null)
                 throw new PlatformNotSupportedException($"Your computer's architecture is {sysArch}, which is not supported by this package.");
 
-            switch (installerInfo.InstallerType)
+            switch (Installer.InstallerType ?? Manifest.InstallerType)
             {
                 case WinGetRun.Enums.InstallerType.Appx:
                 case WinGetRun.Enums.InstallerType.Msix:
                     isSuccess = await PackagedInstallerHelper.Install(this);
+                    var file = (StorageFile)DownloadItem;
+                    PackagedInstallerType = await PackagedInstallerHelper.GetInstallerType(file);
+                    PackageFamilyName = await PackagedInstallerHelper.GetPackageFamilyName(file, PackagedInstallerType.Value.HasFlag(Models.InstallerType.Bundle));
                     break;
 
                 default:
 #if WINDOWS_UWP
                     // TODO: Use full trust component to start installer in slient mode
-                    var args = installerInfo.Switches?.Silent ?? Manifest.Switches?.Silent;
+                    var args = Installer.Switches?.Silent ?? Manifest.Switches?.Silent;
                     try
                     {
                         await Win32Helpers.InvokeWin32ComponentAsync(DownloadItem.Path, args, true);
+                        isSuccess = true;
                     }
                     catch (Exception ex)
                     {
@@ -157,15 +161,41 @@ namespace FluentStore.SDK.Packages
             return isSuccess;
         }
 
-        public override Task<bool> IsPackageInstalledAsync()
+        public override async Task<bool> IsPackageInstalledAsync()
         {
-            throw new NotImplementedException();
+            if (HasPackageFamilyName)
+                return await PackagedInstallerHelper.IsInstalled(PackageFamilyName);
+
+            return false;
         }
 
-        public override Task LaunchAsync()
+        public override async Task LaunchAsync()
         {
-            throw new NotImplementedException();
+            switch (Installer.InstallerType ?? Manifest.InstallerType)
+            {
+                case WinGetRun.Enums.InstallerType.Appx:
+                case WinGetRun.Enums.InstallerType.Msix:
+                    Guard.IsTrue(HasPackageFamilyName, nameof(HasPackageFamilyName));
+                    await PackagedInstallerHelper.Launch(PackageFamilyName);
+                    break;
+            }
         }
+
+        private string _PackageFamilyName;
+        public string PackageFamilyName
+        {
+            get => _PackageFamilyName;
+            set => SetProperty(ref _PackageFamilyName, value);
+        }
+        public bool HasPackageFamilyName => PackageFamilyName != null;
+
+        private Models.InstallerType? _PackagedInstallerType;
+        public Models.InstallerType? PackagedInstallerType
+        {
+            get => _PackagedInstallerType;
+            set => SetProperty(ref _PackagedInstallerType, value);
+        }
+        public bool HasPackagedInstallerType => PackagedInstallerType == null;
 
         private Uri _PackageUri;
         public Uri PackageUri
@@ -186,6 +216,13 @@ namespace FluentStore.SDK.Packages
         {
             get => _Manifest;
             set => SetProperty(ref _Manifest, value);
+        }
+
+        private Installer _Installer;
+        public Installer Installer
+        {
+            get => _Installer;
+            set => SetProperty(ref _Installer, value);
         }
     }
 }

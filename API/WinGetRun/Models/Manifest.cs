@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using WinGetRun.Enums;
 
 namespace WinGetRun.Models
 {
@@ -20,7 +21,7 @@ namespace WinGetRun.Models
         public string? FileExtensions { get; set; }
         public string? Protocols { get; set; }
         public string? Commands { get; set; }
-        public string? InstallerType { get; set; }
+        public InstallerType? InstallerType { get; set; }
         public Switches? Switches { get; set; }
         public string? Log { get; set; }
         public string? InstallLocation { get; set; }
