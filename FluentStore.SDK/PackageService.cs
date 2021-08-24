@@ -15,6 +15,10 @@ namespace FluentStore.SDK
     public class PackageService
     {
         private Dictionary<string, PackageHandlerBase> _PackageHandlers;
+        /// <summary>
+        /// A cache of all valid package handlers. The key is the name of the <see cref="Type"/>,
+        /// and the value is an instance of the <see cref="PackageHandlerBase"/>
+        /// </summary>
         public Dictionary<string, PackageHandlerBase> PackageHandlers
         {
             get
@@ -36,9 +40,7 @@ namespace FluentStore.SDK
                             var handler = (PackageHandlerBase)ctr.Invoke(emptyObjectList);
                             if (handler == null)
                                 continue;
-
-                            foreach (string ns in handler.HandledNamespaces)
-                                _PackageHandlers.Add(ns, handler);
+                            _PackageHandlers.Add(type.Name, handler);
                         }
                         catch (Exception ex)
                         {
@@ -54,6 +56,26 @@ namespace FluentStore.SDK
             }
         }
 
+        private Dictionary<string, PackageHandlerBase> _NamespaceRegistry;
+        /// <summary>
+        /// A mapping of known namespaces and the handlers that registered them.
+        /// </summary>
+        public Dictionary<string, PackageHandlerBase> NamespaceRegistry
+        {
+            get
+            {
+                if (_NamespaceRegistry == null)
+                {
+                    _NamespaceRegistry = new Dictionary<string, PackageHandlerBase>();
+                    foreach (PackageHandlerBase handler in PackageHandlers.Values)
+                        foreach (string ns in handler.HandledNamespaces)
+                            _NamespaceRegistry.Add(ns, handler);
+                }
+
+                return _NamespaceRegistry;
+            }
+        }
+
         /// <summary>
         /// Gets a list of featured packages from each package handler.
         /// </summary>
@@ -61,7 +83,7 @@ namespace FluentStore.SDK
         {
             var lists = new List<HandlerPackageListPair>();
 
-            foreach (var handler in PackageHandlers.Values.Distinct())
+            foreach (var handler in PackageHandlers.Values)
             {
                 var results = await handler.GetFeaturedPackagesAsync();
                 if (results.Count <= 0)
@@ -78,7 +100,7 @@ namespace FluentStore.SDK
         public async Task<List<PackageBase>> SearchAsync(string query)
         {
             var packages = new List<PackageBase>();
-            foreach (var handler in PackageHandlers.Values.Distinct())
+            foreach (var handler in PackageHandlers.Values)
             {
                 var results = await handler.SearchAsync(query);
                 // Filter results already in list
@@ -97,7 +119,7 @@ namespace FluentStore.SDK
         public async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
         {
             var packages = new List<PackageBase>();
-            foreach (var handler in PackageHandlers.Values.Distinct())
+            foreach (var handler in PackageHandlers.Values)
             {
                 var results = await handler.GetSearchSuggestionsAsync(query);
                 // Filter results already in list
@@ -111,12 +133,12 @@ namespace FluentStore.SDK
         }
 
         /// <summary>
-        /// Gets the package with the specific <paramref name="packageUrn"/>.
+        /// Gets the package with the specified <paramref name="packageUrn"/>.
         /// </summary>
         public async Task<PackageBase> GetPackageAsync(Urn packageUrn)
         {
             string ns = packageUrn.NamespaceIdentifier;
-            if (PackageHandlers.TryGetValue(ns, out var handler))
+            if (NamespaceRegistry.TryGetValue(ns, out var handler))
             {
                 return await handler.GetPackage(packageUrn);
             }
@@ -132,7 +154,7 @@ namespace FluentStore.SDK
         public async Task<PackageBase> GetPackageFromUrlAsync(Url url)
         {
             PackageBase package = null;
-            foreach (PackageHandlerBase handler in PackageHandlers.Values.Distinct())
+            foreach (PackageHandlerBase handler in PackageHandlers.Values)
             {
                 package = await handler.GetPackageFromUrl(url);
                 if (package != null)
@@ -148,7 +170,7 @@ namespace FluentStore.SDK
         public Url GetUrlForPackageAsync(PackageBase package)
         {
             string ns = package.Urn.NamespaceIdentifier;
-            if (PackageHandlers.TryGetValue(ns, out var handler))
+            if (NamespaceRegistry.TryGetValue(ns, out var handler))
             {
                 return handler.GetUrlFromPackage(package);
             }
