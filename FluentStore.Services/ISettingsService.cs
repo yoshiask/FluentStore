@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace FluentStore.Services
 {
     public interface ISettingsService
     {
-        [DefaultSettingValue(Value = @"\s?(?i)guide(?-i)\s?")]
+        [DefaultSettingValue(Value = @"\s?(?i)(guide|manual|tutorial)(?-i)\s?")]
         public string ExclusionFilter { get; set; }
 
         [DefaultSettingValue(Value = true)]
