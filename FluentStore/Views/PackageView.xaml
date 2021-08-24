@@ -184,10 +184,11 @@
                         </StackPanel.Resources>
 
                         <!-- Screenshots -->
-                        <StackPanel Visibility="{x:Bind ViewModel.Screenshots, Converter={StaticResource BoolToVisibilityConverter}}"
+                        <StackPanel Visibility="{x:Bind ViewModel.Screenshots, Converter={StaticResource CollectionVisibilityConverter}}"
                                     Style="{ThemeResource DetailsPanelStyle}">
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Screenshots" />
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto">
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto"
+                                          VerticalScrollBarVisibility="Disabled" VerticalScrollMode="Disabled">
                                 <ItemsControl ItemsSource="{x:Bind ViewModel.Screenshots}"
                                               ItemTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}">
                                     <ItemsControl.ItemsPanel>
