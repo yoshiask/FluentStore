@@ -22,9 +22,8 @@ namespace FluentStore.SDK.Packages
 {
     public class MicrosoftStorePackage : ModernPackage<ProductDetails>
     {
-        public MicrosoftStorePackage(ImageBase handlerImage, CardModel card = null, ProductSummary summary = null, ProductDetails product = null)
+        public MicrosoftStorePackage(CardModel card = null, ProductSummary summary = null, ProductDetails product = null)
         {
-            HandlerImage = handlerImage;
             if (card != null)
                 Update(card);
             if (summary != null)

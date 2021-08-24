@@ -121,7 +121,7 @@ namespace FluentStore.ViewModels
                 var collections = await FSApi.GetCollectionsAsync(UserService.CurrentUser.LocalID);
                 foreach (Collection collection in collections)
                 {
-                    CollectionPackage package = new CollectionPackage(FluentStoreHandler.GetImageStatic(), collection);
+                    CollectionPackage package = new CollectionPackage(collection);
                     Collections.Add(new PackageViewModel(package));
                 }
             }

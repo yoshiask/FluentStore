@@ -49,22 +49,18 @@ namespace FluentStore.ViewModels
 
 #if DEBUG
                 // Add fake MS Store package for Fluent Store
-                var fsHandlerImg = new SDK.Images.FileImage
-                {
-                    Url = "ms-appx:///Assets/Square71x71Logo.png"
-                };
-                MicrosoftStorePackage fakeFSPackage = new MicrosoftStorePackage(fsHandlerImg)
+                MicrosoftStorePackage fakeFSPackage = new MicrosoftStorePackage
                 {
                     Categories = { "Utilities & tools" },
                     Description = "A unifying frontend for Windows app stores and package managers.",
                     DeveloperName = "Joshua \"Yoshi\" Askharoun",
                     DisplayPrice = "Free",
                     Features =
-                {
-                    "Download MS Store apps without installing them",
-                    "Create collections of apps to sync across devices and batch install",
-                    "Discover and install apps from multiple sources, including WinGet and the Microsoft Store"
-                },
+                    {
+                        "Download MS Store apps without installing them",
+                        "Create collections of apps to sync across devices and batch install",
+                        "Discover and install apps from multiple sources, including WinGet and the Microsoft Store"
+                    },
                     Images =
                     {
                         new SDK.Images.MicrosoftStoreImage

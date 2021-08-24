@@ -32,7 +32,7 @@ namespace FluentStore.SDK.Handlers
             var page = (await StorefrontApi.GetHomeSpotlight(deviceFamily: Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily)).Payload;
             packages.AddRange(
                 page.Cards.Where(card => card.ProductId.Length == 12 && card.TypeTag == "app")
-                          .Select(card => new MicrosoftStorePackage(Image, card) { Status = PackageStatus.BasicDetails })
+                          .Select(card => new MicrosoftStorePackage(card) { Status = PackageStatus.BasicDetails })
             );
 
             return packages;
@@ -43,14 +43,14 @@ namespace FluentStore.SDK.Handlers
             var packages = new List<PackageBase>();
             var page = (await StorefrontApi.Search(query, "apps", Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily)).Payload;
             packages.AddRange(
-                page.SearchResults.Select(card => new MicrosoftStorePackage(Image, card) { Status = PackageStatus.BasicDetails })
+                page.SearchResults.Select(card => new MicrosoftStorePackage(card) { Status = PackageStatus.BasicDetails })
             );
 
             for (int p = 1; p < 3; p++)
             {
                 page = (await StorefrontApi.NextSearchPage(page)).Payload;
                 packages.AddRange(
-                    page.SearchResults.Select(card => new MicrosoftStorePackage(Image, card) { Status = PackageStatus.BasicDetails })
+                    page.SearchResults.Select(card => new MicrosoftStorePackage(card) { Status = PackageStatus.BasicDetails })
                 );
             }
 
@@ -62,7 +62,7 @@ namespace FluentStore.SDK.Handlers
             var suggs = await StorefrontApi.GetSearchSuggestions(query);
             var packages = new List<PackageBase>();
             packages.AddRange(
-                suggs.Payload.AssetSuggestions.Select(summ => new MicrosoftStorePackage(Image, summary: summ) { Status = PackageStatus.BasicDetails })
+                suggs.Payload.AssetSuggestions.Select(summ => new MicrosoftStorePackage(summary: summ) { Status = PackageStatus.BasicDetails })
             );
 
             return packages;
@@ -93,7 +93,7 @@ namespace FluentStore.SDK.Handlers
                 return null;
             }
 
-            var package = new MicrosoftStorePackage(Image, product: details);
+            var package = new MicrosoftStorePackage(product: details);
             if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.RatingSummary>(out var ratingSummary))
             {
                 package.Update(ratingSummary);

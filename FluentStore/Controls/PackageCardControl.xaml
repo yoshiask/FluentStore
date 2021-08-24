@@ -33,7 +33,7 @@
                 <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal"
                             Visibility="{x:Bind ViewModel.Package.HasReviewSummary, Converter={StaticResource BoolToVisibilityConverter}}">
                     <TextBlock Text="{x:Bind ViewModel.Package.ReviewSummary.ReviewCount}" FontSize="14"
-                               VerticalAlignment="Center" Margin="0,0,0,0"
+                               VerticalAlignment="Center" Margin="0,0,8,0"
                                Visibility="{x:Bind ViewModel.Package.ReviewSummary.HasReviewCount, Converter={StaticResource BoolToVisibilityConverter}}"/>
                     <Viewbox Width="90" Margin="0,0,-4,-4"
                              Visibility="{x:Bind ViewModel.Package.ReviewSummary.HasAverageRating, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -45,9 +45,11 @@
                        x:Name="DisplayPriceBlock" VerticalAlignment="Bottom" Grid.Row="1"
                        Visibility="{x:Bind ViewModel.Package.HasDisplayPrice, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
-            <ContentControl Content="{x:Bind ViewModel.Package.HandlerImage}" MaxHeight="32" Margin="-8"
+            <ContentControl Content="{x:Bind ViewModel.PackageService.GetHandlerImage(ViewModel.Package.Urn)}"
+                            ToolTipService.ToolTip="{x:Bind ViewModel.PackageService.GetHandlerDisplayName(ViewModel.Package.Urn)}"
+                            MaxHeight="32" Margin="-8" Grid.Row="1"
                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                            HorizontalAlignment="Right" VerticalAlignment="Stretch" Grid.Row="1"
+                            HorizontalAlignment="Right" VerticalAlignment="Stretch"
                             ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
         </Grid>
     </Grid>

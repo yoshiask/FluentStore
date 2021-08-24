@@ -32,7 +32,7 @@ namespace FluentStore.SDK.Packages
             get
             {
                 if (_Urn == null)
-                    UrnBuilder.CreateUrn(MicrosoftStoreHandler.NAMESPACE_MODERNPACK + ":" + PackageFamilyName);
+                    _Urn = Urn.Parse("urn:" + MicrosoftStoreHandler.NAMESPACE_MODERNPACK + ":" + PackageFamilyName);
                 return _Urn;
             }
             set => _Urn = value;

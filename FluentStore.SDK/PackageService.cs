@@ -138,14 +138,8 @@ namespace FluentStore.SDK
         public async Task<PackageBase> GetPackageAsync(Urn packageUrn)
         {
             string ns = packageUrn.NamespaceIdentifier;
-            if (NamespaceRegistry.TryGetValue(ns, out var handler))
-            {
-                return await handler.GetPackage(packageUrn);
-            }
-            else
-            {
-                throw new NotSupportedException("No package handler is registered for the namespace \"" + ns + "\".");
-            }
+            PackageHandlerBase handler = GetHandlerForNamespace(ns);
+            return await handler.GetPackage(packageUrn);
         }
 
         /// <summary>
@@ -170,14 +164,61 @@ namespace FluentStore.SDK
         public Url GetUrlForPackageAsync(PackageBase package)
         {
             string ns = package.Urn.NamespaceIdentifier;
+            return GetHandlerForNamespace(ns).GetUrlFromPackage(package);
+        }
+
+
+        /// <summary>
+        /// Gets the handler registered for the given namespace.
+        /// </summary>
+        /// <exception cref="NotSupportedException"/>
+        public PackageHandlerBase GetHandlerForNamespace(string ns)
+        {
             if (NamespaceRegistry.TryGetValue(ns, out var handler))
             {
-                return handler.GetUrlFromPackage(package);
+                return handler;
             }
             else
             {
                 throw new NotSupportedException("No package handler is registered for the namespace \"" + ns + "\".");
             }
         }
+
+        /// <summary>
+        /// Gets the handler with the given [class] name.
+        /// </summary>
+        /// <exception cref="NotSupportedException"/>
+        public PackageHandlerBase GetHandlerByName(string name)
+        {
+            if (PackageHandlers.TryGetValue(name, out var handler))
+            {
+                return handler;
+            }
+            else
+            {
+                throw new NotSupportedException("A package handler with the name \"" + name + "\" was not registered.");
+            }
+        }
+
+        /// <inheritdoc cref="GetHandlerForNamespace(string)"/>
+        public PackageHandlerBase GetHandlerForNamespace(Urn packageUrn) => GetHandlerForNamespace(packageUrn.NamespaceIdentifier);
+
+
+        /// <inheritdoc cref="GetHandlerImage(string)"/>
+        public Images.ImageBase GetHandlerImage(Urn packageUrn) => GetHandlerImage(packageUrn.NamespaceIdentifier);
+
+        /// <summary>
+        /// Gets an image that represents the handler registered for the given namespace.
+        /// </summary>
+        public Images.ImageBase GetHandlerImage(string ns) => GetHandlerForNamespace(ns).Image;
+
+
+        /// <inheritdoc cref="GetHandlerDisplayName(string)"/>
+        public string GetHandlerDisplayName(Urn packageUrn) => GetHandlerDisplayName(packageUrn.NamespaceIdentifier);
+
+        /// <summary>
+        /// Gets the display name for the handler registered for the given namespace.
+        /// </summary>
+        public string GetHandlerDisplayName(string ns) => GetHandlerForNamespace(ns).DisplayName;
     }
 }

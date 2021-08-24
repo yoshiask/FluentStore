@@ -27,7 +27,7 @@ namespace FluentStore.ViewModels
         }
 
         private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
-        private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
+        public readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
         private PackageBase _Package;
         public PackageBase Package

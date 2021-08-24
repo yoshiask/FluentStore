@@ -29,7 +29,7 @@ namespace FluentStore.SDK.Handlers
             var packages = new List<PackageBase>();
             var featured = await WinGetApi.GetFeatured();
             foreach (Package wgPackage in featured)
-                packages.Add(new WinGetPackage(Image, wgPackage));
+                packages.Add(new WinGetPackage(wgPackage));
 
             return packages;
         }
@@ -39,7 +39,7 @@ namespace FluentStore.SDK.Handlers
             Guard.IsEqualTo(packageUrn.NamespaceIdentifier, NAMESPACE_WINGET, nameof(packageUrn));
 
             var package = await WinGetApi.GetPackage(packageUrn.GetContent<NamespaceSpecificString>().UnEscapedValue);
-            return new WinGetPackage(Image, package);
+            return new WinGetPackage(package);
         }
 
         public override async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
@@ -51,7 +51,7 @@ namespace FluentStore.SDK.Handlers
             };
             var firstPage = await WinGetApi.SearchPackages(query: query, pageOptions: pageOptions);
             foreach (Package wgPackage in firstPage.Packages)
-                packages.Add(new WinGetPackage(Image, wgPackage));
+                packages.Add(new WinGetPackage(wgPackage));
 
             return packages;
         }
@@ -69,7 +69,7 @@ namespace FluentStore.SDK.Handlers
                 pageOptions.Page = p;
                 var page = await WinGetApi.SearchPackages(query: query, pageOptions: pageOptions);
                 foreach (Package wgPackage in page.Packages)
-                    packages.Add(new WinGetPackage(Image, wgPackage));
+                    packages.Add(new WinGetPackage(wgPackage));
             }
 
             return packages;

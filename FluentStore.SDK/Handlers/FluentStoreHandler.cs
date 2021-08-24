@@ -46,7 +46,7 @@ namespace FluentStore.SDK.Handlers
                     items.Add(package);
                 }
 
-                var collectionPack = new CollectionPackage(Image, collection, items);
+                var collectionPack = new CollectionPackage(collection, items);
                 collectionPack.Update(authorProfile);
                 return collectionPack;
             }

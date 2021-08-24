@@ -19,9 +19,8 @@ namespace FluentStore.SDK.Packages
     {
         private readonly WinGetApi WinGetApi = Ioc.Default.GetRequiredService<WinGetApi>();
 
-        public WinGetPackage(ImageBase handlerImage, Package pack = null)
+        public WinGetPackage(Package pack = null)
         {
-            HandlerImage = handlerImage;
             if (pack != null)
                 Update(pack);
         }
@@ -81,6 +80,7 @@ namespace FluentStore.SDK.Packages
         {
             Manifest = await WinGetApi.GetManifest(Urn.GetContent<NamespaceSpecificString>().UnEscapedValue, Version);
             PackageUri = new Uri(Manifest.Installers[0].Url);
+            Website = Manifest.Homepage;
 
             Status = PackageStatus.DownloadReady;
             return true;
@@ -138,7 +138,6 @@ namespace FluentStore.SDK.Packages
                     break;
 
                 default:
-#if WINDOWS_UWP
                     // TODO: Use full trust component to start installer in slient mode
                     var args = Installer.Switches?.Silent ?? Manifest.Switches?.Silent;
                     try
@@ -152,7 +151,6 @@ namespace FluentStore.SDK.Packages
                         logger.UnhandledException(ex, "Exception from Win32 component");
                         throw;
                     }
-#endif
                     break;
             }
 
