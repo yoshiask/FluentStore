@@ -6,6 +6,7 @@ using Microsoft.Marketplace.Storefront.Contracts;
 using Microsoft.Toolkit.Diagnostics;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -28,15 +29,11 @@ namespace FluentStore.SDK.Handlers
         public override async Task<List<PackageBase>> GetFeaturedPackagesAsync()
         {
             var packages = new List<PackageBase>();
-            var firstPage = await StorefrontApi.GetHomeSpotlight(deviceFamily: Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily);
-            foreach (var card in firstPage.Payload.Cards)
-            {
-                if (card.ProductId.Length != 12 || card.TypeTag != "app")
-                    continue;
-                var package = new MicrosoftStorePackage(Image, card);
-                package.Status = PackageStatus.BasicDetails;
-                packages.Add(package);
-            }
+            var page = (await StorefrontApi.GetHomeSpotlight(deviceFamily: Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily)).Payload;
+            packages.AddRange(
+                page.Cards.Where(card => card.ProductId.Length == 12 && card.TypeTag == "app")
+                          .Select(card => new MicrosoftStorePackage(Image, card) { Status = PackageStatus.BasicDetails })
+            );
 
             return packages;
         }
@@ -44,12 +41,17 @@ namespace FluentStore.SDK.Handlers
         public override async Task<List<PackageBase>> SearchAsync(string query)
         {
             var packages = new List<PackageBase>();
-            var firstPage = await StorefrontApi.Search(query, "apps", Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily);
-            foreach (var product in firstPage.Payload.SearchResults)
+            var page = (await StorefrontApi.Search(query, "apps", Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily)).Payload;
+            packages.AddRange(
+                page.SearchResults.Select(card => new MicrosoftStorePackage(Image, card) { Status = PackageStatus.BasicDetails })
+            );
+
+            for (int p = 1; p < 3; p++)
             {
-                var package = new MicrosoftStorePackage(Image, product);
-                package.Status = PackageStatus.BasicDetails;
-                packages.Add(package);
+                page = (await StorefrontApi.NextSearchPage(page)).Payload;
+                packages.AddRange(
+                    page.SearchResults.Select(card => new MicrosoftStorePackage(Image, card) { Status = PackageStatus.BasicDetails })
+                );
             }
 
             return packages;
@@ -59,13 +61,9 @@ namespace FluentStore.SDK.Handlers
         {
             var suggs = await StorefrontApi.GetSearchSuggestions(query);
             var packages = new List<PackageBase>();
-
-            foreach (var product in suggs.Payload.AssetSuggestions)
-            {
-                var package = new MicrosoftStorePackage(Image, summary: product);
-                package.Status = PackageStatus.BasicDetails;
-                packages.Add(package);
-            }
+            packages.AddRange(
+                suggs.Payload.AssetSuggestions.Select(summ => new MicrosoftStorePackage(Image, summary: summ) { Status = PackageStatus.BasicDetails })
+            );
 
             return packages;
         }

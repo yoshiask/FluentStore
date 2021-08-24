@@ -62,6 +62,15 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         }
 
         /// <summary>
+        /// Gets the next page of the given search response.
+        /// </summary>
+        public async Task<ResponseItem<V9.SearchResponse>> NextSearchPage(V9.SearchResponse currentResponse)
+        {
+            return await (Constants.STOREFRONT_API_HOST + currentResponse.NextUri)
+                .GetJsonAsync<ResponseItem<V9.SearchResponse>>();
+        }
+
+        /// <summary>
         /// Gets a list of search suggestions for a given query fragment.
         /// </summary>
         public async Task<ResponseItem<V3.AutoSuggestions>> GetSearchSuggestions(string query, string deviceFamily = "Windows.Desktop", CultureInfo culture = null)

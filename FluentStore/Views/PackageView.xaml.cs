@@ -329,7 +329,6 @@ namespace FluentStore.Views
             {
                 var storageItem = await ViewModel.Package.DownloadPackageAsync();
                 InstallButton.IsEnabled = storageItem == null;
-                // TODO: Show success message
             }
             catch (Flurl.Http.FlurlHttpException ex)
             {
@@ -343,7 +342,8 @@ namespace FluentStore.Views
             }
             finally
             {
-                flyout.ShowAt(InstallButton);
+                if (flyout != null)
+                    flyout.ShowAt(InstallButton);
                 VisualStateManager.GoToState(this, "NoAction", true);
                 WeakReferenceMessenger.Default.UnregisterAll(this);
             }

@@ -59,9 +59,18 @@ namespace FluentStore.SDK.Handlers
         public override async Task<List<PackageBase>> SearchAsync(string query)
         {
             var packages = new List<PackageBase>();
-            var firstPage = await WinGetApi.SearchPackages(query: query);
-            foreach (Package wgPackage in firstPage.Packages)
-                packages.Add(new WinGetPackage(Image, wgPackage));
+            var pageOptions = new PaginationOptions
+            {
+                Page = 0
+            };
+
+            for (int p = 0; p < 3; p++)
+            {
+                pageOptions.Page = p;
+                var page = await WinGetApi.SearchPackages(query: query, pageOptions: pageOptions);
+                foreach (Package wgPackage in page.Packages)
+                    packages.Add(new WinGetPackage(Image, wgPackage));
+            }
 
             return packages;
         }
