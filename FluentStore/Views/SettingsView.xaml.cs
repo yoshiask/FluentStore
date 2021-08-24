@@ -1,4 +1,7 @@
-﻿using FluentStore.ViewModels.Messages;
+﻿using FluentStore.SDK;
+using FluentStore.Services;
+using FluentStore.ViewModels.Messages;
+using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using Windows.UI.Xaml.Controls;
 
@@ -11,6 +14,9 @@ namespace FluentStore.Views
 	/// </summary>
 	public sealed partial class SettingsView : Page
 	{
+		private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
+		private readonly ISettingsService Settings = Ioc.Default.GetRequiredService<ISettingsService>();
+
 		public SettingsView()
 		{
 			this.InitializeComponent();

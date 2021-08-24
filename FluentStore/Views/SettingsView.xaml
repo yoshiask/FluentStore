@@ -6,12 +6,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:FluentStore.Controls"
+    xmlns:sdk="using:FluentStore.SDK"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-	DataContext="{StaticResource settings}">
+    x:DefaultBindMode="TwoWay"
+    Background="{ThemeResource SystemControlChromeMediumLowAcrylicWindowMediumBrush}">
 
-	<ScrollViewer Padding="8">
-		<StackPanel Spacing="4">
+    <ScrollViewer Padding="8">
+        <StackPanel Spacing="4">
 
             <controls:SettingsBlockControl Title="Search exclusion filter"
                                            Description="A regular expression used to filter out unwanted search suggestions and results.">
@@ -19,12 +20,36 @@
                     <FontIcon Glyph="&#xF6FA;"/>
                 </controls:SettingsBlockControl.Icon>
                 <controls:SettingsBlockControl.ExpandableContent>
-                    <TextBox Text="{Binding Default.ExclusionFilter, Mode=TwoWay}" Margin="16"
-                             IsEnabled="{Binding Default.UseExclusionFilter}"/>
+                    <TextBox Text="{x:Bind Settings.ExclusionFilter}" Margin="16"
+                             IsEnabled="{x:Bind Settings.UseExclusionFilter}"/>
                 </controls:SettingsBlockControl.ExpandableContent>
-                <ToggleSwitch IsOn="{Binding Default.UseExclusionFilter, Mode=TwoWay}" Style="{ThemeResource ToggleSwitchRightStyle}"/>
+                <ToggleSwitch IsOn="{x:Bind Settings.UseExclusionFilter}" Style="{ThemeResource ToggleSwitchRightStyle}"/>
+            </controls:SettingsBlockControl>
+
+            <controls:SettingsBlockControl Title="Package sources" Icon="Shop"
+                                           Description="All currently registered package handlers.">
+                <controls:SettingsBlockControl.ExpandableContent>
+                    <ItemsControl ItemsSource="{x:Bind PackageService.PackageHandlers.Values, Mode=OneWay}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="8"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="sdk:PackageHandlerBase">
+                                <Border>
+                                    <StackPanel Spacing="8" Orientation="Horizontal">
+                                        <ContentControl Content="{x:Bind Image, Mode=OneWay}" Height="48"
+                                                        ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
+                                        <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </controls:SettingsBlockControl.ExpandableContent>
             </controls:SettingsBlockControl>
 
         </StackPanel>
-	</ScrollViewer>
+    </ScrollViewer>
 </Page>
