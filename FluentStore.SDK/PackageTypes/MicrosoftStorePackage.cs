@@ -40,13 +40,16 @@ namespace FluentStore.SDK.Packages
             // Set base properties
             Title = card.Title;
             Description = card.Description ?? card.LongDescription;
-            ReviewSummary = new ReviewSummary
+            if (card.RatingsCount != null)
             {
-                AverageRating = card.AverageRating,
-                // TODO: Parse into int. Examples:
-                // 2K -> 2000; 1.2M -> 1200000
-                //ReviewCount = card.RatingsCount
-            };
+                ReviewSummary = new ReviewSummary
+                {
+                    AverageRating = card.AverageRating,
+                    // TODO: Parse into int. Examples:
+                    // 2K -> 2000; 1.2M -> 1200000
+                    //ReviewCount = card.RatingsCount
+                };
+            }
             Price = card.Price;
             DisplayPrice = card.DisplayPrice;
             StoreId = card.ProductId;
@@ -69,11 +72,14 @@ namespace FluentStore.SDK.Packages
 
             // Set base properties
             Title = summary.Title;
-            ReviewSummary = new ReviewSummary
+            if (summary.RatingCount > 0)
             {
-                AverageRating = summary.AverageRating,
-                ReviewCount = summary.RatingCount
-            };
+                ReviewSummary = new ReviewSummary
+                {
+                    AverageRating = summary.AverageRating,
+                    ReviewCount = summary.RatingCount
+                };
+            }
             Price = summary.Price;
             StoreId = summary.ProductId;
 
@@ -96,11 +102,14 @@ namespace FluentStore.SDK.Packages
             ReleaseDate = product.LastUpdateDateUtc;
             Description = product.Description;
             Version = product.Version;
-            ReviewSummary = new ReviewSummary
+            if (product.RatingCount > 0)
             {
-                AverageRating = product.AverageRating,
-                ReviewCount = product.RatingCount
-            };
+                ReviewSummary = new ReviewSummary
+                {
+                    AverageRating = product.AverageRating,
+                    ReviewCount = product.RatingCount
+                };
+            }
             Price = product.Price;
             DisplayPrice = product.DisplayPrice;
             ShortTitle = product.ShortTitle;
