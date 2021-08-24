@@ -178,14 +178,14 @@
                     <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
                                 Padding="20" Spacing="20">
                         <StackPanel.Resources>
-                            <Style TargetType="StackPanel">
+                            <Style x:Key="DetailsPanelStyle" TargetType="StackPanel">
                                 <Setter Property="Spacing" Value="12"/>
                             </Style>
                         </StackPanel.Resources>
 
                         <!-- Screenshots -->
-                        <StackPanel x:Name="ScreenshotsPanel"
-                                    x:Load="{x:Bind ViewModel.Screenshots, Converter={StaticResource EmptyCollectionToFalseConverter}}">
+                        <StackPanel Visibility="{x:Bind ViewModel.Screenshots, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    Style="{ThemeResource DetailsPanelStyle}">
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Screenshots" />
                             <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto">
                                 <ItemsControl ItemsSource="{x:Bind ViewModel.Screenshots}"
@@ -200,8 +200,8 @@
                         </StackPanel>
 
                         <!-- Description -->
-                        <StackPanel x:Name="DescriptionPanel"
-                                    x:Load="{x:Bind ViewModel.Package.Description, Converter={StaticResource EmptyStringToFalseConverter}}">
+                        <StackPanel Visibility="{x:Bind ViewModel.Package.Description, Converter={StaticResource EmptyStringToCollapsedConverter}}"
+                                    Style="{ThemeResource DetailsPanelStyle}">
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Description"/>
                             <TextBlock x:Name="DescriptionBlock" Text="{x:Bind ViewModel.Package.Description}"
                                        FontSize="16" TextTrimming="WordEllipsis" TextWrapping="Wrap" MaxLines="4"
@@ -212,7 +212,8 @@
                         </StackPanel>
 
                         <!-- Reviews -->
-                        <StackPanel x:Name="ReviewsPanel" x:Load="{x:Bind ViewModel.Package.HasReviewSummary}">
+                        <StackPanel Visibility="{x:Bind ViewModel.Package.HasReviewSummary, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    Style="{ThemeResource DetailsPanelStyle}">
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Reviews"/>
                             <controls:RatingBarControl x:Name="ReviewsBar"
                                                        x:Load="{x:Bind ViewModel.Package.ReviewSummary.HasReviewCount}"
@@ -227,7 +228,8 @@
                         <!-- Source-specific details -->
                         <!-- All properties marked with DisplayAttribute are shown here -->
                         <ItemsControl x:Name="DisplayPropertiesControl" ItemsSource="{x:Bind ViewModel.DisplayProperties}"
-                                      x:Load="{x:Bind ViewModel.DisplayProperties, Converter={StaticResource EmptyCollectionToFalseConverter}}">
+                                      Visibility="{x:Bind ViewModel.DisplayProperties, Converter={StaticResource CollectionVisibilityConverter}}"
+                                      Style="{ThemeResource DetailsPanelStyle}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel Spacing="12"/>

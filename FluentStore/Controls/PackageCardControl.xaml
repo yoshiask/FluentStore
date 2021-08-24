@@ -14,7 +14,7 @@
     <Grid Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}" MaxHeight="300">
         <Grid.RowDefinitions>
             <RowDefinition Height="150"/>
-            <RowDefinition MaxHeight="125"/>
+            <RowDefinition Height="100"/>
         </Grid.RowDefinitions>
         <Border Background="{x:Bind ViewModel.AppIcon.BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}"
                 VerticalAlignment="Stretch">
@@ -27,24 +27,23 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <StackPanel Spacing="4" Grid.Row="0">
-                <TextBlock Text="{x:Bind ViewModel.Package.Title}" FontWeight="SemiBold"
+            <StackPanel Grid.Row="0">
+                <TextBlock Text="{x:Bind ViewModel.Package.Title}" FontWeight="SemiBold" Margin="0,0,4,0"
                            TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxLines="2"/>
-                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8"
-                            x:Name="ReviewPanel"
-                            x:Load="{x:Bind ViewModel.Package.HasReviewSummary}">
-                    <TextBlock Text="{x:Bind ViewModel.Package.ReviewSummary.ReviewCount}" FontSize="14" VerticalAlignment="Center"
-                               x:Name="RatingCountBlock"
-                               x:Load="{x:Bind ViewModel.Package.ReviewSummary.HasReviewCount}"/>
-                    <Viewbox x:Name="RatingBox" Width="90" Margin="0,0,0,-4"
-                             x:Load="{x:Bind ViewModel.Package.ReviewSummary.HasAverageRating}">
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal"
+                            Visibility="{x:Bind ViewModel.Package.HasReviewSummary, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <TextBlock Text="{x:Bind ViewModel.Package.ReviewSummary.ReviewCount}" FontSize="14"
+                               VerticalAlignment="Center" Margin="0,0,0,0"
+                               Visibility="{x:Bind ViewModel.Package.ReviewSummary.HasReviewCount, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    <Viewbox Width="90" Margin="0,0,-4,-4"
+                             Visibility="{x:Bind ViewModel.Package.ReviewSummary.HasAverageRating, Converter={StaticResource BoolToVisibilityConverter}}">
                         <winui:RatingControl Value="{x:Bind ViewModel.Package.ReviewSummary.AverageRating}" IsReadOnly="True"/>
                     </Viewbox>
                 </StackPanel>
             </StackPanel>
             <TextBlock Text="{x:Bind ViewModel.Package.DisplayPrice}"
                        x:Name="DisplayPriceBlock" VerticalAlignment="Bottom" Grid.Row="1"
-                       x:Load="{x:Bind ViewModel.Package.HasDisplayPrice}"/>
+                       Visibility="{x:Bind ViewModel.Package.HasDisplayPrice, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
             <ContentControl Content="{x:Bind ViewModel.Package.HandlerImage}" MaxHeight="32" Margin="-8"
                             HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"

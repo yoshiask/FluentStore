@@ -9,25 +9,55 @@ namespace FluentStore.SDK.Models
         public double AverageRating
         {
             get => _AverageRating;
-            set => SetProperty(ref _AverageRating, value);
+            set
+            {
+                SetProperty(ref _AverageRating, value);
+                HasAverageRating = AverageRating >= 0;
+            }
         }
-        public bool HasAverageRating => AverageRating >= 0;
+
+        private bool _HasAverageRating;
+        public bool HasAverageRating
+        {
+            get => _HasAverageRating;
+            set => SetProperty(ref _HasAverageRating, value);
+        }
 
         private int _ReviewCount = -1;
         public int ReviewCount
         {
             get => _ReviewCount;
-            set => SetProperty(ref _ReviewCount, value);
+            set
+            {
+                SetProperty(ref _ReviewCount, value);
+                HasReviewCount = ReviewCount >= 0;
+            }
         }
-        public bool HasReviewCount => ReviewCount >= 0;
 
+        private bool _HasReviewCount;
+        public bool HasReviewCount
+        {
+            get => _HasReviewCount;
+            set => SetProperty(ref _HasReviewCount, value);
+        }
+        
         private List<Review> _Reviews;
         public List<Review> Reviews
         {
             get => _Reviews;
-            set => SetProperty(ref _Reviews, value);
+            set
+            {
+                HasReviews = Reviews != null && Reviews.Count > 0;
+                SetProperty(ref _Reviews, value);
+            }
         }
-        public bool HasReviews => Reviews != null && Reviews.Count > 0;
+
+        private bool _HasReviews;
+        public bool HasReviews
+        {
+            get => _HasReviews;
+            set => SetProperty(ref _HasReviews, value);
+        }
 
         private int _Star1Count;
         public int Star1Count
