@@ -10,6 +10,14 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <controls:PackageCardGridView Packages="{x:Bind ViewModel.PackageList}" SelectedPackage="{x:Bind ViewModel.SelectedPackage}"/>
+    <Grid>
+        <TextBlock Visibility="{x:Bind ViewModel.NoResults, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                   FontSize="24" FontWeight="SemiBold" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center">
+            <Run Text="We couldn't find anything matching &quot;"/><Run Text="{x:Bind ViewModel.Query, Mode=OneWay}"/><Run Text="&quot;."/><LineBreak/>
+            <Run Text="Try searching with different terms." FontSize="16" FontWeight="Normal"/>
+        </TextBlock>
+
+        <controls:PackageCardGridView Packages="{x:Bind ViewModel.PackageList}" SelectedPackage="{x:Bind ViewModel.SelectedPackage}"/>
+    </Grid>
 
 </Page>

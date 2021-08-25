@@ -73,6 +73,13 @@ namespace FluentStore.ViewModels
             }
         }
 
+        private bool _NoResults = false;
+        public bool NoResults
+        {
+            get => _NoResults;
+            set => SetProperty(ref _NoResults, value);
+        }
+
         private ObservableCollection<PackageViewModel> _PackageList = new ObservableCollection<PackageViewModel>();
         public ObservableCollection<PackageViewModel> PackageList
         {
@@ -114,6 +121,7 @@ namespace FluentStore.ViewModels
             {
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
 
+                NoResults = false;
                 PackageList.Clear();
                 IEnumerable<PackageBase> results = await PackageService.SearchAsync(Query);
 
@@ -125,6 +133,7 @@ namespace FluentStore.ViewModels
                 }
 
                 PackageList = new ObservableCollection<PackageViewModel>(results.Select(p => new PackageViewModel(p)));
+                NoResults = PackageList.Count <= 0;
 
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
             }
