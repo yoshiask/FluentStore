@@ -60,6 +60,7 @@ namespace FluentStore.Views
             {
                 ErrorCode = errorCode;
                 ErrorMessage = errorMessage;
+                UpdateErrorTitle(this, errorCode);
             }
         }
 

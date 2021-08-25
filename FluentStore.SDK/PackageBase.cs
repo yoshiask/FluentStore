@@ -70,7 +70,7 @@ namespace FluentStore.SDK
 
         public abstract Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null);
 
-        public abstract Task<bool> IsPackageInstalledAsync();
+        public abstract Task<bool> CanLaunchAsync();
 
         public abstract Task LaunchAsync();
 

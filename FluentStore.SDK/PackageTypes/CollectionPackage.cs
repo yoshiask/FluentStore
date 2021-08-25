@@ -123,11 +123,11 @@ namespace FluentStore.SDK.Packages
             return success;
         }
 
-        public override async Task<bool> IsPackageInstalledAsync()
+        public override async Task<bool> CanLaunchAsync()
         {
             bool isInstalled = true;
             foreach (PackageBase package in Items)
-                isInstalled &= await package.IsPackageInstalledAsync();
+                isInstalled &= await package.CanLaunchAsync();
             return isInstalled;
         }
 

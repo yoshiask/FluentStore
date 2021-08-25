@@ -159,7 +159,7 @@ namespace FluentStore.SDK.Packages
             return isSuccess;
         }
 
-        public override async Task<bool> IsPackageInstalledAsync()
+        public override async Task<bool> CanLaunchAsync()
         {
             if (HasPackageFamilyName)
                 return await PackagedInstallerHelper.IsInstalled(PackageFamilyName);

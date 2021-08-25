@@ -59,7 +59,7 @@ namespace FluentStore.SDK.Packages
                 (IStorageFile)DownloadItem, Type.HasFlag(InstallerType.Bundle));
         }
 
-        public override async Task<bool> IsPackageInstalledAsync()
+        public override async Task<bool> CanLaunchAsync()
         {
             Guard.IsNotNull(PackageFamilyName, nameof(PackageFamilyName));
             try

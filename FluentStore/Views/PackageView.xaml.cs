@@ -95,16 +95,16 @@ namespace FluentStore.Views
             {
                 WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Apps"));
 
-                bool isInstalled = false;
+                bool canLaunch = false;
                 try
                 {
-                    isInstalled = await ViewModel.Package.IsPackageInstalledAsync();
+                    canLaunch = await ViewModel.Package.CanLaunchAsync();
                 }
                 catch (Exception ex)
                 {
                     // TODO: Log exception
                 }
-                if (isInstalled)
+                if (canLaunch)
                     UpdateInstallButtonToLaunch();
             }
         }
@@ -246,9 +246,10 @@ namespace FluentStore.Views
 
             var progressToast = RegisterPackageServiceMessages();
             WeakReferenceMessenger.Default.Unregister<PackageInstallCompletedMessage>(this);
-            WeakReferenceMessenger.Default.Register<PackageInstallCompletedMessage>(this, (r, m) =>
+            WeakReferenceMessenger.Default.Register<PackageInstallCompletedMessage>(this, async (r, m) =>
             {
-                UpdateInstallButtonToLaunch();
+                if (await m.Package.CanLaunchAsync())
+                    UpdateInstallButtonToLaunch();
                 VisualStateManager.GoToState(this, "NoAction", true);
 
                 PackageHelper.HandlePackageInstallCompletedToast(m, progressToast);
@@ -292,7 +293,7 @@ namespace FluentStore.Views
             }
             finally
             {
-                flyout.ShowAt(InstallButton);
+                flyout?.ShowAt(InstallButton);
                 VisualStateManager.GoToState(this, "NoAction", true);
                 WeakReferenceMessenger.Default.UnregisterAll(this);
             }

@@ -229,8 +229,7 @@
                         <!-- Source-specific details -->
                         <!-- All properties marked with DisplayAttribute are shown here -->
                         <ItemsControl x:Name="DisplayPropertiesControl" ItemsSource="{x:Bind ViewModel.DisplayProperties}"
-                                      Visibility="{x:Bind ViewModel.DisplayProperties, Converter={StaticResource CollectionVisibilityConverter}}"
-                                      Style="{ThemeResource DetailsPanelStyle}">
+                                      Visibility="{x:Bind ViewModel.DisplayProperties, Converter={StaticResource CollectionVisibilityConverter}}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel Spacing="12"/>
@@ -238,7 +237,7 @@
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="attributes:DisplayInfo">
-                                    <StackPanel HorizontalAlignment="Stretch">
+                                    <StackPanel HorizontalAlignment="Stretch" Style="{ThemeResource DetailsPanelStyle}">
                                         <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="{x:Bind Title}" />
                                         <ContentControl Content="{x:Bind Value}" x:Name="ContentPresenterWithSelector"
                                                         ContentTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"
