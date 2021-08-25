@@ -2,6 +2,7 @@
 
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
          xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+         xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
          xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
          IgnorableNamespaces="uap rescap">
 
@@ -42,7 +43,7 @@
                         <uap:ShowOn Tile="wide310x150Logo"/>
                     </uap:ShowNameOnTiles>
                 </uap:DefaultTile >
-                <uap:SplashScreen Image="Images\SplashScreen.png" />
+                <uap:SplashScreen Image="Images\SplashScreen.png" uap5:Optional="true" />
             </uap:VisualElements>
             <Extensions>
                 <desktop:Extension
