@@ -87,7 +87,6 @@ namespace FluentStore.SDK.Handlers
                 if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V1.ErrorResponse>(out var error))
                 {
                     var NavService = Ioc.Default.GetRequiredService<Services.INavigationService>();
-                    uint code = uint.Parse(error.ErrorCode, System.Globalization.NumberStyles.AllowHexSpecifier);
                     NavService.ShowHttpErrorPage(404, error.ErrorDescription);
                 }
                 return null;
