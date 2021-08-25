@@ -46,7 +46,7 @@ namespace FluentStore.SDK.Handlers
                 page.SearchResults.Select(card => new MicrosoftStorePackage(card) { Status = PackageStatus.BasicDetails })
             );
 
-            for (int p = 1; p < 3; p++)
+            for (int p = 1; p < 3 && page.NextUri != null; p++)
             {
                 page = (await StorefrontApi.NextSearchPage(page)).Payload;
                 packages.AddRange(
