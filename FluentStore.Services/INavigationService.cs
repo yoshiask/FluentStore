@@ -2,6 +2,7 @@
 using Garfoot.Utilities.FluentUrn;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FluentStore.Services
@@ -69,7 +70,7 @@ namespace FluentStore.Services
 
             try
             {
-                switch (ptcl.Host)
+                switch (string.IsNullOrEmpty(ptcl.Host) ? ptcl.Path : ptcl.Host)
                 {
                     case "package":
                         destination = ResolveType("PackageView");
@@ -79,6 +80,19 @@ namespace FluentStore.Services
                     case "web":
                         destination = ResolveType("PackageView");
                         parameter = (Url)ptcl.Path.Substring(1);
+                        break;
+
+                    case "crash":
+                        destination = ResolveType("HttpErrorPage");
+                        int code = 418;
+                        string message = null;
+                        if (ptcl.QueryParams.TryGetFirst("code", out object codeParam))
+                            int.TryParse(codeParam.ToString(), out code);
+                        if (ptcl.QueryParams.TryGetFirst("msg", out object messageParam))
+                            message = Encoding.UTF8.GetString(Convert.FromBase64String(messageParam.ToString()));
+                        if (ptcl.QueryParams.TryGetFirst("trace", out object traceParam))
+                            message += "\r\n" + Encoding.UTF8.GetString(Convert.FromBase64String(messageParam.ToString()));
+                        parameter = (code, message);
                         break;
 
                     default:

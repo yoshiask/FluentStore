@@ -1,13 +1,16 @@
 ﻿using FluentStore.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using Microsoft.Toolkit.Uwp.Notifications;
 using System;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Core;
 using Windows.System;
 using Windows.UI;
 using Windows.UI.Core;
+using Windows.UI.Notifications;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -28,12 +31,20 @@ namespace FluentStore
         /// </summary>
         public App()
         {
-            this.InitializeComponent();
-            this.Suspending += OnSuspending;
+            InitializeComponent();
+            Suspending += OnSuspending;
+            UnhandledException += App_UnhandledException;
+            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 
             Services = ConfigureServices();
             Ioc.Default.ConfigureServices(Services);
         }
+
+        private void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+            => OnUnhandledException(e.Exception);
+
+        private void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
+            => OnUnhandledException(e.Exception);
 
         /// <inheritdoc/>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
@@ -90,12 +101,13 @@ namespace FluentStore
                 Window.Current.Activate();
             }
 
-            if (args.Kind == ActivationKind.Protocol)
+            if (args is ProtocolActivatedEventArgs ptclArgs)
             {
-                ProtocolActivatedEventArgs ptclArgs = args as ProtocolActivatedEventArgs;
-                // The received URI is eventArgs.Uri.AbsoluteUri
-
                 destination = NavService.ParseProtocol(ptclArgs.Uri);
+            }
+            else if (args is ToastNotificationActivatedEventArgs toastArgs)
+            {
+                destination = NavService.ParseProtocol(toastArgs.Argument);
             }
             rootFrame.Navigate(typeof(MainPage), destination);
 
@@ -125,6 +137,98 @@ namespace FluentStore
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
             deferral.Complete();
+        }
+
+        private void OnUnhandledException(Exception ex)
+        {
+            /// Mostly yoinked from https://github.com/files-community/Files/blob/ace2f355ec87f4ca27975c25026636be8514f1e0/Files/App.xaml.cs#L432
+
+            LoggerService Logger = Ioc.Default.GetService<LoggerService>();
+            string formattedException = string.Empty;
+
+            formattedException += "--------- UNHANDLED EXCEPTION ---------";
+            if (ex != null)
+            {
+                formattedException += $"\n>>>> HRESULT: {ex.HResult}\n";
+                if (ex.Message != null)
+                {
+                    formattedException += "\n--- MESSAGE ---";
+                    formattedException += ex.Message;
+                }
+                if (ex.StackTrace != null)
+                {
+                    formattedException += "\n--- STACKTRACE ---";
+                    formattedException += ex.StackTrace;
+                }
+                if (ex.Source != null)
+                {
+                    formattedException += "\n--- SOURCE ---";
+                    formattedException += ex.Source;
+                }
+                if (ex.InnerException != null)
+                {
+                    formattedException += "\n--- INNER ---";
+                    formattedException += ex.InnerException;
+                }
+            }
+            else
+            {
+                formattedException += "\nException is null!\n";
+            }
+
+            formattedException += "---------------------------------------";
+
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine(formattedException);
+
+            System.Diagnostics.Debugger.Break(); // Please check "Output Window" for exception details (View -> Output Window) (CTRL + ALT + O)
+#endif
+
+            Logger?.UnhandledException(ex, ex.Message);
+
+            // Encode error message and stack trace
+            string message = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(ex.ToString()));
+
+            var toastContent = new ToastContent()
+            {
+                Visual = new ToastVisual()
+                {
+                    BindingGeneric = new ToastBindingGeneric()
+                    {
+                        Children =
+                        {
+                            new AdaptiveText()
+                            {
+                                Text = "Oops!"
+                            },
+                            new AdaptiveText()
+                            {
+                                Text = "An error occurred that Fluent Store could not recover from."
+                            }
+                        },
+                        //AppLogoOverride = new ToastGenericAppLogo()
+                        //{
+                        //    Source = "ms-appx:///Assets/error.png"
+                        //}
+                    }
+                },
+                Actions = new ToastActionsCustom()
+                {
+                    Buttons =
+                    {
+                        new ToastButton("View", $"crash?msg={message}")
+                        {
+                            ActivationType = ToastActivationType.Foreground
+                        }
+                    }
+                }
+            };
+
+            // Create the toast notification
+            var toastNotif = new ToastNotification(toastContent.GetXml());
+
+            // And send the notification
+            ToastNotificationManager.CreateToastNotifier().Show(toastNotif);
         }
 
         /// <summary>
