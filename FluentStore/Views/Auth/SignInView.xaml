@@ -5,11 +5,13 @@
     xmlns:local="using:FluentStore.Views.Auth"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:tkconverters="using:Microsoft.Toolkit.Uwp.UI.Converters"
+    xmlns:muxcWindows11Present="using:Microsoft.UI.Xaml.Controls?IsApiContractPresent(Windows.Foundation.UniversalApiContract, 14)"
+    xmlns:contract14NotPresent="http://schemas.microsoft.com/winfx/2006/xaml/presentation?IsApiContractNotPresent(Windows.Foundation.UniversalApiContract,14)"
     xmlns:authviewmodels="using:FluentStore.ViewModels.Auth"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d"
-    Background="{ThemeResource SystemControlAcrylicWindowBrush}">
+    muxcWindows11Present:BackdropMaterial.ApplyToRootOrPageBackground="True"
+    contract14NotPresent:Background="{ThemeResource SystemControlAcrylicWindowBrush}">
     <Page.Resources>
         <authviewmodels:SignInViewModel x:Name="ViewModel"/>
     </Page.Resources>

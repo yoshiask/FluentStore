@@ -5,10 +5,11 @@
     xmlns:local="using:FluentStore"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxcWindows11Present="using:Microsoft.UI.Xaml.Controls?IsApiContractPresent(Windows.Foundation.UniversalApiContract, 14)"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d"
     SizeChanged="Page_SizeChanged"
-    Background="{ThemeResource SystemControlAcrylicWindowBrush}">
+    muxcWindows11Present:BackdropMaterial.ApplyToRootOrPageBackground="True">
 
     <winui:NavigationView x:Name="MainNav" PaneDisplayMode="Top" IsTitleBarAutoPaddingEnabled="True"
                           SelectionChanged="NavigationView_SelectionChanged" BackRequested="MainNav_BackRequested">
@@ -62,7 +63,7 @@
             </Grid>
         </winui:NavigationView.PaneFooter>
 
-        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition x:Name="TitlebarRow" Height="0"/>
                 <RowDefinition Height="*"/>
@@ -72,9 +73,9 @@
                 <TextBlock Text="{x:Bind ViewModel.PageHeader, Mode=OneWay}" FontWeight="Bold" FontSize="18"
                            VerticalAlignment="Center" Margin="4"/>
             </Grid>
+            <Frame x:Name="MainFrame" Grid.Row="1"/>
             <winui:ProgressBar IsIndeterminate="True" VerticalAlignment="Top" Grid.Row="1" 
                                Visibility="{x:Bind ViewModel.IsPageLoading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
-            <Frame x:Name="MainFrame" Grid.Row="1"/>
         </Grid>
 
         <winui:NavigationView.AutoSuggestBox>

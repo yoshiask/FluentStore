@@ -5,10 +5,11 @@
     xmlns:local="using:FluentStore.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxcWindows11Present="using:Microsoft.UI.Xaml.Controls?IsApiContractPresent(Windows.Foundation.UniversalApiContract, 14)"
     xmlns:tkcontrols="using:Microsoft.Toolkit.Uwp.UI.Controls"
     mc:Ignorable="d"
     x:DefaultBindMode="OneWay"
-    Background="{ThemeResource SystemControlAcrylicWindowBrush}">
+    muxcWindows11Present:BackdropMaterial.ApplyToRootOrPageBackground="True">
 
     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Stretch"
                 Margin="16" Spacing="16" MaxWidth="400">

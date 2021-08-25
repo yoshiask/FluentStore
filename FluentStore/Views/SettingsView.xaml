@@ -5,11 +5,12 @@
     xmlns:local="using:FluentStore.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxcWindows11Present="using:Microsoft.UI.Xaml.Controls?IsApiContractPresent(Windows.Foundation.UniversalApiContract, 14)"
     xmlns:controls="using:FluentStore.Controls"
     xmlns:sdk="using:FluentStore.SDK"
     mc:Ignorable="d"
     x:DefaultBindMode="TwoWay"
-    Background="{ThemeResource SystemControlChromeMediumLowAcrylicWindowMediumBrush}">
+    muxcWindows11Present:BackdropMaterial.ApplyToRootOrPageBackground="True">
 
     <ScrollViewer Padding="8">
         <StackPanel Spacing="4">
@@ -21,7 +22,7 @@
                 </controls:SettingsBlockControl.Icon>
                 <controls:SettingsBlockControl.ExpandableContent>
                     <TextBox Text="{x:Bind Settings.ExclusionFilter}" Margin="16"
-                             IsEnabled="{x:Bind Settings.UseExclusionFilter}"/>
+                             IsEnabled="{x:Bind Settings.UseExclusionFilter, Mode=OneWay}"/>
                 </controls:SettingsBlockControl.ExpandableContent>
                 <ToggleSwitch IsOn="{x:Bind Settings.UseExclusionFilter}" Style="{ThemeResource ToggleSwitchRightStyle}"/>
             </controls:SettingsBlockControl>
