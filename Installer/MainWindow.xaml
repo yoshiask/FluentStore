@@ -1,0 +1,30 @@
+﻿<Window x:Class="Installer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Installer"
+        mc:Ignorable="d"
+        Title="Setup - Fluent Store Beta" Height="400" Width="650"
+        Loaded="Window_Loaded">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Margin="16" VerticalAlignment="Center">
+            <TextBlock x:Name="ProgressBlock" Text="Preparing..." Margin="0,0,0,8"
+                       FontSize="24" TextAlignment="Center"/>
+            <ProgressBar x:Name="ProgressBar" IsIndeterminate="True"/>
+        </StackPanel>
+        <TextBox x:Name="OutputBox" FontFamily="Consolas" TextWrapping="Wrap" IsReadOnly="True" Grid.Row="1"
+                 TextChanged="OutputBox_TextChanged"/>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2" Margin="8">
+            <Button Content="Cancel" Click="CancelButton_Click" Padding="4"/>
+        </StackPanel>
+    </Grid>
+    
+</Window>

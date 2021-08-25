@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentStore.FullTrust", "Fu
 EndProject
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "FluentStore.Package", "FullTrust\FluentStore.Package\FluentStore.Package.wapproj", "{05E2EDE8-73F6-4BC8-9549-95183F665BB5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Installer", "Installer\Installer.csproj", "{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,7 +45,6 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{207C9124-469A-45D7-8AB8-6C5FC2C0C1F3}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{207C9124-469A-45D7-8AB8-6C5FC2C0C1F3}.Debug|Any CPU.Build.0 = Debug|x86
-		{207C9124-469A-45D7-8AB8-6C5FC2C0C1F3}.Debug|Any CPU.Deploy.0 = Debug|x86
 		{207C9124-469A-45D7-8AB8-6C5FC2C0C1F3}.Debug|ARM.ActiveCfg = Debug|ARM
 		{207C9124-469A-45D7-8AB8-6C5FC2C0C1F3}.Debug|ARM.Build.0 = Debug|ARM
 		{207C9124-469A-45D7-8AB8-6C5FC2C0C1F3}.Debug|ARM64.ActiveCfg = Debug|ARM64
@@ -257,6 +258,26 @@ Global
 		{05E2EDE8-73F6-4BC8-9549-95183F665BB5}.Release|x86.ActiveCfg = Release|x86
 		{05E2EDE8-73F6-4BC8-9549-95183F665BB5}.Release|x86.Build.0 = Release|x86
 		{05E2EDE8-73F6-4BC8-9549-95183F665BB5}.Release|x86.Deploy.0 = Release|x86
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Debug|ARM.ActiveCfg = Debug|ARM
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Debug|ARM.Build.0 = Debug|ARM
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Debug|ARM64.Build.0 = Debug|ARM64
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Debug|x64.ActiveCfg = Debug|x64
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Debug|x64.Build.0 = Debug|x64
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Debug|x86.ActiveCfg = Debug|x86
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Debug|x86.Build.0 = Debug|x86
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Release|ARM.ActiveCfg = Release|Any CPU
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Release|ARM.Build.0 = Release|Any CPU
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Release|ARM64.Build.0 = Release|Any CPU
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Release|x64.ActiveCfg = Release|Any CPU
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Release|x64.Build.0 = Release|Any CPU
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Release|x86.ActiveCfg = Release|Any CPU
+		{92D4A5D4-BC9A-4E5F-B3B2-A470CA360505}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
