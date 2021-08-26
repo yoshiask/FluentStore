@@ -11,7 +11,7 @@ namespace Installer
     {
         public static MainWindow InstallerWindow;
 
-        public static Version Version { get; } = new Version(0, 1, 1, 0);
+        public static Version Version { get; } = new Version(0, 1, 2, 0);
         public static string VersionString => Version.ToString();
 
         public App()
