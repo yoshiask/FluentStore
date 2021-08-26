@@ -25,7 +25,11 @@ namespace Installer.Steps
 
         private void Hyperlink_Click(object sender, RoutedEventArgs e)
         {
-            Process.Start("http://josh.askharoun.com/Fluent%20Store/help/installer-faq");
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "http://josh.askharoun.com/Fluent%20Store/help/installer-faq",
+                UseShellExecute = true
+            });
         }
     }
 }
