@@ -18,7 +18,6 @@
     <ItemGroup>
         <None Remove="Resources\Background.png" />
         <None Remove="Resources\Square71x71Logo.png" />
-        <None Remove="Steps\S00_Welcome.xaml.cs~RF4ef5043.TMP" />
     </ItemGroup>
 
     <ItemGroup>
