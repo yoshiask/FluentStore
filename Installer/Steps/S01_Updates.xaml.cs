@@ -1,6 +1,7 @@
-﻿using Octokit;
-using System;
+﻿using System;
 using System.Diagnostics;
+using System.Net.Http;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using TaskDialogInterop;
@@ -27,12 +28,26 @@ namespace Installer.Steps
 
             try
             {
-                var github = new GitHubClient(new ProductHeaderValue("FluentStoreInstaller"));
-                var latest = await github.Repository.Release.GetLatest("yoshiask", "FluentStore");
-                Regex rx = new(@"(?<major>\d+)\.(?<minor>\d+)(?:\.(?<build>\d+)(?:\.(?<revision>\d+))?)?");
-                Match m = rx.Match(latest.TagName);
-                if (m == null || !m.Success)
+                HttpClient client = new();
+                client.DefaultRequestHeaders.Add("User-Agent", "FluentStoreInstaller");
+                HttpResponseMessage response = await client.GetAsync("https://api.github.com/repos/yoshiask/FluentStore/releases/latest");
+                if (!response.IsSuccessStatusCode)
+                {
+                    App.InstallerWindow.NextStep();
                     return;
+                }
+
+                JsonElement latest = (await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync())).RootElement;
+                string tagName = latest.GetProperty("tag_name").GetString();
+                string htmlUrl = latest.GetProperty("html_url").GetString();
+
+                Regex rx = new(@"(?<major>\d+)\.(?<minor>\d+)(?:\.(?<build>\d+)(?:\.(?<revision>\d+))?)?");
+                Match m = rx.Match(tagName);
+                if (m == null || !m.Success)
+                {
+                    App.InstallerWindow.NextStep();
+                    return;
+                }
                 int major = int.Parse(m.Groups["major"].Value);
                 int minor = int.Parse(m.Groups["minor"].Value);
                 bool hasBuild = int.TryParse(m.Groups["build"].Value, out int build);
@@ -60,7 +75,7 @@ namespace Installer.Steps
                     switch (res.Result)
                     {
                         case TaskDialogSimpleResult.Yes:
-                            Process.Start(latest.HtmlUrl);
+                            Process.Start(htmlUrl);
                             App.InstallerWindow.Cancel(false);
                             return;
 
