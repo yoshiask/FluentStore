@@ -9,10 +9,9 @@
         <UseWPF>true</UseWPF>
         <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <NoWarn>1701;1702;CS8618;CS8603;CS8625</NoWarn>
 
-        <PublishSingleFile>true</PublishSingleFile>
-        <SelfContained>true</SelfContained>
-        <PublishReadyToRun>true</PublishReadyToRun>
+        <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
         <ApplicationManifest>app.manifest</ApplicationManifest>
     </PropertyGroup>
 
@@ -22,7 +21,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="PostSharp.Community.Packer" Version="1.2.0" />
         <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
+        <PackageReference Include="System.Resources.Extensions" Version="4.6.0" />
         <Reference Include="System.Net.Http" />
         <Resource Include="Resources\Background.png" />
         <Resource Include="Resources\Square71x71Logo.png" />
