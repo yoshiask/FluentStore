@@ -89,7 +89,7 @@ namespace Installer
                 config.Content = "Setup is not complete. If you exit now, the app will not be installed.\r\n\r\n" +
                                  "You may run the setup again at another time to complete the installation.";
                 config.CommonButtons = TaskDialogCommonButtons.YesNo;
-                config.MainIcon = VistaTaskDialogIcon.Warning;
+                config.MainIcon = TaskDialogIcon.Warning;
 
                 cancel = TaskDialog.Show(config).Result == TaskDialogSimpleResult.Yes;
             }
@@ -111,7 +111,7 @@ namespace Installer
             config.Content = msg + "\r\n\r\n" +
                              "You may run the setup again at another time to complete the installation.";
             config.CommonButtons = TaskDialogCommonButtons.Close;
-            config.MainIcon = VistaTaskDialogIcon.Error;
+            config.MainIcon = TaskDialogIcon.Error;
 
             TaskDialogResult res = TaskDialog.Show(config);
             if (res.Result == TaskDialogSimpleResult.Close)

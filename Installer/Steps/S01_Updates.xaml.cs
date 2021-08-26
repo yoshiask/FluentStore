@@ -54,7 +54,7 @@ namespace Installer.Steps
                     config.MainInstruction = "A newer version of Fluent Store is available";
                     config.Content = "Would you like to exit the setup and open the download page?";
                     config.CommonButtons = TaskDialogCommonButtons.YesNoCancel;
-                    config.MainIcon = VistaTaskDialogIcon.Information;
+                    config.MainIcon = TaskDialogIcon.Information;
 
                     TaskDialogResult res = TaskDialog.Show(config);
                     switch (res.Result)
