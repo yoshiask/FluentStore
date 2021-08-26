@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Threading;
 
 namespace Installer
@@ -8,6 +9,11 @@ namespace Installer
     /// </summary>
     public partial class App : Application
     {
+        public static MainWindow InstallerWindow;
+
+        public static Version Version { get; } = new Version(0, 1, 1, 0);
+        public static string VersionString => Version.ToString();
+
         public App()
         {
             DispatcherUnhandledException += OnUnhandledException;
@@ -15,7 +21,7 @@ namespace Installer
 
         private void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            ((MainWindow)MainWindow).ShowErrorMessage(e.Exception.ToString());
+            InstallerWindow.ShowErrorMessage(e.Exception.ToString());
         }
     }
 }

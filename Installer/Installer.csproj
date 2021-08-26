@@ -16,12 +16,16 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <None Remove="Resources\Background.png" />
         <None Remove="Resources\Square71x71Logo.png" />
+        <None Remove="Steps\S00_Welcome.xaml.cs~RF4ef5043.TMP" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Condition=" $(TargetFramework.StartsWith('net5')) " Include="Microsoft.Windows.CsWinRT" Version="1.3.3" />
+        <PackageReference Include="Octokit" Version="0.50.0" />
         <PackageReference Include="WPFTaskDialog" Version="1.7.1" />
+        <Resource Include="Resources\Background.png" />
         <Resource Include="Resources\Square71x71Logo.png" />
 
         <Compile Update="DefaultResources.Designer.cs">

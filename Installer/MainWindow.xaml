@@ -6,25 +6,31 @@
         xmlns:local="clr-namespace:Installer"
         mc:Ignorable="d"
         Title="Setup - Fluent Store Beta" Height="400" Width="650"
-        Loaded="Window_Loaded">
-    
+        Background="{StaticResource FSGray2Brush}"
+        Loaded="Window_Loaded"
+        WindowStartupLocation="CenterScreen">
+
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Margin="16" VerticalAlignment="Center">
-            <TextBlock x:Name="ProgressBlock" Text="Preparing..." Margin="0,0,0,8"
-                       FontSize="24" TextAlignment="Center"/>
-            <ProgressBar x:Name="ProgressBar" IsIndeterminate="True"/>
-        </StackPanel>
-        <TextBox x:Name="OutputBox" FontFamily="Consolas" TextWrapping="Wrap" IsReadOnly="True" Grid.Row="1"
-                 TextChanged="OutputBox_TextChanged"/>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2" Margin="8">
-            <Button Content="Cancel" Click="CancelButton_Click" Padding="4"/>
+        <Frame x:Name="StepFrame" NavigationUIVisibility="Hidden"/>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2" Margin="8" Height="20">
+            <Button x:Name="BackButton" Content="&lt; Back" IsEnabled="False"
+                    Click="BackButton_Click" Margin="0,0,8,0" Width="60"/>
+            <Button x:Name="NextButton" Content="Next >" IsEnabled="True"
+                    Click="NextButton_Click" Margin="0,0,8,0" Width="60" IsDefault="True"/>
+            <Button x:Name="CancelButton" Content="Cancel" IsEnabled="True"
+                    Click="CancelButton_Click" Width="60"/>
         </StackPanel>
+
+        <TextBlock x:Name="VersionBlock" Grid.Row="2"
+                   HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8">
+            <Run Text="Version "/><Run Text="{x:Static local:App.VersionString}"/>
+        </TextBlock>
     </Grid>
     
 </Window>

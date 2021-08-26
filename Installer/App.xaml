@@ -4,7 +4,13 @@
              xmlns:local="clr-namespace:Installer"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        
-        
+
+        <Color x:Key="FSGray1">#ECEFF1</Color>
+        <Color x:Key="FSGray2">#CFD8DC</Color>
+        <Color x:Key="ContentBackground">#E5EAEC</Color>
+        <SolidColorBrush x:Key="FSGray1Brush" Color="{StaticResource FSGray1}"/>
+        <SolidColorBrush x:Key="FSGray2Brush" Color="{StaticResource FSGray2}"/>
+        <SolidColorBrush x:Key="ContentBackgroundBrush" Color="{StaticResource ContentBackground}"/>
+
     </Application.Resources>
 </Application>
