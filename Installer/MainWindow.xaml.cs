@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+﻿using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using TaskDialogInterop;
+using Installer.Utils.TaskDialog;
 
 namespace Installer
 {
@@ -81,7 +78,7 @@ namespace Installer
             if (confirm)
             {
                 // Confirm cancel
-                TaskDialogOptions config = new TaskDialogOptions();
+                TaskDialogOptions config = new();
 
                 config.Owner = this;
                 config.Title = "Fluent Store Installer";
@@ -89,7 +86,7 @@ namespace Installer
                 config.Content = "Setup is not complete. If you exit now, the app will not be installed.\r\n\r\n" +
                                  "You may run the setup again at another time to complete the installation.";
                 config.CommonButtons = TaskDialogCommonButtons.YesNo;
-                config.MainIcon = TaskDialogIcon.Warning;
+                config.MainIcon = VistaTaskDialogIcon.Warning;
 
                 cancel = TaskDialog.Show(config).Result == TaskDialogSimpleResult.Yes;
             }
@@ -111,7 +108,7 @@ namespace Installer
             config.Content = msg + "\r\n\r\n" +
                              "You may run the setup again at another time to complete the installation.";
             config.CommonButtons = TaskDialogCommonButtons.Close;
-            config.MainIcon = TaskDialogIcon.Error;
+            config.MainIcon = VistaTaskDialogIcon.Error;
 
             TaskDialogResult res = TaskDialog.Show(config);
             if (res.Result == TaskDialogSimpleResult.Close)

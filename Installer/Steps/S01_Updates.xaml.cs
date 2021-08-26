@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Installer.Utils.TaskDialog;
+using System;
 using System.Diagnostics;
 using System.Net.Http;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
-using TaskDialogInterop;
+using Windows.Data.Json;
 
 namespace Installer.Steps
 {
@@ -37,9 +37,9 @@ namespace Installer.Steps
                     return;
                 }
 
-                JsonElement latest = (await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync())).RootElement;
-                string tagName = latest.GetProperty("tag_name").GetString();
-                string htmlUrl = latest.GetProperty("html_url").GetString();
+                JsonObject latest = JsonObject.Parse(await response.Content.ReadAsStringAsync());
+                string tagName = latest["tag_name"].GetString();
+                string htmlUrl = latest["html_url"].GetString();
 
                 Regex rx = new(@"(?<major>\d+)\.(?<minor>\d+)(?:\.(?<build>\d+)(?:\.(?<revision>\d+))?)?");
                 Match m = rx.Match(tagName);
@@ -69,7 +69,7 @@ namespace Installer.Steps
                     config.MainInstruction = "A newer version of Fluent Store is available";
                     config.Content = "Would you like to exit the setup and open the download page?";
                     config.CommonButtons = TaskDialogCommonButtons.YesNoCancel;
-                    config.MainIcon = TaskDialogIcon.Information;
+                    config.MainIcon = VistaTaskDialogIcon.Information;
 
                     TaskDialogResult res = TaskDialog.Show(config);
                     switch (res.Result)
