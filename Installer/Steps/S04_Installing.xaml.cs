@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using static Installer.Utils.InstallScriptLocalization;
 
 namespace Installer.Steps
 {
@@ -15,7 +16,6 @@ namespace Installer.Steps
     {
         private DirectoryInfo TempFolder;
         private FileInfo ZipFile;
-        private DirectoryInfo InstallerDir;
         private Process psProc;
 
         public S04_Installing()
@@ -36,19 +36,19 @@ namespace Installer.Steps
             TempFolder = Directory.CreateDirectory(Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FluentStoreInstaller"));
             ZipFile = new(Path.Combine(TempFolder.FullName, "FluentStore_Beta.zip"));
-            InstallerDir = new(Path.Combine(TempFolder.FullName, "FluentStore_Beta"));
+            App.InstallerDir = new(Path.Combine(TempFolder.FullName, "FluentStore_Beta"));
 
-            Debug.WriteLine("Extracting to " + InstallerDir.FullName);
+            Debug.WriteLine("Extracting to " + App.InstallerDir.FullName);
             File.WriteAllBytes(ZipFile.FullName, DefaultResources.FluentStore_Beta);
-            if (InstallerDir.Exists)
-                InstallerDir.Delete(true);
-            System.IO.Compression.ZipFile.ExtractToDirectory(ZipFile.FullName, InstallerDir.FullName);
+            if (App.InstallerDir.Exists)
+                App.InstallerDir.Delete(true);
+            System.IO.Compression.ZipFile.ExtractToDirectory(ZipFile.FullName, App.InstallerDir.FullName);
 
             // Run Install.ps1
             ProcessStartInfo startInfo = new()
             {
                 FileName = "powershell",
-                WorkingDirectory = InstallerDir.FullName,
+                WorkingDirectory = App.InstallerDir.FullName,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -99,7 +99,7 @@ namespace Installer.Steps
                     continue;
 
                 Debug.WriteLine("\tOut> " + line);
-                OutputBox.Text += line.Replace(InstallerDir.FullName, "$(InstallerPath)") + "\r\n";
+                OutputBox.Text += line.Replace(App.InstallerDir.FullName, "$(InstallerPath)") + "\r\n";
                 if (line.Contains("HRESULT"))
                 {
                     // Error occurred
@@ -128,12 +128,12 @@ namespace Installer.Steps
                 {
                     await psProc.StandardInput.WriteLineAsync();
                 }
-                else if (line.StartsWith("Success"))
+                else if (line == GetLocalizedString(KEY_Success))
                 {
                     // Install succeeded
                     App.InstallerWindow.NextStep();
                 }
-                else if (line.StartsWith("Error"))
+                else if (line.StartsWith(GetLocalizedString(KEY_Error)))
                 {
                     // Install failed
                     ProgressBar.Visibility = Visibility.Collapsed;
