@@ -13,6 +13,7 @@
 
         <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
         <ApplicationManifest>app.manifest</ApplicationManifest>
+        <ApplicationIcon>Resources\Logo.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
