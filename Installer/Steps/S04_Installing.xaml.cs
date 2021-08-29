@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -17,6 +18,9 @@ namespace Installer.Steps
         private DirectoryInfo TempFolder;
         private FileInfo ZipFile;
         private Process psProc;
+        private const string regPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock";
+        private bool? AllowAllTrustedApps = null;
+        private bool? AllowDevelopmentWithoutDevLicense = null;
 
         public S04_Installing()
         {
@@ -88,6 +92,25 @@ namespace Installer.Steps
             await Task.Delay(100);
             await psProc.StandardInput.WriteLineAsync("Set-ExecutionPolicy -Scope Process Unrestricted");
             await Task.Delay(100);
+
+            // Set developer license so the install script doesn't open settings
+            using RegistryKey? hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+            RegistryKey? regKey = hklm.OpenSubKey(regPath, true);
+            if (regKey == null)
+                regKey = Registry.LocalMachine.CreateSubKey(regPath, true);
+
+            int? regVal = regKey.GetValue("AllowAllTrustedApps") as int?;
+            if (regVal.HasValue)
+                AllowAllTrustedApps = regVal.Value > 0 ? true : false;
+            regVal = regKey.GetValue("AllowDevelopmentWithoutDevLicense") as int?;
+            if (regVal.HasValue)
+                AllowDevelopmentWithoutDevLicense = regVal.Value > 0 ? true : false;
+
+            regKey.SetValue("AllowAllTrustedApps", true, RegistryValueKind.DWord);
+            regKey.SetValue("AllowDevelopmentWithoutDevLicense", true, RegistryValueKind.DWord);
+            regKey.Close();
+
+            // Start install script
             await psProc.StandardInput.WriteLineAsync(".\\Install.ps1");
 
             bool isError = false;
@@ -159,6 +182,23 @@ namespace Installer.Steps
                     Debug.WriteLine("Killing PowerShell script");
                     psProc?.Kill();
                     psProc?.Close();
+                }
+
+                using RegistryKey? hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+                RegistryKey? regKey = hklm.OpenSubKey(regPath, true);
+                if (regKey != null)
+                {
+                    if (AllowAllTrustedApps.HasValue)
+                        regKey.SetValue("AllowAllTrustedApps", AllowAllTrustedApps.Value, RegistryValueKind.DWord);
+                    else
+                        regKey.DeleteValue("AllowAllTrustedApps");
+
+                    if (AllowDevelopmentWithoutDevLicense.HasValue)
+                        regKey.SetValue("AllowDevelopmentWithoutDevLicense", AllowDevelopmentWithoutDevLicense.Value, RegistryValueKind.DWord);
+                    else
+                        regKey.DeleteValue("AllowDevelopmentWithoutDevLicense");
+
+                    regKey.Close();
                 }
 
                 Debug.WriteLine("Removing temporary files");
