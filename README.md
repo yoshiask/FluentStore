@@ -15,7 +15,7 @@ Several sources are currently supported, with several more planned for the futur
 | Source Name       | Search | Download | Install
 ---                 | :---:  | :---:    | :---:
 | Microsoft Store   | ✅     | ✅      | ✅¹ |
-| WinGet            | ✅     | ✅      | ❌  |
+| WinGet            | ✅     | ✅      | ✅  |
 | GitHub Releases   | ❌     | ❌      | ❌  |
 | Chocolatey        | ❌     | ❌      | ❌  |
 
