@@ -36,7 +36,7 @@ namespace Installer.Steps
             App.InstallerWindow.SetCancelButtonEnabled();
 
             // Extract ZIP to temp folder
-            OutputBox.Text += "Extracting installer...\r\n";
+            OutputBoxWriteLine("Extracting installer...");
             TempFolder = Directory.CreateDirectory(Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FluentStoreInstaller"));
             ZipFile = new(Path.Combine(TempFolder.FullName, "FluentStore_Beta.zip"));
@@ -82,7 +82,7 @@ namespace Installer.Steps
                 App.InstallerWindow.ShowErrorMessage("Failed to start install script.");
                 return;
             }
-            OutputBox.Text += "Beginning install...\r\n";
+            OutputBoxWriteLine("Beginning install...");
             psProc.BeginErrorReadLine();
             await psProc.StandardOutput.ReadLineAsync();
             await Task.Delay(100);
@@ -122,7 +122,7 @@ namespace Installer.Steps
                     continue;
 
                 Debug.WriteLine("\tOut> " + line);
-                OutputBox.Text += line.Replace(App.InstallerDir.FullName, "$(InstallerPath)") + "\r\n";
+                OutputBoxWriteLine(line.Replace(App.InstallerDir.FullName, "$(InstallerPath)"));
                 if (line.Contains("HRESULT"))
                 {
                     // Error occurred
@@ -171,6 +171,11 @@ namespace Installer.Steps
                 Debug.WriteLine("Removing temporary files");
                 TempFolder.Delete(true);
             }
+        }
+
+        private void OutputBoxWriteLine(string line)
+        {
+            OutputBox.Text += line + "\r\n";
         }
 
         public void Cancel()
