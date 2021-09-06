@@ -145,7 +145,9 @@
                                     <winui:SplitButton.Flyout>
                                         <MenuFlyout Placement="BottomEdgeAlignedLeft">
                                             <MenuFlyoutItem Text="Share website link" ToolTipService.ToolTip="Shares a link to the package on the source website."
-                                                            x:Name="ShareWebLinkMenuItem" Icon="Globe" Click="ShareWebLink_Click"/>
+                                                            x:Name="ShareWebLinkMenuItem" Icon="Link" Click="ShareWebLink_Click"/>
+                                            <MenuFlyoutItem Text="Open in browser" ToolTipService.ToolTip="Opens a link to the package on the source website."
+                                                            x:Name="OpenInBrowserMenuItem" Icon="Globe" Click="OpenInBrowser_Click"/>
                                         </MenuFlyout>
                                     </winui:SplitButton.Flyout>
                                 </winui:SplitButton>

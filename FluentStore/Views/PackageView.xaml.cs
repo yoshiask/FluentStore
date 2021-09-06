@@ -372,6 +372,12 @@ namespace FluentStore.Views
             DataTransferManager.ShowShareUI();
         }
 
+        private void OpenInBrowser_Click(object sender, RoutedEventArgs e)
+        {
+            Flurl.Url appUrl = PackageService.GetUrlForPackageAsync(ViewModel.Package);
+            NavigationService.OpenInBrowser(appUrl);
+        }
+
         private void ShareDataRequested(DataTransferManager sender, DataRequestedEventArgs args, Flurl.Url appUrl)
         {
             var appUri = appUrl.ToUri();
