@@ -53,7 +53,7 @@ namespace FluentStore.Services
             ShowHttpErrorPage(errorCode, errorMessage);
         }
 
-        public abstract Task<bool> OpenInBrowser(string url);
+        public abstract Task<bool> OpenInBrowser(Url url);
 
         public abstract Task<bool> OpenInBrowser(Uri uri);
 

@@ -3,6 +3,7 @@ using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
 using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
+using Windows.ApplicationModel;
 using Windows.UI.Xaml.Controls;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
@@ -15,7 +16,17 @@ namespace FluentStore.Views
 	public sealed partial class SettingsView : Page
 	{
 		private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
+		private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
 		private readonly ISettingsService Settings = Ioc.Default.GetRequiredService<ISettingsService>();
+
+		private string VersionString
+        {
+            get
+            {
+				PackageVersion ver = Package.Current.Id.Version;
+				return $"{ver.Major}.{ver.Minor}.{ver.Build}";
+			}
+        }
 
 		public SettingsView()
 		{
@@ -23,5 +34,15 @@ namespace FluentStore.Views
 
 			WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Settings"));
 		}
-	}
+
+        private async void BugReportButton_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+			await NavigationService.OpenInBrowser("https://github.com/yoshiask/FluentStore/issues/new");
+        }
+
+        private async void DonateButton_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+			await NavigationService.OpenInBrowser("https://paypal.me/YoshiAsk");
+		}
+    }
 }

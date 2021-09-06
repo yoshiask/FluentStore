@@ -142,14 +142,14 @@ namespace FluentStore.Services
         }
 
 
-        public override async Task<bool> OpenInBrowser(string url)
+        public override async Task<bool> OpenInBrowser(Url url)
         {
             // Wrap in a try-catch block in order to prevent the
             // app from crashing from invalid links.
             // (specifically from project badges)
             try
             {
-                return await OpenInBrowser(new Uri(url));
+                return await OpenInBrowser(url.ToUri());
             }
             catch
             {
