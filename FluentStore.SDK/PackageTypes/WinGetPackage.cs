@@ -7,6 +7,7 @@ using Microsoft.Toolkit.Mvvm.DependencyInjection;
 using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.Foundation.Metadata;
 using Windows.Storage;
@@ -125,7 +126,11 @@ namespace FluentStore.SDK.Packages
                 Installer = Manifest.Installers.Find(i => i.Arch == WinGetRun.Enums.InstallerArchitecture.X86
                     || i.Arch == WinGetRun.Enums.InstallerArchitecture.Neutral);
             if (Installer == null)
-                throw new PlatformNotSupportedException($"Your computer's architecture is {sysArch}, which is not supported by this package.");
+            {
+                string archStr = string.Join(", ", Manifest.Installers.Select(i => i.Arch));
+                throw new PlatformNotSupportedException($"Your computer's architecture is {sysArch}, which is not supported by this package." +
+                    $"This package supports {archStr}].");
+            }
 
             switch (Installer.InstallerType ?? Manifest.InstallerType)
             {
@@ -140,17 +145,7 @@ namespace FluentStore.SDK.Packages
                 default:
                     // TODO: Use full trust component to start installer in slient mode
                     var args = Installer.Switches?.Silent ?? Manifest.Switches?.Silent;
-                    try
-                    {
-                        await Win32Helpers.InvokeWin32ComponentAsync(DownloadItem.Path, args, true);
-                        isSuccess = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        var logger = Ioc.Default.GetRequiredService<Services.LoggerService>();
-                        logger.UnhandledException(ex, "Exception from Win32 component");
-                        throw;
-                    }
+                    await Win32Helper.Install(this, args);
                     break;
             }
 

@@ -1,26 +1,12 @@
-﻿using FluentStore.SDK.Handlers;
-using FluentStore.SDK.Helpers;
+﻿using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
-using FluentStore.SDK.Messages;
 using FluentStore.SDK.Models;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Marketplace.Storefront.Contracts.Enums;
 using Microsoft.Toolkit.Diagnostics;
-using Microsoft.Toolkit.Mvvm.Messaging;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Linq;
-using System.Xml.XPath;
-using Windows.ApplicationModel;
-using Windows.Management.Deployment;
 using Windows.Storage;
-using Windows.System;
-using Windows.System.Profile;
-using ImageType = FluentStore.SDK.Images.ImageType;
 
 namespace FluentStore.SDK.Packages
 {
@@ -29,12 +15,7 @@ namespace FluentStore.SDK.Packages
         private Urn _Urn;
         public override Urn Urn
         {
-            get
-            {
-                if (_Urn == null)
-                    _Urn = Urn.Parse("urn:" + MicrosoftStoreHandler.NAMESPACE_MODERNPACK + ":" + PackageFamilyName);
-                return _Urn;
-            }
+            get => _Urn;
             set => _Urn = value;
         }
 
@@ -126,7 +107,7 @@ namespace FluentStore.SDK.Packages
 
         public override async Task<List<ImageBase>> GetScreenshots()
         {
-            return new List<ImageBase>();
+            return new List<ImageBase>(0);
         }
 
         private InstallerType _Type;
