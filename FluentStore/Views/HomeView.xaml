@@ -28,9 +28,9 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <tkcontrols:Carousel x:Name="FeaturedCarousel" ItemsSource="{x:Bind ViewModel.CarouselItems}"
-                           SelectedIndex="{x:Bind ViewModel.SelectedCarouselItemIndex, Mode=TwoWay}"
-                           SelectedItem="{x:Bind ViewModel.SelectedCarouselItem, Mode=TwoWay}"
-                           ItemMargin="16" ItemDepth="200" ManipulationMode="None">
+                             SelectedIndex="{x:Bind ViewModel.SelectedCarouselItemIndex, Mode=TwoWay}"
+                             SelectedItem="{x:Bind ViewModel.SelectedCarouselItem, Mode=TwoWay}"
+                             ItemMargin="16" ItemDepth="200" ManipulationMode="None">
             <tkcontrols:Carousel.EasingFunction>
                 <CubicEase EasingMode="EaseOut" />
             </tkcontrols:Carousel.EasingFunction>
@@ -44,7 +44,7 @@
                         </Grid.RowDefinitions>
                         <ContentControl Content="{x:Bind HeroImage}" Grid.RowSpan="2"
                                         ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
-                        <Grid Grid.Row="1" Padding="8" ColumnSpacing="8" Background="{ThemeResource SystemControlBaseHighAcrylicElementBrush}">
+                        <Grid Grid.Row="1" Padding="8" ColumnSpacing="8" Background="{ThemeResource SystemControlChromeMediumAcrylicElementMediumBrush}">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition/>

@@ -55,7 +55,7 @@
                         </Grid.ColumnDefinitions>
 
                         <Border x:Name="BackgroundFill" Grid.RowSpan="4" Grid.ColumnSpan="2" Margin="-20"
-                                Background="{ThemeResource SystemControlChromeHighAcrylicElementMediumBrush}"/>
+                                Background="{ThemeResource SystemControlChromeMediumAcrylicElementMediumBrush}"/>
 
                         <Viewbox x:Name="IconBox"
                                  MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="125"
