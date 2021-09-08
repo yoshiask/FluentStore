@@ -107,7 +107,7 @@ namespace FluentStoreAPI.Models.Firebase
                     else
                     {
                         PropertyInfo targetProp = tType.GetProperty(fieldName, fieldValue?.GetType() ?? typeof(object));
-                        if (targetProp != null && targetProp.CanWrite)
+                        if (targetProp != null && targetProp.CanWrite && !targetProp.IsDefined(typeof(IgnoreAttribute)))
                             targetProp.SetValue(result, fieldValue);
                     }
                 }
@@ -182,7 +182,8 @@ namespace FluentStoreAPI.Models.Firebase
             Type sType = source.GetType();
             foreach (PropertyInfo prop in sType.GetProperties())
             {
-                if (prop.Name == "Id" || prop.Name == "CreatedAt" || prop.Name == "UpdatedAt")
+                if (prop.Name == "Id" || prop.Name == "CreatedAt" || prop.Name == "UpdatedAt"
+                    || prop.IsDefined(typeof(IgnoreAttribute)))
                     continue;
 
                 JObject jField = UntransformField(prop.GetValue(source));
