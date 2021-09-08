@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Windows.System;
 using WinGetRun.Enums;
 
@@ -44,5 +45,31 @@ namespace FluentStore.SDK.Helpers
         }
 
         public static string GetExtension(this InstallerType type) => type.ToString().ToLower();
+
+        public static bool IsAtLeast<TEnum>(this TEnum a, TEnum b) where TEnum : unmanaged, Enum
+        {
+            return a.AsUInt64() >= b.AsUInt64();
+        }
+
+        public static bool IsLessThan<TEnum>(this TEnum a, TEnum b) where TEnum : unmanaged, Enum
+        {
+            return a.AsUInt64() < b.AsUInt64();
+        }
+
+        public static unsafe ulong AsUInt64<TEnum>(this TEnum item) where TEnum : unmanaged, Enum
+        {
+            ulong x;
+            if (sizeof(TEnum) == 1)
+                x = *(byte*)(&item);
+            else if (sizeof(TEnum) == 2)
+                x = *(ushort*)(&item);
+            else if (sizeof(TEnum) == 4)
+                x = *(uint*)(&item);
+            else if (sizeof(TEnum) == 8)
+                x = *(ulong*)(&item);
+            else
+                throw new ArgumentException("Argument is not a usual enum type; it is not 1, 2, 4, or 8 bytes in length.");
+            return x;
+        }
     }
 }

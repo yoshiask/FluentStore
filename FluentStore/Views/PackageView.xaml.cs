@@ -2,6 +2,7 @@
 using FluentStore.Helpers.Continuity;
 using FluentStore.Helpers.Continuity.Extensions;
 using FluentStore.SDK;
+using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Messages;
 using FluentStore.Services;
 using FluentStore.ViewModels;
@@ -259,7 +260,9 @@ namespace FluentStore.Views
             Flyout flyout = null;
             try
             {
-                if (await ViewModel.Package.DownloadPackageAsync() != null)
+                if (ViewModel.Package.Status.IsLessThan(PackageStatus.Downloaded))
+                    await ViewModel.Package.DownloadPackageAsync();
+                if (ViewModel.Package.Status.IsAtLeast(PackageStatus.Downloaded))
                 {
                     bool installed = await ViewModel.Package.InstallAsync();
                     InstallButton.IsEnabled = true;
