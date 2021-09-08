@@ -32,7 +32,7 @@ namespace FluentStore.SDK.Packages
 
         public override Task<List<ImageBase>> GetScreenshots()
         {
-            return Task.FromResult(Images.FirstOrDefault(i => i.ImageType == ImageType.Screenshot));
+            return Task.FromResult(Images.Where(i => i.ImageType == ImageType.Screenshot).ToList());
         }
 
         public override Task<bool> InstallAsync() => throw new NotImplementedException();
