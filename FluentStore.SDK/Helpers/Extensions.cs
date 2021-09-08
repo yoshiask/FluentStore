@@ -44,7 +44,7 @@ namespace FluentStore.SDK.Helpers
             }
         }
 
-        public static string GetExtension(this InstallerType type) => type.ToString().ToLower();
+        public static string GetExtension(this InstallerType type) => "." + type.ToString().ToLower();
 
         public static bool IsAtLeast<TEnum>(this TEnum a, TEnum b) where TEnum : unmanaged, Enum
         {
