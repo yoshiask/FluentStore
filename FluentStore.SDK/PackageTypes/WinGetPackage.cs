@@ -74,6 +74,7 @@ namespace FluentStore.SDK.Packages
             await DownloadItem.RenameAsync(System.IO.Path.GetFileName(PackageUri.ToString()), NameCollisionOption.ReplaceExisting);
 
             WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, (StorageFile)DownloadItem));
+            Status = PackageStatus.Downloaded;
             return DownloadItem;
         }
 

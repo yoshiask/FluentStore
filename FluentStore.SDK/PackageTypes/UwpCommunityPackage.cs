@@ -95,14 +95,22 @@ namespace FluentStore.SDK.Packages
             set => _Urn = value;
         }
 
-        public override Task<bool> CanLaunchAsync() => Task.FromResult(false);
+        public override async Task<bool> CanLaunchAsync()
+        {
+            if (LinkedPackage != null)
+                return await LinkedPackage.CanLaunchAsync();
+            else
+                return false;
+        }
 
         public override async Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null)
         {
             LinkedPackage = await PackageService.GetPackageFromUrlAsync(DownloadLink);
             if (LinkedPackage != null)
             {
-                return await LinkedPackage.DownloadPackageAsync(folder);
+                DownloadItem = await LinkedPackage.DownloadPackageAsync(folder);
+                Status = LinkedPackage.Status;
+                return DownloadItem;
             }
             else
             {
@@ -136,7 +144,11 @@ namespace FluentStore.SDK.Packages
                 return true;
         }
 
-        public override Task LaunchAsync() => throw new NotImplementedException();
+        public override async Task LaunchAsync()
+        {
+            if (LinkedPackage != null)
+                await LinkedPackage.LaunchAsync();
+        }
 
         private int _ProjectId;
         public int ProjectId
