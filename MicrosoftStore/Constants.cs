@@ -12,6 +12,9 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         public const string CAT_ALL_PRODUCTS = "DCatAll-Products";
         public const string CAT_APPS = "Apps";
 
+        public const string DEFAULT_DEVICEFAMILY = "Windows.Desktop";
+        public const string DEFAULT_ARCHITECTURE = "x86";
+
         public static readonly JsonSerializerSettings DefaultJsonSettings = new JsonSerializerSettings
         {
             MetadataPropertyHandling = MetadataPropertyHandling.Default,
