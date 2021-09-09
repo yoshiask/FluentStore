@@ -22,7 +22,8 @@ namespace FluentStore.Services
                     PageType = typeof(HomeView),
                     Icon = new SymbolIcon(Symbol.Home),
                     Title = "Home",
-                    Path = "home"
+                    Path = "home",
+                    Tooltip = "Explore featured apps"
                 },
 
                 new PageInfo()
@@ -30,7 +31,8 @@ namespace FluentStore.Services
                     PageType = typeof(MyAppsView),
                     Icon = new SymbolIcon(Symbol.AllApps),
                     Title = "My Apps",
-                    Path = "myapps"
+                    Path = "myapps",
+                    Tooltip = "View your installed apps"
                 },
 
                 new PageInfo()
@@ -39,6 +41,7 @@ namespace FluentStore.Services
                     Icon = new SymbolIcon(Symbol.List),
                     Title = "My Collections",
                     Path = "mycollections",
+                    Tooltip = "Manage your app collections",
                     RequiresSignIn = true
                 },
             };
@@ -200,7 +203,8 @@ namespace FluentStore.Services
                 Icon = (IconElement)page.Icon,
                 Visibility = page.RequiresSignIn ? Visibility.Collapsed : Visibility.Visible,
             };
-            ToolTipService.SetToolTip(item, new ToolTip { Content = page.Tooltip });
+            if (!string.IsNullOrWhiteSpace(page.Tooltip))
+                ToolTipService.SetToolTip(item, new ToolTip { Content = page.Tooltip });
             Windows.UI.Xaml.Automation.AutomationProperties.SetName(item, page.Title);
 
             return item;
