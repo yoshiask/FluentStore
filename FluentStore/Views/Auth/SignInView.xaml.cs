@@ -18,12 +18,12 @@ namespace FluentStore.Views.Auth
             this.InitializeComponent();
         }
 
-        private void PasswordBox_KeyDown(object sender, KeyRoutedEventArgs e)
+        private async void PasswordBox_KeyDown(object sender, KeyRoutedEventArgs e)
         {
             if (e.Key == Windows.System.VirtualKey.Enter)
             {
                 // Attempt to sign the user in
-                ViewModel.SignInCommand.Execute(null);
+                await ViewModel.SignInCommand.ExecuteAsync(null);
             }
         }
 
@@ -32,6 +32,11 @@ namespace FluentStore.Views.Auth
             base.OnNavigatedTo(e);
 
             WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage(string.Empty));
+        }
+
+        private void InfoButton_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            InfoTeachingTip.IsOpen = true;
         }
     }
 }

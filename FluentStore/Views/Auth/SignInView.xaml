@@ -31,8 +31,16 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Text="Fluent Store Social" Style="{ThemeResource SubtitleTextBlockStyle}"
-                       TextLineBounds="Tight" Grid.Row="0"/>
+            <StackPanel Grid.Row="0" Spacing="4" Orientation="Horizontal">
+                <TextBlock Text="Fluent Store Social" Style="{ThemeResource SubtitleTextBlockStyle}"
+                           TextLineBounds="Tight"/>
+                <Button x:Name="InfoButton" Style="{ThemeResource ButtonRevealStyle}"
+                        VerticalAlignment="Center" Width="40" Height="40"
+                        Click="InfoButton_Click">
+                    <FontIcon Glyph="&#xE946;" FontSize="12" />
+                </Button>
+            </StackPanel>
+            
             <TextBlock Text="{x:Bind ViewModel.FailReason, Mode=OneWay}" IsTextSelectionEnabled="True"
                        Foreground="{ThemeResource SystemControlErrorTextForegroundBrush}" Grid.Row="1"/>
             <winui:ProgressBar IsIndeterminate="True" Grid.Row="1"
@@ -45,6 +53,15 @@
                 <HyperlinkButton Content="Sign up" Command="{x:Bind ViewModel.SignUpCommand}"/>
                 <Button Content="Log in" Style="{ThemeResource AccentButtonStyle}" Command="{x:Bind ViewModel.SignInCommand}"/>
             </StackPanel>
+
+            <winui:TeachingTip x:Name="InfoTeachingTip"
+                               Target="{x:Bind InfoButton}"
+                               Title="What is the Fluent Store Social?"
+                               Subtitle="With a Fluent Store Social account, you can create, download, install, and share collections of apps. Collections are synced across devices, which makes installing your favorite apps on new computers easier than ever.">
+                <winui:TeachingTip.IconSource>
+                    <winui:FontIconSource Glyph="&#xE716;" />
+                </winui:TeachingTip.IconSource>
+            </winui:TeachingTip>
         </Grid>
 
         <VisualStateManager.VisualStateGroups>
