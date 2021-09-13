@@ -332,7 +332,24 @@ namespace FluentStore.Views
             try
             {
                 var storageItem = await ViewModel.Package.DownloadPackageAsync();
-                InstallButton.IsEnabled = storageItem == null;
+                bool downloaded = storageItem != null;
+                InstallButton.IsEnabled = true;
+                if (downloaded)
+                {
+                    // Show success
+                    flyout = new Flyout
+                    {
+                        Content = new TextBlock
+                        {
+                            Text = "Download succeeded!"
+                        }
+                    };
+                }
+                else
+                {
+                    // Show error
+                    flyout = new Controls.HttpErrorFlyout(418, "Package was not downloaded, an unknown error occurred.");
+                }
             }
             catch (Flurl.Http.FlurlHttpException ex)
             {

@@ -89,8 +89,10 @@ namespace FluentStore.SDK.Packages
         public async Task<string> GetInstallerType()
         {
             Guard.IsEqualTo((int)Status, (int)PackageStatus.Downloaded, nameof(Status));
-            Type = await PackagedInstallerHelper.GetInstallerType((StorageFile)DownloadItem);
-            return Type.ToString().ToLower();
+
+            if (Type == InstallerType.Unknown)
+                Type = await PackagedInstallerHelper.GetInstallerType((StorageFile)DownloadItem);
+            return Type.GetExtension();
         }
 
         public override async Task<ImageBase> GetAppIcon()
