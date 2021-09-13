@@ -24,7 +24,7 @@
     <ItemGroup>
         <PackageReference Include="PostSharp.Community.Packer" Version="1.2.0" />
         <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
-        <PackageReference Include="System.Resources.Extensions" Version="4.6.0" />
+        <PackageReference Include="System.Resources.Extensions" Version="5.0.0" />
         <Reference Include="System.Net.Http" />
         <Resource Include="Resources\Background.png" />
         <Resource Include="Resources\Square71x71Logo.png" />
