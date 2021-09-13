@@ -1,6 +1,9 @@
 ﻿using FluentStore.ViewModels;
+using FluentStore.ViewModels.Messages;
+using Microsoft.Toolkit.Mvvm.Messaging;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -24,5 +27,10 @@ namespace FluentStore.Views
         }
         public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(nameof(ViewModel),
             typeof(HomeViewModel), typeof(HomeView), new PropertyMetadata(null));
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Home"));
+        }
     }
 }

@@ -20,8 +20,6 @@ namespace FluentStore.ViewModels
         public HomeViewModel()
         {
             LoadFeaturedCommand = new AsyncRelayCommand(LoadFeaturedAsync);
-
-            WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Home"));
         }
 
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
