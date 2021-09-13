@@ -31,15 +31,24 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0" Spacing="4" Orientation="Horizontal">
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
                 <TextBlock Text="Fluent Store Social" Style="{ThemeResource SubtitleTextBlockStyle}"
                            TextLineBounds="Tight"/>
-                <Button x:Name="InfoButton" Style="{ThemeResource ButtonRevealStyle}"
-                        VerticalAlignment="Center" Width="40" Height="40"
-                        Click="InfoButton_Click">
-                    <FontIcon Glyph="&#xE946;" FontSize="12" />
+
+                <Button x:Name="InfoButton" Click="InfoButton_Click"
+                        AutomationProperties.Name="About the Fluent Store Social?"
+                        ToolTipService.ToolTip="About the Fluent Store Social?"
+                        Grid.Column="1" Width="30" Height="30" Margin="0,-8,0,0" Padding="0"
+                        HorizontalAlignment="Right" VerticalAlignment="Top"
+                        Style="{ThemeResource ButtonRevealStyle}">
+                    <FontIcon Width="30" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                              Glyph="&#xE946;" />
                 </Button>
-            </StackPanel>
+            </Grid>
             
             <TextBlock Text="{x:Bind ViewModel.FailReason, Mode=OneWay}" IsTextSelectionEnabled="True"
                        Foreground="{ThemeResource SystemControlErrorTextForegroundBrush}" Grid.Row="1"/>
