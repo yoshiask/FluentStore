@@ -584,7 +584,10 @@
     <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications">
       <Version>7.0.2</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Controls">
+    <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Controls.Core">
+      <Version>7.0.2</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Controls.Layout">
       <Version>7.0.2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.UI.Xaml">
