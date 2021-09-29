@@ -28,7 +28,7 @@
     <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <PackageCertificateThumbprint>5EC41115D1E1B49D0BFD6A3EB7AA318726E17A2D</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>BF1139D4B9FE20C0A714FA3158740136F5836C37</PackageCertificateThumbprint>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
