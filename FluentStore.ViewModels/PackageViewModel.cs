@@ -3,10 +3,10 @@ using FluentStore.SDK.Attributes;
 using FluentStore.SDK.Images;
 using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.Input;
-using Microsoft.Toolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -152,17 +152,12 @@ namespace FluentStore.ViewModels
             }
             else
             {
-                switch (obj)
+                pvm = obj switch
                 {
-                    case PackageViewModel viewModel:
-                        pvm = viewModel;
-                        break;
-                    case PackageBase package:
-                        pvm = new PackageViewModel(package);
-                        break;
-                    default:
-                        throw new ArgumentException($"'{nameof(obj)}' is an invalid type: {obj.GetType().Name}");
-                }
+                    PackageViewModel viewModel => viewModel,
+                    PackageBase package => new PackageViewModel(package),
+                    _ => throw new ArgumentException($"'{nameof(obj)}' is an invalid type: {obj.GetType().Name}"),
+                };
             }
 
             if (pvm.Package.Status < PackageStatus.Details)
@@ -266,7 +261,7 @@ namespace FluentStore.ViewModels
         }
 
         public static implicit operator PackageBase(PackageViewModel pvm) => pvm.Package;
-        public static implicit operator PackageViewModel(PackageBase pb) => new PackageViewModel(pb);
+        public static implicit operator PackageViewModel(PackageBase pb) => new(pb);
 
         public override string ToString() => Package.ToString();
     }

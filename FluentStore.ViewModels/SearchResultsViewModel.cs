@@ -1,10 +1,10 @@
 ﻿using FluentStore.SDK;
 using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.Input;
-using Microsoft.Toolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -80,7 +80,7 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _NoResults, value);
         }
 
-        private ObservableCollection<PackageViewModel> _PackageList = new ObservableCollection<PackageViewModel>();
+        private ObservableCollection<PackageViewModel> _PackageList = new();
         public ObservableCollection<PackageViewModel> PackageList
         {
             get => _PackageList;
@@ -128,7 +128,7 @@ namespace FluentStore.ViewModels
                 if (Settings.UseExclusionFilter)
                 {
                     // Filter out unwanted search results
-                    Regex exclusionFilter = new Regex(Settings.ExclusionFilter, RegexOptions.Compiled);
+                    Regex exclusionFilter = new(Settings.ExclusionFilter, RegexOptions.Compiled);
                     results = results.Where(pb => !exclusionFilter.IsMatch(pb.Title));
                 }
 

@@ -1,0 +1,88 @@
+﻿<Page
+    x:Class="FluentStore.Views.SettingsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FluentStore.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxcWindows11Present="using:Microsoft.UI.Xaml.Controls?IsApiContractPresent(Windows.Foundation.UniversalApiContract, 14)"
+    xmlns:controls="using:FluentStore.Controls"
+    xmlns:sdk="using:FluentStore.SDK"
+    mc:Ignorable="d"
+    x:DefaultBindMode="TwoWay">
+
+    <ScrollViewer Padding="8">
+        <StackPanel Spacing="4">
+
+            <controls:SettingsBlockControl Title="Search exclusion filter"
+                                           Description="A regular expression used to filter out unwanted search suggestions and results">
+                <controls:SettingsBlockControl.Icon>
+                    <FontIcon Glyph="&#xF6FA;"/>
+                </controls:SettingsBlockControl.Icon>
+                <controls:SettingsBlockControl.ExpandableContent>
+                    <TextBox Text="{x:Bind Settings.ExclusionFilter}" Margin="16"
+                             IsEnabled="{x:Bind Settings.UseExclusionFilter, Mode=OneWay}"/>
+                </controls:SettingsBlockControl.ExpandableContent>
+                <ToggleSwitch IsOn="{x:Bind Settings.UseExclusionFilter}" Style="{ThemeResource ToggleSwitchRightStyle}"/>
+            </controls:SettingsBlockControl>
+
+            <controls:SettingsBlockControl Title="Package sources" Icon="Shop"
+                                           Description="All currently registered package handlers">
+                <controls:SettingsBlockControl.ExpandableContent>
+                    <ItemsControl ItemsSource="{x:Bind PackageService.PackageHandlers.Values, Mode=OneWay}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="8"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="sdk:PackageHandlerBase">
+                                <StackPanel Spacing="8" Orientation="Horizontal">
+                                    <ContentControl Content="{x:Bind Image, Mode=OneWay}" Height="48"
+                                                    ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
+                                    <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </controls:SettingsBlockControl.ExpandableContent>
+            </controls:SettingsBlockControl>
+
+            <controls:SettingsBlockControl Title="About"
+                                           Description="Information about Fluent Store">
+                <controls:SettingsBlockControl.Icon>
+                    <FontIcon Glyph="&#xE946;"/>
+                </controls:SettingsBlockControl.Icon>
+                <controls:SettingsBlockControl.ExpandableContent>
+                    <TextBlock Margin="16" TextWrapping="WrapWholeWords">
+                            <Run Text="Fluent Store is a unifying frontend for Windows app stores and package managers."/>
+                            <Run Text="You can search all repositories at once, pick out an app, and install it without ever opening a browser or command prompt."/>
+                            <Run Text="With a Fluent Store Social account, you can create collections of apps to install or share in one click."/>
+                            <LineBreak/>
+                            <Run Text="Version "/><Run Text="{x:Bind VersionString, Mode=OneTime}"/>
+                    </TextBlock>
+                </controls:SettingsBlockControl.ExpandableContent>
+            </controls:SettingsBlockControl>
+
+            <controls:SettingsBlockControl Title="Report an issue">
+                <controls:SettingsBlockControl.Icon>
+                    <FontIcon Glyph="&#xEBE8;"/>
+                </controls:SettingsBlockControl.Icon>
+                <controls:SettingsBlockControl.SettingsActionableElement>
+                    <Button Content="Open in browser" Click="BugReportButton_Click"/>
+                </controls:SettingsBlockControl.SettingsActionableElement>
+            </controls:SettingsBlockControl>
+
+            <controls:SettingsBlockControl Title="Support the developer"
+                                           Description="Support development of this and other projects">
+                <controls:SettingsBlockControl.Icon>
+                    <FontIcon Glyph="&#xEB51;"/>
+                </controls:SettingsBlockControl.Icon>
+                <controls:SettingsBlockControl.SettingsActionableElement>
+                    <Button Content="Donate" Click="DonateButton_Click"/>
+                </controls:SettingsBlockControl.SettingsActionableElement>
+            </controls:SettingsBlockControl>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

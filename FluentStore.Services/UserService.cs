@@ -1,7 +1,7 @@
 ﻿using FSAPI = FluentStoreAPI.FluentStoreAPI;
 using FluentStoreAPI.Models.Firebase;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Threading.Tasks;
 using System.Linq;
 
@@ -62,7 +62,7 @@ namespace FluentStore.Services
                     }
                 }
 
-                CurrentUser = (await FSApi.GetCurrentUserDataAsync()).First();
+                CurrentUser = (await FSApi.GetCurrentUserDataAsync())[0];
                 CurrentProfile = await FSApi.GetUserProfileAsync(CurrentUser.LocalID);
 
                 PasswordVaultService.Add(new CredentialBase(CurrentUser.LocalID, refreshToken));

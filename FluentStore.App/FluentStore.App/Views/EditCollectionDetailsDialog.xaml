@@ -1,0 +1,38 @@
+﻿<ContentDialog
+    x:Class="FluentStore.Views.EditCollectionDetailsDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FluentStore.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Edit collection details"
+    PrimaryButtonText="Save"
+    SecondaryButtonText="Cancel"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+    Loaded="ContentDialog_Loaded"
+    Style="{ThemeResource DefaultContentDialogStyle}">
+
+    <Grid RowSpacing="4">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition MinHeight="100"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBox x:Name="NameBox" PlaceholderText="Name" Header="Name"
+                 ToolTipService.ToolTip="The name of the collection." Grid.Row="0"/>
+        <TextBox x:Name="ImageUrlBox" PlaceholderText="Image link" Header="Icon"
+                 ToolTipService.ToolTip="A link to an image to be used as an icon." Grid.Row="1"/>
+        <TextBox x:Name="TileGlyphBox" PlaceholderText="Short indicator" Header="Short indicator"
+                 ToolTipService.ToolTip="Text to be shown on the collection's tile if no image is provided." Grid.Row="2"/>
+        <TextBox x:Name="DescriptionBox" PlaceholderText="Description" Header="Description"
+                 AcceptsReturn="True" TextWrapping="Wrap" Grid.Row="3"
+                 ToolTipService.ToolTip="A description of the collection."/>
+        <ToggleSwitch x:Name="IsPublicSwitch" OnContent="Public" OffContent="Private"
+                      ToolTipService.ToolTip="Determines if this collection is visible to others." Grid.Row="4"/>
+    </Grid>
+    
+</ContentDialog>

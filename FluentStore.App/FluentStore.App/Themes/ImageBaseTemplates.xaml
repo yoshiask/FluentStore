@@ -1,0 +1,73 @@
+﻿<ResourceDictionary
+    x:Class="FluentStore.Themes.ImageBaseTemplates"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:FluentStore.Controls"
+    xmlns:images="using:FluentStore.SDK.Images">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Themes/CommonConverters.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+    <DataTemplate x:Key="DefaultImageBaseTemplate" x:DataType="images:ImageBase">
+        <Border VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                Background="{Binding BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}"/>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DefaultFileImageTemplate" x:DataType="images:FileImage">
+        <Border Background="{Binding BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}">
+            <Image VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Stretch="Uniform">
+                <Image.Source>
+                    <BitmapImage UriSource="{Binding Uri, TargetNullValue=//:0}"/>
+                </Image.Source>
+            </Image>
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate x:Key="FileImageUniformToFillTemplate" x:DataType="images:FileImage">
+        <Border Background="{Binding BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}">
+            <Image VerticalAlignment="Stretch" HorizontalAlignment="Center" Stretch="UniformToFill">
+                <Image.Source>
+                    <BitmapImage UriSource="{Binding Uri, TargetNullValue=//:0}"/>
+                </Image.Source>
+            </Image>
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DefaultStreamImageTemplate" x:DataType="images:StreamImage">
+        <Border Background="{Binding BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}">
+            <Image VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Stretch="Uniform"
+                   Source="{Binding Stream, Converter={StaticResource StreamToBitmapImageConverter}}"/>
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate x:Key="StreamImageUniformToFillTemplate" x:DataType="images:StreamImage">
+        <Border Background="{Binding BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}">
+            <Image VerticalAlignment="Stretch" HorizontalAlignment="Center" Stretch="UniformToFill"
+                   Source="{Binding Stream, Converter={StaticResource StreamToBitmapImageConverter}}"/>
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DefaultTextImageTemplate" x:DataType="images:TextImage">
+        <Border Background="{Binding BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}">
+            <Viewbox HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <TextBlock Text="{Binding Text}" FontFamily="{Binding FontFamily, Converter={StaticResource NameToFontFamilyConverter}}"
+                           TextLineBounds="Tight" TextWrapping="NoWrap"
+                           FontSize="24" FontWeight="Bold" Padding="12"/>
+            </Viewbox>
+        </Border>
+    </DataTemplate>
+    
+    <controls:ImageBaseTemplateSelector x:Key="DefaultImageBaseTemplateSelector"
+                                        Default="{StaticResource DefaultImageBaseTemplate}"
+                                        File="{StaticResource DefaultFileImageTemplate}"
+                                        Stream="{StaticResource DefaultStreamImageTemplate}"
+                                        Text="{StaticResource DefaultTextImageTemplate}"/>
+    
+    <controls:ImageBaseTemplateSelector x:Key="ImageBaseUniformToFillTemplateSelector"
+                                        Default="{StaticResource DefaultImageBaseTemplate}"
+                                        File="{StaticResource FileImageUniformToFillTemplate}"
+                                        Stream="{StaticResource StreamImageUniformToFillTemplate}"
+                                        Text="{StaticResource DefaultTextImageTemplate}"/>
+
+</ResourceDictionary>

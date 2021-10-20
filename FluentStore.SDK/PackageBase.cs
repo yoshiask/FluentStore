@@ -192,7 +192,7 @@ namespace FluentStore.SDK
         }
         public bool HasWebsite => Website != null;
 
-        private List<ImageBase> _Images = new List<ImageBase>();
+        private List<ImageBase> _Images = new();
         public List<ImageBase> Images
         {
             get => _Images;

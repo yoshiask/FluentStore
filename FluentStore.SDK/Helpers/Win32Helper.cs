@@ -23,9 +23,10 @@ namespace FluentStore.SDK.Helpers
 
         public static async Task InvokeWin32ComponentsAsync(IEnumerable<string> applicationPaths, string arguments = null, bool runAsAdmin = false, string workingDirectory = null)
         {
+            throw new NotImplementedException();
             Debug.WriteLine("Launching EXE in FullTrustProcess");
 
-            var connection = await AppServiceConnectionHelper.Instance;
+            object connection = null;
             if (connection != null)
             {
                 var value = new ValueSet()
@@ -45,7 +46,7 @@ namespace FluentStore.SDK.Helpers
                     value.Add("Parameters", arguments);
                 }
 
-                await connection.SendMessageAsync(value);
+                //await connection.SendMessageAsync(value);
             }
         }
 

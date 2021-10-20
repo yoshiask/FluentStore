@@ -1,0 +1,46 @@
+﻿<Page
+    x:Class="FluentStore.Views.MyCollectionsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FluentStore.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:controls="using:FluentStore.Controls"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <interactivity:Interaction.Behaviors>
+        <core:EventTriggerBehavior EventName="Loaded">
+            <core:InvokeCommandAction Command="{x:Bind ViewModel.LoadCollectionsCommand}"/>
+        </core:EventTriggerBehavior>
+    </interactivity:Interaction.Behaviors>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <controls:PackageCardGridView Packages="{x:Bind ViewModel.Collections, Mode=OneWay}"
+                                      SelectedPackage="{x:Bind ViewModel.SelectedCollection, Mode=TwoWay}"
+                                      ViewPackageCommand="{x:Bind ViewModel.ViewCollectionCommand}"/>
+
+        <CommandBar Grid.Row="1" DefaultLabelPosition="Right">
+            <AppBarButton x:Name="NewCollectionButton" Icon="Add" Label="New" Click="NewButton_Click"/>
+        </CommandBar>
+
+        <muxc:TeachingTip x:Name="NewCollectionTip"
+                          Target="{x:Bind NewCollectionButton}"
+                          Title="Create your first collection"
+                          Subtitle="Collections allow you to share, download, or install many apps at once."
+                          IsOpen="{x:Bind ViewModel.ShowNewCollectionTip, Mode=OneWay}">
+            <muxc:TeachingTip.IconSource>
+                <muxc:SymbolIconSource Symbol="List" />
+            </muxc:TeachingTip.IconSource>
+        </muxc:TeachingTip>
+    </Grid>
+    
+</Page>

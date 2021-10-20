@@ -15,7 +15,7 @@ namespace FluentStore.SDK.Handlers
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
         public const string NAMESPACE_COLLECTION = "fluent-store-collection";
-        public override HashSet<string> HandledNamespaces => new HashSet<string>
+        public override HashSet<string> HandledNamespaces => new()
         {
             NAMESPACE_COLLECTION,
         };

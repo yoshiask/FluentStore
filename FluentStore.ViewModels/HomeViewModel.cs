@@ -1,10 +1,10 @@
 ﻿using FSAPI = FluentStoreAPI.FluentStoreAPI;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using Microsoft.Toolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.ViewModels.Messages;
 using FluentStore.SDK.Packages;
 using Microsoft.Marketplace.Storefront.Contracts;
@@ -47,7 +47,7 @@ namespace FluentStore.ViewModels
 
 #if DEBUG
                 // Add fake MS Store package for Fluent Store
-                MicrosoftStorePackage fakeFSPackage = new MicrosoftStorePackage
+                MicrosoftStorePackage fakeFSPackage = new()
                 {
                     Categories = { "Utilities & tools" },
                     Description = "A unifying frontend for Windows app stores and package managers.",
@@ -124,7 +124,7 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _LoadFeaturedCommand, value);
         }
 
-        private ObservableCollection<PackageViewModel> _CarouselItems = new ObservableCollection<PackageViewModel>();
+        private ObservableCollection<PackageViewModel> _CarouselItems = new();
         public ObservableCollection<PackageViewModel> CarouselItems
         {
             get => _CarouselItems;

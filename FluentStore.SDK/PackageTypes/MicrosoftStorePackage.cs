@@ -170,7 +170,7 @@ namespace FluentStore.SDK.Packages
             ReviewSummary.Reviews = new List<Models.Review>();
             foreach (Microsoft.Marketplace.Storefront.Contracts.V3.Review msReview in reviewList.Reviews)
             {
-                Models.Review review = new Models.Review
+                Models.Review review = new()
                 {
                     Title = msReview.Title,
                     ReviewId = msReview.ReviewId.ToString(),
@@ -330,7 +330,7 @@ namespace FluentStore.SDK.Packages
             return sorted;
         }
 
-        private List<string> _Notes = new List<string>();
+        private List<string> _Notes = new();
         [Display(Title = "What's new in this version", Rank = 3)]
         public List<string> Notes
         {
@@ -338,7 +338,7 @@ namespace FluentStore.SDK.Packages
             set => SetProperty(ref _Notes, value);
         }
 
-        private List<string> _Features = new List<string>();
+        private List<string> _Features = new();
         [Display(Rank = 2)]
         public List<string> Features
         {
@@ -346,7 +346,7 @@ namespace FluentStore.SDK.Packages
             set => SetProperty(ref _Features, value);
         }
 
-        private List<string> _Categories = new List<string>();
+        private List<string> _Categories = new();
         [DisplayAdditionalInformation(Icon = "\uE7C1")]
         public List<string> Categories
         {
@@ -381,28 +381,28 @@ namespace FluentStore.SDK.Packages
             }
         }
 
-        private List<string> _Platforms = new List<string>();
+        private List<string> _Platforms = new();
         public List<string> Platforms
         {
             get => _Platforms;
             set => SetProperty(ref _Platforms, value);
         }
 
-        private List<string> _SupportUrls = new List<string>();
+        private List<string> _SupportUrls = new();
         public List<string> SupportUrls
         {
             get => _SupportUrls;
             set => SetProperty(ref _SupportUrls, value);
         }
 
-        private List<ProductRating> _Ratings = new List<ProductRating>();
+        private List<ProductRating> _Ratings = new();
         public List<ProductRating> Ratings
         {
             get => _Ratings;
             set => SetProperty(ref _Ratings, value);
         }
 
-        private List<string> _PermissionsRequested = new List<string>();
+        private List<string> _PermissionsRequested = new();
         [DisplayAdditionalInformation("Permissions", "\uE8D7")]
         public List<string> PermissionsRequested
         {
@@ -410,21 +410,21 @@ namespace FluentStore.SDK.Packages
             set => SetProperty(ref _PermissionsRequested, value);
         }
 
-        private List<string> _PackageAndDeviceCapabilities = new List<string>();
+        private List<string> _PackageAndDeviceCapabilities = new();
         public List<string> PackageAndDeviceCapabilities
         {
             get => _PackageAndDeviceCapabilities;
             set => SetProperty(ref _PackageAndDeviceCapabilities, value);
         }
 
-        private List<PlatWindows> _AllowedPlatforms = new List<PlatWindows>();
+        private List<PlatWindows> _AllowedPlatforms = new();
         public List<PlatWindows> AllowedPlatforms
         {
             get => _AllowedPlatforms;
             set => SetProperty(ref _AllowedPlatforms, value);
         }
 
-        private List<WarningMessage> _WarningMessages = new List<WarningMessage>();
+        private List<WarningMessage> _WarningMessages = new();
         public List<WarningMessage> WarningMessages
         {
             get => _WarningMessages;

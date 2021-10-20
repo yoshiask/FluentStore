@@ -61,7 +61,7 @@ namespace FluentStore.SDK.Helpers
 
         public static string PrepUrnForFile(Urn urn)
         {
-            string urnStr = urn.ToString().Substring(4);
+            string urnStr = urn.ToString()[4..];
             return urnStr.Replace(":", "_");
             byte[] hashBytes = SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(urnStr));
             return BitConverter.ToString(hashBytes).Replace("-", "");
@@ -73,7 +73,7 @@ namespace FluentStore.SDK.Helpers
             var file = await CreatePackageFile(package.Urn, folder);
             package.DownloadItem = file;
 
-            BackgroundDownloader downloader = new BackgroundDownloader();
+            BackgroundDownloader downloader = new();
             DownloadOperation download = downloader.CreateDownload(downloadUri, file);
             download.RangesDownloaded += (op, args) =>
             {

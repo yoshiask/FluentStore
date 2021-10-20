@@ -18,7 +18,7 @@ namespace FluentStore.SDK.Handlers
 
         public const string NAMESPACE_MSSTORE = "microsoft-store";
         public const string NAMESPACE_MODERNPACK = "win-modern-package";
-        public override HashSet<string> HandledNamespaces => new HashSet<string>
+        public override HashSet<string> HandledNamespaces => new()
         {
             NAMESPACE_MSSTORE,
             NAMESPACE_MODERNPACK,
@@ -116,7 +116,7 @@ namespace FluentStore.SDK.Handlers
 
         public override async Task<PackageBase> GetPackageFromUrl(Url url)
         {
-            Regex rx = new Regex(@"^https?:\/\/(?:www\.)?microsoft\.com\/(?:(?<locale>[a-z]{2}-[a-z]{2})\/)?(?:store\/apps|(?:p|store\/r)(?:\/.+)?)\/(?<id>\w{12})",
+            Regex rx = new(@"^https?:\/\/(?:www\.)?microsoft\.com\/(?:(?<locale>[a-z]{2}-[a-z]{2})\/)?(?:store\/apps|(?:p|store\/r)(?:\/.+)?)\/(?<id>\w{12})",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
             Match m = rx.Match(url.ToString());
             if (!m.Success)

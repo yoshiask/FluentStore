@@ -21,7 +21,7 @@ namespace FluentStore.SDK.Handlers
         private const string BASE_URL = "https://uwpcommunity-site-backend.herokuapp.com";
 
         public const string NAMESPACE_PROJECT = "uwpc-projects";
-        public override HashSet<string> HandledNamespaces => new HashSet<string>
+        public override HashSet<string> HandledNamespaces => new()
         {
             NAMESPACE_PROJECT,
         };

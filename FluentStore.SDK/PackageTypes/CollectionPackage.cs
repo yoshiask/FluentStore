@@ -139,7 +139,7 @@ namespace FluentStore.SDK.Packages
                 await package.LaunchAsync();
         }
 
-        private ObservableCollection<PackageBase> _Items = new ObservableCollection<PackageBase>();
+        private ObservableCollection<PackageBase> _Items = new();
         [Display(Title = "Apps", Rank = 1)]
         public ObservableCollection<PackageBase> Items
         {

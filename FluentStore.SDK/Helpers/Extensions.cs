@@ -37,7 +37,9 @@ namespace FluentStore.SDK.Helpers
                 case InstallerArchitecture.Arm:
                     return ProcessorArchitecture.Arm;
                 case InstallerArchitecture.Arm64:
-                    return ProcessorArchitecture.Arm64;
+                    if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 19041))
+                        return ProcessorArchitecture.Arm64;
+                    goto default;
 
                 default:
                     return ProcessorArchitecture.Unknown;
