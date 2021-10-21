@@ -202,7 +202,7 @@ namespace FluentStore.Controls
                 //coreTitleBar.LayoutMetricsChanged += CoreTitleBar_LayoutMetricsChanged;
                 VisualStateManager.GoToState(this, "CompactLayout", true);
                 // Set XAML element as a draggable region.
-                Window.Current.SetTitleBar(TitlebarGrid);
+                //Window.Current.SetTitleBar(TitlebarGrid);
             }
             else if (e.NewSize.Width > CompactModeMinWidth && e.PreviousSize.Width <= CompactModeMinWidth)
             {
