@@ -1,7 +1,7 @@
 ﻿using FluentStore.SDK.Messages;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Toolkit.Diagnostics;
-using Microsoft.Toolkit.Mvvm.Messaging;
+using CommunityToolkit.Diagnostics;
+using CommunityToolkit.Mvvm.Messaging;
 using System;
 using System.Security.Cryptography;
 using System.Text;

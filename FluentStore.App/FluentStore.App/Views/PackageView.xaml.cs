@@ -585,7 +585,7 @@ namespace FluentStore.Views
 
         private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            string state = (Window.Current.Bounds.Width > (double)App.Current.Resources["CompactModeMinWidth"]) ? "DefaultLayout" : "CompactLayout";
+            string state = (this.ActualWidth > (double)App.Current.Resources["CompactModeMinWidth"]) ? "DefaultLayout" : "CompactLayout";
             VisualStateManager.GoToState(this, state, true);
         }
 

@@ -2,7 +2,7 @@
 using FluentStore.SDK.Packages;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FSAPI = FluentStoreAPI.FluentStoreAPI;

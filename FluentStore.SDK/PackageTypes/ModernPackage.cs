@@ -2,7 +2,7 @@
 using FluentStore.SDK.Images;
 using FluentStore.SDK.Models;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Toolkit.Diagnostics;
+using CommunityToolkit.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

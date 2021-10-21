@@ -2,8 +2,8 @@
 using FluentStore.SDK.Messages;
 using FluentStore.SDK.Models;
 using Microsoft.Marketplace.Storefront.Contracts.Enums;
-using Microsoft.Toolkit.Diagnostics;
-using Microsoft.Toolkit.Mvvm.Messaging;
+using CommunityToolkit.Diagnostics;
+using CommunityToolkit.Mvvm.Messaging;
 using System;
 using System.Collections.Generic;
 using System.IO;

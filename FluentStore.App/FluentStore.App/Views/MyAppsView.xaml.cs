@@ -37,14 +37,14 @@ namespace FluentStore.Views
             ViewModel.Apps = new ObservableCollection<AppViewModelBase>();
             PackageManager pkgManager = new();
 
-            var appsList = new ObservableCollection<AppViewModelBase>();
+            ObservableCollection<AppViewModelBase> appsList = new();
             foreach (var pkg in pkgManager.FindPackagesForUser(string.Empty).OrderBy(p => p.DisplayName))
             {
-                var entry = (await pkg.GetAppListEntriesAsync()).FirstOrDefault();
-                if (entry != null)
+                var entries = await pkg.GetAppListEntriesAsync();
+                if (entries.Count > 0)
                 {
-                    var app = new AppViewModel(entry, pkg.Id.FamilyName);
-                    Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, async () =>
+                    AppViewModel app = new(entries[0], pkg.Id.FamilyName);
+                    _ = DispatcherQueue.TryEnqueue(async () =>
                     {
                         await app.LoadIconSourceAsync();
 

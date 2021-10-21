@@ -23,7 +23,7 @@
                     <TextBox Text="{x:Bind Settings.ExclusionFilter}" Margin="16"
                              IsEnabled="{x:Bind Settings.UseExclusionFilter, Mode=OneWay}"/>
                 </controls:SettingsBlockControl.ExpandableContent>
-                <ToggleSwitch IsOn="{x:Bind Settings.UseExclusionFilter}" Style="{ThemeResource ToggleSwitchRightStyle}"/>
+                <ToggleSwitch IsOn="{x:Bind Settings.UseExclusionFilter}"/>
             </controls:SettingsBlockControl>
 
             <controls:SettingsBlockControl Title="Package sources" Icon="Shop"

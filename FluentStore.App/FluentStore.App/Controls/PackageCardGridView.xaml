@@ -15,13 +15,13 @@
               HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="8"
               controls:ListViewBehaviour.FillBeforeWrap="True" controls:ListViewBehaviour.MinItemWidth="150">
 
-        <GridView.ItemContainerStyle>
+        <!--<GridView.ItemContainerStyle>
             <Style TargetType="GridViewItem" BasedOn="{StaticResource DefaultGridViewItemStyle}">
                 <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                 <Setter Property="VerticalContentAlignment" Value="Stretch"/>
                 <Setter Property="Margin" Value="4"/>
             </Style>
-        </GridView.ItemContainerStyle>
+        </GridView.ItemContainerStyle>-->
         
         <GridView.ItemContainerTransitions>
             <TransitionCollection>
