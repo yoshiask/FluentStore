@@ -88,7 +88,7 @@ namespace FluentStore.SDK.Packages
             return true;
         }
 
-        public override async Task<ImageBase> GetAppIcon()
+        public override async Task<ImageBase> CacheAppIcon()
         {
             if (Model.IconUrl != null)
             {
@@ -104,12 +104,12 @@ namespace FluentStore.SDK.Packages
             }
         }
 
-        public override Task<ImageBase> GetHeroImage()
+        public override Task<ImageBase> CacheHeroImage()
         {
             return null;
         }
 
-        public override async Task<List<ImageBase>> GetScreenshots()
+        public override async Task<List<ImageBase>> CacheScreenshots()
         {
             return new List<ImageBase>();
         }

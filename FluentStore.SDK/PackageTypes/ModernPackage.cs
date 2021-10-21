@@ -95,19 +95,19 @@ namespace FluentStore.SDK.Packages
             return Type.GetExtension();
         }
 
-        public override async Task<ImageBase> GetAppIcon()
+        public override async Task<ImageBase> CacheAppIcon()
         {
             Guard.IsNotNull(DownloadItem, nameof(DownloadItem));
             return await PackagedInstallerHelper.GetAppIcon(
                 (StorageFile)DownloadItem, Type.HasFlag(InstallerType.Bundle));
         }
 
-        public override async Task<ImageBase> GetHeroImage()
+        public override async Task<ImageBase> CacheHeroImage()
         {
             return null;
         }
 
-        public override async Task<List<ImageBase>> GetScreenshots()
+        public override async Task<List<ImageBase>> CacheScreenshots()
         {
             return new List<ImageBase>(0);
         }

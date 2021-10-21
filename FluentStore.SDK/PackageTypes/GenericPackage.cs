@@ -20,17 +20,17 @@ namespace FluentStore.SDK.Packages
 
         public override Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null) => Task.FromResult<IStorageItem>(null);
 
-        public override Task<ImageBase> GetAppIcon()
+        public override Task<ImageBase> CacheAppIcon()
         {
             return Task.FromResult(Images.FirstOrDefault(i => i.ImageType == ImageType.Logo));
         }
 
-        public override Task<ImageBase> GetHeroImage()
+        public override Task<ImageBase> CacheHeroImage()
         {
             return Task.FromResult(Images.FirstOrDefault(i => i.ImageType == ImageType.Hero));
         }
 
-        public override Task<List<ImageBase>> GetScreenshots()
+        public override Task<List<ImageBase>> CacheScreenshots()
         {
             return Task.FromResult(Images.Where(i => i.ImageType == ImageType.Screenshot).ToList());
         }

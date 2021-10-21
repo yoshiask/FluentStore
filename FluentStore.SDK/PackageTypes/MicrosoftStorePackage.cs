@@ -275,7 +275,7 @@ namespace FluentStore.SDK.Packages
             return true;
         }
 
-        public override async Task<ImageBase> GetAppIcon()
+        public override async Task<ImageBase> CacheAppIcon()
         {
             // Prefer tiles, then logos, then posters.
             var icons = Images.FindAll(i => i.ImageType == SDK.Images.ImageType.Tile);
@@ -296,30 +296,33 @@ namespace FluentStore.SDK.Packages
             return icons.OrderByDescending(i => i.Width).First();
         }
 
-        public override async Task<ImageBase> GetHeroImage()
+        public override async Task<ImageBase> CacheHeroImage()
         {
             ImageBase img = null;
             int width = -1;
             foreach (ImageBase image in Images.FindAll(i => i.ImageType == SDK.Images.ImageType.Hero))
             {
                 if (image.Width > width)
+                {
                     img = image;
+                    width = image.Width;
+                }
             }
 
-            return img;
+            return img ?? (await GetScreenshots())[0];
         }
 
-        public override async Task<List<ImageBase>> GetScreenshots()
+        public override async Task<List<ImageBase>> CacheScreenshots()
         {
-            string deviceFam = AnalyticsInfo.VersionInfo.DeviceFamily.Substring("Windows.".Length);
+            string deviceFam = AnalyticsInfo.VersionInfo.DeviceFamily["Windows.".Length..];
             var screenshots = Images.Cast<MicrosoftStoreImage>().Where(i => i.ImageType == SDK.Images.ImageType.Screenshot
-                && !string.IsNullOrEmpty(i.ImagePositionInfo) && i.ImagePositionInfo.StartsWith(deviceFam));
+                && !string.IsNullOrEmpty(i.ImagePositionInfo) && i.ImagePositionInfo.StartsWith(deviceFam, StringComparison.InvariantCultureIgnoreCase));
 
-            var sorted = new List<ImageBase>(screenshots.Count());
-            foreach (var screenshot in screenshots)
+            List<ImageBase> sorted = new(screenshots.Count());
+            foreach (MicrosoftStoreImage screenshot in screenshots)
             {
                 // length + 1, to skip device family name and the "/"
-                string posStr = screenshot.ImagePositionInfo.Substring(deviceFam.Length + 1);
+                string posStr = screenshot.ImagePositionInfo[(deviceFam.Length + 1)..];
                 int pos = int.Parse(posStr);
                 if (pos >= sorted.Count)
                     sorted.Add(screenshot);

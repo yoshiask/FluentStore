@@ -199,20 +199,62 @@ namespace FluentStore.SDK
             set => SetProperty(ref _Images, value);
         }
 
+        private ImageBase _AppIcon;
         /// <summary>
-        /// Gets the app's icon.
+        /// Populates the image cache for the app icon.
         /// </summary>
-        public abstract Task<ImageBase> GetAppIcon();
+        public abstract Task<ImageBase> CacheAppIcon();
 
         /// <summary>
-        /// Gets the app's hero image.
+        /// Gets the app icon.
         /// </summary>
-        public abstract Task<ImageBase> GetHeroImage();
+        /// <remarks>
+        /// Uses the image cache if populated.
+        /// </remarks>
+        public async Task<ImageBase> GetAppIcon()
+        {
+            if (_AppIcon == null)
+                _AppIcon = await CacheAppIcon();
+            return _AppIcon;
+        }
+
+        private ImageBase _HeroImage;
+        /// <summary>
+        /// Populates the image cache for the hero image.
+        /// </summary>
+        public abstract Task<ImageBase> CacheHeroImage();
 
         /// <summary>
-        /// Gets the app's screenshots.
+        /// Gets the hero image.
         /// </summary>
-        public abstract Task<List<ImageBase>> GetScreenshots();
+        /// <remarks>
+        /// Uses the image cache if populated.
+        /// </remarks>
+        public async Task<ImageBase> GetHeroImage()
+        {
+            if (_HeroImage == null)
+                _HeroImage = await CacheHeroImage();
+            return _HeroImage;
+        }
+
+        private List<ImageBase> _Screenshots;
+        /// <summary>
+        /// Populates the image cache for screenshots.
+        /// </summary>
+        public abstract Task<List<ImageBase>> CacheScreenshots();
+
+        /// <summary>
+        /// Gets the screenshots.
+        /// </summary>
+        /// <remarks>
+        /// Uses the image cache if populated.
+        /// </remarks>
+        public async Task<List<ImageBase>> GetScreenshots()
+        {
+            if (_Screenshots == null)
+                _Screenshots = await CacheScreenshots();
+            return _Screenshots;
+        }
     }
 
     public abstract class PackageBase<TModel> : PackageBase

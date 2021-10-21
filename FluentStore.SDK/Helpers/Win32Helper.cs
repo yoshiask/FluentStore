@@ -66,7 +66,7 @@ namespace FluentStore.SDK.Helpers
             }
         }
 
-        /// <inheritdoc cref="PackageBase.GetAppIcon"/>
+        /// <inheritdoc cref="PackageBase.CacheAppIcon"/>
         public static async Task<ImageBase> GetAppIcon(StorageFile file)
         {
             // Open package archive for reading

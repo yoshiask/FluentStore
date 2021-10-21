@@ -120,18 +120,18 @@ namespace FluentStore.SDK.Packages
             }
         }
 
-        public override async Task<ImageBase> GetAppIcon()
+        public override async Task<ImageBase> CacheAppIcon()
         {
             return Images.FirstOrDefault(i => i.ImageType == ImageType.Logo)
                 ?? TextImage.CreateFromName(Title);
         }
 
-        public override async Task<ImageBase> GetHeroImage()
+        public override async Task<ImageBase> CacheHeroImage()
         {
             return Images.FirstOrDefault(i => i.ImageType == ImageType.Hero);
         }
 
-        public override async Task<List<ImageBase>> GetScreenshots()
+        public override async Task<List<ImageBase>> CacheScreenshots()
         {
             return Images.Where(i => i.ImageType == ImageType.Screenshot).ToList();
         }

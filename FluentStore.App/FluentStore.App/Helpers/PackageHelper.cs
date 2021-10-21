@@ -29,7 +29,7 @@ namespace FluentStore.Helpers
                     }
                 },
             };
-            if (package.GetAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
+            if (package.CacheAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
             {
                 visualBinding.AppLogoOverride = new ToastGenericAppLogo
                 {
@@ -80,7 +80,7 @@ namespace FluentStore.Helpers
                 .AddText(package.Title)
                 .AddText(package.Title + " is ready to install");
 
-            if (package.GetAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
+            if (package.CacheAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
                 builder.AddAppLogoOverride(image.Uri, addImageQuery: false);
 
             return new ToastNotification(builder.GetXml());
@@ -93,7 +93,7 @@ namespace FluentStore.Helpers
                 .AddText(package.Title)
                 .AddText("Failed to download, please try again later");
 
-            if (package.GetAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
+            if (package.CacheAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
                 builder.AddAppLogoOverride(image.Uri, addImageQuery: false);
 
             return new ToastNotification(builder.GetXml());
@@ -106,7 +106,7 @@ namespace FluentStore.Helpers
                 .AddText(package.ShortTitle)
                 .AddText(package.Title + " just got installed.");
 
-            if (package.GetAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
+            if (package.CacheAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
                 builder.AddAppLogoOverride(image.Uri, addImageQuery: false);
 
             return new ToastNotification(builder.GetXml());
@@ -120,7 +120,7 @@ namespace FluentStore.Helpers
                 .AddText(package.Title + " failed to install.")
                 .AddText(ex.Message);
 
-            if (package.GetAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
+            if (package.CacheAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
                 builder.AddAppLogoOverride(image.Uri, addImageQuery: false);
 
             return new ToastNotification(builder.GetXml());
