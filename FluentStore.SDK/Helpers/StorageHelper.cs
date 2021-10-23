@@ -8,11 +8,24 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Networking.BackgroundTransfer;
 using Windows.Storage;
+using Windows.Web.Http;
+using Windows.Foundation;
 
 namespace FluentStore.SDK.Helpers
 {
     public static class StorageHelper
     {
+        private static HttpClient _HttpClient;
+        private static HttpClient HttpClient
+        {
+            get
+            {
+                if (_HttpClient == null)
+                    _HttpClient = new();
+                return _HttpClient;
+            }
+        }
+
         public static async Task<StorageFile> GetPackageFile(Urn packageUrn, StorageFolder folder = null)
         {
             Guard.IsNotNull(packageUrn, nameof(packageUrn));
@@ -70,31 +83,60 @@ namespace FluentStore.SDK.Helpers
         public static async Task BackgroundDownloadPackage(PackageBase package, Uri downloadUri, StorageFolder folder = null)
         {
             // Create the location to download to
-            var file = await CreatePackageFile(package.Urn, folder);
+            StorageFile file = await CreatePackageFile(package.Urn, folder);
             package.DownloadItem = file;
 
-            BackgroundDownloader downloader = new();
-            DownloadOperation download = downloader.CreateDownload(downloadUri, file);
-            download.RangesDownloaded += (op, args) =>
+            try
             {
-                WeakReferenceMessenger.Default.Send(
-                    new PackageDownloadProgressMessage(package, op.Progress.BytesReceived, op.Progress.TotalBytesToReceive));
-            };
+                void DownloadProgress(IAsyncOperationWithProgress<HttpResponseMessage, HttpProgress> asyncInfo, HttpProgress p)
+                {
+                    if (p.TotalBytesToReceive.HasValue)
+                        WeakReferenceMessenger.Default.Send(
+                            new PackageDownloadProgressMessage(package, p.BytesReceived, p.TotalBytesToReceive.Value));
+                }
+                void DownloadComplete(IAsyncOperationWithProgress<HttpResponseMessage, HttpProgress> asyncInfo, AsyncStatus asyncStatus)
+                {
+                    switch (asyncStatus)
+                    {
+                        case AsyncStatus.Completed:
+                            WeakReferenceMessenger.Default.Send(
+                                new PackageDownloadProgressMessage(package, 1, 1));
+                            package.Status = PackageStatus.Downloaded;
+                            break;
 
-            // Start download
-            WeakReferenceMessenger.Default.Send(new PackageDownloadStartedMessage(package));
-            await download.StartAsync();
+                        case AsyncStatus.Error:
+                            WeakReferenceMessenger.Default.Send(
+                                new PackageDownloadFailedMessage(package, asyncInfo.ErrorCode));
+                            break;
 
-            // Verify success code
-            uint statusCode = download.GetResponseInformation().StatusCode;
-            if (statusCode < 200 || statusCode >= 300)
-            {
-                WeakReferenceMessenger.Default.Send(new PackageDownloadFailedMessage(package,
-                    new Exception($"Status code {statusCode} did not indicate success.")));
-                package.Status = PackageStatus.DownloadReady;
-                return;
+                        case AsyncStatus.Started:
+                            WeakReferenceMessenger.Default.Send(
+                                new PackageDownloadStartedMessage(package));
+                            break;
+                    }
+                }
+
+                // Prep download
+                var operation = HttpClient.GetAsync(downloadUri);
+                //operation.Completed = DownloadComplete;
+                operation.Progress = DownloadProgress;
+
+                // Start download
+                HttpResponseMessage response = await operation;
+                response.EnsureSuccessStatusCode();
+
+                // Save to file
+                using var fileStream = await file.OpenAsync(FileAccessMode.ReadWrite);
+                await response.Content.WriteToStreamAsync(fileStream);
+                await fileStream.FlushAsync();
+
+                package.Status = PackageStatus.Downloaded;
             }
-            package.Status = PackageStatus.Downloaded;
+            catch (Exception ex)
+            {
+                WeakReferenceMessenger.Default.Send(new PackageDownloadFailedMessage(package, ex));
+                package.Status = PackageStatus.DownloadReady;
+            }
         }
     }
 }

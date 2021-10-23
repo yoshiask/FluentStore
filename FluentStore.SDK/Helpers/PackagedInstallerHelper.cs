@@ -101,9 +101,10 @@ namespace FluentStore.SDK.Helpers
 
             // Attempt to install the downloaded package
             // WinRT never sends a progress callback, so don't bother registering one
+            System.Diagnostics.Debug.WriteLine(package.DownloadItem.Path);
             var result = await pkgManager.AddPackageAsync(
                 new Uri(package.DownloadItem.Path),
-                Array.Empty<Uri>(),
+                null,
                 DeploymentOptions.ForceApplicationShutdown
             );
 

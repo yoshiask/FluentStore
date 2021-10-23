@@ -243,13 +243,16 @@ namespace FluentStore.SDK.Packages
             // Download package
             await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
 
+            // Check for success
+            if (Status.IsLessThan(PackageStatus.Downloaded))
+                return null;
+
             // Set the proper file type and extension
             string extension = await GetInstallerType();
             if (extension != string.Empty)
                 await DownloadItem.RenameAsync(PackageMoniker + extension, NameCollisionOption.ReplaceExisting);
 
             WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, (StorageFile)DownloadItem));
-            Status = PackageStatus.Downloaded;
             return DownloadItem;
         }
 

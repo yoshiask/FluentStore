@@ -298,6 +298,7 @@ namespace FluentStore.Views
                 flyout?.ShowAt(InstallButton);
                 VisualStateManager.GoToState(this, "NoAction", true);
                 WeakReferenceMessenger.Default.UnregisterAll(this);
+                InstallButton.IsEnabled = true;
             }
         }
 
@@ -332,7 +333,6 @@ namespace FluentStore.Views
             {
                 var storageItem = await ViewModel.Package.DownloadPackageAsync();
                 bool downloaded = storageItem != null;
-                InstallButton.IsEnabled = true;
                 if (downloaded)
                 {
                     // Show success
@@ -366,6 +366,7 @@ namespace FluentStore.Views
                     flyout.ShowAt(InstallButton);
                 VisualStateManager.GoToState(this, "NoAction", true);
                 WeakReferenceMessenger.Default.UnregisterAll(this);
+                InstallButton.IsEnabled = true;
             }
         }
 
@@ -471,20 +472,20 @@ namespace FluentStore.Views
 
                 PackageHelper.HandlePackageDownloadStartedToast(m, progressToast);
             });
-            WeakReferenceMessenger.Default.Register<PackageDownloadProgressMessage>(this, async (r, m) =>
+            WeakReferenceMessenger.Default.Register<PackageDownloadProgressMessage>(this, (r, m) =>
             {
-                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
-                   () =>
-                   {
-                       double prog = m.Downloaded / m.Total;
-                       ProgressIndicator.IsIndeterminate = false;
-                       ProgressIndicator.Value = prog;
-                       ProgressText.Text = $"{prog * 100:##0}%";
-                   });
+                double prog = m.Downloaded / m.Total;
+                System.Diagnostics.Debug.WriteLine($"{prog * 100:##0}%");
+                _ = DispatcherQueue.TryEnqueue(() =>
+                {
+                    ProgressIndicator.IsIndeterminate = false;
+                    ProgressIndicator.Value = prog;
+                    ProgressText.Text = $"{prog * 100:##0}%";
 
-                PackageHelper.HandlePackageDownloadProgressToast(m, progressToast);
+                    PackageHelper.HandlePackageDownloadProgressToast(m, progressToast);
+                });
             });
-            WeakReferenceMessenger.Default.Register<PackageInstallProgressMessage>(this, async (r, m) =>
+            WeakReferenceMessenger.Default.Register<PackageInstallProgressMessage>(this, (r, m) =>
             {
                 ProgressIndicator.IsIndeterminate = true;
                 ProgressText.Text = string.Empty;

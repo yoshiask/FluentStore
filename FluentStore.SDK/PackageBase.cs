@@ -78,6 +78,10 @@ namespace FluentStore.SDK
 
         public virtual bool Equals(PackageBase other) => this.Urn.Equals(other.Urn);
 
+        public override bool Equals(object obj) => obj is PackageBase other ? this.Equals(other) : false;
+
+        public override int GetHashCode() => Urn.GetHashCode();
+
         public override string ToString() => Title;
 
         /// <summary>
