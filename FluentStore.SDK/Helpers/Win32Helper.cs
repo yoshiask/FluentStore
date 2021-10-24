@@ -55,7 +55,7 @@ namespace FluentStore.SDK.Helpers
         {
             try
             {
-                await InvokeWin32ComponentAsync(package.DownloadItem.Path, args, true);
+                await InvokeWin32ComponentAsync(package.DownloadItem.FullName, args, true);
                 return true;
             }
             catch (Exception ex)
@@ -67,11 +67,11 @@ namespace FluentStore.SDK.Helpers
         }
 
         /// <inheritdoc cref="PackageBase.CacheAppIcon"/>
-        public static async Task<ImageBase> GetAppIcon(StorageFile file)
+        public static async Task<ImageBase> GetAppIcon(FileInfo file)
         {
             // Open package archive for reading
-            using var stream = await file.OpenReadAsync();
-            using var archive = new ZipArchive(stream.AsStream());
+            using FileStream stream = file.OpenRead();
+            using ZipArchive archive = new(stream);
 
             // Get the app icon
             ZipArchiveEntry iconEntry = archive.Entries.FirstOrDefault(e => e.FullName.StartsWith(".rsrc/ICON/1"));

@@ -17,6 +17,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.System.Profile;
+using System.IO;
 
 namespace FluentStore.SDK.Packages
 {
@@ -229,7 +230,7 @@ namespace FluentStore.SDK.Packages
             return null;
         }
 
-        public override async Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null)
+        public override async Task<FileSystemInfo> DownloadPackageAsync(DirectoryInfo folder = null)
         {
             WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
             // Find the package URI
@@ -250,9 +251,9 @@ namespace FluentStore.SDK.Packages
             // Set the proper file type and extension
             string extension = await GetInstallerType();
             if (extension != string.Empty)
-                await DownloadItem.RenameAsync(PackageMoniker + extension, NameCollisionOption.ReplaceExisting);
+                ((FileInfo)DownloadItem).MoveTo(PackageMoniker + extension, true);
 
-            WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, (StorageFile)DownloadItem));
+            WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, (FileInfo)DownloadItem));
             return DownloadItem;
         }
 

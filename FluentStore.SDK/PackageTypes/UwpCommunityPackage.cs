@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
+using System.IO;
 
 namespace FluentStore.SDK.Packages
 {
@@ -103,7 +104,7 @@ namespace FluentStore.SDK.Packages
                 return false;
         }
 
-        public override async Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null)
+        public override async Task<FileSystemInfo> DownloadPackageAsync(DirectoryInfo folder = null)
         {
             LinkedPackage = await PackageService.GetPackageFromUrlAsync(DownloadLink);
             if (LinkedPackage != null)

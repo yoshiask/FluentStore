@@ -1,23 +1,24 @@
 ﻿using CommunityToolkit.Mvvm.Messaging.Messages;
 using System;
+using System.IO;
 using Windows.Storage;
 
 namespace FluentStore.SDK.Messages
 {
-    public class PackageDownloadCompletedMessage : ValueChangedMessage<Tuple<PackageBase, StorageFile>>
+    public class PackageDownloadCompletedMessage : ValueChangedMessage<Tuple<PackageBase, FileInfo>>
     {
-        public PackageDownloadCompletedMessage(Tuple<PackageBase, StorageFile> info) : base(info)
+        public PackageDownloadCompletedMessage(Tuple<PackageBase, FileInfo> info) : base(info)
         {
 
         }
 
-        public PackageDownloadCompletedMessage(PackageBase package, StorageFile installerFile)
-            : base(new Tuple<PackageBase, StorageFile>(package, installerFile))
+        public PackageDownloadCompletedMessage(PackageBase package, FileInfo installerFile)
+            : base(new Tuple<PackageBase, FileInfo>(package, installerFile))
         {
 
         }
 
         public PackageBase Package => Value.Item1;
-        public StorageFile InstallerFile => Value.Item2;
+        public FileInfo InstallerFile => Value.Item2;
     }
 }

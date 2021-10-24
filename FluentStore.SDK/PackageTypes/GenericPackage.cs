@@ -2,6 +2,7 @@
 using Garfoot.Utilities.FluentUrn;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
@@ -18,7 +19,7 @@ namespace FluentStore.SDK.Packages
 
         public override Task<bool> CanLaunchAsync() => Task.FromResult(false);
 
-        public override Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null) => Task.FromResult<IStorageItem>(null);
+        public override Task<FileSystemInfo> DownloadPackageAsync(DirectoryInfo folder = null) => Task.FromResult<FileSystemInfo>(null);
 
         public override Task<ImageBase> CacheAppIcon()
         {

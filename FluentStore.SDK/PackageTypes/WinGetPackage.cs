@@ -13,6 +13,7 @@ using Windows.Foundation.Metadata;
 using Windows.Storage;
 using WinGetRun;
 using WinGetRun.Models;
+using System.IO;
 
 namespace FluentStore.SDK.Packages
 {
@@ -56,7 +57,7 @@ namespace FluentStore.SDK.Packages
             set => _Urn = value;
         }
 
-        public override async Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null)
+        public override async Task<FileSystemInfo> DownloadPackageAsync(DirectoryInfo folder = null)
         {
             WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
             // Find the package URI
@@ -71,9 +72,9 @@ namespace FluentStore.SDK.Packages
             await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
 
             // Set the proper file name
-            await DownloadItem.RenameAsync(System.IO.Path.GetFileName(PackageUri.ToString()), NameCollisionOption.ReplaceExisting);
+            ((FileInfo)DownloadItem).MoveTo(Path.GetFileName(PackageUri.ToString()), true);
 
-            WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, (StorageFile)DownloadItem));
+            WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, (FileInfo)DownloadItem));
             Status = PackageStatus.Downloaded;
             return DownloadItem;
         }
@@ -138,9 +139,9 @@ namespace FluentStore.SDK.Packages
                 case WinGetRun.Enums.InstallerType.Appx:
                 case WinGetRun.Enums.InstallerType.Msix:
                     isSuccess = await PackagedInstallerHelper.Install(this);
-                    var file = (StorageFile)DownloadItem;
-                    PackagedInstallerType = await PackagedInstallerHelper.GetInstallerType(file);
-                    PackageFamilyName = await PackagedInstallerHelper.GetPackageFamilyName(file, PackagedInstallerType.Value.HasFlag(Models.InstallerType.Bundle));
+                    var file = (FileInfo)DownloadItem;
+                    PackagedInstallerType = PackagedInstallerHelper.GetInstallerType(file);
+                    PackageFamilyName = PackagedInstallerHelper.GetPackageFamilyName(file, PackagedInstallerType.Value.HasFlag(Models.InstallerType.Bundle));
                     break;
 
                 default:

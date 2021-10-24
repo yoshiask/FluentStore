@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Storage;
+using System.IO;
 
 namespace FluentStore.SDK
 {
@@ -68,13 +69,13 @@ namespace FluentStore.SDK
 
         public abstract Task<bool> InstallAsync();
 
-        public abstract Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null);
+        public abstract Task<FileSystemInfo> DownloadPackageAsync(DirectoryInfo folder = null);
 
         public abstract Task<bool> CanLaunchAsync();
 
         public abstract Task LaunchAsync();
 
-        public virtual void OnDownloaded(IStorageItem item) { }
+        public virtual void OnDownloaded(FileSystemInfo item) { }
 
         public virtual bool Equals(PackageBase other) => this.Urn.Equals(other.Urn);
 
@@ -101,8 +102,8 @@ namespace FluentStore.SDK
             set => SetProperty(ref _Status, value);
         }
 
-        private IStorageItem _DownloadItem;
-        public IStorageItem DownloadItem
+        private FileSystemInfo _DownloadItem;
+        public FileSystemInfo DownloadItem
         {
             get => _DownloadItem;
             set

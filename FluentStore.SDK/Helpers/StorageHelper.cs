@@ -10,6 +10,8 @@ using Windows.Networking.BackgroundTransfer;
 using Windows.Storage;
 using Windows.Web.Http;
 using Windows.Foundation;
+using System.IO;
+using System.Linq;
 
 namespace FluentStore.SDK.Helpers
 {
@@ -26,46 +28,44 @@ namespace FluentStore.SDK.Helpers
             }
         }
 
-        public static async Task<StorageFile> GetPackageFile(Urn packageUrn, StorageFolder folder = null)
+        public static (FileInfo info, FileStream stream) GetPackageFile(Urn packageUrn, DirectoryInfo folder = null)
+            => OpenPackageFile(packageUrn, folder, FileMode.Open);
+
+        public static (FileInfo info, FileStream stream) CreatePackageFile(Urn packageUrn, DirectoryInfo folder = null)
+            => OpenPackageFile(packageUrn, folder, FileMode.Create);
+
+        public static (FileInfo info, FileStream stream) OpenPackageFile(Urn packageUrn, DirectoryInfo folder = null, FileMode mode = FileMode.Create)
         {
             Guard.IsNotNull(packageUrn, nameof(packageUrn));
             if (folder == null)
-                folder = ApplicationData.Current.LocalCacheFolder;
+                folder = new(Path.GetTempPath());
 
-            return await folder.GetFileAsync(PrepUrnForFile(packageUrn));
+            FileInfo file = new(Path.Combine(folder.FullName, PrepUrnForFile(packageUrn)));
+            return (file, file.Open(mode));
         }
 
-        public static async Task<StorageFile> CreatePackageFile(Urn packageUrn, StorageFolder folder = null)
-        {
-            Guard.IsNotNull(packageUrn, nameof(packageUrn));
-            if (folder == null)
-                folder = ApplicationData.Current.LocalCacheFolder;
-
-            return await folder.CreateFileAsync(PrepUrnForFile(packageUrn), CreationCollisionOption.ReplaceExisting);
-        }
-
-        public static async Task<StorageFolder> CreatePackageDownloadFolder(Urn urn)
+        public static DirectoryInfo CreatePackageDownloadFolder(Urn urn)
         {
             Guard.IsNotNull(urn, nameof(urn));
 
-            return await CreateTempFolderAsync(PrepUrnForFile(urn));
+            return CreateTempFolderAsync(PrepUrnForFile(urn));
         }
 
-        public static async Task<StorageFolder> CreateTempFolderAsync(string relativePath)
+        public static DirectoryInfo CreateTempFolderAsync(string relativePath)
         {
-            return await EnsureExists(ApplicationData.Current.LocalCacheFolder, relativePath);
+            return EnsureExists(new(Path.GetTempPath()), relativePath);
         }
 
-        public static async Task<StorageFolder> EnsureExists(StorageFolder folder, string relativePath)
+        public static DirectoryInfo EnsureExists(DirectoryInfo folder, string relativePath)
         {
             Guard.IsNotNull(folder, nameof(folder));
 
-            StorageFolder prevFolder = folder;
+            DirectoryInfo prevFolder = folder;
             foreach (string fragment in relativePath.Split('/', '\\'))
             {
-                StorageFolder curFolder = await prevFolder.TryGetItemAsync(fragment) as StorageFolder;
+                DirectoryInfo curFolder = prevFolder.EnumerateDirectories(fragment).FirstOrDefault();
                 if (curFolder == null)
-                    curFolder = await prevFolder.CreateFolderAsync(fragment);
+                    curFolder = prevFolder.CreateSubdirectory(fragment);
                 prevFolder = curFolder;
             }
 
@@ -80,15 +80,16 @@ namespace FluentStore.SDK.Helpers
             return BitConverter.ToString(hashBytes).Replace("-", "");
         }
 
-        public static async Task BackgroundDownloadPackage(PackageBase package, Uri downloadUri, StorageFolder folder = null)
+        public static async Task BackgroundDownloadPackage(PackageBase package, Uri downloadUri, DirectoryInfo folder = null)
         {
             // Create the location to download to
-            StorageFile file = await CreatePackageFile(package.Urn, folder);
-            package.DownloadItem = file;
+            (FileInfo info, FileStream stream) = CreatePackageFile(package.Urn, folder);
+            package.DownloadItem = info;
 
             try
             {
-                void DownloadProgress(IAsyncOperationWithProgress<HttpResponseMessage, HttpProgress> asyncInfo, HttpProgress p)
+                //void DownloadProgress(IAsyncOperationWithProgress<HttpResponseMessage, HttpProgress> asyncInfo, HttpProgress p)
+                void DownloadProgress(HttpProgress p)
                 {
                     if (p.TotalBytesToReceive.HasValue)
                         WeakReferenceMessenger.Default.Send(
@@ -117,18 +118,19 @@ namespace FluentStore.SDK.Helpers
                 }
 
                 // Prep download
-                var operation = HttpClient.GetAsync(downloadUri);
+                var operation = HttpClient.GetAsync(downloadUri).AsTask(new Progress<HttpProgress>(DownloadProgress)).ConfigureAwait(false);
                 //operation.Completed = DownloadComplete;
-                operation.Progress = DownloadProgress;
+                //operation.Progress = DownloadProgress;
 
                 // Start download
                 HttpResponseMessage response = await operation;
                 response.EnsureSuccessStatusCode();
 
                 // Save to file
-                using var fileStream = await file.OpenAsync(FileAccessMode.ReadWrite);
-                await response.Content.WriteToStreamAsync(fileStream);
-                await fileStream.FlushAsync();
+                using var contentStream = (await response.Content.ReadAsInputStreamAsync()).AsStreamForRead();
+                await contentStream.CopyToAsync(stream);
+                stream.Flush();
+                stream.Dispose();
 
                 package.Status = PackageStatus.Downloaded;
             }

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Storage;
+using System.IO;
 
 namespace FluentStore.SDK.Packages
 {
@@ -36,8 +37,8 @@ namespace FluentStore.SDK.Packages
         public override async Task<string> GetCannotBeInstalledReason()
         {
             Guard.IsNotNull(DownloadItem, nameof(DownloadItem));
-            return await PackagedInstallerHelper.GetCannotBeInstalledReason(
-                (IStorageFile)DownloadItem, Type.HasFlag(InstallerType.Bundle));
+            return PackagedInstallerHelper.GetCannotBeInstalledReason(
+                (FileInfo)DownloadItem, Type.HasFlag(InstallerType.Bundle));
         }
 
         public override async Task<bool> CanLaunchAsync()
@@ -76,7 +77,7 @@ namespace FluentStore.SDK.Packages
             await PackagedInstallerHelper.Launch(PackageFamilyName);
         }
 
-        public override Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null)
+        public override Task<FileSystemInfo> DownloadPackageAsync(DirectoryInfo folder = null)
         {
             throw new NotImplementedException();
         }
@@ -91,15 +92,15 @@ namespace FluentStore.SDK.Packages
             Guard.IsEqualTo((int)Status, (int)PackageStatus.Downloaded, nameof(Status));
 
             if (Type == InstallerType.Unknown)
-                Type = await PackagedInstallerHelper.GetInstallerType((StorageFile)DownloadItem);
+                Type = PackagedInstallerHelper.GetInstallerType((FileInfo)DownloadItem);
             return Type.GetExtension();
         }
 
         public override async Task<ImageBase> CacheAppIcon()
         {
             Guard.IsNotNull(DownloadItem, nameof(DownloadItem));
-            return await PackagedInstallerHelper.GetAppIcon(
-                (StorageFile)DownloadItem, Type.HasFlag(InstallerType.Bundle));
+            return PackagedInstallerHelper.GetAppIcon(
+                (FileInfo)DownloadItem, Type.HasFlag(InstallerType.Bundle));
         }
 
         public override async Task<ImageBase> CacheHeroImage()

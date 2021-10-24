@@ -314,16 +314,16 @@ namespace FluentStore.Views
                 var savePicker = new Windows.Storage.Pickers.FileSavePicker();
                 savePicker.SuggestedStartLocation =
                     Windows.Storage.Pickers.PickerLocationId.Downloads;
-                if (file.FileType.EndsWith("bundle"))
-                    savePicker.FileTypeChoices.Add("Windows App Bundle", new string[] { file.FileType });
+                if (file.Extension.EndsWith("bundle"))
+                    savePicker.FileTypeChoices.Add("Windows App Bundle", new string[] { file.Extension });
                 else
-                    savePicker.FileTypeChoices.Add("Windows App Package", new string[] { file.FileType });
-                savePicker.SuggestedFileName = file.DisplayName;
-                savePicker.SuggestedSaveFile = file;
+                    savePicker.FileTypeChoices.Add("Windows App Package", new string[] { file.Extension });
+                savePicker.SuggestedFileName = file.Name;
+                //savePicker.SuggestedSaveFile = file;
                 var userFile = await savePicker.PickSaveFileAsync();
                 if (userFile != null)
                 {
-                    await file.MoveAndReplaceAsync(userFile);
+                    file.MoveTo(userFile.Path);
                 }
             });
             VisualStateManager.GoToState(this, "Progress", true);

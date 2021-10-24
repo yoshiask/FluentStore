@@ -18,19 +18,21 @@ using Windows.Management.Deployment;
 using Windows.Storage;
 using Windows.System;
 using Windows.System.Profile;
+using Windows.Foundation;
+using Windows.Web.Http;
 
 namespace FluentStore.SDK.Helpers
 {
     public static class PackagedInstallerHelper
     {
         /// <inheritdoc cref="PackageBase.GetCannotBeInstalledReason"/>
-        public static async Task<string> GetCannotBeInstalledReason(IStorageFile installerFile, bool isBundle)
+        public static string GetCannotBeInstalledReason(FileInfo installerFile, bool isBundle)
         {
             Guard.IsNotNull(installerFile, nameof(installerFile));
 
             // Open package archive for reading
-            using var stream = await installerFile.OpenReadAsync();
-            using var archive = new ZipArchive(stream.AsStream());
+            using var stream = installerFile.OpenRead();
+            using var archive = new ZipArchive(stream);
 
             // Extract metadata from manifest
             List<ProcessorArchitecture> architectures = new();
@@ -92,32 +94,51 @@ namespace FluentStore.SDK.Helpers
         public static async Task<bool> Install(PackageBase package)
         {
             PackageManager pkgManager = new();
-            Progress<DeploymentProgress> progressCallback = new(prog =>
+            bool success = false;
+
+            void InstallProgress(IAsyncOperationWithProgress<DeploymentResult, DeploymentProgress> asyncInfo, DeploymentProgress p)
             {
-                WeakReferenceMessenger.Default.Send(new PackageInstallProgressMessage(package, prog.percentage / 100));
-            });
+                WeakReferenceMessenger.Default.Send(
+                    new PackageInstallProgressMessage(package, p.percentage / 100));
+            }
+            void InstallComplete(IAsyncOperationWithProgress<DeploymentResult, DeploymentProgress> asyncInfo, AsyncStatus asyncStatus)
+            {
+                switch (asyncStatus)
+                {
+                    case AsyncStatus.Completed:
+                        WeakReferenceMessenger.Default.Send(
+                            new PackageInstallProgressMessage(package, 1));
+                        package.Status = PackageStatus.Downloaded;
+                        success = true;
+                        break;
 
-            WeakReferenceMessenger.Default.Send(new PackageInstallStartedMessage(package));
+                    case AsyncStatus.Error:
+                        WeakReferenceMessenger.Default.Send(
+                            new PackageInstallFailedMessage(package, asyncInfo.ErrorCode));
+                        success = false;
+                        break;
 
-            // Attempt to install the downloaded package
-            // WinRT never sends a progress callback, so don't bother registering one
-            System.Diagnostics.Debug.WriteLine(package.DownloadItem.Path);
-            var result = await pkgManager.AddPackageAsync(
-                new Uri(package.DownloadItem.Path),
+                    case AsyncStatus.Started:
+                        WeakReferenceMessenger.Default.Send(
+                            new PackageInstallStartedMessage(package));
+                        break;
+                }
+            }
+
+            // Prep install
+            System.Diagnostics.Debug.WriteLine("\"{0}\" exists: {1}", package.DownloadItem.FullName, package.DownloadItem.Exists);
+            var operation = pkgManager.AddPackageAsync(
+                new Uri(package.DownloadItem.FullName),
                 null,
                 DeploymentOptions.ForceApplicationShutdown
             );
+            operation.Completed = InstallComplete;
+            operation.Progress = InstallProgress;
 
-            if (!result.IsRegistered)
-            {
-                WeakReferenceMessenger.Default.Send(new PackageInstallFailedMessage(package, new Exception(result.ErrorText)));
-                return false;
-            }
+            // Attempt to install the downloaded package
+            DeploymentResult result = await operation;
 
-            // Fire the success callback
-            WeakReferenceMessenger.Default.Send(new PackageInstallCompletedMessage(package));
-
-            return true;
+            return result.IsRegistered && success;
         }
 
         /// <inheritdoc cref="PackageBase.LaunchAsync"/>
@@ -134,11 +155,11 @@ namespace FluentStore.SDK.Helpers
             return await firstApp.LaunchAsync();
         }
 
-        public static async Task<InstallerType> GetInstallerType(StorageFile file)
+        public static InstallerType GetInstallerType(FileInfo file)
         {
             InstallerType type = InstallerType.Unknown;
 
-            using (var stream = await file.OpenStreamForReadAsync())
+            using (FileStream stream = file.OpenRead())
             {
                 var bytes = new byte[4];
                 stream.Read(bytes, 0, 4);
@@ -149,7 +170,7 @@ namespace FluentStore.SDK.Helpers
                     // ZIP
                     /// Typical [not empty or spanned] ZIP archive
                     case 0x504B0304:
-                        using (var archive = ZipFile.OpenRead(file.Path))
+                        using (ZipArchive archive = new(stream))
                         {
                             var entry = archive.GetEntry("[Content_Types].xml");
                             var ctypesXml = XDocument.Load(entry.Open());
@@ -196,11 +217,11 @@ namespace FluentStore.SDK.Helpers
         }
 
         /// <inheritdoc cref="PackageBase.CacheAppIcon"/>
-        public static async Task<ImageBase> GetAppIcon(StorageFile file, bool isBundle)
+        public static ImageBase GetAppIcon(FileInfo file, bool isBundle)
         {
             // Open package archive for reading
-            using var stream = await file.OpenReadAsync();
-            using var archive = new ZipArchive(stream.AsStream());
+            using var stream = file.OpenRead();
+            using var archive = new ZipArchive(stream);
 
             // Extract icon from manifest
             ZipArchive packArchive;
@@ -258,13 +279,13 @@ namespace FluentStore.SDK.Helpers
             };
         }
 
-        public static async Task<string> GetPackageFamilyName(IStorageFile installerFile, bool isBundle)
+        public static string GetPackageFamilyName(FileInfo installerFile, bool isBundle)
         {
             Guard.IsNotNull(installerFile, nameof(installerFile));
 
             // Open package archive for reading
-            using var stream = await installerFile.OpenReadAsync();
-            using var archive = new ZipArchive(stream.AsStream());
+            using var stream = installerFile.OpenRead();
+            using var archive = new ZipArchive(stream);
 
             // Extract metadata from manifest
             ZipArchiveEntry manifestEntry = archive.GetEntry(

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Windows.Storage;
+using System.IO;
 
 namespace FluentStore.SDK.Packages
 {
@@ -62,10 +63,10 @@ namespace FluentStore.SDK.Packages
             set => _Urn = value;
         }
 
-        public override async Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null)
+        public override async Task<FileSystemInfo> DownloadPackageAsync(DirectoryInfo folder = null)
         {
             if (folder == null)
-                folder = await StorageHelper.CreatePackageDownloadFolder(Urn);
+                folder = StorageHelper.CreatePackageDownloadFolder(Urn);
             DownloadItem = folder;
 
             bool success = true;
