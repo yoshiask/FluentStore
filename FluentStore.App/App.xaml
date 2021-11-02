@@ -1,0 +1,35 @@
+﻿<Application
+    x:Class="FluentStore.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FluentStore"
+    xmlns:helpers="using:FluentStore.Helpers"
+    xmlns:controls="using:FluentStore.Controls">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                
+                <!-- Other merged dictionaries here -->
+                <ResourceDictionary Source="/Themes/CommonConverters.xaml"/>
+                <ResourceDictionary Source="/Themes/PackageDisplayTemplates.xaml"/>
+                <ResourceDictionary Source="/Themes/ImageBaseTemplates.xaml"/>
+                <!--<ResourceDictionary Source="/Themes/ToggleSwitchRightStyle.xaml"/>-->
+
+                <ResourceDictionary>
+
+                    <helpers:Settings x:Key="settings" />
+
+                    <x:Double x:Key="CompactModeMinWidth">641</x:Double>
+
+                    <DataTemplate x:Key="DefaultPackageCardTemplate">
+                        <controls:PackageCardControl ViewModel="{Binding}"/>
+                    </DataTemplate>
+                </ResourceDictionary>
+
+            </ResourceDictionary.MergedDictionaries>
+            
+            <!-- Other app resources here -->
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

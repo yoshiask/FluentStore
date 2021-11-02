@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.SDK">
 
     <PropertyGroup>
-        <TargetFramework>net5.0-windows10.0.19041.0</TargetFramework>
+        <TargetFramework>net5.0-windows10.0.20348.0</TargetFramework>
         <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-        <!--<TargetFrameworks>net5.0-windows10.0.19041.0;netstandard2.0</TargetFrameworks>-->
         <LangVersion>latest</LangVersion>
         <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -15,17 +14,9 @@
         <PackageReference Include="CommunityToolkit.Diagnostics" Version="7.0.3" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="7.0.3" />
         <PackageReference Include="OwlCore" Version="0.0.23" />
-    </ItemGroup>
 
-    <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-        <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
-        <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
-    </ItemGroup>
-
-    <ItemGroup Condition=" $(TargetFramework.StartsWith('net5.0-windows')) ">
-        <PackageReference Include="Microsoft.ProjectReunion" Version="0.8.0" />
-        <PackageReference Include="Microsoft.ProjectReunion.Foundation" Version="0.8.0" />
-        <PackageReference Include="Microsoft.ProjectReunion.InteractiveExperiences" Version="0.8.0" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0-preview3" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22489-preview" />
     </ItemGroup>
 
     <ItemGroup>

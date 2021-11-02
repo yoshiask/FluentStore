@@ -1,0 +1,39 @@
+﻿<Page
+    x:Class="FluentStore.Views.HttpErrorPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FluentStore.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxcWindows11Present="using:Microsoft.UI.Xaml.Controls?IsApiContractPresent(Windows.Foundation.UniversalApiContract, 14)"
+    xmlns:tkcontrols="using:CommunityToolkit.WinUI.UI.Controls"
+    mc:Ignorable="d"
+    x:DefaultBindMode="OneWay"
+    Background="{ThemeResource SystemControlAcrylicWindowBrush}">
+
+    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Stretch"
+                Margin="16" Spacing="16" MaxWidth="400">
+        <tkcontrols:WrapPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                              HorizontalSpacing="16" VerticalSpacing="8">
+
+            <TextBlock Text="Oops!" FontSize="64" FontWeight="Bold" VerticalAlignment="Center"
+                       d:Text="Oops!"/>
+
+            <StackPanel Spacing="4">
+                <TextBlock Text="{x:Bind ErrorCode}" FontSize="48" FontWeight="SemiBold"
+                           TextLineBounds="TrimToBaseline" VerticalAlignment="Bottom"
+                           d:Text="404"/>
+                <TextBlock Text="{x:Bind ErrorTitle}" FontSize="24" TextWrapping="Wrap" VerticalAlignment="Top"
+                           Visibility="{x:Bind ErrorTitle, Converter={StaticResource EmptyStringToCollapsedConverter}}"
+                           d:Text="Page not found"/>
+            </StackPanel>
+
+        </tkcontrols:WrapPanel>
+
+        <ScrollViewer Visibility="{x:Bind ErrorMessage, Converter={StaticResource EmptyStringToCollapsedConverter}}">
+            <TextBlock d:Text="The requested resource could not be found but may be available in the future. Subsequent requests by the client are permissible."
+                       Text="{x:Bind ErrorMessage}" TextWrapping="Wrap" IsTextSelectionEnabled="True"/>
+        </ScrollViewer>
+    </StackPanel>
+
+</Page>

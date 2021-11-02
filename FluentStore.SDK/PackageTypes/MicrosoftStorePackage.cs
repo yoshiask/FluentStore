@@ -250,10 +250,16 @@ namespace FluentStore.SDK.Packages
 
             // Set the proper file type and extension
             string extension = await GetInstallerType();
+            FileInfo downloadFile = (FileInfo)DownloadItem;
             if (extension != string.Empty)
-                ((FileInfo)DownloadItem).MoveTo(PackageMoniker + extension, true);
+            {
+                string destinationPath = Path.Combine(downloadFile.DirectoryName, PackageMoniker + extension);
+                downloadFile.MoveTo(destinationPath, true);
+                downloadFile = new(destinationPath);
+            }
 
-            WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, (FileInfo)DownloadItem));
+            WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, downloadFile));
+            DownloadItem = downloadFile;
             return DownloadItem;
         }
 

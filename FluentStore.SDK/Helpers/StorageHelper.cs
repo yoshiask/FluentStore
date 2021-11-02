@@ -6,12 +6,10 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.Networking.BackgroundTransfer;
-using Windows.Storage;
 using Windows.Web.Http;
-using Windows.Foundation;
 using System.IO;
 using System.Linq;
+using Windows.Storage.Streams;
 
 namespace FluentStore.SDK.Helpers
 {
@@ -28,6 +26,14 @@ namespace FluentStore.SDK.Helpers
             }
         }
 
+        public static DirectoryInfo GetTempDirectoryPath()
+        {
+            DirectoryInfo tempDir = new(Path.Combine(Path.GetTempPath(), "FluentStoreBeta"));
+            if (!tempDir.Exists)
+                tempDir.Create();
+            return tempDir;
+        }
+
         public static (FileInfo info, FileStream stream) GetPackageFile(Urn packageUrn, DirectoryInfo folder = null)
             => OpenPackageFile(packageUrn, folder, FileMode.Open);
 
@@ -38,7 +44,7 @@ namespace FluentStore.SDK.Helpers
         {
             Guard.IsNotNull(packageUrn, nameof(packageUrn));
             if (folder == null)
-                folder = new(Path.GetTempPath());
+                folder = GetTempDirectoryPath();
 
             FileInfo file = new(Path.Combine(folder.FullName, PrepUrnForFile(packageUrn)));
             return (file, file.Open(mode));
@@ -53,7 +59,7 @@ namespace FluentStore.SDK.Helpers
 
         public static DirectoryInfo CreateTempFolderAsync(string relativePath)
         {
-            return EnsureExists(new(Path.GetTempPath()), relativePath);
+            return EnsureExists(GetTempDirectoryPath(), relativePath);
         }
 
         public static DirectoryInfo EnsureExists(DirectoryInfo folder, string relativePath)
@@ -88,49 +94,31 @@ namespace FluentStore.SDK.Helpers
 
             try
             {
-                //void DownloadProgress(IAsyncOperationWithProgress<HttpResponseMessage, HttpProgress> asyncInfo, HttpProgress p)
-                void DownloadProgress(HttpProgress p)
+                ulong? length = null;
+                void DownloadProgress(ulong progress)
                 {
-                    if (p.TotalBytesToReceive.HasValue)
+                    if (length.HasValue)
                         WeakReferenceMessenger.Default.Send(
-                            new PackageDownloadProgressMessage(package, p.BytesReceived, p.TotalBytesToReceive.Value));
+                            new PackageDownloadProgressMessage(package, progress, length.Value));
+
                 }
-                void DownloadComplete(IAsyncOperationWithProgress<HttpResponseMessage, HttpProgress> asyncInfo, AsyncStatus asyncStatus)
-                {
-                    switch (asyncStatus)
-                    {
-                        case AsyncStatus.Completed:
-                            WeakReferenceMessenger.Default.Send(
-                                new PackageDownloadProgressMessage(package, 1, 1));
-                            package.Status = PackageStatus.Downloaded;
-                            break;
-
-                        case AsyncStatus.Error:
-                            WeakReferenceMessenger.Default.Send(
-                                new PackageDownloadFailedMessage(package, asyncInfo.ErrorCode));
-                            break;
-
-                        case AsyncStatus.Started:
-                            WeakReferenceMessenger.Default.Send(
-                                new PackageDownloadStartedMessage(package));
-                            break;
-                    }
-                }
-
-                // Prep download
-                var operation = HttpClient.GetAsync(downloadUri).AsTask(new Progress<HttpProgress>(DownloadProgress)).ConfigureAwait(false);
-                //operation.Completed = DownloadComplete;
-                //operation.Progress = DownloadProgress;
 
                 // Start download
-                HttpResponseMessage response = await operation;
+                HttpResponseMessage response = await HttpClient.GetAsync(downloadUri, HttpCompletionOption.ResponseHeadersRead);
                 response.EnsureSuccessStatusCode();
 
+                // this is horrible
+                if (response.Content.TryComputeLength(out ulong computedLength) || (computedLength = response.Content.Headers.ContentLength.GetValueOrDefault()) != 0)
+                {
+                    length = computedLength;
+                }
+
                 // Save to file
-                using var contentStream = (await response.Content.ReadAsInputStreamAsync()).AsStreamForRead();
-                await contentStream.CopyToAsync(stream);
-                stream.Flush();
-                stream.Dispose();
+                using IInputStream contentStream = await response.Content.ReadAsInputStreamAsync();
+                using IRandomAccessStream outputStream = stream.AsRandomAccessStream();
+
+                await RandomAccessStream.CopyAndCloseAsync(contentStream, outputStream)
+                    .AsTask(new Progress<ulong>(DownloadProgress));
 
                 package.Status = PackageStatus.Downloaded;
             }
