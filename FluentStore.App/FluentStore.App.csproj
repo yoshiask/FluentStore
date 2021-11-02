@@ -10,6 +10,8 @@
         <PublishProfile>win10-$(Platform).pubxml</PublishProfile>
         <UseWinUI>true</UseWinUI>
         <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
+        <PackageCertificateThumbprint>BF1139D4B9FE20C0A714FA3158740136F5836C37</PackageCertificateThumbprint>
+        <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     </PropertyGroup>
     
     <ItemGroup>
@@ -23,7 +25,6 @@
         <Content Include="Assets\Square150x150Logo.scale-200.png" />
         <Content Include="Assets\Square44x44Logo.scale-200.png" />
         <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-        <Content Include="Assets\StoreLogo.png" />
         <Content Include="Assets\Wide310x150Logo.scale-200.png" />
     </ItemGroup>
 

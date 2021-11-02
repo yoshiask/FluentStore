@@ -100,10 +100,10 @@ namespace FluentStore.SDK.Helpers
                     if (length.HasValue)
                         WeakReferenceMessenger.Default.Send(
                             new PackageDownloadProgressMessage(package, progress, length.Value));
-
                 }
 
                 // Start download
+                WeakReferenceMessenger.Default.Send(new PackageDownloadStartedMessage(package));
                 HttpResponseMessage response = await HttpClient.GetAsync(downloadUri, HttpCompletionOption.ResponseHeadersRead);
                 response.EnsureSuccessStatusCode();
 

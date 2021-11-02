@@ -287,12 +287,12 @@ namespace FluentStore.Views
             catch (Flurl.Http.FlurlHttpException ex)
             {
                 // TODO: Use InfoBar
-                flyout = new Controls.HttpErrorFlyout(ex.StatusCode ?? 418, ex.Message);
+                flyout = new Controls.HttpErrorFlyout(ex.StatusCode ?? 418, ex.ToString());
             }
             catch (Exception ex)
             {
                 // TODO: Use InfoBar
-                flyout = new Controls.HttpErrorFlyout(418, ex.Message);
+                flyout = new Controls.HttpErrorFlyout(418, ex.ToString());
             }
             finally
             {
@@ -455,54 +455,69 @@ namespace FluentStore.Views
         public ToastNotification RegisterPackageServiceMessages()
         {
             var progressToast = PackageHelper.GenerateProgressToast(ViewModel.Package);
+
             WeakReferenceMessenger.Default.Register<PackageFetchStartedMessage>(this, (r, m) =>
             {
-                ProgressIndicator.IsIndeterminate = true;
-                ProgressLabel.Text = "Fetching packages...";
-            });
-            WeakReferenceMessenger.Default.Register<PackageFetchFailedMessage>(this, async (r, m) =>
-            {
-                VisualStateManager.GoToState(this, "NoAction", true);
-                var noPackagesDialog = new ContentDialog()
+                _ = DispatcherQueue.TryEnqueue(() =>
                 {
-                    Title = m.Package.Title,
-                    Content = "Failed to fetch packages for this product.",
-                    PrimaryButtonText = "Ok"
-                };
-                await noPackagesDialog.ShowAsync();
+                    ProgressIndicator.IsIndeterminate = true;
+                    ProgressLabel.Text = "Fetching packages...";
+                });
+            });
+            WeakReferenceMessenger.Default.Register<PackageFetchFailedMessage>(this, (r, m) =>
+            {
+                _ = DispatcherQueue.TryEnqueue(async () =>
+                {
+                    VisualStateManager.GoToState(this, "NoAction", true);
+                    var noPackagesDialog = new ContentDialog()
+                    {
+                        Title = m.Package.Title,
+                        Content = "Failed to fetch packages for this product.",
+                        PrimaryButtonText = "Ok"
+                    };
+                    await noPackagesDialog.ShowAsync();
+                });
             });
             WeakReferenceMessenger.Default.Register<PackageDownloadStartedMessage>(this, (r, m) =>
             {
-                ProgressLabel.Text = "Downloading package...";
+                _ = DispatcherQueue.TryEnqueue(() =>
+                {
+                    ProgressLabel.Text = "Downloading package...";
 
-                PackageHelper.HandlePackageDownloadStartedToast(m, progressToast);
+                    PackageHelper.HandlePackageDownloadStartedToast(m, progressToast);
+                });
             });
-            WeakReferenceMessenger.Default.Register<PackageDownloadProgressMessage>(this, async (r, m) =>
+            WeakReferenceMessenger.Default.Register<PackageDownloadProgressMessage>(this, (r, m) =>
             {
-                _ = DispatcherQueue.TryEnqueue(
-                   () =>
-                   {
-                       double prog = m.Downloaded / m.Total;
-                       ProgressIndicator.IsIndeterminate = false;
-                       ProgressIndicator.Value = prog;
-                       ProgressText.Text = $"{prog * 100:##0}%";
-                   });
+                _ = DispatcherQueue.TryEnqueue(() =>
+                {
+                    double prog = m.Downloaded / m.Total;
+                    ProgressIndicator.IsIndeterminate = false;
+                    ProgressIndicator.Value = prog;
+                    ProgressText.Text = $"{prog * 100:##0}%";
 
-                PackageHelper.HandlePackageDownloadProgressToast(m, progressToast);
+                    PackageHelper.HandlePackageDownloadProgressToast(m, progressToast);
+                });
             });
-            WeakReferenceMessenger.Default.Register<PackageInstallProgressMessage>(this, async (r, m) =>
+            WeakReferenceMessenger.Default.Register<PackageInstallProgressMessage>(this, (r, m) =>
             {
-                ProgressIndicator.IsIndeterminate = true;
-                ProgressText.Text = string.Empty;
-                ProgressLabel.Text = "Installing package...";
+                _ = DispatcherQueue.TryEnqueue(() =>
+                {
+                    ProgressIndicator.IsIndeterminate = true;
+                    ProgressText.Text = string.Empty;
+                    ProgressLabel.Text = "Installing package...";
 
-                PackageHelper.HandlePackageInstallProgressToast(m, progressToast);
+                    PackageHelper.HandlePackageInstallProgressToast(m, progressToast);
+                });
             });
             WeakReferenceMessenger.Default.Register<PackageInstallCompletedMessage>(this, (r, m) =>
             {
-                VisualStateManager.GoToState(this, "NoAction", true);
+                _ = DispatcherQueue.TryEnqueue(() =>
+                {
+                    VisualStateManager.GoToState(this, "NoAction", true);
 
-                PackageHelper.HandlePackageInstallCompletedToast(m, progressToast);
+                    PackageHelper.HandlePackageInstallCompletedToast(m, progressToast);
+                });
             });
 
             return progressToast;

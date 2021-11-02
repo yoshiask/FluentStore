@@ -94,51 +94,32 @@ namespace FluentStore.SDK.Helpers
         public static async Task<bool> Install(PackageBase package)
         {
             PackageManager pkgManager = new();
-            bool success = false;
 
-            void InstallProgress(IAsyncOperationWithProgress<DeploymentResult, DeploymentProgress> asyncInfo, DeploymentProgress p)
+            void InstallProgress(DeploymentProgress p)
             {
                 WeakReferenceMessenger.Default.Send(
                     new PackageInstallProgressMessage(package, p.percentage / 100));
             }
-            void InstallComplete(IAsyncOperationWithProgress<DeploymentResult, DeploymentProgress> asyncInfo, AsyncStatus asyncStatus)
-            {
-                switch (asyncStatus)
-                {
-                    case AsyncStatus.Completed:
-                        WeakReferenceMessenger.Default.Send(
-                            new PackageInstallProgressMessage(package, 1));
-                        package.Status = PackageStatus.Downloaded;
-                        success = true;
-                        break;
 
-                    case AsyncStatus.Error:
-                        WeakReferenceMessenger.Default.Send(
-                            new PackageInstallFailedMessage(package, asyncInfo.ErrorCode));
-                        success = false;
-                        break;
-
-                    case AsyncStatus.Started:
-                        WeakReferenceMessenger.Default.Send(
-                            new PackageInstallStartedMessage(package));
-                        break;
-                }
-            }
-
-            // Prep install
-            System.Diagnostics.Debug.WriteLine("\"{0}\" exists: {1}", package.DownloadItem.FullName, package.DownloadItem.Exists);
-            var operation = pkgManager.AddPackageAsync(
+            // Deploy package
+            WeakReferenceMessenger.Default.Send(new PackageInstallStartedMessage(package));
+            var result = await pkgManager.AddPackageAsync(
                 new Uri(package.DownloadItem.FullName),
                 null,
                 DeploymentOptions.ForceApplicationShutdown
-            );
-            operation.Completed = InstallComplete;
-            operation.Progress = InstallProgress;
+            ).AsTask(new Progress<DeploymentProgress>(InstallProgress));
 
-            // Attempt to install the downloaded package
-            DeploymentResult result = await operation;
-
-            return result.IsRegistered && success;
+            if (!result.IsRegistered)
+            {
+                WeakReferenceMessenger.Default.Send(new PackageInstallFailedMessage(package, result.ExtendedErrorCode));
+                package.Status = PackageStatus.Downloaded;
+            }
+            else
+            {
+                WeakReferenceMessenger.Default.Send(new PackageInstallCompletedMessage(package));
+                package.Status = PackageStatus.Installed;
+            }
+            return result.IsRegistered;
         }
 
         /// <inheritdoc cref="PackageBase.LaunchAsync"/>
