@@ -12,13 +12,20 @@ Other features include:
 ## What package sources are available?
 Several sources are currently supported, with several more planned for the future. Listed below are the available sources, along with the features they currently support. Sources that implement at least one of the three features in the table can be added to Collections.
 
+**Legend**
+| Symbol   | Description
+---        | :---:
+| ✅      | Available in latest release
+| ☑       | Available in next release
+| ❌      | Not available at this time
+
 | Source Name       | Search | Download | Install
 ---                 | :---:  | :---:    | :---:
 | Microsoft Store   | ✅     | ✅      | ✅¹ |
 | WinGet            | ✅     | ✅      | ✅  |
 | GitHub Releases   | ❌     | ❌      | ❌  |
 | Chocolatey        | ❌     | ❌      | ❌  |
-| UWP Community     | ❌     | ✅²     | ✅² |
+| UWP Community     | ❌     | ✅²     | ☑² |
 
 1.  Only packaged apps can be installed. Unpackaged apps can be downloaded, but must be installed manually.
 2.  UWP Community projects do not have direct download links. Fluent Store will attempt to follow the link
