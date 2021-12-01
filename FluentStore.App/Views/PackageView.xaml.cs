@@ -377,24 +377,24 @@ namespace FluentStore.Views
 
         private void ShareButton_Click(SplitButton sender, SplitButtonClickEventArgs args)
         {
-            DataTransferManager dataTransferManager = DataTransferManager.GetForCurrentView();
+            DataTransferManager dataTransferManager = ShareHelper.GetDataTransferManager(App.Current.Window);
             dataTransferManager.DataRequested += (sender, args) =>
             {
                 Flurl.Url appUrl = "fluentstore://package/" + ViewModel.Package.Urn.ToString();
                 ShareDataRequested(sender, args, appUrl);
             };
-            DataTransferManager.ShowShareUI();
+            ShareHelper.ShowShareUIForWindow(App.Current.Window);
         }
 
         private void ShareWebLink_Click(object sender, RoutedEventArgs e)
         {
-            DataTransferManager dataTransferManager = DataTransferManager.GetForCurrentView();
+            DataTransferManager dataTransferManager = ShareHelper.GetDataTransferManager(App.Current.Window);
             dataTransferManager.DataRequested += (sender, args) =>
             {
                 Flurl.Url appUrl = PackageService.GetUrlForPackageAsync(ViewModel.Package);
                 ShareDataRequested(sender, args, appUrl);
             };
-            DataTransferManager.ShowShareUI();
+            ShareHelper.ShowShareUIForWindow(App.Current.Window);
         }
 
         private void OpenInBrowser_Click(object sender, RoutedEventArgs e)

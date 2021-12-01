@@ -300,7 +300,8 @@ namespace FluentStore.SDK.Packages
             if (icons.Count > 0)
                 goto done;
 
-            Guard.IsNotEmpty(icons, nameof(icons));
+            // If no app icon is specified, fall back to any image.
+            icons = Images;
 
         done:
             return icons.OrderByDescending(i => i.Width).First();

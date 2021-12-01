@@ -17,6 +17,7 @@
 
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0-preview3" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22489-preview" />
+        <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
     </ItemGroup>
 
     <ItemGroup>
