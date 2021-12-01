@@ -110,6 +110,11 @@ namespace FluentStore.ViewModels
             {
                 NavService.ShowHttpErrorPage(ex);
             }
+            catch (System.IO.FileLoadException ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+                throw;
+            }
 
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
