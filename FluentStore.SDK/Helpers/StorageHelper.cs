@@ -78,6 +78,12 @@ namespace FluentStore.SDK.Helpers
             return prevFolder;
         }
 
+        public static void Rename(this FileInfo file, string newName, bool overwrite = true)
+        {
+            string newPath = Path.Combine(file.DirectoryName, newName);
+            file.MoveTo(newPath, overwrite);
+        }
+
         public static string PrepUrnForFile(Urn urn)
         {
             string urnStr = urn.ToString()[4..];

@@ -72,7 +72,7 @@ namespace FluentStore.SDK.Packages
             await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
 
             // Set the proper file name
-            ((FileInfo)DownloadItem).MoveTo(Path.GetFileName(PackageUri.ToString()), true);
+            ((FileInfo)DownloadItem).Rename(Path.GetFileName(PackageUri.ToString()));
 
             WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, (FileInfo)DownloadItem));
             Status = PackageStatus.Downloaded;
@@ -105,7 +105,7 @@ namespace FluentStore.SDK.Packages
             }
         }
 
-        public override Task<ImageBase> CacheHeroImage()
+        public override async Task<ImageBase> CacheHeroImage()
         {
             return null;
         }

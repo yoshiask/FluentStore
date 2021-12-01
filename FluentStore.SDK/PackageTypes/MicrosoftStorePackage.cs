@@ -252,11 +252,7 @@ namespace FluentStore.SDK.Packages
             string extension = await GetInstallerType();
             FileInfo downloadFile = (FileInfo)DownloadItem;
             if (extension != string.Empty)
-            {
-                string destinationPath = Path.Combine(downloadFile.DirectoryName, PackageMoniker + extension);
-                downloadFile.MoveTo(destinationPath, true);
-                downloadFile = new(destinationPath);
-            }
+                downloadFile.Rename(PackageMoniker + extension);
 
             WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, downloadFile));
             DownloadItem = downloadFile;
@@ -320,7 +316,7 @@ namespace FluentStore.SDK.Packages
                 }
             }
 
-            return img ?? (await GetScreenshots())[0];
+            return img ?? (await GetScreenshots()).FirstOrDefault() ?? null;
         }
 
         public override async Task<List<ImageBase>> CacheScreenshots()
