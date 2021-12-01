@@ -19,7 +19,7 @@ namespace Microsoft.Marketplace.Storefront.Contracts
                 .SetQueryParam("deviceFamily", deviceFamily).SetQueryParam("architecture", architecture)
                 .SetQueryParam("productId", productId)
                 .GetStringAsync();
-            return JsonConvert.DeserializeObject<ResponseItemList>(json, Constants.DefaultJsonSettings);
+            return JsonConvert.DeserializeObject<ResponseItemList>(json, DefaultJsonSettings);
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         /// </summary>
         public async Task<ResponseItem<V9.SearchResponse>> NextSearchPage(V9.SearchResponse currentResponse)
         {
-            return await (Constants.STOREFRONT_API_HOST + currentResponse.NextUri)
+            return await (STOREFRONT_API_HOST + currentResponse.NextUri)
                 .GetJsonAsync<ResponseItem<V9.SearchResponse>>();
         }
 

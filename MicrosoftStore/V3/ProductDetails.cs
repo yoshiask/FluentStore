@@ -92,6 +92,7 @@ namespace Microsoft.Marketplace.Storefront.Contracts.V3
         public long ApproximateSizeInBytes { get; set; }
         public long MaxInstallSizeInBytes { get; set; }
         public bool IsGamingAppOnly { get; set; }
+        public V9.Installer Installer { get; set; }
 
         [JsonIgnore]
         public Uri PrivacyUri
