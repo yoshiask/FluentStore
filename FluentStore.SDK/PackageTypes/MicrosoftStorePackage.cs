@@ -209,7 +209,7 @@ namespace FluentStore.SDK.Packages
             var culture = System.Globalization.CultureInfo.CurrentCulture;
             var installer = manifest.Installers.FirstOrDefault(i => i.InstallerLocale == culture.TwoLetterISOLanguageName && i.Markets.HasMarket(culture));
             PackageUri = installer.InstallerUri;
-            Type = installer.InstallerType.ToInstallerType();
+            Type = installer.InstallerType.ToSDKInstallerType();
         }
 
         private Urn _Urn;

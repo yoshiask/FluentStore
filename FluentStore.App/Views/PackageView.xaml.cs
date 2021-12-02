@@ -320,10 +320,33 @@ namespace FluentStore.Views
                 var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.Current.Window);
                 WinRT.Interop.InitializeWithWindow.Initialize(savePicker, hwnd);
 
-                if (file.Extension.EndsWith("bundle"))
-                    savePicker.FileTypeChoices.Add("Windows App Bundle", new string[] { file.Extension });
+                SDK.Models.InstallerType type = m.Package.Type;
+                SDK.Models.InstallerType typeReduced = type.Reduce();
+                string extDesc;
+                if (typeReduced == SDK.Models.InstallerType.Msix)
+                {
+                    extDesc = "Windows App " + (type.HasFlag(SDK.Models.InstallerType.Bundle) ? "Bundle" : "Package");
+
+                    if (type.HasFlag(SDK.Models.InstallerType.Encrypted))
+                        extDesc = "Encrypted " + extDesc;
+                }
                 else
-                    savePicker.FileTypeChoices.Add("Windows App Package", new string[] { file.Extension });
+                {
+                    extDesc = type switch
+                    {
+                        SDK.Models.InstallerType.Msi => "Windows Installer",
+                        SDK.Models.InstallerType.Exe => "Installer",
+                        SDK.Models.InstallerType.Zip => "Compressed zip archive",
+                        SDK.Models.InstallerType.Inno => "Inno Setup installer",
+                        SDK.Models.InstallerType.Nullsoft => "NSIS installer",
+                        SDK.Models.InstallerType.Wix => "WiX installer",
+                        SDK.Models.InstallerType.Burn => "WiX Burn installer",
+
+                        _ => "Unknown"
+                    };
+                }
+                savePicker.FileTypeChoices.Add(extDesc, new string[] { file.Extension });
+
                 savePicker.SuggestedFileName = file.Name;
                 var userFile = await savePicker.PickSaveFileAsync();
                 if (userFile != null)

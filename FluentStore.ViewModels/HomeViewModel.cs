@@ -38,11 +38,18 @@ namespace FluentStore.ViewModels
 
                 for (int i = 0; i < featured.Carousel.Count; i++)
                 {
-                    Urn packageUrn = Urn.Parse(featured.Carousel[i]);
-                    var package = await PackageService.GetPackageAsync(packageUrn);
-                    CarouselItems.Add(new PackageViewModel(package));
-                    if (i == 0)
-                        SelectedCarouselItemIndex = i;
+                    try
+                    {
+                        Urn packageUrn = Urn.Parse(featured.Carousel[i]);
+                        var package = await PackageService.GetPackageAsync(packageUrn);
+                        CarouselItems.Add(new PackageViewModel(package));
+                        if (i == 0)
+                            SelectedCarouselItemIndex = i;
+                    }
+                    catch (Flurl.Http.FlurlHttpException)
+                    {
+                        // Ignore packages that couldn't be resolved
+                    }
                 }
 
 #if DEBUG
@@ -114,11 +121,6 @@ namespace FluentStore.ViewModels
             catch (Flurl.Http.FlurlHttpException ex)
             {
                 NavService.ShowHttpErrorPage(ex);
-            }
-            catch (System.IO.FileLoadException ex)
-            {
-                System.Diagnostics.Debug.WriteLine(ex);
-                throw;
             }
 
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));

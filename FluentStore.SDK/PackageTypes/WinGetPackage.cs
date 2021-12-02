@@ -49,9 +49,19 @@ namespace FluentStore.SDK.Packages
         {
             Guard.IsNotNull(manifest, nameof(manifest));
             Manifest = manifest;
+            var installer = Manifest.Installers[0];
 
-            PackageUri = new Uri(Manifest.Installers[0].Url);
+            PackageUri = new Uri(installer.Url);
             Website = Manifest.Homepage;
+
+            if (installer.InstallerType.HasValue)
+            {
+                Type = installer.InstallerType.Value.ToSDKInstallerType();
+            }
+            else if (Enum.TryParse<Models.InstallerType>(Path.GetExtension(PackageUri.ToString())[1..], true, out var type))
+            {
+                Type = type;
+            }
         }
 
         private Urn _Urn;

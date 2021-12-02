@@ -45,7 +45,7 @@ namespace FluentStore.SDK.Helpers
             }
         }
 
-        public static Models.InstallerType ToInstallerType(this WinGetRun.Enums.InstallerType type)
+        public static Models.InstallerType ToSDKInstallerType(this WinGetRun.Enums.InstallerType type)
         {
             return type switch
             {
@@ -64,14 +64,25 @@ namespace FluentStore.SDK.Helpers
             };
         }
 
+        /// <summary>
+        /// Reduces the installer type to its most generic type.
+        /// </summary>
+        /// <returns>
+        /// <see cref="Models.InstallerType.Msix"/> for Windows App Packages,
+        /// <see cref="Models.InstallerType.Win32"/> for traditional Win32 installers,
+        /// <see cref="Models.InstallerType.Unknown"/> for everything else.
+        /// </returns>
         public static Models.InstallerType Reduce(this Models.InstallerType type)
         {
-            if (type.HasFlag(Models.InstallerType.AppX) || type.HasFlag(Models.InstallerType.Msix))
-                return Models.InstallerType.AppX;
-            else if (type.HasFlag(Models.InstallerType.Win32))
-                return Models.InstallerType.Win32;
-            else
-                return Models.InstallerType.Unknown;
+            uint genericId = (uint)type >> 28;
+            return genericId switch
+            {
+                ((uint)Models.InstallerType.Msix >> 28) => Models.InstallerType.Msix,
+                ((uint)Models.InstallerType.Win32 >> 28) => Models.InstallerType.Win32,
+
+                0 => Models.InstallerType.Unknown,
+                _ => Models.InstallerType.Unknown
+            };
         }
 
         public static string GetExtension<TEnum>(this TEnum type) where TEnum : unmanaged, Enum
