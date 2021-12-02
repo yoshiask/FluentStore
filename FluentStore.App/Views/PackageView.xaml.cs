@@ -531,13 +531,24 @@ namespace FluentStore.Views
                     PackageHelper.HandlePackageDownloadProgressToast(m, progressToast);
                 });
             });
-            WeakReferenceMessenger.Default.Register<PackageInstallProgressMessage>(this, (r, m) =>
+            WeakReferenceMessenger.Default.Register<PackageInstallStartedMessage>(this, (r, m) =>
             {
                 _ = DispatcherQueue.TryEnqueue(() =>
                 {
                     ProgressIndicator.IsIndeterminate = true;
                     ProgressText.Text = string.Empty;
                     ProgressLabel.Text = "Installing package...";
+
+                    PackageHelper.HandlePackageInstallProgressToast(new(m.Package, 0), progressToast);
+                });
+            });
+            WeakReferenceMessenger.Default.Register<PackageInstallProgressMessage>(this, (r, m) =>
+            {
+                _ = DispatcherQueue.TryEnqueue(() =>
+                {
+                    ProgressIndicator.IsIndeterminate = false;
+                    ProgressIndicator.Value = m.Progress;
+                    ProgressText.Text = $"{m.Progress * 100:##0}%";
 
                     PackageHelper.HandlePackageInstallProgressToast(m, progressToast);
                 });
