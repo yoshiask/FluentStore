@@ -10,10 +10,11 @@ namespace FluentStore.Views
     {
         public Collection Collection { get; internal set; }
 
-        public EditCollectionDetailsDialog(Collection collection)
+        public EditCollectionDetailsDialog(Collection collection, XamlRoot root)
         {
-            this.InitializeComponent();
+            InitializeComponent();
             Collection = collection;
+            XamlRoot = root;
         }
 
         private void ContentDialog_Loaded(object sender, RoutedEventArgs e)

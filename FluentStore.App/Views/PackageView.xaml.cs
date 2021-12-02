@@ -549,7 +549,7 @@ namespace FluentStore.Views
         private async void EditCollection_Click(object sender, RoutedEventArgs e)
         {
             FluentStoreAPI.Models.Collection collection = ((SDK.Packages.CollectionPackage)ViewModel.Package).Model;
-            var editDialog = new EditCollectionDetailsDialog(collection);
+            EditCollectionDetailsDialog editDialog = new(collection, Content.XamlRoot);
 
             if (await editDialog.ShowAsync() == ContentDialogResult.Primary)
             {

@@ -212,7 +212,7 @@ namespace FluentStore
 
         private async void EditProfileMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var editDialog = new Views.Auth.EditProfileDialog(UserService.CurrentProfile);
+            var editDialog = new Views.Auth.EditProfileDialog(UserService.CurrentProfile, Content.XamlRoot);
 
             if (await editDialog.ShowAsync() == ContentDialogResult.Primary)
             {

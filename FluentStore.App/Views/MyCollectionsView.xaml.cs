@@ -30,7 +30,7 @@ namespace FluentStore.Views
 
         private async void NewButton_Click(object sender, RoutedEventArgs e)
         {
-            var editDialog = new EditCollectionDetailsDialog(new Collection());
+            var editDialog = new EditCollectionDetailsDialog(new Collection(), Content.XamlRoot);
             if (await editDialog.ShowAsync() == ContentDialogResult.Primary)
             {
                 // User wants to save

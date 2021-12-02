@@ -8,10 +8,11 @@ namespace FluentStore.Views.Auth
     {
         public Profile Profile { get; internal set; }
 
-        public EditProfileDialog(Profile profile)
+        public EditProfileDialog(Profile profile, XamlRoot root)
         {
             this.InitializeComponent();
             Profile = profile;
+            XamlRoot = root;
         }
 
         private void ContentDialog_Loaded(object sender, RoutedEventArgs e)
