@@ -29,24 +29,12 @@ namespace FluentStore.ViewModels
                 var self = (ShellViewModel)r;
                 self.IsPageLoading = m.Value;
             });
-            WeakReferenceMessenger.Default.Register<Messages.SetPageHeaderMessage>(this, (r, m) =>
-            {
-                var self = (ShellViewModel)r;
-                self.PageHeader = m.Value;
-            });
         }
 
         private readonly UserService UserService = Ioc.Default.GetRequiredService<UserService>();
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
         private readonly ISettingsService Settings = Ioc.Default.GetRequiredService<ISettingsService>();
-
-        private string _PageHeader;
-        public string PageHeader
-        {
-            get => _PageHeader;
-            set => SetProperty(ref _PageHeader, value);
-        }
 
         private bool _IsPageLoading;
         public bool IsPageLoading

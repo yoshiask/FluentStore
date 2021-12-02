@@ -24,8 +24,11 @@
         <Content Include="Assets\LockScreenLogo.scale-200.png" />
         <Content Include="Assets\Square150x150Logo.scale-200.png" />
         <Content Include="Assets\Square44x44Logo.scale-200.png" />
-        <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+		<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png"/>
         <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+		<None Include="Assets\AppIcon.ico">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
     </ItemGroup>
 
     <ItemGroup>

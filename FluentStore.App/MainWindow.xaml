@@ -7,23 +7,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid>
-        <!--<Grid.RowDefinitions>
-            <RowDefinition Height="32"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        
-        <Grid Padding="4" x:Name="CustomTitleBar" x:FieldModifier="public">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-
-            <TextBlock Text="Fluent Store Beta" VerticalAlignment="Center"/>
-        </Grid>-->
-
-        <local:MainPage/>
-
-    </Grid>
+    <local:MainPage x:Name="MainContent"/>
 
 </Window>

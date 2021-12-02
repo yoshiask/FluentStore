@@ -9,6 +9,8 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
+using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.ViewModels.Messages;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -30,6 +32,8 @@ namespace FluentStore
         }
         public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(
             nameof(ViewModel), typeof(ShellViewModel), typeof(MainPage), new PropertyMetadata(new ShellViewModel()));
+
+        public bool IsCompact { get; private set; }
 
         public MainPage()
         {
@@ -194,14 +198,13 @@ namespace FluentStore
             if (e.NewSize.Width <= CompactModeMinWidth && e.PreviousSize.Width > CompactModeMinWidth)
             {
                 VisualStateManager.GoToState(this, "CompactLayout", true);
-                // Set XAML element as a draggable region.
-                App.Current.Window.SetTitleBar(TitlebarGrid);
+                IsCompact = true;
             }
             else if (e.NewSize.Width > CompactModeMinWidth && e.PreviousSize.Width <= CompactModeMinWidth)
             {
                 VisualStateManager.GoToState(this, "DefaultLayout", true);
-                // Set XAML element as a draggable region.
-                App.Current.Window.SetTitleBar(null);
+                IsCompact = false;
+                WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage(string.Empty));
             }
         }
 

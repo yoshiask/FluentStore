@@ -16,22 +16,9 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
-        <Border x:Name="TitlebarPadding" Height="32"
-                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
 
-        <winui:NavigationView x:Name="MainNav" PaneDisplayMode="Top" Grid.Row="1"
+        <winui:NavigationView x:Name="MainNav" PaneDisplayMode="Top" Grid.Row="1" IsTitleBarAutoPaddingEnabled="False"
                               SelectionChanged="NavigationView_SelectionChanged" BackRequested="MainNav_BackRequested">
-
-            <winui:NavigationView.PaneHeader>
-                <StackPanel x:Name="HeaderBranding" Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Viewbox>
-                        <Image Source="/Assets/Square71x71Logo.png"/>
-                    </Viewbox>
-                    <TextBlock Text="Fluent Store" Style="{ThemeResource SubtitleTextBlockStyle}"
-                               VerticalAlignment="Center" Margin="4,0" FontSize="20"/>
-                </StackPanel>
-            </winui:NavigationView.PaneHeader>
 
             <winui:NavigationView.PaneFooter>
                 <Grid>
@@ -73,17 +60,8 @@
             </winui:NavigationView.PaneFooter>
 
             <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition x:Name="TitlebarRow" Height="0"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <Grid x:Name="TitlebarGrid" HorizontalAlignment="Stretch" Background="{ThemeResource SystemControlChromeMediumLowAcrylicWindowMediumBrush}">
-                    <TextBlock Text="{x:Bind ViewModel.PageHeader, Mode=OneWay}" FontWeight="Bold" FontSize="18"
-                               VerticalAlignment="Center" Margin="4"/>
-                </Grid>
-                <Frame x:Name="MainFrame" Grid.Row="1"/>
-                <winui:ProgressBar IsIndeterminate="True" VerticalAlignment="Top" Grid.Row="1" 
+                <Frame x:Name="MainFrame" />
+                <winui:ProgressBar IsIndeterminate="True" VerticalAlignment="Top"
                                    Visibility="{x:Bind ViewModel.IsPageLoading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
             </Grid>
 
@@ -111,9 +89,6 @@
                     <VisualState.Setters>
                         <Setter Target="MainNav.PaneDisplayMode" Value="LeftCompact"/>
                         <Setter Target="MainNav.IsTitleBarAutoPaddingEnabled" Value="False"/>
-                        <Setter Target="HeaderBranding.HorizontalAlignment" Value="Left"/>
-                        <Setter Target="TitlebarRow.Height" Value="40"/>
-                        <Setter Target="TitlebarPadding.Height" Value="0"/>
                         <Setter Target="SignInButton.CornerRadius" Value="0"/>
                         <Setter Target="UserButton.CornerRadius" Value="0"/>
                     </VisualState.Setters>

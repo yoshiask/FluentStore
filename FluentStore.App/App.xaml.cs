@@ -32,6 +32,8 @@ namespace FluentStore
     /// </summary>
     public partial class App : Application
     {
+        public const string AppName = "Fluent Store";
+
         public MainWindow Window { get; private set; }
 
         /// <summary>
@@ -72,8 +74,11 @@ namespace FluentStore
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            Window = new();
-            ExtendIntoTitlebar();
+            Window = new()
+            {
+                Title = "Fluent Store"
+            };
+            //ExtendIntoTitlebar();
             Window.Activate();
         }
 
