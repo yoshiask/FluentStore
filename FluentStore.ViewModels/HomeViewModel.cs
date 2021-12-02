@@ -97,9 +97,14 @@ namespace FluentStore.ViewModels
                     Title = "Fluent Store",
                     Urn = Urn.Parse("urn:microsoft-store:123456789123"),
                     Website = "https://github.com/yoshiask/FluentStore",
-                    Version = "0.1.1.0"
+                    PackageUri = new("https://github.com/yoshiask/FluentStore/releases/download/v0.1.2-beta/FluentStoreBeta_0.1.2.0.exe"),
+                    Version = "0.1.2-beta"
                 };
                 CarouselItems.Add(new PackageViewModel(fakeFSPackage));
+
+                // Add Launch 2021
+                var launch2021Package = await PackageService.GetPackageAsync(Urn.Parse($"urn:{SDK.Handlers.UwpCommunityHandler.NAMESPACE_LAUNCH}:2021"));
+                CarouselItems.Add(new PackageViewModel(launch2021Package));
 #endif
 
                 // Load featured packages from other sources

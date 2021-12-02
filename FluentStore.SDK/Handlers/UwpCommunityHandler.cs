@@ -21,9 +21,11 @@ namespace FluentStore.SDK.Handlers
         private const string BASE_URL = "https://uwpcommunity-site-backend.herokuapp.com";
 
         public const string NAMESPACE_PROJECT = "uwpc-projects";
+        public const string NAMESPACE_LAUNCH = "uwpc-launch";
         public override HashSet<string> HandledNamespaces => new()
         {
             NAMESPACE_PROJECT,
+            NAMESPACE_LAUNCH
         };
 
         public override string DisplayName => "UWP Community";
@@ -52,8 +54,11 @@ namespace FluentStore.SDK.Handlers
 
         public override async Task<PackageBase> GetPackage(Urn urn)
         {
+            string id = urn.GetContent<NamespaceSpecificString>().UnEscapedValue;
             if (urn.NamespaceIdentifier == NAMESPACE_PROJECT)
-                return await GetPackage(urn.GetContent<NamespaceSpecificString>().UnEscapedValue);
+                return await GetPackage(id);
+            else if (urn.NamespaceIdentifier == NAMESPACE_LAUNCH)
+                return await GetLaunchCollection(id);
 
             return null;
         }
@@ -71,7 +76,8 @@ namespace FluentStore.SDK.Handlers
                 return null;
             }
 
-            var package = new UwpCommunityPackage(project);
+            UwpCommunityPackage package = new(project);
+            package.Status = PackageStatus.BasicDetails;
 
             var images = await BASE_URL.AppendPathSegments("projects", "images")
                 .SetQueryParam("projectId", projectIdStr).GetJsonAsync<List<string>>();
@@ -83,6 +89,61 @@ namespace FluentStore.SDK.Handlers
 
             package.Status = PackageStatus.DownloadReady;
             return package;
+        }
+
+        public async Task<GenericListPackage<dynamic>> GetLaunchCollection(string year)
+        {
+            dynamic projects = (await BASE_URL.AppendPathSegments("projects", "launch", year).GetJsonAsync()).projects;
+
+            GenericListPackage<dynamic> listPackage = new()
+            {
+                Urn = Urn.Parse("urn:" + NAMESPACE_LAUNCH + ":" + year),
+                Title = "Launch " + year,
+                Description = "An annual event hosted by the UWP Community, where developers, beta testers, translators, and users work together to Launch their new and refreshed apps.",
+                DeveloperName = "UWP Community",
+                Website = "https://uwpcommunity.com/launch",
+                DisplayPrice = "View",
+                Images =
+                {
+                    new FileImage
+                    {
+                        Url = "https://github.com/UWPCommunity/UWPCommunityApp/blob/dev/UWPCommunity/Assets/StoreLogo.scale-400.png?raw=true",
+                        ImageType = ImageType.Logo
+                    }
+                },
+                Status = PackageStatus.BasicDetails,
+            };
+
+            // Use showcase site when available
+            if (year == "2021")
+                listPackage.Website += "/2021";
+
+            // Set hero image
+            string heroImageUrl = "https://uwpcommunity.com/launch/2021/package/Assets/Banner.png";
+            if (year == "2020")
+                heroImageUrl = "https://uwpcommunity.com/assets/img/LaunchAppsHero.jpg";
+            else if (year == "2019")
+                heroImageUrl = "https://uwpcommunity.com/assets/img/LaunchHero.jpg";
+            listPackage.Images.Add(new FileImage
+            {
+                Url = heroImageUrl,
+                ImageType = ImageType.Hero
+            });
+
+            foreach (dynamic project in projects)
+            {
+                UwpCommunityPackage package = new(project);
+                package.Status = PackageStatus.BasicDetails;
+
+                var images = await BASE_URL.AppendPathSegments("projects", "images")
+                    .SetQueryParam("projectId", package.ProjectId).GetJsonAsync<List<string>>();
+                package.UpdateWithImages(images);
+
+                listPackage.Items.Add(package);
+            }
+
+            listPackage.Status = PackageStatus.DownloadReady;
+            return listPackage;
         }
 
         public override async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)

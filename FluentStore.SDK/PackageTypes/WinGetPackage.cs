@@ -45,6 +45,15 @@ namespace FluentStore.SDK.Packages
             PackageId = pack.GetPublisherAndPackageIds().PackageId;
         }
 
+        public void Update(Manifest manifest)
+        {
+            Guard.IsNotNull(manifest, nameof(manifest));
+            Manifest = manifest;
+
+            PackageUri = new Uri(Manifest.Installers[0].Url);
+            Website = Manifest.Homepage;
+        }
+
         private Urn _Urn;
         public override Urn Urn
         {
@@ -81,9 +90,7 @@ namespace FluentStore.SDK.Packages
 
         private async Task<bool> PopulatePackageUri()
         {
-            Manifest = await WinGetApi.GetManifest(Urn.GetContent<NamespaceSpecificString>().UnEscapedValue, Version);
-            PackageUri = new Uri(Manifest.Installers[0].Url);
-            Website = Manifest.Homepage;
+            Update(await WinGetApi.GetManifest(Urn.GetContent<NamespaceSpecificString>().UnEscapedValue, Version));
 
             Status = PackageStatus.DownloadReady;
             return true;

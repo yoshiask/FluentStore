@@ -33,6 +33,10 @@ namespace FluentStore.SDK.Images
             }
         }
 
+        public FileImage(string url) => Url = url;
+        public FileImage(Uri uri) => Uri = uri;
+        public FileImage() { }
+
         public override async Task<Stream> GetImageStreamAsync()
         {
             if (Stream == null)

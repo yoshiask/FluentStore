@@ -6,12 +6,11 @@ using CommunityToolkit.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Windows.Storage;
 using System.IO;
 
 namespace FluentStore.SDK.Packages
 {
-    public class ModernPackage<TModel> : PackageBase<TModel>
+    public class ModernPackage<TModel> : GenericPackage<TModel>
     {
         private Urn _Urn;
         public override Urn Urn
@@ -36,7 +35,7 @@ namespace FluentStore.SDK.Packages
         public override bool RequiresDownloadForCompatCheck => true;
         public override async Task<string> GetCannotBeInstalledReason()
         {
-            Guard.IsNotNull(DownloadItem, nameof(DownloadItem));
+            Status.IsAtLeast(PackageStatus.Downloaded);
             return PackagedInstallerHelper.GetCannotBeInstalledReason(
                 (FileInfo)DownloadItem, Type.HasFlag(InstallerType.Bundle));
         }
@@ -58,7 +57,7 @@ namespace FluentStore.SDK.Packages
         public override async Task<bool> InstallAsync()
         {
             // Make sure installer is downloaded
-            Guard.IsEqualTo((int)Status, (int)PackageStatus.Downloaded, nameof(Status));
+            Status.IsAtLeast(PackageStatus.Downloaded);
 
             if (await PackagedInstallerHelper.Install(this))
             {
@@ -77,11 +76,6 @@ namespace FluentStore.SDK.Packages
             await PackagedInstallerHelper.Launch(PackageFamilyName);
         }
 
-        public override Task<FileSystemInfo> DownloadPackageAsync(DirectoryInfo folder = null)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Determines the <see cref="InstallerType"/> of the downloaded package.
         /// Requires <see cref="PackageBase.Status"/> to be <see cref="PackageStatus.Downloaded"/>.
@@ -89,7 +83,7 @@ namespace FluentStore.SDK.Packages
         /// <returns>The file extension that corresponds with the determined <see cref="InstallerType"/>.</returns>
         public async Task<string> GetInstallerType()
         {
-            Guard.IsEqualTo((int)Status, (int)PackageStatus.Downloaded, nameof(Status));
+            Status.IsAtLeast(PackageStatus.Downloaded);
 
             if (Type == InstallerType.Unknown)
                 Type = PackagedInstallerHelper.GetInstallerType((FileInfo)DownloadItem);
@@ -98,7 +92,7 @@ namespace FluentStore.SDK.Packages
 
         public override async Task<ImageBase> CacheAppIcon()
         {
-            Guard.IsNotNull(DownloadItem, nameof(DownloadItem));
+            Status.IsAtLeast(PackageStatus.Downloaded);
             return PackagedInstallerHelper.GetAppIcon(
                 (FileInfo)DownloadItem, Type.HasFlag(InstallerType.Bundle));
         }
@@ -111,13 +105,6 @@ namespace FluentStore.SDK.Packages
         public override async Task<List<ImageBase>> CacheScreenshots()
         {
             return new List<ImageBase>(0);
-        }
-
-        private InstallerType _Type;
-        public InstallerType Type
-        {
-            get => _Type;
-            set => SetProperty(ref _Type, value);
         }
 
         private string _PackageFamilyName;
