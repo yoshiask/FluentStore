@@ -112,17 +112,17 @@ namespace FluentStore.Views
 
         private async void MoreButton_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new ContentDialog()
+            var dialog = new ContentDialog
             {
-                Title = new TextBlock()
+                Title = new TextBlock
                 {
                     Text = ViewModel.Package.Title,
                     FontSize = 24,
                     FontWeight = FontWeights.Bold
                 },
-                Content = new ScrollViewer()
+                Content = new ScrollViewer
                 {
-                    Content = new TextBlock()
+                    Content = new TextBlock
                     {
                         Text = ViewModel.Package.Description,
                         TextWrapping = TextWrapping.Wrap
@@ -131,6 +131,7 @@ namespace FluentStore.Views
                 PrimaryButtonText = "Close",
                 IsSecondaryButtonEnabled = false
             };
+            dialog.XamlRoot = Content.XamlRoot;
             await dialog.ShowAsync();
             return;
         }
