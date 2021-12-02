@@ -280,6 +280,8 @@ namespace FluentStore.SDK
 
     public enum PackageStatus
     {
+        Unknown,
+
         None,
 
         /// <summary>
@@ -308,7 +310,5 @@ namespace FluentStore.SDK
         /// The package has been successfully installed.
         /// </summary>
         Installed,
-
-        Unknown = 0xFFFF,
     }
 }

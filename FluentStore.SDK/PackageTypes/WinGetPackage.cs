@@ -58,6 +58,10 @@ namespace FluentStore.SDK.Packages
             {
                 Type = installer.InstallerType.Value.ToSDKInstallerType();
             }
+            else if (manifest.InstallerType.HasValue)
+            {
+                Type = manifest.InstallerType.Value.ToSDKInstallerType();
+            }
             else if (Enum.TryParse<Models.InstallerType>(Path.GetExtension(PackageUri.ToString())[1..], true, out var type))
             {
                 Type = type;
@@ -135,7 +139,7 @@ namespace FluentStore.SDK.Packages
         public override async Task<bool> InstallAsync()
         {
             // Make sure installer is downloaded
-            Guard.IsEqualTo((int)Status, (int)PackageStatus.Downloaded, nameof(Status));
+            Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
             bool isSuccess = false;
 
             // Get installer for current architecture
@@ -151,10 +155,9 @@ namespace FluentStore.SDK.Packages
                     $"This package supports {archStr}].");
             }
 
-            switch (Installer.InstallerType ?? Manifest.InstallerType)
+            switch (Type.Reduce())
             {
-                case WinGetRun.Enums.InstallerType.Appx:
-                case WinGetRun.Enums.InstallerType.Msix:
+                case Models.InstallerType.Msix:
                     isSuccess = await PackagedInstallerHelper.Install(this);
                     var file = (FileInfo)DownloadItem;
                     PackagedInstallerType = PackagedInstallerHelper.GetInstallerType(file);
@@ -162,7 +165,6 @@ namespace FluentStore.SDK.Packages
                     break;
 
                 default:
-                    // TODO: Use full trust component to start installer in slient mode
                     var args = Installer.Switches?.Silent ?? Manifest.Switches?.Silent;
                     await Win32Helper.Install(this, args);
                     break;

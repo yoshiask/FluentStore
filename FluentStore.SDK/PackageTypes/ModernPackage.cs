@@ -35,7 +35,7 @@ namespace FluentStore.SDK.Packages
         public override bool RequiresDownloadForCompatCheck => true;
         public override async Task<string> GetCannotBeInstalledReason()
         {
-            Status.IsAtLeast(PackageStatus.Downloaded);
+            Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
             return PackagedInstallerHelper.GetCannotBeInstalledReason(
                 (FileInfo)DownloadItem, Type.HasFlag(InstallerType.Bundle));
         }
@@ -57,7 +57,7 @@ namespace FluentStore.SDK.Packages
         public override async Task<bool> InstallAsync()
         {
             // Make sure installer is downloaded
-            Status.IsAtLeast(PackageStatus.Downloaded);
+            Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
 
             if (await PackagedInstallerHelper.Install(this))
             {
@@ -83,7 +83,7 @@ namespace FluentStore.SDK.Packages
         /// <returns>The file extension that corresponds with the determined <see cref="InstallerType"/>.</returns>
         public async Task<string> GetInstallerType()
         {
-            Status.IsAtLeast(PackageStatus.Downloaded);
+            Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
 
             if (Type == InstallerType.Unknown)
                 Type = PackagedInstallerHelper.GetInstallerType((FileInfo)DownloadItem);
@@ -92,7 +92,7 @@ namespace FluentStore.SDK.Packages
 
         public override async Task<ImageBase> CacheAppIcon()
         {
-            Status.IsAtLeast(PackageStatus.Downloaded);
+            Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
             return PackagedInstallerHelper.GetAppIcon(
                 (FileInfo)DownloadItem, Type.HasFlag(InstallerType.Bundle));
         }

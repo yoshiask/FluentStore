@@ -1,65 +1,45 @@
 ﻿using FluentStore.SDK.Images;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Newtonsoft.Json;
-using OwlCore.Extensions;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.Foundation.Collections;
-using Windows.Storage;
+using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.SDK.Messages;
 
 namespace FluentStore.SDK.Helpers
 {
     public static class Win32Helper
     {
-        public static async Task InvokeWin32ComponentAsync(string applicationPath, string arguments = null, bool runAsAdmin = false, string workingDirectory = null)
-        {
-            await InvokeWin32ComponentsAsync(applicationPath.IntoList(), arguments, runAsAdmin, workingDirectory);
-        }
-
-        public static async Task InvokeWin32ComponentsAsync(IEnumerable<string> applicationPaths, string arguments = null, bool runAsAdmin = false, string workingDirectory = null)
-        {
-            throw new NotImplementedException();
-            Debug.WriteLine("Launching EXE in FullTrustProcess");
-
-            object connection = null;
-            if (connection != null)
-            {
-                var value = new ValueSet()
-                {
-                    { "Arguments", "LaunchApp" },
-                    { "WorkingDirectory", workingDirectory },
-                    { "Application", applicationPaths.FirstOrDefault() },
-                    { "ApplicationList", JsonConvert.SerializeObject(applicationPaths) },
-                };
-
-                if (runAsAdmin)
-                {
-                    value.Add("Parameters", "runas");
-                }
-                else
-                {
-                    value.Add("Parameters", arguments);
-                }
-
-                //await connection.SendMessageAsync(value);
-            }
-        }
-
         /// <inheritdoc cref="PackageBase.InstallAsync"/>
         public static async Task<bool> Install(PackageBase package, string args = null)
         {
             try
             {
-                await InvokeWin32ComponentAsync(package.DownloadItem.FullName, args, true);
-                return true;
+                WeakReferenceMessenger.Default.Send(new PackageInstallStartedMessage(package));
+
+                // Create and run new process for installer
+                ProcessStartInfo startInfo = new()
+                {
+                    FileName = package.DownloadItem.FullName,
+                    Arguments = args,
+                    UseShellExecute = true,
+                };
+                var installProc = Process.Start(startInfo);
+                await installProc.WaitForExitAsync();
+
+                bool success = installProc.ExitCode == 0;
+                if (success)
+                    WeakReferenceMessenger.Default.Send(new PackageInstallCompletedMessage(package));
+                else
+                    WeakReferenceMessenger.Default.Send(new PackageInstallFailedMessage(package, new Exception(installProc.ExitCode.ToString())));
+                return success;
             }
             catch (Exception ex)
             {
+                WeakReferenceMessenger.Default.Send(new PackageInstallFailedMessage(package, ex));
                 var logger = Ioc.Default.GetRequiredService<Services.LoggerService>();
                 logger.UnhandledException(ex, "Exception from Win32 component");
                 return false;
