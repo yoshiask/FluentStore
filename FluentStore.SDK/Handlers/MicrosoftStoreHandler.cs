@@ -127,8 +127,8 @@ namespace FluentStore.SDK.Handlers
 
         public override Url GetUrlFromPackage(PackageBase package)
         {
-            if (!(package is MicrosoftStorePackage msPackage))
-                throw new System.ArgumentException();
+            if (package is not MicrosoftStorePackage msPackage)
+                throw new System.ArgumentException("Must be a " + nameof(MicrosoftStorePackage), nameof(package));
             return "https://www.microsoft.com/store/apps/" + msPackage.StoreId;
         }
     }

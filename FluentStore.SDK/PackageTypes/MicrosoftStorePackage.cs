@@ -15,9 +15,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.Storage;
 using Windows.System.Profile;
 using System.IO;
+using Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.PackageManifest;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace FluentStore.SDK.Packages
 {
@@ -199,6 +200,18 @@ namespace FluentStore.SDK.Packages
             PackageUri = packageInstance.PackageUri;
         }
 
+        public void Update(PackageManifestVersion manifest)
+        {
+            Guard.IsNotNull(manifest, nameof(manifest));
+            Manifest = manifest;
+            Version = manifest.PackageVersion;
+
+            var culture = System.Globalization.CultureInfo.CurrentCulture;
+            var installer = manifest.Installers.FirstOrDefault(i => i.InstallerLocale == culture.TwoLetterISOLanguageName && i.Markets.HasMarket(culture));
+            PackageUri = installer.InstallerUri;
+            Type = installer.InstallerType.ToInstallerType();
+        }
+
         private Urn _Urn;
         public override Urn Urn
         {
@@ -249,10 +262,14 @@ namespace FluentStore.SDK.Packages
                 return null;
 
             // Set the proper file type and extension
-            string extension = await GetInstallerType();
+            string filename;
+            if (!IsWinGet)
+                filename = PackageMoniker + await GetInstallerType();
+            else
+                filename = Path.GetFileName(PackageUri.ToString());
             FileInfo downloadFile = (FileInfo)DownloadItem;
-            if (extension != string.Empty)
-                downloadFile.Rename(PackageMoniker + extension);
+            if (filename != string.Empty)
+                downloadFile.Rename(filename);
 
             WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, downloadFile));
             DownloadItem = downloadFile;
@@ -261,22 +278,32 @@ namespace FluentStore.SDK.Packages
 
         private async Task<bool> PopulatePackageUri()
         {
-            PlatWindows? currentPlat = PlatWindowsStringConverter.Parse(AnalyticsInfo.VersionInfo.DeviceFamily);
+            PlatWindows currentPlat = PlatWindowsStringConverter.Parse(AnalyticsInfo.VersionInfo.DeviceFamily);
             var culture = System.Globalization.CultureInfo.CurrentUICulture;
 
-            var dcathandler = new StoreLib.Services.DisplayCatalogHandler(DCatEndpoint.Production, new StoreLib.Services.Locale(culture, true));
-            await dcathandler.QueryDCATAsync(StoreId);
-            IEnumerable<PackageInstance> packs = await dcathandler.GetMainPackagesForProductAsync();
+            if (!IsWinGet)
+            {
+                var dcathandler = new StoreLib.Services.DisplayCatalogHandler(DCatEndpoint.Production, new StoreLib.Services.Locale(culture, true));
+                await dcathandler.QueryDCATAsync(StoreId);
+                IEnumerable<PackageInstance> packs = await dcathandler.GetMainPackagesForProductAsync();
 
-            if (currentPlat.HasValue && currentPlat.Value != PlatWindows.Xbox)
-                packs = packs.Where(p => p.Version.Revision != 70);
-            List<PackageInstance> installables = packs.OrderByDescending(p => p.Version).ToList();
-            if (installables.Count < 1)
-                return false;
-            // TODO: Add addtional checks that might take longer that the user can enable 
-            // if they are having issues
+                if (currentPlat != PlatWindows.Xbox)
+                    packs = packs.Where(p => p.Version.Revision != 70);
+                List<PackageInstance> installables = packs.OrderByDescending(p => p.Version).ToList();
+                if (installables.Count < 1)
+                    return false;
 
-            Update(installables.First());
+                // TODO: Add addtional checks that might take longer that the user can enable 
+                // if they are having issues
+
+                Update(installables.First());
+            }
+            else
+            {
+                var StoreEdgeFDApi = Ioc.Default.GetRequiredService<Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.StoreEdgeFDApi>();
+                Update((await StoreEdgeFDApi.GetPackageManifest(StoreId)).Data.Versions[0]);
+            }
+
             Status = PackageStatus.DownloadReady;
             return true;
         }
@@ -470,6 +497,21 @@ namespace FluentStore.SDK.Packages
         {
             get => _PackageId;
             set => SetProperty(ref _PackageId, value);
+        }
+
+        public bool IsWinGet => StoreId.StartsWith("XP");
+
+        private PackageManifestVersion _Manifest;
+        /// <summary>
+        /// The manifest for this package.
+        /// </summary>
+        /// <remarks>
+        /// Only valid if this package is backed by WinGet.
+        /// </remarks>
+        public PackageManifestVersion Manifest
+        {
+            get => _Manifest;
+            set => SetProperty(ref _Manifest, value);
         }
     }
 }

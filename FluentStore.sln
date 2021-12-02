@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31729.503
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentStore", "FluentStore\FluentStore.csproj", "{207C9124-469A-45D7-8AB8-6C5FC2C0C1F3}"
 EndProject
@@ -37,7 +37,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chocolatey", "API\Choco\Cho
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Atom", "API\Atom\Atom.csproj", "{743B3512-B4C5-45A0-B36A-14F5DC117A91}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentStore.App", "FluentStore.App\FluentStore.App.csproj", "{2438D5E5-D7F9-4577-AA33-802B1828A359}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentStore.App", "FluentStore.App\FluentStore.App.csproj", "{2438D5E5-D7F9-4577-AA33-802B1828A359}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoreEdgeFD", "API\StoreEdgeFD\StoreEdgeFD.csproj", "{808CA196-0831-47C7-8E38-5F7807C9E705}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -370,6 +372,26 @@ Global
 		{2438D5E5-D7F9-4577-AA33-802B1828A359}.Release|x86.ActiveCfg = Release|x86
 		{2438D5E5-D7F9-4577-AA33-802B1828A359}.Release|x86.Build.0 = Release|x86
 		{2438D5E5-D7F9-4577-AA33-802B1828A359}.Release|x86.Deploy.0 = Release|x86
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Debug|ARM.Build.0 = Debug|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Debug|x64.Build.0 = Debug|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Debug|x86.Build.0 = Debug|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Release|Any CPU.Build.0 = Release|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Release|ARM.ActiveCfg = Release|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Release|ARM.Build.0 = Release|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Release|ARM64.Build.0 = Release|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Release|x64.ActiveCfg = Release|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Release|x64.Build.0 = Release|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Release|x86.ActiveCfg = Release|Any CPU
+		{808CA196-0831-47C7-8E38-5F7807C9E705}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -383,6 +405,7 @@ Global
 		{7EC2168E-494D-4710-A659-51C6F4BFE059} = {56C24CCE-3389-42E0-95F0-30B154BF421B}
 		{B231577F-FAC4-4F2C-ACBB-65EE63C45524} = {A6FEC513-6706-44AF-B200-D40836E32C19}
 		{743B3512-B4C5-45A0-B36A-14F5DC117A91} = {A6FEC513-6706-44AF-B200-D40836E32C19}
+		{808CA196-0831-47C7-8E38-5F7807C9E705} = {A6FEC513-6706-44AF-B200-D40836E32C19}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DAB9771E-34BB-4E5E-95EA-D7538346B7C4}

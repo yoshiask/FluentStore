@@ -5,7 +5,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Windows.Storage;
 using System.IO;
 
 namespace FluentStore.SDK
@@ -111,6 +110,13 @@ namespace FluentStore.SDK
                 OnDownloaded(value);
                 SetProperty(ref _DownloadItem, value);
             }
+        }
+
+        private InstallerType _Type;
+        public InstallerType Type
+        {
+            get => _Type;
+            set => SetProperty(ref _Type, value);
         }
 
         private string _Title;

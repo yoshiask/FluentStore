@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Windows.System;
-using WinGetRun.Enums;
 
 namespace FluentStore.SDK.Helpers
 {
@@ -24,19 +23,19 @@ namespace FluentStore.SDK.Helpers
             return (TOut)(object)dictionary[key];
         }
 
-        public static ProcessorArchitecture ToWinRTArch(this InstallerArchitecture wgArch)
+        public static ProcessorArchitecture ToWinRTArch(this WinGetRun.Enums.InstallerArchitecture wgArch)
         {
             switch (wgArch)
             {
-                case InstallerArchitecture.Neutral:
+                case WinGetRun.Enums.InstallerArchitecture.Neutral:
                     return ProcessorArchitecture.Neutral;
-                case InstallerArchitecture.X86:
+                case WinGetRun.Enums.InstallerArchitecture.X86:
                     return ProcessorArchitecture.X86;
-                case InstallerArchitecture.X64:
+                case WinGetRun.Enums.InstallerArchitecture.X64:
                     return ProcessorArchitecture.X64;
-                case InstallerArchitecture.Arm:
+                case WinGetRun.Enums.InstallerArchitecture.Arm:
                     return ProcessorArchitecture.Arm;
-                case InstallerArchitecture.Arm64:
+                case WinGetRun.Enums.InstallerArchitecture.Arm64:
                     if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 19041))
                         return ProcessorArchitecture.Arm64;
                     goto default;
@@ -44,6 +43,35 @@ namespace FluentStore.SDK.Helpers
                 default:
                     return ProcessorArchitecture.Unknown;
             }
+        }
+
+        public static Models.InstallerType ToInstallerType(this WinGetRun.Enums.InstallerType type)
+        {
+            return type switch
+            {
+                WinGetRun.Enums.InstallerType.Msix => Models.InstallerType.Msix,
+                WinGetRun.Enums.InstallerType.Msi => Models.InstallerType.Msi,
+                WinGetRun.Enums.InstallerType.Appx => Models.InstallerType.AppX,
+                WinGetRun.Enums.InstallerType.Exe => Models.InstallerType.Exe,
+                WinGetRun.Enums.InstallerType.Zip => Models.InstallerType.Zip,
+                WinGetRun.Enums.InstallerType.Inno => Models.InstallerType.Inno,
+                WinGetRun.Enums.InstallerType.Nullsoft => Models.InstallerType.Nullsoft,
+                WinGetRun.Enums.InstallerType.Wix => Models.InstallerType.Wix,
+                WinGetRun.Enums.InstallerType.Burn => Models.InstallerType.Burn,
+
+                WinGetRun.Enums.InstallerType.Pwa => Models.InstallerType.Unknown,
+                _ => Models.InstallerType.Unknown,
+            };
+        }
+
+        public static Models.InstallerType Reduce(this Models.InstallerType type)
+        {
+            if (type.HasFlag(Models.InstallerType.AppX) || type.HasFlag(Models.InstallerType.Msix))
+                return Models.InstallerType.AppX;
+            else if (type.HasFlag(Models.InstallerType.Win32))
+                return Models.InstallerType.Win32;
+            else
+                return Models.InstallerType.Unknown;
         }
 
         public static string GetExtension<TEnum>(this TEnum type) where TEnum : unmanaged, Enum

@@ -11,7 +11,7 @@ namespace FluentStore.SDK.Packages
 {
     /// <summary>
     /// Provides a default implementation of <see cref="PackageBase"/> that can be used
-    /// by packages that do not have accessible installers (i.e. <see cref="Handlers.UwpCommunityHandler"/>.
+    /// by packages that do not have accessible installers.
     /// </summary>
     public class GenericPackage<TModel> : PackageBase<TModel>
     {
