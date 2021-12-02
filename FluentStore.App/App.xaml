@@ -14,7 +14,7 @@
                 <ResourceDictionary Source="/Themes/CommonConverters.xaml"/>
                 <ResourceDictionary Source="/Themes/PackageDisplayTemplates.xaml"/>
                 <ResourceDictionary Source="/Themes/ImageBaseTemplates.xaml"/>
-                <!--<ResourceDictionary Source="/Themes/ToggleSwitchRightStyle.xaml"/>-->
+                <ResourceDictionary Source="/Themes/ToggleSwitchRightStyle.xaml"/>
 
                 <ResourceDictionary>
 
