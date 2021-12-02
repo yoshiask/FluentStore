@@ -4,7 +4,7 @@ namespace FluentStore.Services
 {
     public interface ISettingsService
     {
-        [DefaultSettingValue(Value = @"\s?(?i)(guide|manual|tutorial)(?-i)\s?")]
+        [DefaultSettingValue(Value = @"(?i)(guide|manual|tutorial)(?-i)")]
         public string ExclusionFilter { get; set; }
 
         [DefaultSettingValue(Value = true)]
