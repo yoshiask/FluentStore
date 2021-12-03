@@ -103,7 +103,8 @@ namespace FluentStore.Views
                 }
                 catch (Exception ex)
                 {
-                    // TODO: Log exception
+                    var logger = Ioc.Default.GetRequiredService<LoggerService>();
+                    logger.UnhandledException(ex, "Exception from Win32 component");
                 }
                 if (canLaunch)
                     UpdateInstallButtonToLaunch();
