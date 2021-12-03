@@ -3,23 +3,10 @@ using CommunityToolkit.WinUI.Notifications;
 using FluentStore.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Microsoft.UI.Xaml.Shapes;
+using Microsoft.Windows.AppLifecycle;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Notifications;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -78,8 +65,22 @@ namespace FluentStore
             {
                 Title = "Fluent Store"
             };
-            //ExtendIntoTitlebar();
-            Window.Activate();
+
+            var NavService = Ioc.Default.GetService<INavigationService>() as NavigationService;
+            (Type page, object parameter) destination = (typeof(Views.HomeView), null);
+            try
+            {
+                var activatedArgs = AppInstance.GetCurrent().GetActivatedEventArgs().Data;
+                if (activatedArgs is IProtocolActivatedEventArgs ptclArgs)
+                {
+                    destination = NavService.ParseProtocol(ptclArgs.Uri);
+                }
+            }
+            finally
+            {
+                NavService.Navigate(destination.page, destination.parameter);
+                Window.Activate();
+            }
         }
 
         private static void OnUnhandledException(Exception ex)

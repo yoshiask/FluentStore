@@ -116,7 +116,7 @@ namespace FluentStore.SDK.Handlers
 
         public override async Task<PackageBase> GetPackageFromUrl(Url url)
         {
-            Regex rx = new(@"^https?:\/\/(?:www\.)?microsoft\.com\/(?:(?<locale>[a-z]{2}-[a-z]{2})\/)?(?:store\/apps|(?:p|store\/r)(?:\/.+)?)\/(?<id>\w{12})",
+            Regex rx = new(@"^https?:\/\/(?:www\.)?microsoft\.com\/(?:(?<locale>[a-z]{2}-[a-z]{2})\/)?(?:store\/(?:apps|productId)|(?:p|store\/r)(?:\/.+)?)\/(?<id>\w{12})",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
             Match m = rx.Match(url.ToString());
             if (!m.Success)

@@ -59,11 +59,11 @@ namespace FluentStore.Services
 
         public abstract Type ResolveType(string viewName);
 
-        public Tuple<Type, object> ParseProtocol(Url ptcl)
+        public (Type page, object parameter) ParseProtocol(Url ptcl)
         {
             Type destination = ResolveType("HomeView");
             object parameter = null;
-            var defaultResult = new Tuple<Type, object>(destination, null);
+            (Type page, object parameter) defaultResult = (destination, null);
 
             if (ptcl == null || string.IsNullOrWhiteSpace(ptcl.Path))
                 return defaultResult;
@@ -107,7 +107,7 @@ namespace FluentStore.Services
                 return defaultResult;
             }
 
-            return new Tuple<Type, object>(destination, parameter);
+            return (destination, parameter);
         }
     }
 
