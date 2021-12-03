@@ -316,7 +316,7 @@ namespace FluentStore.Views
         {
             InstallButton.IsEnabled = false;
 
-            RegisterPackageServiceMessages();
+            var progressToast = RegisterPackageServiceMessages();
             WeakReferenceMessenger.Default.Unregister<PackageDownloadCompletedMessage>(this);
             WeakReferenceMessenger.Default.Register<PackageDownloadCompletedMessage>(this, async (r, m) =>
             {
@@ -356,8 +356,10 @@ namespace FluentStore.Views
                     };
                 }
                 savePicker.FileTypeChoices.Add(extDesc, new string[] { file.Extension });
-
                 savePicker.SuggestedFileName = file.Name;
+
+                _ = DispatcherQueue.TryEnqueue(() => PackageHelper.HandlePackageDownloadCompletedToast(m, progressToast));
+
                 var userFile = await savePicker.PickSaveFileAsync();
                 if (userFile != null)
                 {

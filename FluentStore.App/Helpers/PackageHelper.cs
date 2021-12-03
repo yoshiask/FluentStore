@@ -58,7 +58,7 @@ namespace FluentStore.Helpers
                 //        }
                 //    }
                 //},
-                Launch = $"action=viewDownload&packageUrn={package.Urn}",
+                Launch = $"package/{package.Urn}",
             };
 
             var notif = new ToastNotification(content.GetXml());
@@ -71,10 +71,10 @@ namespace FluentStore.Helpers
             return notif;
         }
 
-        public static ToastNotification GenerateDownloadSuccessToast(PackageBase package, StorageFile file)
+        public static ToastNotification GenerateDownloadSuccessToast(PackageBase package)
         {
             var builder = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
-                .AddToastActivationInfo($"action=viewEvent&packageUrn={package.Urn}&installerPath={file.Path}", ToastActivationType.Foreground)
+                .AddToastActivationInfo($"package/{package.Urn}", ToastActivationType.Foreground)
                 .AddText(package.Title)
                 .AddText(package.Title + " is ready to install");
 
@@ -87,7 +87,7 @@ namespace FluentStore.Helpers
         public static ToastNotification GenerateDownloadFailureToast(PackageBase package)
         {
             var builder = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
-                .AddToastActivationInfo($"action=viewEvent&packageUrn={package.Urn}", ToastActivationType.Foreground)
+                .AddToastActivationInfo($"package/{package.Urn}", ToastActivationType.Foreground)
                 .AddText(package.Title)
                 .AddText("Failed to download, please try again later");
 
@@ -100,7 +100,7 @@ namespace FluentStore.Helpers
         public static ToastNotification GenerateInstallSuccessToast(PackageBase package)
         {
             var builder = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
-                .AddToastActivationInfo($"action=viewEvent&packageUrn={package.Urn}", ToastActivationType.Foreground)
+                .AddToastActivationInfo($"package/{package.Urn}", ToastActivationType.Foreground)
                 .AddText(package.ShortTitle)
                 .AddText(package.Title + " just got installed.");
 
@@ -147,6 +147,14 @@ namespace FluentStore.Helpers
             ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
             // Show the final notification
             ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateDownloadFailureToast(m.Package));
+        }
+
+        public static void HandlePackageDownloadCompletedToast(PackageDownloadCompletedMessage m, ToastNotification progressToast)
+        {
+            // Hide progress notification
+            ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
+            // Show the final notification
+            ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateDownloadSuccessToast(m.Package));
         }
 
         public static void HandlePackageInstallProgressToast(PackageInstallProgressMessage m, ToastNotification progressToast)
