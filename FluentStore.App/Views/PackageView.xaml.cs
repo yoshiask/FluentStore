@@ -275,7 +275,6 @@ namespace FluentStore.Views
                 if (ViewModel.Package.Status.IsAtLeast(PackageStatus.Downloaded))
                 {
                     bool installed = await ViewModel.Package.InstallAsync();
-                    InstallButton.IsEnabled = true;
                     if (installed)
                     {
                         // Show success
@@ -307,6 +306,7 @@ namespace FluentStore.Views
             finally
             {
                 flyout?.ShowAt(InstallButton);
+                InstallButton.IsEnabled = true;
                 VisualStateManager.GoToState(this, "NoAction", true);
                 WeakReferenceMessenger.Default.UnregisterAll(this);
             }
@@ -373,7 +373,6 @@ namespace FluentStore.Views
             {
                 var storageItem = await ViewModel.Package.DownloadPackageAsync();
                 bool downloaded = storageItem != null;
-                InstallButton.IsEnabled = true;
                 if (downloaded)
                 {
                     // Show success
@@ -403,8 +402,8 @@ namespace FluentStore.Views
             }
             finally
             {
-                if (flyout != null)
-                    flyout.ShowAt(InstallButton);
+                flyout?.ShowAt(InstallButton);
+                InstallButton.IsEnabled = true;
                 VisualStateManager.GoToState(this, "NoAction", true);
                 WeakReferenceMessenger.Default.UnregisterAll(this);
             }
