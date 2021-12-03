@@ -53,20 +53,22 @@ namespace FluentStore.ViewModels
                 }
 
 #if DEBUG
-                // Add fake MS Store package for Fluent Store
-                MicrosoftStorePackage fakeFSPackage = new()
+                try
                 {
-                    Categories = { "Utilities & tools" },
-                    Description = "A unifying frontend for Windows app stores and package managers.",
-                    DeveloperName = "Joshua \"Yoshi\" Askharoun",
-                    DisplayPrice = "Free",
-                    Features =
+                    // Add fake MS Store package for Fluent Store
+                    MicrosoftStorePackage fakeFSPackage = new()
+                    {
+                        Categories = { "Utilities & tools" },
+                        Description = "A unifying frontend for Windows app stores and package managers.",
+                        DeveloperName = "Joshua \"Yoshi\" Askharoun",
+                        DisplayPrice = "Free",
+                        Features =
                     {
                         "Download MS Store apps without installing them",
                         "Create collections of apps to sync across devices and batch install",
                         "Discover and install apps from multiple sources, including WinGet and the Microsoft Store"
                     },
-                    Images =
+                        Images =
                     {
                         new SDK.Images.MicrosoftStoreImage
                         {
@@ -97,21 +99,38 @@ namespace FluentStore.ViewModels
                             ImagePositionInfo = "Desktop/2"
                         },
                     },
-                    PackageFamilyName = "52374YoshiAskharoun.FluentStore_bcem08bwhrc72",
-                    PublisherDisplayName = "YoshiAsk",
-                    ReleaseDate = new System.DateTimeOffset(new System.DateTime(2021, 9, 1, 13, 0, 0)),
-                    StoreId = "123456789123",
-                    Title = "Fluent Store",
-                    Urn = Urn.Parse("urn:microsoft-store:123456789123"),
-                    Website = "https://github.com/yoshiask/FluentStore",
-                    PackageUri = new("https://github.com/yoshiask/FluentStore/releases/download/v0.1.2-beta/FluentStoreBeta_0.1.2.0.exe"),
-                    Version = "0.1.2-beta"
-                };
-                CarouselItems.Add(new PackageViewModel(fakeFSPackage));
+                        ReleaseDate = new System.DateTimeOffset(new System.DateTime(2021, 9, 1, 13, 0, 0)),
+                        StoreId = "123456789123",
+                        Title = "Fluent Store",
+                        Urn = Urn.Parse("urn:microsoft-store:123456789123"),
+                        Website = "https://github.com/yoshiask/FluentStore",
+                        PackageUri = new("https://github.com/yoshiask/FluentStore/releases/download/v0.1.2-beta/FluentStoreBeta_0.1.2.0.exe"),
+                        Version = "0.1.2-beta"
+                    };
+                    var _fakeFSPackage = (ModernPackage<Microsoft.Marketplace.Storefront.Contracts.V3.ProductDetails>)fakeFSPackage.InternalPackage;
+                    _fakeFSPackage.PackageFamilyName = "52374YoshiAskharoun.FluentStore_bcem08bwhrc72";
+                    _fakeFSPackage.PublisherDisplayName = "YoshiAsk";
+                    fakeFSPackage.CopyProperties(ref _fakeFSPackage);
+                    fakeFSPackage.InternalPackage = _fakeFSPackage;
+                    CarouselItems.Add(new PackageViewModel(fakeFSPackage));
+                }
+                catch (System.Exception ex)
+                {
+                    var logger = Ioc.Default.GetRequiredService<LoggerService>();
+                    logger.Warn(ex, "Error loading fake MS Store package for Fluent Store");
+                }
 
-                // Add Launch 2021
-                var launch2021Package = await PackageService.GetPackageAsync(Urn.Parse($"urn:{SDK.Handlers.UwpCommunityHandler.NAMESPACE_LAUNCH}:2021"));
-                CarouselItems.Add(new PackageViewModel(launch2021Package));
+                try
+                {
+                    // Add Launch 2021
+                    var launch2021Package = await PackageService.GetPackageAsync(Urn.Parse($"urn:{SDK.Handlers.UwpCommunityHandler.NAMESPACE_LAUNCH}:2021"));
+                    CarouselItems.Add(new PackageViewModel(launch2021Package));
+                }
+                catch (System.Exception ex)
+                {
+                    var logger = Ioc.Default.GetRequiredService<LoggerService>();
+                    logger.Warn(ex, "Error loading Launch 2021 package");
+                }
 #endif
 
                 // Load featured packages from other sources
@@ -121,6 +140,11 @@ namespace FluentStore.ViewModels
             catch (Flurl.Http.FlurlHttpException ex)
             {
                 NavService.ShowHttpErrorPage(ex);
+            }
+            catch (System.Exception ex)
+            {
+                var logger = Ioc.Default.GetRequiredService<LoggerService>();
+                logger.Warn(ex, ex.Message);
             }
 
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
@@ -156,7 +180,6 @@ namespace FluentStore.ViewModels
             get => _SelectedCarouselItem;
             set => SetProperty(ref _SelectedCarouselItem, value);
         }
-
 
         private ObservableCollection<HandlerPackageListPair> _FeaturedPackages;
         public ObservableCollection<HandlerPackageListPair> FeaturedPackages

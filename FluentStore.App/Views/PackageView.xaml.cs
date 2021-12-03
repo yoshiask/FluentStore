@@ -255,16 +255,7 @@ namespace FluentStore.Views
         {
             InstallButton.IsEnabled = false;
 
-            var progressToast = RegisterPackageServiceMessages();
-            WeakReferenceMessenger.Default.Unregister<PackageInstallCompletedMessage>(this);
-            WeakReferenceMessenger.Default.Register<PackageInstallCompletedMessage>(this, async (r, m) =>
-            {
-                if (await m.Package.CanLaunchAsync())
-                    UpdateInstallButtonToLaunch();
-                VisualStateManager.GoToState(this, "NoAction", true);
-
-                PackageHelper.HandlePackageInstallCompletedToast(m, progressToast);
-            });
+            RegisterPackageServiceMessages();
             VisualStateManager.GoToState(this, "Progress", true);
 
             Flyout flyout = null;
@@ -277,6 +268,8 @@ namespace FluentStore.Views
                     bool installed = await ViewModel.Package.InstallAsync();
                     if (installed)
                     {
+                        if (await ViewModel.Package.CanLaunchAsync())
+                            UpdateInstallButtonToLaunch();
                         // Show success
                         flyout = new Flyout
                         {

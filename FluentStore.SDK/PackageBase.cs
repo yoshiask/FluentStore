@@ -14,29 +14,29 @@ namespace FluentStore.SDK
         public PackageBase() { }
 
         /// <summary>
-        /// Copies the properties of the supplied <see cref="PackageBase"/> to a new instance.
+        /// Copies the properties this <see cref="PackageBase"/> to the supplied instance.
         /// </summary>
-        public static TPackage Copy<TPackage>(TPackage other) where TPackage : PackageBase, new()
+        public void CopyProperties<TPackage>(ref TPackage other, bool copyStatus = false) where TPackage : PackageBase
         {
-            return new TPackage
-            {
-                Urn = other.Urn,
-                Model = other.Model,
-                Status = other.Status,
-                DownloadItem = other.DownloadItem,
-                Title = other.Title,
-                PublisherId = other.PublisherId,
-                DeveloperName = other.DeveloperName,
-                ReleaseDate = other.ReleaseDate,
-                Description = other.Description,
-                Version = other.Version,
-                ReviewSummary = other.ReviewSummary,
-                Price = other.Price,
-                DisplayPrice = other.DisplayPrice,
-                ShortTitle = other.ShortTitle,
-                Website = other.Website,
-                Images = other.Images,
-            };
+            other.Urn = Urn;
+            other.Model = Model;
+            other.DownloadItem = DownloadItem;
+            other.PackageUri = PackageUri;
+            other.Title = Title;
+            other.PublisherId = PublisherId;
+            other.DeveloperName = DeveloperName;
+            other.ReleaseDate = ReleaseDate;
+            other.Description = Description;
+            other.Version = Version;
+            other.ReviewSummary = ReviewSummary;
+            other.Price = Price;
+            other.DisplayPrice = DisplayPrice;
+            other.ShortTitle = ShortTitle;
+            other.Website = Website;
+            other.Images = Images;
+
+            if (copyStatus)
+                other.Status = Status;
         }
 
         /// <summary>
@@ -74,8 +74,6 @@ namespace FluentStore.SDK
 
         public abstract Task LaunchAsync();
 
-        public virtual void OnDownloaded(FileSystemInfo item) { }
-
         public virtual bool Equals(PackageBase other) => this.Urn.Equals(other.Urn);
 
         public override bool Equals(object obj) => obj is PackageBase other ? this.Equals(other) : false;
@@ -105,11 +103,7 @@ namespace FluentStore.SDK
         public FileSystemInfo DownloadItem
         {
             get => _DownloadItem;
-            set
-            {
-                OnDownloaded(value);
-                SetProperty(ref _DownloadItem, value);
-            }
+            set => SetProperty(ref _DownloadItem, value);
         }
 
         private InstallerType _Type;
@@ -117,6 +111,13 @@ namespace FluentStore.SDK
         {
             get => _Type;
             set => SetProperty(ref _Type, value);
+        }
+
+        private Uri _PackageUri;
+        public Uri PackageUri
+        {
+            get => _PackageUri;
+            set => SetProperty(ref _PackageUri, value);
         }
 
         private string _Title;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 
 namespace Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.PackageManifest
 {
@@ -13,6 +14,7 @@ namespace Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.Pa
         public WinGetRun.Enums.InstallerType InstallerType { get; set; }
         public Markets Markets { get; set; }
 
+        [JsonIgnore]
         public Uri? InstallerUri
         {
             get
@@ -26,6 +28,20 @@ namespace Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.Pa
                     return null;
                 }
             }
+        }
+
+        public WinGetRun.Models.Installer ToWinGetRunInstaller()
+        {
+            return new()
+            {
+                Arch = Architecture,
+                InstallerType = InstallerType,
+                Language = InstallerLocale,
+                Sha256 = InstallerSha256,
+                SignatureSha256 = InstallerSha256,
+                Switches = InstallerSwitches,
+                Url = InstallerUrl,
+            };
         }
     }
 

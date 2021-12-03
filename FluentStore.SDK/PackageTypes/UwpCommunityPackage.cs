@@ -58,7 +58,8 @@ namespace FluentStore.SDK.Packages
 
             // Set UWPC properties
             ProjectId = (int)project.id;
-            DownloadLink = project.downloadLink;
+            if (project.downloadLink != null)
+                PackageUri = new(project.downloadLink);
         }
 
         public void UpdateWithImages(IEnumerable<string> images)
@@ -106,7 +107,7 @@ namespace FluentStore.SDK.Packages
 
         public override async Task<FileSystemInfo> DownloadPackageAsync(DirectoryInfo folder = null)
         {
-            LinkedPackage = await PackageService.GetPackageFromUrlAsync(DownloadLink);
+            LinkedPackage = await PackageService.GetPackageFromUrlAsync(PackageUri);
             if (LinkedPackage != null)
             {
                 DownloadItem = await LinkedPackage.DownloadPackageAsync(folder);
@@ -115,7 +116,7 @@ namespace FluentStore.SDK.Packages
             }
             else
             {
-                Status = await NavigationService.OpenInBrowser(DownloadLink)
+                Status = await NavigationService.OpenInBrowser(PackageUri)
                     ? PackageStatus.Downloaded : PackageStatus.DownloadReady;
                 return null;
             }
@@ -156,13 +157,6 @@ namespace FluentStore.SDK.Packages
         {
             get => _ProjectId;
             set => SetProperty(ref _ProjectId, value);
-        }
-
-        private Url _DownloadLink;
-        public Url DownloadLink
-        {
-            get => _DownloadLink;
-            set => SetProperty(ref _DownloadLink, value);
         }
 
         private PackageBase _LinkedPackage;

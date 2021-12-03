@@ -144,7 +144,7 @@ namespace FluentStore.Helpers
         public static void HandlePackageDownloadFailedToast(PackageDownloadFailedMessage m, ToastNotification progressToast)
         {
             // Hide progress notification
-            ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
+            Hide(progressToast);
             // Show the final notification
             ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateDownloadFailureToast(m.Package));
         }
@@ -152,7 +152,7 @@ namespace FluentStore.Helpers
         public static void HandlePackageDownloadCompletedToast(PackageDownloadCompletedMessage m, ToastNotification progressToast)
         {
             // Hide progress notification
-            ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
+            Hide(progressToast);
             // Show the final notification
             ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateDownloadSuccessToast(m.Package));
         }
@@ -172,7 +172,7 @@ namespace FluentStore.Helpers
         public static void HandlePackageInstallFailedToast(PackageInstallFailedMessage m, ToastNotification progressToast)
         {
             // Hide progress notification
-            ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
+            Hide(progressToast);
             // Show the final notification
             ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateInstallFailureToast(m.Package, m.Exception));
         }
@@ -180,9 +180,18 @@ namespace FluentStore.Helpers
         public static void HandlePackageInstallCompletedToast(PackageInstallCompletedMessage m, ToastNotification progressToast)
         {
             // Hide progress notification
-            ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(progressToast);
+            Hide(progressToast);
             // Show the final notification
             ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateInstallSuccessToast(m.Package));
+        }
+
+        private static void Hide(ToastNotification toast)
+        {
+            try
+            {
+                ToastNotificationManager.GetDefault().CreateToastNotifier().Hide(toast);
+            }
+            catch { }
         }
 
         public static string GetNotificationTag(Urn urn)

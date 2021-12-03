@@ -19,7 +19,7 @@ namespace FluentStore.SDK.Packages
 {
     public class WinGetPackage : PackageBase<Package>
     {
-        private readonly WinGetApi WinGetApi = Ioc.Default.GetRequiredService<WinGetApi>();
+        private readonly WinGetApi WinGetApi = Ioc.Default.GetService<WinGetApi>();
 
         public WinGetPackage(Package pack = null)
         {
@@ -104,7 +104,8 @@ namespace FluentStore.SDK.Packages
 
         private async Task<bool> PopulatePackageUri()
         {
-            Update(await WinGetApi.GetManifest(Urn.GetContent<NamespaceSpecificString>().UnEscapedValue, Version));
+            if (PackageUri == null)
+                Update(await WinGetApi.GetManifest(Urn.GetContent<NamespaceSpecificString>().UnEscapedValue, Version));
 
             Status = PackageStatus.DownloadReady;
             return true;
@@ -112,7 +113,7 @@ namespace FluentStore.SDK.Packages
 
         public override async Task<ImageBase> CacheAppIcon()
         {
-            if (Model.IconUrl != null)
+            if (Model?.IconUrl != null)
             {
                 return new FileImage
                 {
@@ -122,7 +123,7 @@ namespace FluentStore.SDK.Packages
             }
             else
             {
-                return TextImage.CreateFromName(Model.Latest.Name);
+                return TextImage.CreateFromName(Model?.Latest?.Name ?? Title);
             }
         }
 
@@ -166,7 +167,7 @@ namespace FluentStore.SDK.Packages
 
                 default:
                     var args = Installer.Switches?.Silent ?? Manifest.Switches?.Silent;
-                    await Win32Helper.Install(this, args);
+                    isSuccess = await Win32Helper.Install(this, args);
                     break;
             }
 
@@ -210,13 +211,6 @@ namespace FluentStore.SDK.Packages
             set => SetProperty(ref _PackagedInstallerType, value);
         }
         public bool HasPackagedInstallerType => PackagedInstallerType == null;
-
-        private Uri _PackageUri;
-        public Uri PackageUri
-        {
-            get => _PackageUri;
-            set => SetProperty(ref _PackageUri, value);
-        }
 
         private string _PackageId;
         public string PackageId

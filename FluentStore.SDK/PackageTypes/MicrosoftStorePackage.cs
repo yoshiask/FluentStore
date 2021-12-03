@@ -19,10 +19,11 @@ using Windows.System.Profile;
 using System.IO;
 using Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.PackageManifest;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 
 namespace FluentStore.SDK.Packages
 {
-    public class MicrosoftStorePackage : ModernPackage<ProductDetails>
+    public class MicrosoftStorePackage : PackageBase<ProductDetails>
     {
         public MicrosoftStorePackage(CardModel card = null, ProductSummary summary = null, ProductDetails product = null)
         {
@@ -56,16 +57,22 @@ namespace FluentStore.SDK.Packages
             DisplayPrice = card.DisplayPrice;
             StoreId = card.ProductId;
 
-            // Set modern package properties
-            PackageFamilyName = card.PackageFamilyNames?[0];
-
             // Set MS Store package properties
-            PackageId = PackageFamilyName ?? StoreId;  // Unpackaged apps don't have PackageFamilyName
             Categories = card.Categories;
             Images.Clear();
             if (card.Images != null)
                 foreach (ImageItem img in card.Images)
                     Images.Add(new MicrosoftStoreImage(img));
+
+            PackageBase internalPackage = InternalPackage;
+            if (!IsWinGet)
+            {
+                var package = (ModernPackage<ProductDetails>)internalPackage;
+                package.PackageFamilyName = card.PackageFamilyNames?[0];
+                internalPackage = package;
+            }
+            CopyProperties(ref internalPackage);
+            InternalPackage = internalPackage;
         }
 
         public void Update(ProductSummary summary)
@@ -118,12 +125,7 @@ namespace FluentStore.SDK.Packages
             Website = product.AppWebsiteUrl;
             StoreId = product.ProductId;
 
-            // Set modern package properties
-            PackageFamilyName = product.PackageFamilyNames?[0];
-            PublisherDisplayName = product.PublisherName;
-
             // Set MS Store package properties
-            PackageId = product.PackageFamilyNames?[0] ?? StoreId;  // Unpackaged apps don't have PackageFamilyName
             Notes = product.Notes;
             Features = product.Features;
             Categories = product.Categories;
@@ -141,6 +143,17 @@ namespace FluentStore.SDK.Packages
             if (product.Images != null)
                 foreach (ImageItem img in product.Images)
                     Images.Add(new MicrosoftStoreImage(img));
+
+            PackageBase internalPackage = InternalPackage;
+            if (!IsWinGet)
+            {
+                var package = (ModernPackage<ProductDetails>)internalPackage;
+                package.PackageFamilyName = product.PackageFamilyNames?[0];
+                package.PublisherDisplayName = product.PublisherName;
+                internalPackage = package;
+            }
+            CopyProperties(ref internalPackage);
+            InternalPackage = internalPackage;
         }
         
         public void Update(RatingSummary ratingSummary)
@@ -198,6 +211,10 @@ namespace FluentStore.SDK.Packages
             Version = packageInstance.Version.ToString();
             PackageMoniker = packageInstance.PackageMoniker;
             PackageUri = packageInstance.PackageUri;
+
+            PackageBase internalPackage = InternalPackage;
+            CopyProperties(ref internalPackage);
+            InternalPackage = internalPackage;
         }
 
         public void Update(PackageManifestVersion manifest)
@@ -210,6 +227,12 @@ namespace FluentStore.SDK.Packages
             var installer = manifest.Installers.FirstOrDefault(i => i.InstallerLocale == culture.TwoLetterISOLanguageName && i.Markets.HasMarket(culture));
             PackageUri = installer.InstallerUri;
             Type = installer.InstallerType.ToSDKInstallerType();
+
+            PackageBase internalPackage = InternalPackage;
+            if (IsWinGet)
+                ((WinGetPackage)InternalPackage).Update(manifest.ToWinGetRunManifest(installer));
+            CopyProperties(ref internalPackage);
+            InternalPackage = internalPackage;
         }
 
         private Urn _Urn;
@@ -255,19 +278,20 @@ namespace FluentStore.SDK.Packages
             WeakReferenceMessenger.Default.Send(new PackageFetchCompletedMessage(this));
 
             // Download package
-            await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
+            DownloadItem = await InternalPackage.DownloadPackageAsync(folder);
+            Status = InternalPackage.Status;
 
             // Check for success
             if (Status.IsLessThan(PackageStatus.Downloaded))
                 return null;
 
             // Set the proper file type and extension
+            FileInfo downloadFile = (FileInfo)DownloadItem;
             string filename;
             if (!IsWinGet)
-                filename = PackageMoniker + await GetInstallerType();
+                filename = PackageMoniker + ((ModernPackage<ProductDetails>)InternalPackage).GetInstallerType();
             else
                 filename = Path.GetFileName(PackageUri.ToString());
-            FileInfo downloadFile = (FileInfo)DownloadItem;
             if (filename != string.Empty)
                 downloadFile.Rename(filename);
 
@@ -365,6 +389,26 @@ namespace FluentStore.SDK.Packages
             }
 
             return sorted;
+        }
+
+        public override async Task<bool> InstallAsync()
+        {
+            if (InternalPackage != null)
+                return await InternalPackage.InstallAsync();
+            return false;
+        }
+
+        public override async Task<bool> CanLaunchAsync()
+        {
+            if (InternalPackage != null)
+                return await InternalPackage.CanLaunchAsync();
+            return false;
+        }
+
+        public override async Task LaunchAsync()
+        {
+            if (InternalPackage != null)
+                await InternalPackage.InstallAsync();
         }
 
         private List<string> _Notes = new();
@@ -468,13 +512,6 @@ namespace FluentStore.SDK.Packages
             set => SetProperty(ref _WarningMessages, value);
         }
 
-        private Uri _PackageUri;
-        public Uri PackageUri
-        {
-            get => _PackageUri;
-            set => SetProperty(ref _PackageUri, value);
-        }
-
         private string _PackageMoniker;
         public string PackageMoniker
         {
@@ -487,16 +524,6 @@ namespace FluentStore.SDK.Packages
         {
             get => _StoreId;
             set => SetProperty(ref _StoreId, value);
-        }
-
-        private string _PackageId;
-        /// <summary>
-        /// The PackageFamilyName for packaged apps, <see cref="StoreId"/> for unpackaged apps.
-        /// </summary>
-        public string PackageId
-        {
-            get => _PackageId;
-            set => SetProperty(ref _PackageId, value);
         }
 
         public bool IsWinGet => StoreId.StartsWith("XP");
@@ -512,6 +539,27 @@ namespace FluentStore.SDK.Packages
         {
             get => _Manifest;
             set => SetProperty(ref _Manifest, value);
+        }
+
+        private PackageBase _InternalPackage;
+        /// <summary>
+        /// The actual package type. Currently, packaged apps are <see cref="ModernPackage{ProductDetails}"/>
+        /// and WinGet-backed apps are <see cref="WinGetPackage"/>.
+        /// </summary>
+        public PackageBase InternalPackage
+        {
+            get
+            {
+                if (_InternalPackage == null)
+                {
+                    if (IsWinGet)
+                        _InternalPackage = new WinGetPackage();
+                    else
+                        _InternalPackage = new ModernPackage<ProductDetails>();
+                }
+                return _InternalPackage;
+            }
+            set => SetProperty(ref _InternalPackage, value);
         }
     }
 }
