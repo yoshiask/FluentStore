@@ -245,7 +245,7 @@ namespace FluentStore.ViewModels
                             continue;
 
                         object value = prop.GetValue(Package);
-                        if (value == null || (value is System.Collections.IList list && list.Count == 0)))
+                        if (value == null || (value is System.Collections.IList list && list.Count == 0))
                             continue;
 
                         var info = new DisplayAdditionalInformationInfo(displayAttr, value);
