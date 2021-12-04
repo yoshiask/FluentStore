@@ -408,7 +408,7 @@ namespace FluentStore.SDK.Packages
         public override async Task LaunchAsync()
         {
             if (InternalPackage != null)
-                await InternalPackage.InstallAsync();
+                await InternalPackage.LaunchAsync();
         }
 
         private List<string> _Notes = new();
