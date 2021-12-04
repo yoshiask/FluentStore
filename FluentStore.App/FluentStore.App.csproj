@@ -9,7 +9,8 @@
         <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
         <PublishProfile>win10-$(Platform).pubxml</PublishProfile>
         <UseWinUI>true</UseWinUI>
-		
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
         <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
         <PackageCertificateThumbprint>BF1139D4B9FE20C0A714FA3158740136F5836C37</PackageCertificateThumbprint>
         <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
@@ -34,11 +35,11 @@
         <Content Include="Assets\LockScreenLogo.scale-200.png" />
         <Content Include="Assets\Square150x150Logo.scale-200.png" />
         <Content Include="Assets\Square44x44Logo.scale-200.png" />
-		<Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+        <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
         <Content Include="Assets\Wide310x150Logo.scale-200.png" />
-		<None Include="Assets\AppIcon.ico">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
+        <None Include="Assets\AppIcon.ico">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
@@ -53,6 +54,7 @@
         <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="2.0.8" />
         <PackageReference Include="PInvoke.User32" Version="0.7.104" />
         <PackageReference Include="OwlCore" Version="0.0.37" />
+        <PackageReference Include="Vanara.PInvoke.DwmApi" Version="3.3.14" />
         
         <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj" />
         <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
