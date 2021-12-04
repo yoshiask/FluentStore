@@ -129,7 +129,7 @@ namespace FluentStore.SDK.Packages
             Notes = product.Notes;
             Features = product.Features;
             Categories = product.Categories;
-            PrivacyUrl = product.PrivacyUrl;
+            PrivacyUri = product.PrivacyUri;
             Platforms = product.Platforms;
             if (product.SupportUris != null)
                 foreach (SupportUri uri in product.SupportUris)
@@ -289,7 +289,7 @@ namespace FluentStore.SDK.Packages
             FileInfo downloadFile = (FileInfo)DownloadItem;
             string filename;
             if (!IsWinGet)
-                filename = PackageMoniker + ((ModernPackage<ProductDetails>)InternalPackage).GetInstallerType();
+                filename = PackageMoniker + await ((ModernPackage<ProductDetails>)InternalPackage).GetInstallerType();
             else
                 filename = Path.GetFileName(PackageUri.ToString());
             if (filename != string.Empty)
@@ -351,7 +351,10 @@ namespace FluentStore.SDK.Packages
             icons = Images;
 
         done:
-            return icons.OrderByDescending(i => i.Width).First();
+            var icon = icons.OrderByDescending(i => i.Width).First();
+            if (InternalPackage != null)
+                InternalPackage.AppIconCache = icon;
+            return icon;
         }
 
         public override async Task<ImageBase> CacheHeroImage()
@@ -367,7 +370,10 @@ namespace FluentStore.SDK.Packages
                 }
             }
 
-            return img ?? (await GetScreenshots()).FirstOrDefault() ?? null;
+            img ??= (await GetScreenshots()).FirstOrDefault();
+            if (InternalPackage != null)
+                InternalPackage.HeroImageCache = img;
+            return img;
         }
 
         public override async Task<List<ImageBase>> CacheScreenshots()
@@ -388,6 +394,8 @@ namespace FluentStore.SDK.Packages
                     sorted.Insert(pos, screenshot);
             }
 
+            if (InternalPackage != null)
+                InternalPackage.ScreenshotsCache = sorted;
             return sorted;
         }
 
@@ -433,33 +441,6 @@ namespace FluentStore.SDK.Packages
         {
             get => _Categories;
             set => SetProperty(ref _Categories, value);
-        }
-
-        private string _PrivacyUrl;
-        public string PrivacyUrl
-        {
-            get => _PrivacyUrl;
-            set
-            {
-                SetProperty(ref _PrivacyUrl, value);
-                try
-                {
-                    SetProperty(ref _PrivacyUri, new Uri(value));
-                }
-                catch { }
-            }
-        }
-
-        private Uri _PrivacyUri;
-        [DisplayAdditionalInformation("Privacy url", "\uE71B")]
-        public Uri PrivacyUri
-        {
-            get => _PrivacyUri;
-            set
-            {
-                SetProperty(ref _PrivacyUri, value);
-                SetProperty(ref _PrivacyUrl, value.ToString());
-            }
         }
 
         private List<string> _Platforms = new();

@@ -218,14 +218,16 @@ namespace FluentStore.SDK.Helpers
                 var defaultBundleNs = bundleManifest.DocumentElement.NamespaceURI;
                 var bnsmgr = new XmlNamespaceManager(bundleManifest.NameTable);
                 const string bd = "default";
+                bnsmgr.AddNamespace(bd, defaultBundleNs);
 
-                var packageNodes = bundleManifest.CreateNavigator().Select($"/{bd}:Bundle/{bd}:Packages/{bd}:Package[@Type=\"application\"]");
+                var packageNodes = bundleManifest.CreateNavigator().Select($"/{bd}:Bundle/{bd}:Packages/{bd}:Package[@Type=\"application\"]", bnsmgr);
                 XPathNavigator smallestPackEntry = null;
                 long smallestPackSize = long.MaxValue;
                 do
                 {
                     var packEntry = packageNodes.Current;
-                    long packSize = long.Parse(packEntry.GetAttribute("Size", string.Empty));
+                    if (!long.TryParse(packEntry.GetAttribute("Size", string.Empty), out long packSize))
+                        continue;
                     if (packSize < smallestPackSize)
                         smallestPackEntry = packEntry;
                 } while (packageNodes.MoveNext());
@@ -240,7 +242,7 @@ namespace FluentStore.SDK.Helpers
             }
 
             // Get the app icon
-            var manifestEntry = archive.GetEntry("AppxManifest.xml");
+            var manifestEntry = packArchive.GetEntry("AppxManifest.xml");
             using var manifestStream = manifestEntry.Open();
             XmlDocument manifest = new();
             manifest.Load(manifestStream);
@@ -249,9 +251,36 @@ namespace FluentStore.SDK.Helpers
             var defaultNs = manifest.DocumentElement.NamespaceURI;
             var nsmgr = new XmlNamespaceManager(manifest.NameTable);
             const string d = "default";
+            nsmgr.AddNamespace(d, defaultNs);
 
-            var logoNode = manifest.CreateNavigator().Select($"/{d}:Package/{d}:Properties/{d}:Logo[1]", nsmgr).Current;
-            var iconEntry = archive.GetEntry(logoNode.Value);
+            var logoNodes = manifest.CreateNavigator().Select($"/{d}:Package/{d}:Properties/{d}:Logo[1]", nsmgr);
+            XPathNavigator logoNode = null;
+            do
+            {
+                var cur = logoNodes.Current;
+                if (cur.LocalName == "Logo")
+                {
+                    logoNode = cur;
+                    break;
+                }
+            } while (logoNodes.MoveNext());
+
+            // Find real entry using scaling
+            ZipArchiveEntry iconEntry = packArchive.GetEntry(logoNode.Value);
+            if (iconEntry == null)
+            {
+                string[] targetSplit = logoNode.Value.Replace('\\', '/').Split('.', 3);
+                foreach (var entry in packArchive.Entries)
+                {
+                    string[] split = entry.FullName.Split('.', 3);
+                    if (split.Length >= 3 && targetSplit[0] == split[0] && targetSplit[1] == split[2])
+                    {
+                        iconEntry = entry;
+                        break;
+                    }
+                }
+            }
+
             return new StreamImage
             {
                 ImageType = Images.ImageType.Logo,

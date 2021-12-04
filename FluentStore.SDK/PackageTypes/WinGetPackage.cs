@@ -113,18 +113,17 @@ namespace FluentStore.SDK.Packages
 
         public override async Task<ImageBase> CacheAppIcon()
         {
+            ImageBase icon = null;
             if (Model?.IconUrl != null)
             {
-                return new FileImage
+                icon = new FileImage
                 {
                     Url = Model.IconUrl,
                     ImageType = ImageType.Logo
                 };
             }
-            else
-            {
-                return TextImage.CreateFromName(Model?.Latest?.Name ?? Title);
-            }
+
+            return icon ?? TextImage.CreateFromName(Model?.Latest?.Name ?? Title);
         }
 
         public override async Task<ImageBase> CacheHeroImage()

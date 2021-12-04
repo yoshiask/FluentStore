@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.IO;
+using FluentStore.SDK.Attributes;
 
 namespace FluentStore.SDK
 {
@@ -33,7 +34,11 @@ namespace FluentStore.SDK
             other.DisplayPrice = DisplayPrice;
             other.ShortTitle = ShortTitle;
             other.Website = Website;
+            other.PrivacyUri = PrivacyUri;
             other.Images = Images;
+
+            other.AppIconCache ??= AppIconCache;
+            other.HeroImageCache ??= HeroImageCache;
 
             if (copyStatus)
                 other.Status = Status;
@@ -204,6 +209,14 @@ namespace FluentStore.SDK
         }
         public bool HasWebsite => Website != null;
 
+        private Uri _PrivacyUri;
+        [DisplayAdditionalInformation("Privacy url", "\uE71B")]
+        public Uri PrivacyUri
+        {
+            get => _PrivacyUri;
+            set => SetProperty(ref _PrivacyUri, value);
+        }
+
         private List<ImageBase> _Images = new();
         public List<ImageBase> Images
         {
@@ -211,7 +224,7 @@ namespace FluentStore.SDK
             set => SetProperty(ref _Images, value);
         }
 
-        private ImageBase _AppIcon;
+        public ImageBase AppIconCache;
         /// <summary>
         /// Populates the image cache for the app icon.
         /// </summary>
@@ -225,12 +238,12 @@ namespace FluentStore.SDK
         /// </remarks>
         public async Task<ImageBase> GetAppIcon()
         {
-            if (_AppIcon == null)
-                _AppIcon = await CacheAppIcon();
-            return _AppIcon;
+            if (AppIconCache == null)
+                AppIconCache = await CacheAppIcon();
+            return AppIconCache;
         }
 
-        private ImageBase _HeroImage;
+        public ImageBase HeroImageCache;
         /// <summary>
         /// Populates the image cache for the hero image.
         /// </summary>
@@ -244,12 +257,12 @@ namespace FluentStore.SDK
         /// </remarks>
         public async Task<ImageBase> GetHeroImage()
         {
-            if (_HeroImage == null)
-                _HeroImage = await CacheHeroImage();
-            return _HeroImage;
+            if (HeroImageCache == null)
+                HeroImageCache = await CacheHeroImage();
+            return HeroImageCache;
         }
 
-        private List<ImageBase> _Screenshots;
+        public List<ImageBase> ScreenshotsCache;
         /// <summary>
         /// Populates the image cache for screenshots.
         /// </summary>
@@ -263,9 +276,9 @@ namespace FluentStore.SDK
         /// </remarks>
         public async Task<List<ImageBase>> GetScreenshots()
         {
-            if (_Screenshots == null)
-                _Screenshots = await CacheScreenshots();
-            return _Screenshots;
+            if (ScreenshotsCache == null)
+                ScreenshotsCache = await CacheScreenshots();
+            return ScreenshotsCache;
         }
     }
 
