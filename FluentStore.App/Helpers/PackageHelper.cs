@@ -13,6 +13,9 @@ namespace FluentStore.Helpers
     {
         public static ToastNotification GenerateProgressToast(PackageBase package)
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
+                return null;
+
             var visualBinding = new ToastBindingGeneric
             {
                 Children =
@@ -73,6 +76,9 @@ namespace FluentStore.Helpers
 
         public static ToastNotification GenerateDownloadSuccessToast(PackageBase package)
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
+                return null;
+
             var builder = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
                 .AddToastActivationInfo($"package/{package.Urn}", ToastActivationType.Foreground)
                 .AddText(package.Title)
@@ -86,6 +92,9 @@ namespace FluentStore.Helpers
 
         public static ToastNotification GenerateDownloadFailureToast(PackageBase package)
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
+                return null;
+
             var builder = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
                 .AddToastActivationInfo($"package/{package.Urn}", ToastActivationType.Foreground)
                 .AddText(package.Title)
@@ -99,21 +108,30 @@ namespace FluentStore.Helpers
 
         public static ToastNotification GenerateInstallSuccessToast(PackageBase package)
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
+                return null;
+
             var builder = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
                 .AddToastActivationInfo($"package/{package.Urn}", ToastActivationType.Foreground)
                 .AddText(package.ShortTitle)
                 .AddText(package.Title + " just got installed.");
 
-            if (package.GetAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
-                builder.AddAppLogoOverride(image.Uri, addImageQuery: false);
+            try
+            {
+                if (package.GetAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
+                    builder.AddAppLogoOverride(image.Uri, addImageQuery: false);
+            } finally { }
 
             return new ToastNotification(builder.GetXml());
         }
 
         public static ToastNotification GenerateInstallFailureToast(PackageBase package, Exception ex)
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
+                return null;
+
             var builder = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
-                .AddToastActivationInfo($"action=viewEvent&packageUrn={package.Urn}", ToastActivationType.Foreground)
+                .AddToastActivationInfo($"/package/{package.Urn}", ToastActivationType.Foreground)
                 .AddText(package.Title)
                 .AddText(package.Title + " failed to install.")
                 .AddText(ex.Message);
@@ -126,6 +144,9 @@ namespace FluentStore.Helpers
 
         public static void HandlePackageDownloadProgressToast(PackageDownloadProgressMessage m, ToastNotification progressToast)
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
+                return;
+
             ToastNotificationManager.GetDefault().CreateToastNotifier().Update(
                 new NotificationData(new Dictionary<string, string>()
                 {
@@ -138,11 +159,17 @@ namespace FluentStore.Helpers
 
         public static void HandlePackageDownloadStartedToast(PackageDownloadStartedMessage m, ToastNotification progressToast)
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
+                return;
+
             ToastNotificationManager.GetDefault().CreateToastNotifier().Show(progressToast);
         }
 
         public static void HandlePackageDownloadFailedToast(PackageDownloadFailedMessage m, ToastNotification progressToast)
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
+                return;
+
             // Hide progress notification
             Hide(progressToast);
             // Show the final notification
@@ -151,6 +178,9 @@ namespace FluentStore.Helpers
 
         public static void HandlePackageDownloadCompletedToast(PackageDownloadCompletedMessage m, ToastNotification progressToast)
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
+                return;
+
             // Hide progress notification
             Hide(progressToast);
             // Show the final notification
@@ -159,6 +189,9 @@ namespace FluentStore.Helpers
 
         public static void HandlePackageInstallProgressToast(PackageInstallProgressMessage m, ToastNotification progressToast)
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
+                return;
+
             ToastNotificationManager.GetDefault().CreateToastNotifier().Update(
                 new NotificationData(new Dictionary<string, string>()
                 {
@@ -171,6 +204,9 @@ namespace FluentStore.Helpers
 
         public static void HandlePackageInstallFailedToast(PackageInstallFailedMessage m, ToastNotification progressToast)
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
+                return;
+
             // Hide progress notification
             Hide(progressToast);
             // Show the final notification
@@ -179,6 +215,9 @@ namespace FluentStore.Helpers
 
         public static void HandlePackageInstallCompletedToast(PackageInstallCompletedMessage m, ToastNotification progressToast)
         {
+            if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
+                return;
+
             // Hide progress notification
             Hide(progressToast);
             // Show the final notification
