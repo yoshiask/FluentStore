@@ -41,9 +41,7 @@ namespace FluentStore.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
-            if (!typeof(FontFamily).IsAssignableFrom(value.GetType()))
-                return value;
-            return ((FontFamily)value).Source;
+            return value;
         }
     }
 }
