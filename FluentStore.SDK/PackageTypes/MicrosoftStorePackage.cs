@@ -71,6 +71,7 @@ namespace FluentStore.SDK.Packages
                 package.PackageFamilyName = card.PackageFamilyNames?[0];
                 internalPackage = package;
             }
+            Type = internalPackage.Type;
             CopyProperties(ref internalPackage);
             InternalPackage = internalPackage;
         }
@@ -152,6 +153,7 @@ namespace FluentStore.SDK.Packages
                 package.PublisherDisplayName = product.PublisherName;
                 internalPackage = package;
             }
+            Type = internalPackage.Type;
             CopyProperties(ref internalPackage);
             InternalPackage = internalPackage;
         }
@@ -289,9 +291,14 @@ namespace FluentStore.SDK.Packages
             FileInfo downloadFile = (FileInfo)DownloadItem;
             string filename;
             if (!IsWinGet)
+            {
                 filename = PackageMoniker + await ((ModernPackage<ProductDetails>)InternalPackage).GetInstallerType();
+                Type = InternalPackage.Type;
+            }
             else
+            {
                 filename = Path.GetFileName(PackageUri.ToString());
+            }
             if (filename != string.Empty)
                 downloadFile.Rename(filename);
 

@@ -22,6 +22,7 @@ namespace FluentStore.SDK
             other.Urn = Urn;
             other.Model = Model;
             other.DownloadItem = DownloadItem;
+            other.Type = Type;
             other.PackageUri = PackageUri;
             other.Title = Title;
             other.PublisherId = PublisherId;
