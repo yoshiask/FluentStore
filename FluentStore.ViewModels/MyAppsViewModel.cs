@@ -3,7 +3,6 @@ using FluentStore.SDK.Handlers;
 using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Marketplace.Storefront.Contracts;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
@@ -137,6 +136,6 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _LaunchCommand, value);
         }
 
-        public async Task<bool> LaunchAsync() => false;
+        public virtual async Task<bool> LaunchAsync() => false;
     }
 }

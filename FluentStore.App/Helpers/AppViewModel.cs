@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
@@ -53,7 +52,7 @@ namespace FluentStore.ViewModels
             LoadIconSourceCommand = new AsyncRelayCommand(LoadIconSourceAsync);
         }
 
-        public async Task<bool> LaunchAsync()
+        public override async Task<bool> LaunchAsync()
         {
             return await Entry.LaunchAsync();
         }

@@ -94,7 +94,6 @@ namespace FluentStore
                     //minMaxInfo.ptMinTrackSize.y = (int)(MinHeight * scalingFactor); 
                     //Marshal.StructureToPtr(minMaxInfo, lParam, true);
                     break;
-                    
             }
             return CallWindowProc(oldWndProc, hWnd, Msg, wParam, lParam);
         }
