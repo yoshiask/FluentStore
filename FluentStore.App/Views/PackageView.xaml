@@ -241,7 +241,9 @@
                                 <DataTemplate x:DataType="attributes:DisplayInfo">
                                     <StackPanel HorizontalAlignment="Stretch" Style="{ThemeResource DetailsPanelStyle}">
                                         <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="{x:Bind Title}" />
-                                        <ContentControl Content="{x:Bind Value}" x:Name="ContentPresenterWithSelector"
+                                        <ContentControl x:Name="ContentPresenterWithSelector"
+                                                        Content="{x:Bind Value, Converter={StaticResource PackageDisplayConverter}}"
+                                                        DataContext="{x:Bind Value, Converter={StaticResource PackageDisplayConverter}}"
                                                         ContentTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"
                                                         HorizontalContentAlignment="Stretch"/>
                                     </StackPanel>

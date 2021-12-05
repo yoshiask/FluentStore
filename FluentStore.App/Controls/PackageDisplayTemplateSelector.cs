@@ -16,6 +16,7 @@ namespace FluentStore.Controls
         public DataTemplate Uri { get; set; }
         public DataTemplate PackageEnumerable { get; set; }
         public DataTemplate Enumerable { get; set; }
+        public DataTemplate UIElement { get; set; }
 
         protected override DataTemplate SelectTemplateCore(object item)
         {
@@ -37,6 +38,8 @@ namespace FluentStore.Controls
                 return Default;
             else if (typeof(IEnumerable).IsAssignableFrom(type))
                 return Enumerable;
+            else if (typeof(UIElement).IsAssignableFrom(type))
+                return UIElement;
             else
                 return Default;
         }

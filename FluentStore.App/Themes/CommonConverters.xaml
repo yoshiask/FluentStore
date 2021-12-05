@@ -24,5 +24,6 @@
     <converters:CSSColorToBrushConverter x:Name="CSSColorToBrushConverter"/>
     <converters:PlatWindowsEnumToVisibility x:Key="PlatWindowsEnumToVisibility"/>
     <converters:PackageBaseEnumerableToViewModelEnumerable x:Key="PackageBaseEnumerableToViewModelEnumerable"/>
+    <converters:PackageDisplayConverter x:Key="PackageDisplayConverter"/>
 
 </ResourceDictionary>

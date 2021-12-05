@@ -42,12 +42,17 @@
         <TextBlock Text="{Binding}" TextWrapping="Wrap" IsTextSelectionEnabled="True"/>
     </DataTemplate>
 
+    <DataTemplate x:Key="DefaultDisplayUIElementTemplate" x:DataType="UIElement">
+        <ContentControl Content="{Binding}"/>
+    </DataTemplate>
+
     <controls:PackageDisplayTemplateSelector x:Key="DefaultDisplayTemplateSelector"
                                              Default="{StaticResource DefaultDisplayObjectTemplate}"
                                              DateTime="{StaticResource DefaultDisplayDateTimeTemplate}"
                                              DateTimeOffset="{StaticResource DefaultDisplayDateTimeOffsetTemplate}"
                                              Uri="{StaticResource DefaultDisplayUriTemplate}"
                                              PackageEnumerable="{StaticResource DefaultDisplayPackageEnumerableTemplate}"
-                                             Enumerable="{StaticResource DefaultDisplayEnumerableTemplate}"/>
+                                             Enumerable="{StaticResource DefaultDisplayEnumerableTemplate}"
+                                             UIElement="{StaticResource DefaultDisplayUIElementTemplate}"/>
 
 </ResourceDictionary>
