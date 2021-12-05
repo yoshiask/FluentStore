@@ -1,0 +1,40 @@
+<s:Envelope
+	xmlns:a="http://www.w3.org/2005/08/addressing"
+	xmlns:s="http://www.w3.org/2003/05/soap-envelope">
+    <s:Header>
+        <a:Action s:mustUnderstand="1">http://www.microsoft.com/SoftwareDistribution/Server/ClientWebService/GetExtendedUpdateInfo2</a:Action>
+        <a:MessageID>urn:uuid:2cc99c2e-3b3e-4fb1-9e31-0cd30e6f43a0</a:MessageID>
+        <a:To s:mustUnderstand="1">https://fe3.delivery.mp.microsoft.com/ClientWebService/client.asmx/secured</a:To>
+        <o:Security s:mustUnderstand="1"
+			xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+            <Timestamp
+				xmlns="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+                <Created>2017-08-01T00:29:01.868Z</Created>
+                <Expires>2017-08-01T00:34:01.868Z</Expires>
+            </Timestamp>
+            <wuws:WindowsUpdateTicketsToken wsu:id="ClientMSA"
+				xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+				xmlns:wuws="http://schemas.microsoft.com/msus/2014/10/WindowsUpdateAuthorization">
+                <TicketType Name="MSA" Version="1.0" Policy="MBI_SSL">
+                    <Device>dAA9AEUAdwBBAHcAQQBzAE4AMwBCAEEAQQBVADEAYgB5AHMAZQBtAGIAZQBEAFYAQwArADMAZgBtADcAbwBXAHkASAA3AGIAbgBnAEcAWQBtAEEAQQBQAHoANQBoAFoAaQBtAGYAYwA1AE0AbgBVADMAYwAvADQARgAyAEwAawBFAFkAKwAwADkAMABhAEwAUgBOAEYAUwBTAE0AeQB3AGsAZAAyAC8ARQBZADMAWQB1AFUAeQBzACsAWABDAFIARQBoAEUAUwA3AGcAeQBBAGgAawByAGUAZQBHAHUAOABSAG4AYwBWAEYAVgBiAFUAUgBYAE0AWgBMAEMATQBWAEcARABTAFYANgB2ADMAeQBJAE0AYwBXAEwARgBUAC8ATgBuAE4ATgBRAE0ARgArAHAAWgBuAHYAZABaADAAcwBOAGwAMABwAEEARAA4AHMAMgBDAGgAcgBiAE0AZQBoAGsATwB2AEEATgA0AHUATwAyAFUAVgAwAFcAagBLAG8ARABPAEsAagBJAHkAMABXAE4AMQBnAGUASABwAC8AVwBhAEwANABTAFkAVwBBADIAWQBBAEEAQQBqAFEAZwA5AGwAUQAwAFoATwA3AEMAWQBBAEIAagAyAHgAZwB0AFQATQBuAFUAdgBkAHQAYQBOAE0AbwBxAG4AYwB3AFUATABEAHIAQQBhAG0ATQA0ADMAKwBwAGEAMwA3AG4ANgBTAEsARwBBAHYAdwB1AEwAaQAzAEQAZAB4AEcAVAAvAFEAaQAzAEYAZQBTAEUAcgA3AGkANwBiAG8ANwBoAFUAKwB2AGkASQBtAHEAVABRAG4AKwA2AEQAMgB0AEUAZgBHAGMAZQBaADgAUgB1AGoAdAAzAFIAVQBkAHIAQwB5AC8ASgBOAFIAZwBRAGcATABWAHcANABGAEwAOQB6AEsAMwBMAE8AKwBTAHoARgA0AFQAQgBuADYAbwB6AEIAcABJAHQAYgBZAHAARwAxAE8ASwBtAEoAdwBDAHIANwBqAGEAUAA2AGoASwBlAGYAbQA3AFQASQBlAEQAegBOADIAcQBMAHUAMwB5AFIAOABIAE4ANABPAFMAeABWAGsATQA4AGIANgBkAEwAVgB6AHQANwBhAEYAdABsADIANABEAFcAUwB2AG0AVwBMAG8AKwArADMAbwA0ACsASQBGAHcAagBlAHYATABuADgAYgBjAGoARwBTAEEARgBlAFAAYQBtADUAcAA0ADQANQBlAEcAegBQAFAANABiAFMASAB2AEsAbwBQAFEASwBFAG4AUQBwAEoATQBKAFIAZAA4AEcAZgBNAG4AOQA1ADgAZgBtADYALwBzADcANgBYAHEAMgBSAGUAQQBIAGUAcwBvAHoAWQBOAHYAVABlADYAQQAvAHAATgBnAFoAWQAzAGkAYgAzAEcAaABuAFYAWgBUAGcAdAA1AG4AOQBWAGoAbABwAEMAawBZAHMAOAA1AGEAbQBSADcAdQAwAGgAZAByADkALwBYAEsANgBxAGkATQBFAC8ASwAwAEQAWgBnAEEASQBSAEYAUgBuAE4AQQAxAEUAZgB4AGcARABNAEIAWgBoAFUAbgBqAHgAMABwAHcANgBPAHgAYgB3AHgAMQA5AEgAcABIAE4AOAB0ACsAQgBoAC8AVABvAE0AVABKAHoANQAvAG8AcgBzAFcATwBDAGQARgB1AHIARAAzAHUAbABWAHQAMAB1AGkAegBHAE4AVABQAEkARABsAGkAcgBkAFUAbQBFAGkAbQA4AFMAdQAyAEMANQBuAHoAbwB1AGMARQBpAGIAZgBmAGYAWAA2AFIATwBMAHcATABsAFIAYwBoAFIAMABhAFkAWQA2AEIANgB2AEEAVgB4AHYAbgA5ADMATQBNAEwAawBaAEcAYQBQACsAdQBHACsAWgA1AEoALwBqAFAANwBWAC8ASwB1AFgAOQB4ADkAUABvADUAVABmAEkATwAxAHMAdwBFAD0AJgBwAD0A</Device>
+                </TicketType>
+            </wuws:WindowsUpdateTicketsToken>
+        </o:Security>
+    </s:Header>
+    <s:Body>
+        <GetExtendedUpdateInfo2
+			xmlns="http://www.microsoft.com/SoftwareDistribution/Server/ClientWebService">
+            <updateIDs>
+                <UpdateIdentity>
+                    <UpdateID>{0}</UpdateID>
+                    <RevisionNumber>{1}</RevisionNumber>
+                </UpdateIdentity>
+            </updateIDs>
+            <infoTypes>
+                <XmlUpdateFragmentType>FileUrl</XmlUpdateFragmentType>
+                <XmlUpdateFragmentType>FileDecryption</XmlUpdateFragmentType>
+            </infoTypes>
+            <deviceAttributes>BranchReadinessLevel=CB;CurrentBranch=rs_prerelease;OEMModel=Virtual Machine;FlightRing=WIS;AttrDataVer=21;SystemManufacturer=Microsoft Corporation;InstallLanguage=en-US;OSUILocale=en-US;InstallationType=Client;FlightingBranchName=external;FirmwareVersion=Hyper-V UEFI Release v2.5;SystemProductName=Virtual Machine;OSSkuId=48;FlightContent=Branch;App=WU;OEMName_Uncleaned=Microsoft Corporation;AppVer=10.0.16184.1001;OSArchitecture=AMD64;SystemSKU=None;UpdateManagementGroup=2;IsFlightingEnabled=1;IsDeviceRetailDemo=0;TelemetryLevel=3;OSVersion=10.0.16184.1001;DeviceFamily=Windows.Desktop;</deviceAttributes>
+        </GetExtendedUpdateInfo2>
+    </s:Body>
+</s:Envelope>

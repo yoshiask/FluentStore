@@ -13,7 +13,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
+		<ProjectReference Include="..\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
 		<ProjectReference Include="..\WinGetRun\WinGetRun.csproj" />
 	</ItemGroup>
 

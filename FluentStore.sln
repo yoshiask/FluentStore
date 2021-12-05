@@ -5,11 +5,11 @@ VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{A6FEC513-6706-44AF-B200-D40836E32C19}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Marketplace.Storefront.Contracts", "MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj", "{7FC21573-6B0F-4B5B-BAE5-AF80546C0D79}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Marketplace.Storefront.Contracts", "API\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj", "{7FC21573-6B0F-4B5B-BAE5-AF80546C0D79}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StoreLib", "StoreLib\StoreLib\StoreLib.csproj", "{E13711FF-3E53-4CA4-8043-63B92673567A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StoreLib", "API\StoreLib\StoreLib\StoreLib.csproj", "{E13711FF-3E53-4CA4-8043-63B92673567A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentStoreAPI", "FluentStoreAPI\FluentStoreAPI.csproj", "{9918633D-4C2A-463D-A4CA-C8FC095A820C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentStoreAPI", "API\FluentStoreAPI\FluentStoreAPI.csproj", "{9918633D-4C2A-463D-A4CA-C8FC095A820C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentStore.ViewModels", "FluentStore.ViewModels\FluentStore.ViewModels.csproj", "{DC3ED84A-983C-42DD-9074-26D7C7E44F90}"
 EndProject
