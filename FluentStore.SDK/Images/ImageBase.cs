@@ -38,6 +38,8 @@ namespace FluentStore.SDK.Images
             get => _ForegroundColor;
             set => SetProperty(ref _ForegroundColor, value);
         }
+
+        public override string ToString() => string.Empty;
     }
 
     public enum ImageType

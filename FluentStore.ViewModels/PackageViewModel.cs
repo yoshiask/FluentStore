@@ -139,6 +139,24 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _Screenshots, value);
         }
 
+        private ImageBase _SelectedScreenshot;
+        public ImageBase SelectedScreenshot
+        {
+            get => _SelectedScreenshot;
+            set
+            {
+                SelectedScreenshotNumLabel = (Screenshots.IndexOf(value) + 1).ToString();
+                SetProperty(ref _SelectedScreenshot, value);
+            }
+        }
+
+        private string _SelectedScreenshotNum;
+        public string SelectedScreenshotNumLabel
+        {
+            get => _SelectedScreenshotNum;
+            set => SetProperty(ref _SelectedScreenshotNum, value);
+        }
+
         public string AverageRatingString => Package != null && Package.HasReviewSummary && Package.ReviewSummary.HasAverageRating
             ? Package.ReviewSummary.AverageRating.ToString("F1")
             : string.Empty;

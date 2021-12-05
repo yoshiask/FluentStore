@@ -73,5 +73,7 @@ namespace FluentStore.SDK.Images
                 ImageType = imageType
             };
         }
+
+        public override string ToString() => "Text";
     }
 }

@@ -500,7 +500,8 @@ namespace FluentStore.Views
                     {
                         Title = m.Package.Title,
                         Content = "Failed to fetch packages for this product.",
-                        PrimaryButtonText = "Ok"
+                        PrimaryButtonText = "Ok",
+                        XamlRoot = this.XamlRoot
                     };
                     await noPackagesDialog.ShowAsync();
                 });
@@ -672,6 +673,21 @@ namespace FluentStore.Views
             // Enable implicit Visible/Collapsed animations.
             ProgressGrid.EnableFluidVisibilityAnimation(axis: AnimationAxis.Y,
                 showFromScale: Vector2.UnitX, hideToScale: Vector2.UnitX, showDuration: 400, hideDuration: 250);
+        }
+
+        private void Screenshot_Click(object sender, ItemClickEventArgs e)
+        {
+            if (e.ClickedItem is not SDK.Images.ImageBase img)
+                return;
+
+            // Show screenshot view
+            ViewModel.SelectedScreenshot = img;
+            FindName(nameof(ScreenshotView));
+        }
+
+        private void ScreenshotViewCloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            UnloadObject(ScreenshotView);
         }
     }
 }

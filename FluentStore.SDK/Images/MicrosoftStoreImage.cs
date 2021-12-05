@@ -38,5 +38,7 @@ namespace FluentStore.SDK.Images
             get => _Caption;
             set => SetProperty(ref _Caption, value);
         }
+
+        public override string ToString() => Caption;
     }
 }

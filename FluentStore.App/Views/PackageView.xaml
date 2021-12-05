@@ -7,7 +7,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:FluentStore.Controls"
     xmlns:attributes="using:FluentStore.SDK.Attributes"
-    xmlns:winui="using:Microsoft.UI.Xaml.Controls"
+    xmlns:tkcontrols="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:animations="using:CommunityToolkit.WinUI.UI.Animations"
     x:DefaultBindMode="OneWay"
     SizeChanged="Page_SizeChanged"
     mc:Ignorable="d"
@@ -97,20 +98,20 @@
                                     HorizontalAlignment="Left" VerticalAlignment="Bottom">
 
                             <AppBarElementContainer>
-                                <winui:SplitButton x:Name="InstallButton" Padding="8" Click="InstallSplitButton_Click"
+                                <SplitButton x:Name="InstallButton" Padding="8" Click="InstallSplitButton_Click"
                                                    VerticalAlignment="Stretch">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <FontIcon Glyph="&#xECAA;" FontSize="16" />
                                         <TextBlock Text="Install" x:Name="InstallButtonText" />
                                     </StackPanel>
-                                    <winui:SplitButton.Flyout>
+                                    <SplitButton.Flyout>
                                         <MenuFlyout Placement="BottomEdgeAlignedLeft">
                                             <MenuFlyoutItem Icon="Download" Text="Download installer" ToolTipService.ToolTip="Downloads the app without installing it"
                                                             x:Name="DownloadMenuItem" Click="Download_Click"/>
                                         </MenuFlyout>
-                                    </winui:SplitButton.Flyout>
+                                    </SplitButton.Flyout>
 
-                                    <winui:SplitButton.Resources>
+                                    <SplitButton.Resources>
                                         <StaticResource x:Key="SplitButtonBackground" ResourceKey="AccentButtonBackground" />
                                         <StaticResource x:Key="SplitButtonBackgroundPointerOver" ResourceKey="AccentButtonBackgroundPointerOver" />
                                         <StaticResource x:Key="SplitButtonBackgroundPressed" ResourceKey="AccentButtonBackgroundPressed" />
@@ -124,8 +125,8 @@
                                         <StaticResource x:Key="SplitButtonBorderBrush" ResourceKey="AccentButtonBorderBrush" />
                                         <StaticResource x:Key="SplitButtonBorderBrushPointerOver" ResourceKey="AccentButtonBorderBrushPointerOver" />
                                         <StaticResource x:Key="SplitButtonBorderBrushPressed" ResourceKey="AccentButtonBorderBrushPressed" />
-                                    </winui:SplitButton.Resources>
-                                </winui:SplitButton>
+                                    </SplitButton.Resources>
+                                </SplitButton>
                             </AppBarElementContainer>
 
                             <AppBarButton Label="Add to Collection" Click="AddToCollection_Click">
@@ -135,21 +136,21 @@
                             </AppBarButton>
 
                             <AppBarElementContainer>
-                                <winui:SplitButton x:Name="ShareButton" Padding="8" Click="ShareButton_Click"
+                                <SplitButton x:Name="ShareButton" Padding="8" Click="ShareButton_Click"
                                                    VerticalAlignment="Stretch">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <FontIcon Glyph="&#xE72D;" FontSize="16" />
                                         <TextBlock Text="Share" />
                                     </StackPanel>
-                                    <winui:SplitButton.Flyout>
+                                    <SplitButton.Flyout>
                                         <MenuFlyout Placement="BottomEdgeAlignedLeft">
                                             <MenuFlyoutItem Text="Share website link" ToolTipService.ToolTip="Shares a link to the package on the source website."
                                                             x:Name="ShareWebLinkMenuItem" Icon="Link" Click="ShareWebLink_Click"/>
                                             <MenuFlyoutItem Text="Open in browser" ToolTipService.ToolTip="Opens a link to the package on the source website."
                                                             x:Name="OpenInBrowserMenuItem" Icon="Globe" Click="OpenInBrowser_Click"/>
                                         </MenuFlyout>
-                                    </winui:SplitButton.Flyout>
-                                </winui:SplitButton>
+                                    </SplitButton.Flyout>
+                                </SplitButton>
                             </AppBarElementContainer>
 
                             <AppBarButton Label="Edit details" Icon="Edit" Click="EditCollection_Click"
@@ -172,7 +173,7 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock x:Name="ProgressLabel" d:Text="Downloading package..."/>
                             <TextBlock x:Name="ProgressText" HorizontalAlignment="Right" Grid.Column="1" d:Text="50%"/>
-                            <winui:ProgressBar x:Name="ProgressIndicator" Grid.Row="1" Grid.ColumnSpan="2"
+                            <ProgressBar x:Name="ProgressIndicator" Grid.Row="1" Grid.ColumnSpan="2"
                                                IsIndeterminate="True" d:Value="0.53" Maximum="1"/>
                         </Grid>
 
@@ -191,14 +192,22 @@
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Screenshots" />
                             <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto"
                                           VerticalScrollBarVisibility="Disabled" VerticalScrollMode="Disabled">
-                                <ItemsControl ItemsSource="{x:Bind ViewModel.Screenshots}"
-                                              ItemTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}">
+                                <ListView ItemsSource="{x:Bind ViewModel.Screenshots}"
+                                          ItemTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"
+                                          ItemClick="Screenshot_Click"
+                                          SelectionMode="None" IsItemClickEnabled="True">
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="CornerRadius" Value="0"/>
+                                            <Setter Property="Padding" Value="0"/>
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <StackPanel MaxHeight="150" Orientation="Horizontal" Spacing="10" />
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
-                                </ItemsControl>
+                                </ListView>
                             </ScrollViewer>
                         </StackPanel>
 
@@ -254,6 +263,51 @@
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
+
+            <Grid x:Name="ScreenshotView" x:Load="False"
+                  Padding="16" RowSpacing="4"
+                  Background="{ThemeResource SystemControlChromeMediumAcrylicElementMediumBrush}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Button FontFamily="{ThemeResource SymbolThemeFontFamily}" Content="&#xE10A;"
+                        HorizontalAlignment="Right" Height="32" Width="32" Padding="0"
+                        VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
+                        Click="ScreenshotViewCloseButton_Click"/>
+
+                <tkcontrols:Carousel ItemsSource="{x:Bind ViewModel.Screenshots}"
+                                     ItemTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"
+                                     SelectedItem="{x:Bind ViewModel.SelectedScreenshot, Mode=TwoWay}"
+                                     Grid.Row="1" Margin="0,4" ItemMargin="16" ItemDepth="200"
+                                     x:Name="ScreenshotViewCarousel">
+                    <tkcontrols:Carousel.EasingFunction>
+                        <CubicEase EasingMode="EaseOut" />
+                    </tkcontrols:Carousel.EasingFunction>
+                </tkcontrols:Carousel>
+
+                <TextBlock Text="{x:Bind ViewModel.SelectedScreenshot.ToString()}"
+                           FontSize="16" TextWrapping="Wrap" Grid.Row="2"
+                           Visibility="{x:Bind ViewModel.SelectedScreenshot, Converter={StaticResource EmptyStringToCollapsedConverter}}"/>
+
+                <TextBlock Grid.Row="3" FontWeight="Bold">
+                    <Run Text="{x:Bind ViewModel.SelectedScreenshotNumLabel}"/>
+                    <Run Text="/" Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+                    <Run Text="{x:Bind ViewModel.Screenshots.Count}"
+                         Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+                </TextBlock>
+
+                <!-- TODO: Use a slide-up animation, like the page transitions -->
+                <animations:Implicit.ShowAnimations>
+                    <animations:OpacityAnimation Duration="0:0:0.25" From="0.0" To="1.0" EasingMode="EaseOut" EasingType="Quadratic"/>
+                </animations:Implicit.ShowAnimations>
+                <animations:Implicit.HideAnimations>
+                    <animations:OpacityAnimation Duration="0:0:0.25" From="1.0" To="0.0" EasingMode="EaseOut" EasingType="Quadratic"/>
+                </animations:Implicit.HideAnimations>
+            </Grid>
         </Grid>
 
         <VisualStateManager.VisualStateGroups>

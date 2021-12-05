@@ -17,23 +17,15 @@ namespace FluentStore.Controls
             if (image == null)
                 return Default;
 
-            switch (image)
+            return image switch
             {
-                case FileImage _:
-                    return File;
+                FileImage _ => File,
+                StreamImage _ => Stream,
+                TextImage _ => Text,
+                ImageBase _ => Default,
 
-                case StreamImage _:
-                    return Stream;
-
-                case TextImage _:
-                    return Text;
-
-                case ImageBase _:
-                    return Default;
-
-                default:
-                    throw new ArgumentException($"{nameof(image)} must inherit from {nameof(ImageBase)}.");
-            }
+                _ => throw new ArgumentException($"{nameof(image)} must inherit from {nameof(ImageBase)}."),
+            };
         }
 
         protected override DataTemplate SelectTemplateCore(object item, DependencyObject container)
