@@ -72,6 +72,10 @@ namespace FluentStore
                 {
                     destination = NavService.ParseProtocol(ptclArgs.Uri);
                 }
+                else if (activatedArgs is IToastNotificationActivatedEventArgs toastArgs)
+                {
+                    destination = NavService.ParseProtocol(toastArgs.Argument);
+                }
             }
             finally
             {
@@ -120,6 +124,7 @@ namespace FluentStore
             formattedException += "---------------------------------------";
 
 #if DEBUG
+            System.Diagnostics.Debugger.Launch();
             System.Diagnostics.Debugger.Break(); // Please check "Output Window" for exception details (View -> Output Window) (CTRL + ALT + O)
 #endif
 
