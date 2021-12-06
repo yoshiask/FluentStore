@@ -475,7 +475,16 @@ namespace FluentStore.Views
             InstallButton.Click -= InstallSplitButton_Click;
             InstallButton.Click += async (SplitButton sender, SplitButtonClickEventArgs e) =>
             {
-                await ViewModel.Package.LaunchAsync();
+                try
+                {
+                    await ViewModel.Package.LaunchAsync();
+                }
+                catch (Exception ex)
+                {
+                    // TODO: Use InfoBar
+                    Flyout flyout = new Controls.HttpErrorFlyout(418, ex.ToString());
+                    flyout.ShowAt(InstallButton);
+                }
             };
         }
 
