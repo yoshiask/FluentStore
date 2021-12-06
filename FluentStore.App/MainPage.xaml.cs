@@ -1,16 +1,16 @@
-﻿using FluentStore.Helpers;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.Helpers;
 using FluentStore.SDK;
 using FluentStore.Services;
 using FluentStore.ViewModels;
-using CommunityToolkit.Mvvm.DependencyInjection;
+using FluentStore.ViewModels.Messages;
 using System;
 using System.Linq;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
-using CommunityToolkit.Mvvm.Messaging;
-using FluentStore.ViewModels.Messages;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -21,9 +21,9 @@ namespace FluentStore
     /// </summary>
     public sealed partial class MainPage : UserControl
     {
-        private NavigationService NavService { get; } = Ioc.Default.GetService<INavigationService>() as NavigationService;
-        private UserService UserService { get; } = Ioc.Default.GetService<UserService>();
-        private FluentStoreAPI.FluentStoreAPI FSApi { get; } = Ioc.Default.GetService<FluentStoreAPI.FluentStoreAPI>();
+        private readonly NavigationService NavService = Ioc.Default.GetService<INavigationService>() as NavigationService;
+        private readonly UserService UserService = Ioc.Default.GetService<UserService>();
+        private readonly FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetService<FluentStoreAPI.FluentStoreAPI>();
         
         public ShellViewModel ViewModel
         {
@@ -87,17 +87,6 @@ namespace FluentStore
                         MainFrame.BackStack.Remove(entry);
                 }
             }
-        }
-
-        private void BackButton_Click(object sender, RoutedEventArgs e)
-        {
-            NavService.NavigateBack();
-        }
-
-        private void BackInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
-        {
-            NavService.NavigateBack();
-            args.Handled = true;
         }
 
         private void MainNav_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
@@ -206,11 +195,6 @@ namespace FluentStore
                 IsCompact = false;
                 WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage(string.Empty));
             }
-        }
-
-        private void CoreTitleBar_LayoutMetricsChanged(Windows.ApplicationModel.Core.CoreApplicationViewTitleBar sender, object args)
-        {
-            //TitlebarRow.Height = new GridLength(sender.Height);
         }
 
         private async void EditProfileMenuItem_Click(object sender, RoutedEventArgs e)

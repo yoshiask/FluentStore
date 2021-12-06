@@ -27,7 +27,7 @@
                             ToolTipService.ToolTip="Sign in" AutomationProperties.Name="Sign in"
                             HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
                         <StackPanel Spacing="8" Orientation="Horizontal">
-                            <SymbolIcon Symbol="AddFriend" />
+                            <SymbolIcon x:Name="SignInButtonSymbol" Symbol="AddFriend" />
                             <TextBlock Text="Sign in"/>
                         </StackPanel>
                     </Button>
@@ -36,7 +36,12 @@
                             CornerRadius="4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
                             x:DefaultBindMode="OneWay">
                         <Button.Content>
-                            <SymbolIcon Symbol="Contact"/>
+                            <StackPanel Orientation="Horizontal">
+                                <SymbolIcon x:Name="UserButtonSymbol" Symbol="Contact" />
+                                <TextBlock x:Name="UserButtonDisplayName" Visibility="Collapsed"
+                                           Text="{x:Bind UserService.CurrentProfile.DisplayName}"
+                                           Margin="8,0,0,0"/>
+                            </StackPanel>
                         </Button.Content>
 
                         <Button.Flyout>
@@ -90,7 +95,10 @@
                         <Setter Target="MainNav.PaneDisplayMode" Value="LeftCompact"/>
                         <Setter Target="MainNav.IsTitleBarAutoPaddingEnabled" Value="False"/>
                         <Setter Target="SignInButton.CornerRadius" Value="0"/>
+                        <Setter Target="SignInButtonSymbol.Margin" Value="4,0,0,0"/>
                         <Setter Target="UserButton.CornerRadius" Value="0"/>
+                        <Setter Target="UserButtonSymbol.Margin" Value="4,0,0,0"/>
+                        <Setter Target="UserButtonDisplayName.Visibility" Value="4,0,0,0"/>
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
