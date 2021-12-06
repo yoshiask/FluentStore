@@ -36,7 +36,7 @@ namespace FluentStore.SDK.Helpers
                 case WinGetRun.Enums.InstallerArchitecture.Arm:
                     return ProcessorArchitecture.Arm;
                 case WinGetRun.Enums.InstallerArchitecture.Arm64:
-                    if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 19041))
+                    if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
                         return ProcessorArchitecture.Arm64;
                     goto default;
 

@@ -8,11 +8,26 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK.Messages;
+using Windows.System;
 
 namespace FluentStore.SDK.Helpers
 {
     public static class Win32Helper
     {
+        public static ProcessorArchitecture GetSystemArchitecture()
+        {
+            PInvoke.Kernel32.GetNativeSystemInfo(out var sysInfo);
+            return sysInfo.wProcessorArchitecture switch
+            {
+                PInvoke.Kernel32.ProcessorArchitecture.PROCESSOR_ARCHITECTURE_INTEL => ProcessorArchitecture.X86,
+                PInvoke.Kernel32.ProcessorArchitecture.PROCESSOR_ARCHITECTURE_AMD64 => ProcessorArchitecture.X64,
+                PInvoke.Kernel32.ProcessorArchitecture.PROCESSOR_ARCHITECTURE_ARM => ProcessorArchitecture.Arm,
+                PInvoke.Kernel32.ProcessorArchitecture.PROCESSOR_ARCHITECTURE_ARM64 => ProcessorArchitecture.Arm64,
+
+                _ => ProcessorArchitecture.Unknown,
+            };
+        }
+
         /// <inheritdoc cref="PackageBase.InstallAsync"/>
         public static async Task<bool> Install(PackageBase package, string args = null)
         {

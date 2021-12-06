@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Windows.System;
 
 namespace FluentStore.SDK.Handlers
 {
@@ -29,7 +30,8 @@ namespace FluentStore.SDK.Handlers
         public override async Task<List<PackageBase>> GetFeaturedPackagesAsync()
         {
             var packages = new List<PackageBase>();
-            var page = (await StorefrontApi.GetHomeSpotlight(deviceFamily: Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily)).Payload;
+            (string deviceFamily, string arch) = GetSystemInfo();
+            var page = (await StorefrontApi.GetHomeSpotlight(deviceFamily: deviceFamily, architecture: arch)).Payload;
             packages.AddRange(
                 page.Cards.Where(card => card.ProductId.Length == 12 && card.TypeTag == "app")
                           .Select(card => new MicrosoftStorePackage(card) { Status = PackageStatus.BasicDetails })
@@ -41,7 +43,9 @@ namespace FluentStore.SDK.Handlers
         public override async Task<List<PackageBase>> SearchAsync(string query)
         {
             var packages = new List<PackageBase>();
-            var page = (await StorefrontApi.Search(query, "apps", Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily)).Payload;
+
+            (string deviceFamily, string arch) = GetSystemInfo();
+            var page = (await StorefrontApi.Search(query, "apps", deviceFamily, arch)).Payload;
             packages.AddRange(
                 page.SearchResults.Select(card => new MicrosoftStorePackage(card) { Status = PackageStatus.BasicDetails })
             );
@@ -59,7 +63,8 @@ namespace FluentStore.SDK.Handlers
 
         public override async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
         {
-            var suggs = await StorefrontApi.GetSearchSuggestions(query);
+            (string deviceFamily, string arch) = GetSystemInfo();
+            var suggs = await StorefrontApi.GetSearchSuggestions(query, deviceFamily, arch);
             var packages = new List<PackageBase>();
             packages.AddRange(
                 suggs.Payload.AssetSuggestions.Select(summ => new MicrosoftStorePackage(summary: summ) { Status = PackageStatus.BasicDetails })
@@ -78,7 +83,8 @@ namespace FluentStore.SDK.Handlers
 
         private async Task<MicrosoftStorePackage> GetPackageFromPage(string productId)
         {
-            var page = await StorefrontApi.GetPage(productId);
+            (string deviceFamily, string arch) = GetSystemInfo();
+            var page = await StorefrontApi.GetPage(productId, deviceFamily, arch);
 
             if (!page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ProductDetails>(out var details))
             {
@@ -130,6 +136,23 @@ namespace FluentStore.SDK.Handlers
             if (package is not MicrosoftStorePackage msPackage)
                 throw new System.ArgumentException("Must be a " + nameof(MicrosoftStorePackage), nameof(package));
             return "https://www.microsoft.com/store/apps/" + msPackage.StoreId;
+        }
+
+        private static (string deviceFamily, string arch) GetSystemInfo()
+        {
+            // Get system information
+            string deviceFamily = Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily;
+
+            var sysArch = Helpers.Win32Helper.GetSystemArchitecture();
+            string arch = sysArch switch
+            {
+                ProcessorArchitecture.Neutral or
+                ProcessorArchitecture.Unknown => "x86",
+
+                _ => sysArch.ToString(),
+            };
+
+            return (deviceFamily, arch);
         }
     }
 }
