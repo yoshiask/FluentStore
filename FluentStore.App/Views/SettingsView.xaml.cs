@@ -19,6 +19,18 @@ namespace FluentStore.Views
 		private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
 		private readonly ISettingsService Settings = Ioc.Default.GetRequiredService<ISettingsService>();
 
+		private bool IsDebug
+        {
+			get
+            {
+#if DEBUG
+				return true;
+#else
+				return false;
+#endif
+			}
+        }
+
 		private string VersionString
         {
             get
@@ -43,6 +55,14 @@ namespace FluentStore.Views
         private async void DonateButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
 			await NavigationService.OpenInBrowser("https://paypal.me/YoshiAsk");
+		}
+
+        private void CrashButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+#if DEBUG
+			throw new System.Exception("An unhandled exception was thrown. The app should have crashed and pushed a notification " +
+				"that allows the user to view and report the error.");
+#endif
 		}
     }
 }

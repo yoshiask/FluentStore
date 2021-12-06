@@ -59,7 +59,7 @@
                             <Run Text="Fluent Store is a unifying frontend for Windows app stores and package managers."/>
                             <Run Text="You can search all repositories at once, pick out an app, and install it without ever opening a browser or command prompt."/>
                             <Run Text="With a Fluent Store Social account, you can create collections of apps to install or share in one click."/>
-                            <LineBreak/>
+                            <LineBreak/><LineBreak/>
                             <Run Text="Version "/><Run Text="{x:Bind VersionString, Mode=OneTime}"/>
                     </TextBlock>
                 </controls:SettingsBlockControl.ExpandableContent>
@@ -83,6 +83,21 @@
                     <Button Content="Donate" Click="DonateButton_Click"/>
                 </controls:SettingsBlockControl.SettingsActionableElement>
             </controls:SettingsBlockControl>
+            
+            <!-- #if DEBUG -->
+            <controls:SettingsBlockControl Title="DEBUG: Test error reporting"
+                                           Description="Test the error reporting system by causing an unhandled exception."
+                                           Visibility="{x:Bind IsDebug, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneTime}">
+                <controls:SettingsBlockControl.Icon>
+                    <FontIcon Glyph="&#xEA39;"/>
+                </controls:SettingsBlockControl.Icon>
+                <controls:SettingsBlockControl.SettingsActionableElement>
+                    <Button Content="Crash" Click="CrashButton_Click"
+                            Background="{ThemeResource SystemControlErrorTextForegroundBrush}"
+                            Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
+                </controls:SettingsBlockControl.SettingsActionableElement>
+            </controls:SettingsBlockControl>
+            <!-- #endif -->
 
         </StackPanel>
     </ScrollViewer>

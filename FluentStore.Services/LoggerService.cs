@@ -2,6 +2,11 @@
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
+#if DEBUG
+using Console = System.Diagnostics.Debug;
+#else
+using Console = System.Console;
+#endif
 
 namespace FluentStore.Services
 {
@@ -13,7 +18,7 @@ namespace FluentStore.Services
         [Conditional("DEBUG")]
         public void Log(string message, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
         {
-            Debug.WriteLine($"{Path.GetFileName(filePath)}_{memberName}() [{lineNumber:D4}] : {message}");
+            Console.WriteLine($"{Path.GetFileName(filePath)}_{memberName}() [{lineNumber:D4}] : {message}");
         }
 
         /// <summary>
@@ -22,10 +27,10 @@ namespace FluentStore.Services
         [Conditional("DEBUG")]
         public void Warn(Exception ex, string message, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
         {
-            Debug.WriteLine("=== WARN ===");
+            Console.WriteLine("=== WARN ===");
             Log(message, filePath, memberName, lineNumber);
-            Debug.WriteLine(ex.ToString());
-            Debug.WriteLine("=== ==== ===");
+            Console.WriteLine(ex.ToString());
+            Console.WriteLine("=== ==== ===");
         }
 
         /// <summary>
@@ -34,10 +39,10 @@ namespace FluentStore.Services
         [Conditional("DEBUG")]
         public void UnhandledException(Exception ex, string message, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
         {
-            Debug.WriteLine("=== FATAL EXCEPTION ===");
+            Console.WriteLine("=== FATAL EXCEPTION ===");
             Log(message, filePath, memberName, lineNumber);
-            Debug.WriteLine(ex.ToString());
-            Debug.WriteLine("=== =============== ===");
+            Console.WriteLine(ex.ToString());
+            Console.WriteLine("=== =============== ===");
         }
     }
 }

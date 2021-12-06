@@ -40,19 +40,16 @@ namespace FluentStore
         public App()
         {
             this.InitializeComponent();
-            //Suspending += OnSuspending;
-            UnhandledException += App_UnhandledException;
-            TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+            
+            // Set up error reporting handlers
+            UnhandledException += (sender, e) => OnUnhandledException(e.Exception);
+            TaskScheduler.UnobservedTaskException += (sender, e) => OnUnhandledException(e.Exception);
+            AppDomain.CurrentDomain.UnhandledException += (sender, e)
+              => OnUnhandledException(e.ExceptionObject as Exception ?? new Exception());
 
             Services = ConfigureServices();
             Ioc.Default.ConfigureServices(Services);
         }
-
-        private void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
-            => OnUnhandledException(e.Exception);
-
-        private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
-            => OnUnhandledException(e.Exception);
 
         /// <summary>
         /// Invoked when the application is launched normally by the end user. Other entry points
@@ -63,7 +60,7 @@ namespace FluentStore
         {
             Window = new()
             {
-                Title = "Fluent Store"
+                Title = AppName
             };
 
             var NavService = Ioc.Default.GetService<INavigationService>() as NavigationService;
@@ -123,12 +120,13 @@ namespace FluentStore
             formattedException += "---------------------------------------";
 
 #if DEBUG
-            System.Diagnostics.Debug.WriteLine(formattedException);
-
             System.Diagnostics.Debugger.Break(); // Please check "Output Window" for exception details (View -> Output Window) (CTRL + ALT + O)
 #endif
 
             Logger?.UnhandledException(ex, ex.Message);
+
+            if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
+                return;
 
             // Encode error message and stack trace
             string message = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(ex.ToString()));
@@ -194,12 +192,6 @@ namespace FluentStore
             services.AddSingleton<ISettingsService>(Helpers.Settings.Default);
 
             return services.BuildServiceProvider();
-        }
-
-        private void ExtendIntoTitlebar()
-        {
-            Window.ExtendsContentIntoTitleBar = true;
-            //m_window.SetTitleBar(m_window.CustomTitleBar);
         }
     }
 }
