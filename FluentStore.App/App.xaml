@@ -12,9 +12,11 @@
                 
                 <!-- Other merged dictionaries here -->
                 <ResourceDictionary Source="/Themes/CommonConverters.xaml"/>
+                <ResourceDictionary Source="/Themes/CompactHyperlinkButtonStyle.xaml"/>
                 <ResourceDictionary Source="/Themes/PackageDisplayTemplates.xaml"/>
                 <ResourceDictionary Source="/Themes/ImageBaseTemplates.xaml"/>
                 <ResourceDictionary Source="/Themes/ToggleSwitchRightStyle.xaml"/>
+                <ResourceDictionary Source="/Themes/TrimmedTextBlock.xaml"/>
 
                 <ResourceDictionary>
 
@@ -26,10 +28,6 @@
                         <controls:PackageCardControl ViewModel="{Binding}"/>
                     </DataTemplate>
 
-                    <Style x:Key="CompactHyperlinkButtonStyle" TargetType="HyperlinkButton">
-                        <Setter Property="Padding" Value="0"/>
-                    </Style>
-                    
                 </ResourceDictionary>
 
             </ResourceDictionary.MergedDictionaries>
