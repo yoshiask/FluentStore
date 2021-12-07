@@ -54,7 +54,7 @@ namespace FluentStore.Views
 
         private async void DonateButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-			await NavigationService.OpenInBrowser("https://paypal.me/YoshiAsk");
+			await NavigationService.OpenInBrowser("http://josh.askharoun.com/donate");
 		}
 
         private void CrashButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
