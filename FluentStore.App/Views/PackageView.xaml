@@ -178,17 +178,17 @@
                         </Grid>
 
                     </Grid>
-                    <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-                                Padding="20" Spacing="20">
+                    <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="20">
                         <StackPanel.Resources>
                             <Style x:Key="DetailsPanelStyle" TargetType="StackPanel">
                                 <Setter Property="Spacing" Value="12"/>
+                                <Setter Property="Margin" Value="0,12,0,0"/>
                             </Style>
                         </StackPanel.Resources>
 
                         <!-- Screenshots -->
                         <StackPanel Visibility="{x:Bind ViewModel.Screenshots, Converter={StaticResource CollectionVisibilityConverter}}"
-                                    Style="{ThemeResource DetailsPanelStyle}">
+                                    Style="{ThemeResource DetailsPanelStyle}" Margin="0">
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Screenshots" />
                             <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto"
                                           VerticalScrollBarVisibility="Disabled" VerticalScrollMode="Disabled">
@@ -266,7 +266,7 @@
                         <ItemsControl x:Name="DisplayAdditionalInformationPropertiesControl"
                                       ItemsSource="{x:Bind ViewModel.DisplayAdditionalInformationProperties}"
                                       Visibility="{x:Bind ViewModel.DisplayAdditionalInformationProperties, Converter={StaticResource CollectionVisibilityConverter}}"
-                                      HorizontalAlignment="Stretch">
+                                      HorizontalAlignment="Stretch" Margin="0,18,0,0">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <controls:UniformColumnPanel DesiredItemWidth="200" MaxRowHeight="150"
