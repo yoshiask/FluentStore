@@ -225,7 +225,8 @@ namespace FluentStore.ViewModels
                             continue;
 
                         object value = prop.GetValue(Package);
-                        if (value == null || (value is System.Collections.IList list && list.Count == 0))
+                        object defaultValue = prop.PropertyType.IsValueType ? Activator.CreateInstance(prop.PropertyType) : null;
+                        if (value == null || value.Equals(defaultValue) || (value is System.Collections.IList list && list.Count == 0))
                             continue;
 
                         var info = new DisplayInfo(displayAttr, value);
@@ -262,8 +263,9 @@ namespace FluentStore.ViewModels
                         if (displayAttr == null)
                             continue;
 
-                        object value = prop.GetValue(Package);
-                        if (value == null || (value is System.Collections.IList list && list.Count == 0))
+                        object value = prop.GetValue(Package, null);
+                        object defaultValue = prop.PropertyType.IsValueType ? Activator.CreateInstance(prop.PropertyType) : null;
+                        if (value == null || value.Equals(defaultValue) || (value is System.Collections.IList list && list.Count == 0))
                             continue;
 
                         var info = new DisplayAdditionalInformationInfo(displayAttr, value);
