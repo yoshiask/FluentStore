@@ -63,47 +63,47 @@ namespace FluentStore.ViewModels
                         DeveloperName = "Joshua \"Yoshi\" Askharoun",
                         DisplayPrice = "Free",
                         Features =
-                    {
-                        "Download MS Store apps without installing them",
-                        "Create collections of apps to sync across devices and batch install",
-                        "Discover and install apps from multiple sources, including WinGet and the Microsoft Store"
-                    },
+                        {
+                            "Download MS Store apps without installing them",
+                            "Create collections of apps to sync across devices and batch install",
+                            "Discover and install apps from multiple sources, including WinGet and the Microsoft Store"
+                        },
                         Images =
-                    {
-                        new SDK.Images.MicrosoftStoreImage
                         {
-                            Url = "https://github.com/yoshiask/FluentStore/blob/master/.community/Hero.png?raw=true",
-                            ImageType = SDK.Images.ImageType.Hero
+                            new SDK.Images.MicrosoftStoreImage
+                            {
+                                Url = "https://github.com/yoshiask/FluentStore/blob/master/.community/Hero.png?raw=true",
+                                ImageType = SDK.Images.ImageType.Hero
+                            },
+                            new SDK.Images.MicrosoftStoreImage
+                            {
+                                Url = "https://github.com/yoshiask/FluentStore/blob/master/FluentStore/Assets/Square310x310Logo.scale-200.png?raw=true",
+                                ImageType = SDK.Images.ImageType.Logo
+                            },
+                            new SDK.Images.MicrosoftStoreImage
+                            {
+                                Url = "https://github.com/yoshiask/FluentStore/blob/master/.community/Screenshots/PackageView_MSStore.png?raw=true",
+                                ImageType = SDK.Images.ImageType.Screenshot,
+                                ImagePositionInfo = "Desktop/0"
+                            },
+                            new SDK.Images.MicrosoftStoreImage
+                            {
+                                Url = "https://github.com/yoshiask/FluentStore/blob/master/.community/Screenshots/PackageView_Collection.png?raw=true",
+                                ImageType = SDK.Images.ImageType.Screenshot,
+                                ImagePositionInfo = "Desktop/1"
+                            },
+                            new SDK.Images.MicrosoftStoreImage
+                            {
+                                Url = "https://github.com/yoshiask/FluentStore/blob/master/.community/Screenshots/SearchResultsView_VS.png?raw=true",
+                                ImageType = SDK.Images.ImageType.Screenshot,
+                                ImagePositionInfo = "Desktop/2"
+                            },
                         },
-                        new SDK.Images.MicrosoftStoreImage
-                        {
-                            Url = "https://github.com/yoshiask/FluentStore/blob/master/FluentStore/Assets/Square310x310Logo.scale-200.png?raw=true",
-                            ImageType = SDK.Images.ImageType.Logo
-                        },
-                        new SDK.Images.MicrosoftStoreImage
-                        {
-                            Url = "https://github.com/yoshiask/FluentStore/blob/master/.community/Screenshots/PackageView_MSStore.png?raw=true",
-                            ImageType = SDK.Images.ImageType.Screenshot,
-                            ImagePositionInfo = "Desktop/0"
-                        },
-                        new SDK.Images.MicrosoftStoreImage
-                        {
-                            Url = "https://github.com/yoshiask/FluentStore/blob/master/.community/Screenshots/PackageView_Collection.png?raw=true",
-                            ImageType = SDK.Images.ImageType.Screenshot,
-                            ImagePositionInfo = "Desktop/1"
-                        },
-                        new SDK.Images.MicrosoftStoreImage
-                        {
-                            Url = "https://github.com/yoshiask/FluentStore/blob/master/.community/Screenshots/SearchResultsView_VS.png?raw=true",
-                            ImageType = SDK.Images.ImageType.Screenshot,
-                            ImagePositionInfo = "Desktop/2"
-                        },
-                    },
                         ReleaseDate = new System.DateTimeOffset(new System.DateTime(2021, 9, 1, 13, 0, 0)),
                         StoreId = "123456789123",
                         Title = "Fluent Store",
                         Urn = Urn.Parse("urn:microsoft-store:123456789123"),
-                        Website = "https://github.com/yoshiask/FluentStore",
+                        Website = new("https://github.com/yoshiask/FluentStore", "Fluent Store website"),
                         PackageUri = new("https://github.com/yoshiask/FluentStore/releases/download/v0.1.2-beta/FluentStoreBeta_0.1.2.0.exe"),
                         Version = "0.1.2-beta"
                     };

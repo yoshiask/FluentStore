@@ -101,7 +101,7 @@ namespace FluentStore.SDK.Handlers
                 Title = "Launch " + year,
                 Description = "An annual event hosted by the UWP Community, where developers, beta testers, translators, and users work together to Launch their new and refreshed apps.",
                 DeveloperName = "UWP Community",
-                Website = "https://uwpcommunity.com/launch",
+                Website = new("https://uwpcommunity.com/launch", "UWP Community Launch page"),
                 DisplayPrice = "View",
                 Images =
                 {
@@ -116,7 +116,7 @@ namespace FluentStore.SDK.Handlers
 
             // Use showcase site when available
             if (year == "2021")
-                listPackage.Website += "/2021";
+                listPackage.Website = new(listPackage.Website.Uri.ToString() + "/2021", "UWP Community Launch showcase");
 
             // Set hero image
             string heroImageUrl = "https://uwpcommunity.com/launch/2021/package/Assets/Banner.png";

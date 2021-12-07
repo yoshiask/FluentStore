@@ -203,18 +203,18 @@ namespace FluentStore.SDK
             set => _ShortTitle = value;
         }
 
-        private string _Website;
-        [DisplayAdditionalInformation("Website", "\uEB41")]
-        public string Website
+        private Link _Website;
+        [DisplayAdditionalInformation("Website", "\uE71B")]
+        public Link Website
         {
             get => _Website;
             set => SetProperty(ref _Website, value);
         }
         public bool HasWebsite => Website != null;
 
-        private Uri _PrivacyUri;
-        [DisplayAdditionalInformation("Privacy url", "\uE71B")]
-        public Uri PrivacyUri
+        private Link _PrivacyUri;
+        [DisplayAdditionalInformation("Privacy url", "\uE928")]
+        public Link PrivacyUri
         {
             get => _PrivacyUri;
             set => SetProperty(ref _PrivacyUri, value);

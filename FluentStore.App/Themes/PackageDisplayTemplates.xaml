@@ -4,7 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:sys="using:System"
     xmlns:collections="using:System.Collections"
-    xmlns:controls="using:FluentStore.Controls">
+    xmlns:controls="using:FluentStore.Controls"
+    xmlns:models="using:FluentStore.SDK.Models">
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/Themes/CommonConverters.xaml"/>
@@ -22,6 +23,10 @@
 
     <DataTemplate x:Key="DefaultDisplayUriTemplate" x:DataType="sys:Uri">
         <HyperlinkButton Content="{Binding}" NavigateUri="{Binding}"/>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DefaultDisplayLinkTemplate" x:DataType="models:Link">
+        <HyperlinkButton Content="{Binding TextContent}" NavigateUri="{Binding Uri}"/>
     </DataTemplate>
 
     <DataTemplate x:Key="DefaultDisplayPackageEnumerableTemplate" x:DataType="collections:IEnumerable">

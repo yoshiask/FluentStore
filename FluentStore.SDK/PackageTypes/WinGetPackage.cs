@@ -39,7 +39,7 @@ namespace FluentStore.SDK.Packages
             ReleaseDate = pack.CreatedAt;
             Description = pack.Latest.Description;
             Version = pack.Versions[0];
-            Website = pack.Latest.Homepage;
+            Website = Models.Link.Create(pack.Latest.Homepage, ShortTitle + " website");
 
             // Set WinGet package properties
             PackageId = pack.GetPublisherAndPackageIds().PackageId;
@@ -52,7 +52,7 @@ namespace FluentStore.SDK.Packages
             var installer = Manifest.Installers[0];
 
             PackageUri = new Uri(installer.Url);
-            Website = Manifest.Homepage;
+            Website = Models.Link.Create(Manifest.Homepage, ShortTitle + " website");
 
             if (installer.InstallerType.HasValue)
             {

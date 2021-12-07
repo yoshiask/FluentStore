@@ -128,18 +128,18 @@ namespace FluentStore.SDK.Packages
             Price = product.Price;
             DisplayPrice = product.DisplayPrice;
             ShortTitle = product.ShortTitle;
-            Website = product.AppWebsiteUrl;
+            Website = Link.Create(product.AppWebsiteUrl, ShortTitle + " website");
             StoreId = product.ProductId;
 
             // Set MS Store package properties
             Notes = product.Notes;
             Features = product.Features;
             Categories = product.Categories;
-            PrivacyUri = product.PrivacyUri;
+            PrivacyUri = Link.Create(product.PrivacyUri, ShortTitle + " privacy policy");
             Platforms = product.Platforms;
             if (product.SupportUris != null)
-                foreach (SupportUri uri in product.SupportUris)
-                    SupportUrls.Add(uri.Url);
+                foreach (SupportUri uri in product.SupportUris.Where(u => u.Uri != null))
+                    SupportUrls.Add(new(uri.Uri, ShortTitle + " support"));
             Ratings = product.ProductRatings;
             PermissionsRequested = product.PermissionsRequested;
             PackageAndDeviceCapabilities = product.PackageAndDeviceCapabilities;
@@ -462,8 +462,8 @@ namespace FluentStore.SDK.Packages
             set => SetProperty(ref _Platforms, value);
         }
 
-        private List<string> _SupportUrls = new();
-        public List<string> SupportUrls
+        private List<Link> _SupportUrls = new();
+        public List<Link> SupportUrls
         {
             get => _SupportUrls;
             set => SetProperty(ref _SupportUrls, value);
