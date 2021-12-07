@@ -8,8 +8,8 @@ namespace FluentStore.Controls
 {
     public class UniformColumnPanel : Panel
     {
-        double[] RowHeights;
-        double ActualColumnWidth;
+        double[] RowHeights;    // Includes spacing
+        double ActualColumnWidth;   // Does not include spacing
         double TotalColumnSpacing => (ColumnCount - 1) * ColumnSpacing;
         public int RowCount { get; private set; }
         public int ColumnCount { get; private set; }
@@ -41,6 +41,8 @@ namespace FluentStore.Controls
         protected override Size MeasureOverride(Size availableSize)
         {
             Size returnSize = new(availableSize.Width, 0);
+            if (Children.Count == 0)
+                goto done;
 
             // What's the maximum number of items that will fit on a row?
             if (DesiredItemWidth + ColumnSpacing >= availableSize.Width)
@@ -76,6 +78,7 @@ namespace FluentStore.Controls
             RowHeights[^1] -= RowSpacing;
             returnSize.Height = RowHeights.Sum();
 
+            done:
             return returnSize;
         }
 
@@ -89,8 +92,11 @@ namespace FluentStore.Controls
 
                 // Place child
                 Point anchorPoint = new(col * (ActualColumnWidth + ColumnSpacing), RowHeights.Take(row).Sum());
+                Size childSize = child.DesiredSize;
+                // Allow child to use entire row height
+                childSize.Height = row == RowCount - 1 ? RowHeights[row] : RowHeights[row] - RowSpacing;
 
-                child.Arrange(new Rect(anchorPoint, child.DesiredSize));
+                child.Arrange(new Rect(anchorPoint, childSize));
             }
             return finalSize;
         }
