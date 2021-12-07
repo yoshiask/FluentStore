@@ -39,7 +39,8 @@
     </DataTemplate>
 
     <DataTemplate x:Key="DefaultDisplayObjectTemplate" x:DataType="sys:Object">
-        <TextBlock Text="{Binding}" TextWrapping="Wrap" IsTextSelectionEnabled="True"/>
+        <TextBlock Text="{Binding}" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
+                   IsTextSelectionEnabled="True"/>
     </DataTemplate>
 
     <DataTemplate x:Key="DefaultDisplayUIElementTemplate" x:DataType="UIElement">

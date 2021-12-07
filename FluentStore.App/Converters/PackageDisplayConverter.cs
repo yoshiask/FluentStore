@@ -19,6 +19,7 @@ namespace FluentStore.Converters
                 {
                     IsTextSelectionEnabled = true,
                     TextWrapping = Microsoft.UI.Xaml.TextWrapping.Wrap,
+                    TextTrimming = Microsoft.UI.Xaml.TextTrimming.CharacterEllipsis,
                 };
                 foreach (string s in strings)
                 {

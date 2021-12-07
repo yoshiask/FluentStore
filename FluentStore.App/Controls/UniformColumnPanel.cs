@@ -38,6 +38,14 @@ namespace FluentStore.Controls
         public static readonly DependencyProperty ColumnSpacingProperty = DependencyProperty.Register(
             nameof(ColumnSpacing), typeof(double), typeof(UniformColumnPanel), new PropertyMetadata(0d));
 
+        public double MaxRowHeight
+        {
+            get => (double)GetValue(MaxRowHeightProperty);
+            set => SetValue(MaxRowHeightProperty, value);
+        }
+        public static readonly DependencyProperty MaxRowHeightProperty = DependencyProperty.Register(
+            nameof(MaxRowHeight), typeof(double), typeof(UniformColumnPanel), new PropertyMetadata(double.MaxValue));
+
         protected override Size MeasureOverride(Size availableSize)
         {
             Size returnSize = new(availableSize.Width, 0);
@@ -71,7 +79,7 @@ namespace FluentStore.Controls
                 child.Measure(itemTargetSize);
                 Size childDesiredSize = child.DesiredSize;
 
-                RowHeights[row] = Math.Max(RowHeights[row], childDesiredSize.Height) + RowSpacing;
+                RowHeights[row] = Math.Max(RowHeights[row], Math.Min(childDesiredSize.Height, MaxRowHeight)) + RowSpacing;
             }
 
             // Handle horizontal spacing

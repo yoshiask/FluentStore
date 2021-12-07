@@ -239,16 +239,17 @@
 
                         <!-- Source-specific details -->
                         <!-- All properties marked with DisplayAttribute are shown here -->
-                        <ItemsControl x:Name="DisplayPropertiesControl" ItemsSource="{x:Bind ViewModel.DisplayProperties}"
+                        <ItemsControl x:Name="DisplayPropertiesControl"
+                                      ItemsSource="{x:Bind ViewModel.DisplayProperties}"
                                       Visibility="{x:Bind ViewModel.DisplayProperties, Converter={StaticResource CollectionVisibilityConverter}}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <StackPanel Spacing="12"/>
+                                    <StackPanel Style="{StaticResource DetailsPanelStyle}"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="attributes:DisplayInfo">
-                                    <StackPanel HorizontalAlignment="Stretch" Style="{ThemeResource DetailsPanelStyle}">
+                                    <StackPanel HorizontalAlignment="Stretch" Style="{StaticResource DetailsPanelStyle}">
                                         <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="{x:Bind Title}" />
                                         <ContentControl x:Name="ContentPresenterWithSelector"
                                                         Content="{x:Bind Value, Converter={StaticResource PackageDisplayConverter}}"
@@ -256,6 +257,45 @@
                                                         ContentTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"
                                                         HorizontalContentAlignment="Stretch"/>
                                     </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        
+                        <!-- Source-specific details -->
+                        <!-- All properties marked with DisplayAdditionalInformationAttribute are shown here -->
+                        <ItemsControl x:Name="DisplayAdditionalInformationPropertiesControl"
+                                      ItemsSource="{x:Bind ViewModel.DisplayAdditionalInformationProperties}"
+                                      Visibility="{x:Bind ViewModel.DisplayAdditionalInformationProperties, Converter={StaticResource CollectionVisibilityConverter}}"
+                                      HorizontalAlignment="Stretch">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <controls:UniformColumnPanel DesiredItemWidth="200" MaxRowHeight="150"
+                                                                 RowSpacing="12" ColumnSpacing="12" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="attributes:DisplayAdditionalInformationInfo">
+                                    <Grid HorizontalAlignment="Stretch" ColumnSpacing="8" RowSpacing="8">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <FontIcon Glyph="{x:Bind Icon}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                  Visibility="{x:Bind Icon, Converter={StaticResource EmptyStringToCollapsedConverter}}"
+                                                  FontSize="14"/>
+                                        <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="{x:Bind Title}"
+                                                   Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+
+                                        <ContentControl Content="{x:Bind Value, Converter={StaticResource PackageDisplayConverter}}"
+                                                        DataContext="{x:Bind Value, Converter={StaticResource PackageDisplayConverter}}"
+                                                        ContentTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"
+                                                        HorizontalContentAlignment="Stretch" Grid.Row="1" Grid.Column="1"/>
+                                    </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>

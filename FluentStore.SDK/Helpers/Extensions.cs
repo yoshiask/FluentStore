@@ -23,6 +23,17 @@ namespace FluentStore.SDK.Helpers
             return (TOut)(object)dictionary[key];
         }
 
+        /// <summary>
+        /// Acts exactly like <see cref="string.Join(char, string?[])"/>, but for any <see cref="IList{T}"/>.
+        /// </summary>
+        public static void Join<T>(this IList<T> list, T insert)
+        {
+            for (int i = 0; i < list.Count - 1; i += 2)
+            {
+                list.Insert(i + 1, insert);
+            }
+        }
+
         public static ProcessorArchitecture ToWinRTArch(this WinGetRun.Enums.InstallerArchitecture wgArch)
         {
             switch (wgArch)

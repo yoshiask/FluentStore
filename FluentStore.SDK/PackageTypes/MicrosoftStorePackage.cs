@@ -25,6 +25,11 @@ namespace FluentStore.SDK.Packages
 {
     public class MicrosoftStorePackage : PackageBase<ProductDetails>
     {
+        private const string ACCESSIBILITY_NOTICE_TEXT =
+            "The app developer believes this " +
+            "app meets accessibility requiements, " +
+            "making it easier for everyone to use.";
+
         public MicrosoftStorePackage(CardModel card = null, ProductSummary summary = null, ProductDetails product = null)
         {
             if (card != null)
@@ -494,6 +499,7 @@ namespace FluentStore.SDK.Packages
         }
 
         private List<WarningMessage> _WarningMessages = new();
+        [DisplayAdditionalInformation("Warnings", "\uE7BA")]
         public List<WarningMessage> WarningMessages
         {
             get => _WarningMessages;
@@ -549,5 +555,11 @@ namespace FluentStore.SDK.Packages
             }
             set => SetProperty(ref _InternalPackage, value);
         }
+
+        [DisplayAdditionalInformation("Accessibility", "\uE776")]
+        public string AccessibilityNotice => Model.Accessible ? ACCESSIBILITY_NOTICE_TEXT : null;
+
+        [DisplayAdditionalInformation("Supported languages", "\uE8F2")]
+        public List<string> SupportedLanguages => Model.SupportedLanguages;
     }
 }

@@ -19,5 +19,7 @@ namespace Microsoft.Marketplace.Storefront.Contracts.V3
                 catch { return null; }
             }
         }
+
+        public override string ToString() => Text;
     }
 }
