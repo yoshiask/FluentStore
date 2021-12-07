@@ -269,6 +269,9 @@
                                       HorizontalAlignment="Stretch" Margin="0,18,0,0">
                             <ItemsControl.Resources>
                                 <Style TargetType="HyperlinkButton" BasedOn="{StaticResource CompactHyperlinkButtonStyle}"/>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+                                    <Setter Property="TextWrapping" Value="Wrap"/>
+                                </Style>
                             </ItemsControl.Resources>
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>

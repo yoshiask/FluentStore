@@ -130,11 +130,10 @@ namespace FluentStore.Views
                     }
                 },
                 PrimaryButtonText = "Close",
-                IsSecondaryButtonEnabled = false
+                IsSecondaryButtonEnabled = false,
+                XamlRoot = Content.XamlRoot
             };
-            dialog.XamlRoot = Content.XamlRoot;
             await dialog.ShowAsync();
-            return;
         }
 
         private async void AddToCollection_Click(object sender, RoutedEventArgs e)
