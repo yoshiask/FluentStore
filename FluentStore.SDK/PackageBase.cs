@@ -151,6 +151,7 @@ namespace FluentStore.SDK
         /// The date this specific package was released.
         /// </summary>
         private DateTimeOffset _ReleaseDate;
+        [DisplayAdditionalInformation("Release date", "\uE163")]
         public DateTimeOffset ReleaseDate
         {
             get => _ReleaseDate;
@@ -203,6 +204,7 @@ namespace FluentStore.SDK
         }
 
         private string _Website;
+        [DisplayAdditionalInformation("Website", "\uEB41")]
         public string Website
         {
             get => _Website;

@@ -36,6 +36,10 @@ namespace FluentStore.Converters
 
                 returnValue = textBlock;
             }
+            else if (value is DateTimeOffset date)
+            {
+                returnValue = date.Date.ToShortDateString();
+            }
 
             return returnValue;
         }

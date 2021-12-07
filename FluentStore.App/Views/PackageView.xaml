@@ -293,8 +293,17 @@
 
                                         <ContentControl Content="{x:Bind Value, Converter={StaticResource PackageDisplayConverter}}"
                                                         DataContext="{x:Bind Value, Converter={StaticResource PackageDisplayConverter}}"
-                                                        ContentTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"
-                                                        HorizontalContentAlignment="Stretch" Grid.Row="1" Grid.Column="1"/>
+                                                        HorizontalContentAlignment="Stretch" Grid.Row="1" Grid.Column="1">
+                                            <ContentControl.ContentTemplateSelector>
+                                                <controls:PackageDisplayTemplateSelector Default="{StaticResource DefaultDisplayObjectTemplate}"
+                                                                                         DateTime="{StaticResource DefaultDisplayDateTimeTemplate}"
+                                                                                         DateTimeOffset="{StaticResource DefaultDisplayDateTimeOffsetTemplate}"
+                                                                                         Uri="{StaticResource DefaultDisplayUriTemplate}"
+                                                                                         PackageEnumerable="{StaticResource DefaultDisplayPackageEnumerableTemplate}"
+                                                                                         Enumerable="{StaticResource DefaultDisplayEnumerableTemplate}"
+                                                                                         UIElement="{StaticResource DefaultDisplayUIElementTemplate}"/>
+                                            </ContentControl.ContentTemplateSelector>
+                                        </ContentControl>
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
