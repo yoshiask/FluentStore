@@ -557,9 +557,9 @@ namespace FluentStore.SDK.Packages
         }
 
         [DisplayAdditionalInformation("Accessibility", "\uE776")]
-        public string AccessibilityNotice => Model.Accessible ? ACCESSIBILITY_NOTICE_TEXT : null;
+        public string AccessibilityNotice => (Model != null && Model.Accessible) ? ACCESSIBILITY_NOTICE_TEXT : null;
 
         [DisplayAdditionalInformation("Supported languages", "\uE8F2")]
-        public List<string> SupportedLanguages => Model.SupportedLanguages;
+        public List<string> SupportedLanguages => Model?.SupportedLanguages;
     }
 }

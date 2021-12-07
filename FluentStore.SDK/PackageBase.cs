@@ -199,7 +199,7 @@ namespace FluentStore.SDK
         private string _ShortTitle;
         public string ShortTitle
         {
-            get => _ShortTitle ?? Title;
+            get => string.IsNullOrEmpty(_ShortTitle) ? Title : _ShortTitle;
             set => _ShortTitle = value;
         }
 

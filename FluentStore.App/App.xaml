@@ -25,6 +25,11 @@
                     <DataTemplate x:Key="DefaultPackageCardTemplate">
                         <controls:PackageCardControl ViewModel="{Binding}"/>
                     </DataTemplate>
+
+                    <Style x:Key="CompactHyperlinkButtonStyle" TargetType="HyperlinkButton">
+                        <Setter Property="Padding" Value="0"/>
+                    </Style>
+                    
                 </ResourceDictionary>
 
             </ResourceDictionary.MergedDictionaries>

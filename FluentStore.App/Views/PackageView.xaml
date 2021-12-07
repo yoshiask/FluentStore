@@ -76,7 +76,7 @@
                         <TextBlock x:Name="TitleBlock"
                                    Text="{x:Bind ViewModel.Package.Title}" ToolTipService.ToolTip="{x:Bind ViewModel.Package.Title}"
                                    HorizontalAlignment="Left" FontSize="30" FontWeight="Bold" d:Text="Fluent Store"
-                                   TextTrimming="CharacterEllipsis" TextWrapping="Wrap" MaxLines="2"
+                                   TextTrimming="CharacterEllipsis" TextWrapping="Wrap" HorizontalTextAlignment="Left" MaxLines="2"
                                    Grid.Row="1" Grid.Column="1" VerticalAlignment="Bottom"/>
                         
                         <StackPanel x:Name="SubheadBlock"
@@ -267,6 +267,9 @@
                                       ItemsSource="{x:Bind ViewModel.DisplayAdditionalInformationProperties}"
                                       Visibility="{x:Bind ViewModel.DisplayAdditionalInformationProperties, Converter={StaticResource CollectionVisibilityConverter}}"
                                       HorizontalAlignment="Stretch" Margin="0,18,0,0">
+                            <ItemsControl.Resources>
+                                <Style TargetType="HyperlinkButton" BasedOn="{StaticResource CompactHyperlinkButtonStyle}"/>
+                            </ItemsControl.Resources>
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <controls:UniformColumnPanel DesiredItemWidth="200" MaxRowHeight="150"
@@ -298,6 +301,7 @@
                                                 <controls:PackageDisplayTemplateSelector Default="{StaticResource DefaultDisplayObjectTemplate}"
                                                                                          DateTime="{StaticResource DefaultDisplayDateTimeTemplate}"
                                                                                          DateTimeOffset="{StaticResource DefaultDisplayDateTimeOffsetTemplate}"
+                                                                                         Link="{StaticResource DefaultDisplayLinkTemplate}"
                                                                                          Uri="{StaticResource DefaultDisplayUriTemplate}"
                                                                                          PackageEnumerable="{StaticResource DefaultDisplayPackageEnumerableTemplate}"
                                                                                          Enumerable="{StaticResource DefaultDisplayEnumerableTemplate}"
@@ -372,6 +376,7 @@
                         <Setter Target="IconBox.(Grid.RowSpan)" Value="1"/>
                         <Setter Target="IconBox.MaxWidth" Value="75"/>
                         <Setter Target="TitleBlock.HorizontalAlignment" Value="Center"/>
+                        <Setter Target="TitleBlock.HorizontalTextAlignment" Value="Center"/>
                         <Setter Target="SubheadBlock.HorizontalAlignment" Value="Center"/>
                         <Setter Target="ActionBar.HorizontalAlignment" Value="Center"/>
                     </VisualState.Setters>
