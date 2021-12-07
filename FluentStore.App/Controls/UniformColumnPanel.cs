@@ -70,7 +70,7 @@ namespace FluentStore.Controls
 
             // Loop through each Child, call Measure on each
             RowHeights = new double[RowCount];
-            Size itemTargetSize = new(ActualColumnWidth, double.MaxValue);
+            Size itemTargetSize = new(ActualColumnWidth, MaxRowHeight);
             for (int i = 0; i < Children.Count; i++)
             {
                 int row = i / ColumnCount;
