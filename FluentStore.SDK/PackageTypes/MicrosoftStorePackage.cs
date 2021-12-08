@@ -305,7 +305,7 @@ namespace FluentStore.SDK.Packages
                 filename = Path.GetFileName(PackageUri.ToString());
             }
             if (filename != string.Empty)
-                downloadFile.Rename(filename);
+                downloadFile.MoveRename(filename);
 
             WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, downloadFile));
             DownloadItem = downloadFile;

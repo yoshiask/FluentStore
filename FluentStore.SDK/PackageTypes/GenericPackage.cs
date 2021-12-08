@@ -29,7 +29,7 @@ namespace FluentStore.SDK.Packages
                 return null;
 
             if (PackageUri != null && DownloadItem is FileInfo file)
-                file.Rename(Path.GetFileName(PackageUri.AbsolutePath));
+                DownloadItem = file.CopyRename(Path.GetFileName(PackageUri.AbsolutePath));
 
             return DownloadItem;
         }

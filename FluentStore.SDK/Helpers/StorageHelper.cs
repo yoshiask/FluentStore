@@ -78,10 +78,16 @@ namespace FluentStore.SDK.Helpers
             return prevFolder;
         }
 
-        public static void Rename(this FileInfo file, string newName, bool overwrite = true)
+        public static void MoveRename(this FileInfo file, string newName, bool overwrite = true)
         {
             string newPath = Path.Combine(file.DirectoryName, newName);
             file.MoveTo(newPath, overwrite);
+        }
+
+        public static FileInfo CopyRename(this FileInfo file, string newName, bool overwrite = true)
+        {
+            string newPath = Path.Combine(file.DirectoryName, newName);
+            return file.CopyTo(newPath, overwrite);
         }
 
         public static string PrepUrnForFile(Urn urn)
@@ -94,9 +100,25 @@ namespace FluentStore.SDK.Helpers
 
         public static async Task BackgroundDownloadPackage(PackageBase package, Uri downloadUri, DirectoryInfo folder = null)
         {
-            // Create the location to download to
-            (FileInfo info, FileStream stream) = CreatePackageFile(package.Urn, folder);
-            package.DownloadItem = info;
+            FileInfo info = null;
+            FileStream stream = null;
+
+            // Use cached download if available
+            DownloadCache cache = new(folder);
+            if (cache.TryGet(package.Urn, out var cacheEntry) && cacheEntry.HasValue && cacheEntry.Value.GetDownloadItem() is FileInfo cachedFile)
+            {
+                if (cacheEntry.Value.GetVersion() == package.Version)
+                {
+                    info = cachedFile;
+                    goto downloaded;
+                }
+            }
+            else
+            {
+                // Create the location to download to
+                (info, stream) = CreatePackageFile(package.Urn, folder);
+                cache.Add(package.Urn, package.Version, info);
+            }
 
             try
             {
@@ -125,14 +147,16 @@ namespace FluentStore.SDK.Helpers
 
                 await RandomAccessStream.CopyAndCloseAsync(contentStream, outputStream)
                     .AsTask(new Progress<ulong>(DownloadProgress));
-
-                package.Status = PackageStatus.Downloaded;
             }
             catch (Exception ex)
             {
                 WeakReferenceMessenger.Default.Send(new PackageDownloadFailedMessage(package, ex));
                 package.Status = PackageStatus.DownloadReady;
             }
+
+        downloaded:
+            package.DownloadItem = info;
+            package.Status = PackageStatus.Downloaded;
         }
     }
 }
