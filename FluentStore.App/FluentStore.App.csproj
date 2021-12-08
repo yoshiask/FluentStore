@@ -21,7 +21,7 @@
         <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
         <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
         <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
-        <GenerateTestArtifacts>True</GenerateTestArtifacts>
+        <GenerateTestArtifacts>False</GenerateTestArtifacts>
         <AppxBundle>Auto</AppxBundle>
         <AppxBundlePlatforms>x86|x64|arm64</AppxBundlePlatforms>
         <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
