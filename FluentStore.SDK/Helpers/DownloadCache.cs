@@ -42,8 +42,8 @@ namespace FluentStore.SDK.Helpers
             public void WriteToStream(BinaryWriter writer)
             {
                 writer.Write(urnLength);
-                writer.Write(downloadItemLength);
                 writer.Write(versionLength);
+                writer.Write(downloadItemLength);
 
                 writer.Write(urnBytes);
                 writer.Write(versionBytes);
@@ -57,8 +57,8 @@ namespace FluentStore.SDK.Helpers
                 CacheEntry entry = new();
 
                 int urnLength = reader.ReadInt32();
-                int downloadItemLength = reader.ReadInt32();
                 int versionLength = reader.ReadInt32();
+                int downloadItemLength = reader.ReadInt32();
 
                 entry.urnBytes = reader.ReadBytes(urnLength);
                 entry.versionBytes = reader.ReadBytes(versionLength);
