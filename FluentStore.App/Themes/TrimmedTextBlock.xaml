@@ -4,6 +4,8 @@
     xmlns:controls="using:FluentStore.Controls">
     
     <Style x:Key="DefaultTrimmedTextBlockStyle" TargetType="controls:TrimmedTextBlock">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="MoreButtonHorizontalAlignment" Value="Right"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="controls:TrimmedTextBlock">
@@ -18,10 +20,12 @@
                         <TextBlock Text="{TemplateBinding Text}" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
                                    Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}"
                                    FontWeight="{TemplateBinding FontWeight}" FontFamily="{TemplateBinding FontFamily}"
-                                   FontStretch="{TemplateBinding FontStretch}"
+                                   FontStretch="{TemplateBinding FontStretch}" MaxLines="{TemplateBinding MaxLines}"
+                                   HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                    x:Name="PART_TextBlock" IsTextSelectionEnabled="True"/>
                         <HyperlinkButton Content="More" VerticalAlignment="Bottom" Margin="0,4,0,0" Grid.Row="1"
                                          Visibility="{Binding ElementName=PART_TextBlock, Path=IsTextTrimmed}"
+                                         HorizontalAlignment="{TemplateBinding MoreButtonHorizontalAlignment}"
                                          x:Name="PART_MoreButton"/>
                     </Grid>
                 </ControlTemplate>

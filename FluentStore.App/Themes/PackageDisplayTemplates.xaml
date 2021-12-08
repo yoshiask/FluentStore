@@ -44,7 +44,7 @@
     </DataTemplate>
 
     <DataTemplate x:Key="DefaultDisplayObjectTemplate" x:DataType="sys:Object">
-        <controls:TrimmedTextBlock Text="{Binding}"/>
+        <controls:TrimmedTextBlock Text="{Binding}" MaxLines="4"/>
     </DataTemplate>
 
     <DataTemplate x:Key="DefaultDisplayUIElementTemplate" x:DataType="UIElement">

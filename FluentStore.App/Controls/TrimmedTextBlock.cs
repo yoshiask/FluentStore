@@ -42,6 +42,22 @@ namespace FluentStore.Controls
         public static readonly DependencyProperty TitleProperty = DependencyProperty.Register(
             nameof(Title), typeof(object), typeof(TrimmedTextBlock), new PropertyMetadata("More"));
 
+        public int MaxLines
+        {
+            get => (int)GetValue(MaxLinesProperty);
+            set => SetValue(MaxLinesProperty, value);
+        }
+        public static readonly DependencyProperty MaxLinesProperty = DependencyProperty.Register(
+            nameof(MaxLines), typeof(int), typeof(TrimmedTextBlock), new PropertyMetadata(int.MaxValue));
+
+        public HorizontalAlignment MoreButtonHorizontalAlignment
+        {
+            get => (HorizontalAlignment)GetValue(MoreButtonHorizontalAlignmentProperty);
+            set => SetValue(MoreButtonHorizontalAlignmentProperty, value);
+        }
+        public static readonly DependencyProperty MoreButtonHorizontalAlignmentProperty =
+            DependencyProperty.Register(nameof(MoreButtonHorizontalAlignment), typeof(HorizontalAlignment), typeof(TrimmedTextBlock), new PropertyMetadata(HorizontalAlignment.Left));
+
         protected override void OnApplyTemplate()
         {
             TextBlock = GetTemplateChild(TextBlockName) as TextBlock;

@@ -215,12 +215,8 @@
                         <StackPanel Visibility="{x:Bind ViewModel.Package.Description, Converter={StaticResource EmptyStringToCollapsedConverter}}"
                                     Style="{ThemeResource DetailsPanelStyle}">
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Description"/>
-                            <TextBlock x:Name="DescriptionBlock" Text="{x:Bind ViewModel.Package.Description}"
-                                       FontSize="16" TextTrimming="WordEllipsis" TextWrapping="Wrap" MaxLines="4"
-                                       IsTextSelectionEnabled="True"/>
-                            <HyperlinkButton x:Name="MoreButton" HorizontalAlignment="Right"
-                                             Click="MoreButton_Click" Content="More"
-                                             Visibility="{Binding ElementName=DescriptionBlock, Path=IsTextTrimmed}" />
+                            <controls:TrimmedTextBlock Text="{x:Bind ViewModel.Package.Description}"
+                                                       Title="Description" MaxLines="4"/>
                         </StackPanel>
 
                         <!-- Reviews -->
@@ -271,6 +267,9 @@
                                 <Style TargetType="HyperlinkButton" BasedOn="{StaticResource CompactHyperlinkButtonStyle}"/>
                                 <Style TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
                                     <Setter Property="TextWrapping" Value="Wrap"/>
+                                </Style>
+                                <Style TargetType="controls:TrimmedTextBlock" BasedOn="{StaticResource DefaultTrimmedTextBlockStyle}">
+                                    <Setter Property="MoreButtonHorizontalAlignment" Value="Left"/>
                                 </Style>
                             </ItemsControl.Resources>
                             <ItemsControl.ItemsPanel>
