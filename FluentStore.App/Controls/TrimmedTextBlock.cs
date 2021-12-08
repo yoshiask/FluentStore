@@ -94,7 +94,8 @@ namespace FluentStore.Controls
                     Content = new TextBlock
                     {
                         Text = Text,
-                        TextWrapping = TextWrapping.Wrap
+                        TextWrapping = TextWrapping.Wrap,
+                        IsTextSelectionEnabled = true,
                     }
                 },
                 PrimaryButtonText = "Close",

@@ -216,7 +216,7 @@
                                     Style="{ThemeResource DetailsPanelStyle}">
                             <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Description"/>
                             <controls:TrimmedTextBlock Text="{x:Bind ViewModel.Package.Description}"
-                                                       Title="Description" MaxLines="4"/>
+                                                       Title="Description" MaxLines="8"/>
                         </StackPanel>
 
                         <!-- Reviews -->
