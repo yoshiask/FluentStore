@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
 using Windows.ApplicationModel;
 using Microsoft.UI.Xaml.Controls;
+using FluentStore.SDK.Helpers;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -47,7 +48,13 @@ namespace FluentStore.Views
 			WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Settings"));
 		}
 
-        private async void BugReportButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+		private void ClearCacheButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+		{
+			DownloadCache cache = new(createIfDoesNotExist: false);
+			cache.Clear();
+		}
+
+		private async void BugReportButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
 			await NavigationService.OpenInBrowser("https://github.com/yoshiask/FluentStore/issues/new");
         }

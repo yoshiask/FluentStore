@@ -11,12 +11,12 @@ namespace FluentStore.SDK.Helpers
 {
     public class DownloadCache
     {
-        public DownloadCache(DirectoryInfo directory = null)
+        public DownloadCache(DirectoryInfo directory = null, bool createIfDoesNotExist = true)
         {
             directory ??= StorageHelper.GetTempDirectoryPath();
 
             CacheDatabase = new(Path.Combine(directory.FullName, CACHE_FILENAME));
-            if (!CacheDatabase.Exists)
+            if (!CacheDatabase.Exists && createIfDoesNotExist)
             {
                 using BinaryWriter cache = new(CacheDatabase.Open(FileMode.CreateNew));
                 cache.Write(FILE_MAGIC);
@@ -89,15 +89,18 @@ namespace FluentStore.SDK.Helpers
             }
         }
 
-        public void Clear(DirectoryInfo directory = null)
+        public void Clear()
         {
-            directory ??= StorageHelper.GetTempDirectoryPath();
-            if (!directory.Exists) return;
-
-            CacheDatabase = new(Path.Combine(directory.FullName, CACHE_FILENAME));
             if (CacheDatabase == null || !CacheDatabase.Exists) return;
 
             CacheDatabase.Delete();
+            foreach (FileSystemInfo info in CacheDatabase.Directory.GetFileSystemInfos())
+            {
+                if (info is DirectoryInfo subdir)
+                    subdir.RecursiveDelete();
+                else
+                    info.Delete();
+            }
         }
 
         public void Add(Urn urn, string version, FileSystemInfo downloadItem)

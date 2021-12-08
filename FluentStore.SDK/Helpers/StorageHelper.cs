@@ -59,10 +59,10 @@ namespace FluentStore.SDK.Helpers
 
         public static DirectoryInfo CreateTempFolderAsync(string relativePath)
         {
-            return EnsureExists(GetTempDirectoryPath(), relativePath);
+            return GetTempDirectoryPath().EnsureExists(relativePath);
         }
 
-        public static DirectoryInfo EnsureExists(DirectoryInfo folder, string relativePath)
+        public static DirectoryInfo EnsureExists(this DirectoryInfo folder, string relativePath)
         {
             Guard.IsNotNull(folder, nameof(folder));
 
@@ -76,6 +76,15 @@ namespace FluentStore.SDK.Helpers
             }
 
             return prevFolder;
+        }
+
+        public static void RecursiveDelete(this DirectoryInfo folder)
+        {
+            if (!folder.Exists) return;
+
+            foreach (var dir in folder.EnumerateDirectories())
+                dir.RecursiveDelete();
+            folder.Delete(true);
         }
 
         public static void MoveRename(this FileInfo file, string newName, bool overwrite = true)
