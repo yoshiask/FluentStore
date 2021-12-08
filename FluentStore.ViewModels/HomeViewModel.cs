@@ -134,8 +134,9 @@ namespace FluentStore.ViewModels
 #endif
 
                 // Load featured packages from other sources
-                var rawFeatured = await PackageService.GetFeaturedPackagesAsync();
-                FeaturedPackages = new ObservableCollection<HandlerPackageListPair>(rawFeatured);
+                FeaturedPackages = new ObservableCollection<HandlerPackageListPair>();
+                await foreach (HandlerPackageListPair pair in PackageService.GetFeaturedPackagesAsync())
+                    FeaturedPackages.Add(pair);
             }
             catch (Flurl.Http.FlurlHttpException ex)
             {
