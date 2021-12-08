@@ -70,5 +70,33 @@ namespace FluentStoreAPI
             var document = await GetDocument(false, "featured", "home");
             return document.Transform<HomePageFeatured>();
         }
+
+        public async Task<HomePageFeatured> GetHomePageFeaturedAsync(Version appVersion)
+        {
+            HomePageFeatured document = await GetHomePageFeaturedAsync();
+
+            for (int i = 0; i < document.Carousel.Count; i++)
+            {
+                string feat = document.Carousel[i];
+
+                int idx = feat.LastIndexOf("/?");
+                if (idx < 0) continue;
+
+                string urn = feat.Substring(0, idx);
+                string expression = feat.Substring(idx + 2);
+                document.Carousel[i] = urn;
+
+                bool show = true;
+                QueryParamCollection queries = new(expression);
+                if (queries.TryGetFirst("vMax", out object vMaxVal) && Version.TryParse(vMaxVal.ToString(), out Version vMax))
+                    show &= appVersion <= vMax;
+                if (queries.TryGetFirst("vMin", out object vMinVal) && Version.TryParse(vMinVal.ToString(), out Version vMin))
+                    show &= appVersion >= vMin;
+                if (!show)
+                    document.Carousel.RemoveAt(i--);
+            }
+
+            return document;
+        }
     }
 }

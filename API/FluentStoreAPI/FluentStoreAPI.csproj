@@ -3,6 +3,7 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
+		<LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
