@@ -43,9 +43,7 @@ namespace FluentStore
             NavService.CurrentFrame = MainFrame;
 
             foreach(PageInfo page in NavService.Pages)
-            {
                 MainNav.MenuItems.Add(page.GetNavigationViewItem());
-            }
             MainNav.SelectedItem = MainNav.MenuItems[0];
 
             UserService.OnLoginStateChanged += UserService_OnLoginStateChanged;
@@ -58,21 +56,11 @@ namespace FluentStore
             {
                 UserButton.Visibility = Visibility.Visible;
                 SignInButton.Visibility = Visibility.Collapsed;
-
-                // Show pages that require signin
-                foreach (NavigationViewItem navItem in MainNav.MenuItems)
-                    if (((PageInfo)navItem.Tag).RequiresSignIn)
-                        navItem.Visibility = Visibility.Visible;
             }
             else
             {
                 UserButton.Visibility = Visibility.Collapsed;
                 SignInButton.Visibility = Visibility.Visible;
-
-                // Hide pages that require signin
-                foreach (NavigationViewItem navItem in MainNav.MenuItems)
-                    if (((PageInfo)navItem.Tag).RequiresSignIn)
-                        navItem.Visibility = Visibility.Collapsed;
 
                 // If the current page requires sign in, navigate away
                 if (RequiresSignInAttribute.IsPresent(MainFrame.Content))
@@ -132,14 +120,6 @@ namespace FluentStore
                 // This is in a try-catch block so that I don't have to do a dozen
                 // null checks.
 
-                // If the user is not signed in but current page requires it, navigate away
-                bool requiresSignIn = RequiresSignInAttribute.IsPresent(e.SourcePageType);
-                if (requiresSignIn && !UserService.IsLoggedIn)
-                {
-                    MainNav.SelectedItem = null;
-                    return;
-                }
-
                 var page = NavService.Pages.Find((info) => info.PageType == e.SourcePageType);
                 if (page == null)
                 {
@@ -155,29 +135,31 @@ namespace FluentStore
             }
         }
 
-        private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        private async void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
+            Type page = typeof(Views.HomeView);
+
             if (args.IsSettingsSelected)
             {
-                NavService.Navigate(typeof(Views.SettingsView));
-                return;
+                page = typeof(Views.SettingsView);
+                goto navigate;
             }
 
-            if (!(args.SelectedItem is NavigationViewItem navItem))
-            {
-                NavService.Navigate(typeof(Views.HomeView));
-                return;
-            }
+            if (args.SelectedItem is not NavigationViewItem navItem) goto navigate;
 
             PageInfo pageInfo = NavService.Pages.Find((info) => info == navItem.Tag);
-            if (pageInfo == null)
+            if (pageInfo == null) goto navigate;
+
+            page = pageInfo.PageType;
+            if (pageInfo.RequiresSignIn)
             {
-                NavService.Navigate(typeof(Views.HomeView));
-                return;
+                await UserService.TrySignIn(true);
+                if (!UserService.IsLoggedIn)
+                    return;
             }
 
-            if (pageInfo.PageType.BaseType == typeof(Page))
-                NavService.Navigate(pageInfo.PageType);
+        navigate:
+            NavService.Navigate(page);
         }
 
         private void Page_SizeChanged(object sender, SizeChangedEventArgs e)

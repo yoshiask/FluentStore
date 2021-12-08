@@ -201,7 +201,6 @@ namespace FluentStore.Services
                 Tag = page,
                 Content = page.Title,
                 Icon = (IconElement)page.Icon,
-                Visibility = page.RequiresSignIn ? Visibility.Collapsed : Visibility.Visible,
             };
             if (!string.IsNullOrWhiteSpace(page.Tooltip))
                 ToolTipService.SetToolTip(item, new ToolTip { Content = page.Tooltip });
