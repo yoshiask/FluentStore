@@ -5,7 +5,9 @@
         <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
         <LangVersion>latest</LangVersion>
         <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<AssemblyVersion>0.2.0.0</AssemblyVersion>
+		<FileVersion>$(AssemblyVersion)</FileVersion>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>

@@ -10,6 +10,8 @@
         <PublishProfile>win10-$(Platform).pubxml</PublishProfile>
         <UseWinUI>true</UseWinUI>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<AssemblyVersion>0.2.0.0</AssemblyVersion>
+		<FileVersion>$(AssemblyVersion)</FileVersion>
 
         <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
         <PackageCertificateThumbprint>BF1139D4B9FE20C0A714FA3158740136F5836C37</PackageCertificateThumbprint>
