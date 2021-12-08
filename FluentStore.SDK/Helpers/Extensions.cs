@@ -75,6 +75,11 @@ namespace FluentStore.SDK.Helpers
             };
         }
 
+        public static Version ToVersion(this Windows.ApplicationModel.PackageVersion packageVersion)
+        {
+            return new(packageVersion.Major, packageVersion.Minor, packageVersion.Build, packageVersion.Revision);
+        }
+
         /// <summary>
         /// Reduces the installer type to its most generic type.
         /// </summary>
