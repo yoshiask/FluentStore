@@ -35,12 +35,12 @@ namespace FluentStore.SDK.Helpers
             public byte[] urnBytes;
             public byte[] versionBytes;
             public byte[] downloadItemBytes;
-            public int offsetToNext = 0;
 
-            public long Length => 7 * sizeof(int) + urnLength + downloadItemLength;
+            public long Length => 4 * sizeof(int) + urnLength + versionLength + downloadItemLength;
 
             public void WriteToStream(BinaryWriter writer)
             {
+                writer.Write(byte.MaxValue);
                 writer.Write(urnLength);
                 writer.Write(versionLength);
                 writer.Write(downloadItemLength);
@@ -48,8 +48,6 @@ namespace FluentStore.SDK.Helpers
                 writer.Write(urnBytes);
                 writer.Write(versionBytes);
                 writer.Write(downloadItemBytes);
-
-                writer.Write(offsetToNext);  // Relative offset to next item, from end of this one
             }
 
             public static CacheEntry ReadFromStream(BinaryReader reader)
@@ -63,8 +61,6 @@ namespace FluentStore.SDK.Helpers
                 entry.urnBytes = reader.ReadBytes(urnLength);
                 entry.versionBytes = reader.ReadBytes(versionLength);
                 entry.downloadItemBytes = reader.ReadBytes(downloadItemLength);
-
-                entry.offsetToNext = reader.ReadInt32();
 
                 return entry;
             }
@@ -138,6 +134,9 @@ namespace FluentStore.SDK.Helpers
             while (reader.BaseStream.Position < reader.BaseStream.Length)
             {
                 // Read entry
+                long entryPos = writer.BaseStream.Position;
+                if (reader.ReadByte() != byte.MaxValue) continue;
+
                 CacheEntry entry = CacheEntry.ReadFromStream(reader);
 
                 // Check for equality
@@ -148,18 +147,10 @@ namespace FluentStore.SDK.Helpers
                     if (downloadItem.Exists)
                         downloadItem.RecursiveDelete();
 
-                    // Overwrite "offsetToNext" on preview entry
-                    // to skip over this entry
-                    long offsetToPrevious = -entry.Length - sizeof(int);
-                    if (offsetToPrevious + writer.BaseStream.Position >= 0)
-                    {
-                        writer.BaseStream.Seek(offsetToPrevious, SeekOrigin.Current);
-                        writer.Write(entry.Length);
-                    }
-
-                    // Zero out entry, helps if cache is compressed later
+                    // Zero out entry, acts like a NOP slide
+                    writer.BaseStream.Seek(entryPos, SeekOrigin.Begin);
                     for (int i = 0; i < entry.Length; i++)
-                        writer.Write(0);
+                        writer.Write(byte.MinValue);
 
                     break;
                 }
@@ -181,6 +172,7 @@ namespace FluentStore.SDK.Helpers
             while (reader.BaseStream.Position < reader.BaseStream.Length)
             {
                 // Read entry
+                if (reader.ReadByte() != byte.MaxValue) continue;
                 CacheEntry entry = CacheEntry.ReadFromStream(reader);
 
                 // Check for equality
