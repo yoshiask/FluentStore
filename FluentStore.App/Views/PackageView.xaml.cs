@@ -535,6 +535,13 @@ namespace FluentStore.Views
                     PackageHelper.HandlePackageDownloadProgressToast(m, progressToast);
                 });
             });
+            WeakReferenceMessenger.Default.Register<PackageDownloadFailedMessage>(this, (r, m) =>
+            {
+                _ = DispatcherQueue.TryEnqueue(() =>
+                {
+                    PackageHelper.HandlePackageDownloadFailedToast(m, progressToast);
+                });
+            });
             WeakReferenceMessenger.Default.Register<PackageInstallStartedMessage>(this, (r, m) =>
             {
                 _ = DispatcherQueue.TryEnqueue(() =>
