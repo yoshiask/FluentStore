@@ -89,18 +89,19 @@ namespace FluentStore.SDK.Helpers
             }
         }
 
+        private bool DoesCacheExist()
+        {
+            if (CacheDatabase == null) return false;
+            CacheDatabase.Refresh();
+            return CacheDatabase.Exists;
+        }
+
         public void Clear()
         {
-            if (CacheDatabase == null || !CacheDatabase.Exists) return;
+            if (!DoesCacheExist()) return;
 
-            CacheDatabase.Delete();
-            foreach (FileSystemInfo info in CacheDatabase.Directory.GetFileSystemInfos())
-            {
-                if (info is DirectoryInfo subdir)
-                    subdir.RecursiveDelete();
-                else
-                    info.Delete();
-            }
+            CacheDatabase.Directory.RecursiveDelete();
+            CacheDatabase.Refresh();
         }
 
         public void Add(Urn urn, string version, FileSystemInfo downloadItem)
@@ -124,7 +125,7 @@ namespace FluentStore.SDK.Helpers
 
         public void Remove(Urn urn)
         {
-            if (CacheDatabase == null || !CacheDatabase.Exists) return;
+            if (!DoesCacheExist()) return;
 
             using FileStream cache = CacheDatabase.Open(FileMode.Open);
             using BinaryReader reader = new(cache);
@@ -142,10 +143,19 @@ namespace FluentStore.SDK.Helpers
                 // Check for equality
                 if (entry.urnBytes.SequenceEqual(targetUrnBytes))
                 {
+                    // Delete cached file, if it exists
+                    var downloadItem = entry.GetDownloadItem();
+                    if (downloadItem.Exists)
+                        downloadItem.RecursiveDelete();
+
                     // Overwrite "offsetToNext" on preview entry
                     // to skip over this entry
-                    writer.BaseStream.Seek(-entry.Length - sizeof(int), SeekOrigin.Current);
-                    writer.Write(entry.Length);
+                    long offsetToPrevious = -entry.Length - sizeof(int);
+                    if (offsetToPrevious + writer.BaseStream.Position >= 0)
+                    {
+                        writer.BaseStream.Seek(offsetToPrevious, SeekOrigin.Current);
+                        writer.Write(entry.Length);
+                    }
 
                     // Zero out entry, helps if cache is compressed later
                     for (int i = 0; i < entry.Length; i++)
@@ -158,7 +168,7 @@ namespace FluentStore.SDK.Helpers
 
         public CacheEntry? Get(Urn urn)
         {
-            if (CacheDatabase == null || !CacheDatabase.Exists) return null;
+            if (!DoesCacheExist()) return null;
 
             using FileStream cache = CacheDatabase.Open(FileMode.Open);
             using BinaryReader reader = new(cache);

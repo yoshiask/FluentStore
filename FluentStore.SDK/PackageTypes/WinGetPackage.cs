@@ -94,6 +94,10 @@ namespace FluentStore.SDK.Packages
             // Download package
             await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
 
+            // Check for success
+            if (!Status.IsAtLeast(PackageStatus.Downloaded))
+                return null;
+
             // Set the proper file name
             DownloadItem = ((FileInfo)DownloadItem).CopyRename(Path.GetFileName(PackageUri.ToString()));
 

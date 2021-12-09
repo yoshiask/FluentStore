@@ -34,20 +34,19 @@ namespace FluentStore.SDK.Helpers
             return tempDir;
         }
 
-        public static (FileInfo info, FileStream stream) GetPackageFile(Urn packageUrn, DirectoryInfo folder = null)
+        public static FileInfo GetPackageFile(Urn packageUrn, DirectoryInfo folder = null)
             => OpenPackageFile(packageUrn, folder, FileMode.Open);
 
-        public static (FileInfo info, FileStream stream) CreatePackageFile(Urn packageUrn, DirectoryInfo folder = null)
+        public static FileInfo CreatePackageFile(Urn packageUrn, DirectoryInfo folder = null)
             => OpenPackageFile(packageUrn, folder, FileMode.Create);
 
-        public static (FileInfo info, FileStream stream) OpenPackageFile(Urn packageUrn, DirectoryInfo folder = null, FileMode mode = FileMode.Create)
+        public static FileInfo OpenPackageFile(Urn packageUrn, DirectoryInfo folder = null, FileMode mode = FileMode.Create)
         {
             Guard.IsNotNull(packageUrn, nameof(packageUrn));
             if (folder == null)
                 folder = GetTempDirectoryPath();
 
-            FileInfo file = new(Path.Combine(folder.FullName, PrepUrnForFile(packageUrn)));
-            return (file, file.Open(mode));
+            return new(Path.Combine(folder.FullName, PrepUrnForFile(packageUrn)));
         }
 
         public static DirectoryInfo CreatePackageDownloadFolder(Urn urn)
@@ -85,6 +84,14 @@ namespace FluentStore.SDK.Helpers
             foreach (var dir in folder.EnumerateDirectories())
                 dir.RecursiveDelete();
             folder.Delete(true);
+        }
+
+        public static void RecursiveDelete(this FileSystemInfo info)
+        {
+            if (info is DirectoryInfo subdir)
+                subdir.RecursiveDelete();
+            else
+                info.Delete();
         }
 
         public static void MoveRename(this FileInfo file, string newName, bool overwrite = true)
@@ -125,7 +132,8 @@ namespace FluentStore.SDK.Helpers
             else
             {
                 // Create the location to download to
-                (info, stream) = CreatePackageFile(package.Urn, folder);
+                info = CreatePackageFile(package.Urn, folder);
+                stream = info.OpenWrite();
                 cache.Add(package.Urn, package.Version, info);
             }
 
@@ -141,8 +149,9 @@ namespace FluentStore.SDK.Helpers
 
                 // Start download
                 WeakReferenceMessenger.Default.Send(new PackageDownloadStartedMessage(package));
-                HttpResponseMessage response = await HttpClient.GetAsync(downloadUri, HttpCompletionOption.ResponseHeadersRead);
-                response.EnsureSuccessStatusCode();
+                HttpResponseMessage response = await HttpClient.GetAsync(downloadUri);
+                if (!response.IsSuccessStatusCode)
+                    throw new Models.WebException((int)response.StatusCode, response.ReasonPhrase);
 
                 // this is horrible
                 if (response.Content.TryComputeLength(out ulong computedLength) || (computedLength = response.Content.Headers.ContentLength.GetValueOrDefault()) != 0)
@@ -161,6 +170,13 @@ namespace FluentStore.SDK.Helpers
             {
                 WeakReferenceMessenger.Default.Send(new PackageDownloadFailedMessage(package, ex));
                 package.Status = PackageStatus.DownloadReady;
+                stream?.Dispose();  // Make sure file is closed, or it will fail to remove from the cache
+                cache.Remove(package.Urn);
+                return;
+            }
+            finally
+            {
+                stream?.Dispose();
             }
 
         downloaded:
