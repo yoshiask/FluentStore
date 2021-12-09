@@ -5,7 +5,6 @@
     xmlns:local="using:FluentStore.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     x:DefaultBindMode="OneWay"
     mc:Ignorable="d"
     d:DesignHeight="300"
@@ -37,7 +36,7 @@
                                Visibility="{x:Bind ViewModel.Package.ReviewSummary.HasReviewCount, Converter={StaticResource BoolToVisibilityConverter}}"/>
                     <Viewbox Width="90" Margin="0,0,-4,-4"
                              Visibility="{x:Bind ViewModel.Package.ReviewSummary.HasAverageRating, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <winui:RatingControl Value="{x:Bind ViewModel.Package.ReviewSummary.AverageRating}" IsReadOnly="True"/>
+                        <RatingControl Value="{x:Bind ViewModel.Package.ReviewSummary.AverageRating}" IsReadOnly="True"/>
                     </Viewbox>
                 </StackPanel>
             </StackPanel>

@@ -8,7 +8,6 @@
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:controls="using:FluentStore.Controls"
-    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -32,15 +31,15 @@
             <AppBarButton x:Name="NewCollectionButton" Icon="Add" Label="New" Click="NewButton_Click"/>
         </CommandBar>
 
-        <muxc:TeachingTip x:Name="NewCollectionTip"
+        <TeachingTip x:Name="NewCollectionTip"
                           Target="{x:Bind NewCollectionButton}"
                           Title="Create your first collection"
                           Subtitle="Collections allow you to share, download, or install many apps at once."
                           IsOpen="{x:Bind ViewModel.ShowNewCollectionTip, Mode=OneWay}">
-            <muxc:TeachingTip.IconSource>
-                <muxc:SymbolIconSource Symbol="List" />
-            </muxc:TeachingTip.IconSource>
-        </muxc:TeachingTip>
+            <TeachingTip.IconSource>
+                <SymbolIconSource Symbol="List" />
+            </TeachingTip.IconSource>
+        </TeachingTip>
     </Grid>
     
 </Page>

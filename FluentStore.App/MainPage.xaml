@@ -5,8 +5,6 @@
     xmlns:local="using:FluentStore"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:muxcWindows11Present="using:Microsoft.UI.Xaml.Controls?IsApiContractPresent(Windows.Foundation.UniversalApiContract, 14)"
-    xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d"
     SizeChanged="Page_SizeChanged"
     Background="Transparent">
@@ -17,10 +15,10 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <winui:NavigationView x:Name="MainNav" PaneDisplayMode="Top" Grid.Row="1" IsTitleBarAutoPaddingEnabled="False"
+        <NavigationView x:Name="MainNav" PaneDisplayMode="Top" Grid.Row="1" IsTitleBarAutoPaddingEnabled="False"
                               SelectionChanged="NavigationView_SelectionChanged" BackRequested="MainNav_BackRequested">
 
-            <winui:NavigationView.PaneFooter>
+            <NavigationView.PaneFooter>
                 <Grid>
                     <Button x:Name="SignInButton" Visibility="Visible" Command="{x:Bind ViewModel.SignInCommand}"
                             Style="{ThemeResource AccentButtonStyle}" CornerRadius="4"
@@ -62,15 +60,15 @@
                         </Button.Flyout>
                     </Button>
                 </Grid>
-            </winui:NavigationView.PaneFooter>
+            </NavigationView.PaneFooter>
 
             <Grid>
                 <Frame x:Name="MainFrame" />
-                <winui:ProgressBar IsIndeterminate="True" VerticalAlignment="Top"
+                <ProgressBar IsIndeterminate="True" VerticalAlignment="Top"
                                    Visibility="{x:Bind ViewModel.IsPageLoading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
             </Grid>
 
-            <winui:NavigationView.AutoSuggestBox>
+            <NavigationView.AutoSuggestBox>
                 <AutoSuggestBox x:Name="controlsSearchBox" VerticalAlignment="Center"
                                 PlaceholderText="Search" QueryIcon="Find" MinWidth="200"
                                 KeyboardAcceleratorPlacementMode="Hidden"
@@ -82,9 +80,9 @@
                         <KeyboardAccelerator Modifiers="Control" Key="F" Invoked="CtrlF_Invoked" />
                     </AutoSuggestBox.KeyboardAccelerators>
                 </AutoSuggestBox>
-            </winui:NavigationView.AutoSuggestBox>
+            </NavigationView.AutoSuggestBox>
 
-        </winui:NavigationView>
+        </NavigationView>
 
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
