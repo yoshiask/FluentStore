@@ -49,12 +49,13 @@ namespace FluentStore.SDK.Helpers
                 if (success)
                     WeakReferenceMessenger.Default.Send(new PackageInstallCompletedMessage(package));
                 else
-                    WeakReferenceMessenger.Default.Send(new PackageInstallFailedMessage(package, new Exception(installProc.ExitCode.ToString())));
+                    WeakReferenceMessenger.Default.Send(new PackageInstallFailedMessage(
+                        new Exception(installProc.ExitCode.ToString()), package));
                 return success;
             }
             catch (Exception ex)
             {
-                WeakReferenceMessenger.Default.Send(new PackageInstallFailedMessage(package, ex));
+                WeakReferenceMessenger.Default.Send(new PackageInstallFailedMessage(ex, package));
                 var logger = Ioc.Default.GetRequiredService<Services.LoggerService>();
                 logger.UnhandledException(ex, "Exception from Win32 component");
                 return false;

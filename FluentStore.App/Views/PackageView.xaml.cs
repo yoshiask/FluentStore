@@ -506,7 +506,7 @@ namespace FluentStore.Views
                     VisualStateManager.GoToState(this, "NoAction", true);
                     var noPackagesDialog = new ContentDialog()
                     {
-                        Title = m.Package.Title,
+                        Title = m.Context.Title,
                         Content = "Failed to fetch packages for this product.",
                         PrimaryButtonText = "Ok",
                         XamlRoot = this.XamlRoot

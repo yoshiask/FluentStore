@@ -46,7 +46,7 @@ namespace FluentStore.Views
         public static readonly DependencyProperty ErrorTitleProperty = DependencyProperty.Register(
             nameof(ErrorTitle), typeof(string), typeof(HttpErrorPage), new PropertyMetadata(string.Empty));
 
-        protected static void UpdateErrorTitle(HttpErrorPage page, int? errorCode = null)
+        private static void UpdateErrorTitle(HttpErrorPage page, int? errorCode = null)
         {
             // Set error message to HTTP status code names as listed by IANA
             // https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml

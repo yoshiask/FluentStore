@@ -279,7 +279,7 @@ namespace FluentStore.SDK.Packages
             // Find the package URI
             if (!await PopulatePackageUri())
             {
-                WeakReferenceMessenger.Default.Send(new PackageFetchFailedMessage(this, new Exception("An unknown error occurred.")));
+                WeakReferenceMessenger.Default.Send(new PackageFetchFailedMessage(new Exception("An unknown error occurred."), this));
                 return null;
             }
             WeakReferenceMessenger.Default.Send(new PackageFetchCompletedMessage(this));

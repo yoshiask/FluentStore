@@ -173,7 +173,7 @@ namespace FluentStore.Helpers
             // Hide progress notification
             Hide(progressToast);
             // Show the final notification
-            ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateDownloadFailureToast(m.Package));
+            ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateDownloadFailureToast(m.Context));
         }
 
         public static void HandlePackageDownloadCompletedToast(PackageDownloadCompletedMessage m, ToastNotification progressToast)
@@ -210,7 +210,7 @@ namespace FluentStore.Helpers
             // Hide progress notification
             Hide(progressToast);
             // Show the final notification
-            ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateInstallFailureToast(m.Package, m.Exception));
+            ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateInstallFailureToast(m.Context, m.Exception));
         }
 
         public static void HandlePackageInstallCompletedToast(PackageInstallCompletedMessage m, ToastNotification progressToast)

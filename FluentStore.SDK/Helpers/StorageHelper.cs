@@ -168,7 +168,7 @@ namespace FluentStore.SDK.Helpers
             }
             catch (Exception ex)
             {
-                WeakReferenceMessenger.Default.Send(new PackageDownloadFailedMessage(package, ex));
+                WeakReferenceMessenger.Default.Send(new PackageDownloadFailedMessage(ex, package));
                 package.Status = PackageStatus.DownloadReady;
                 stream?.Dispose();  // Make sure file is closed, or it will fail to remove from the cache
                 cache.Remove(package.Urn);

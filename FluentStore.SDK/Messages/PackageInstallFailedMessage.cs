@@ -1,23 +1,11 @@
-﻿using CommunityToolkit.Mvvm.Messaging.Messages;
-using System;
+﻿using System;
 
 namespace FluentStore.SDK.Messages
 {
-
-    public class PackageInstallFailedMessage : ValueChangedMessage<Tuple<PackageBase, Exception>>
+    public class PackageInstallFailedMessage : ErrorMessage<PackageBase>
     {
-        public PackageInstallFailedMessage(Tuple<PackageBase, Exception> info) : base(info)
+        public PackageInstallFailedMessage(Exception ex, PackageBase context = null) : base(ex, context)
         {
-
         }
-
-        public PackageInstallFailedMessage(PackageBase package, Exception ex)
-            : base(new Tuple<PackageBase, Exception>(package, ex))
-        {
-
-        }
-
-        public PackageBase Package => Value.Item1;
-        public Exception Exception => Value.Item2;
     }
 }
