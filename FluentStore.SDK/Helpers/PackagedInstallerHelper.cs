@@ -134,15 +134,22 @@ namespace FluentStore.SDK.Helpers
         /// <inheritdoc cref="PackageBase.LaunchAsync"/>
         public static async Task<bool> Launch(string packageFamilyName)
         {
-            var pkgManager = new PackageManager();
-            var pkg = pkgManager.FindPackagesForUser(string.Empty, packageFamilyName).FirstOrDefault();
-            if (pkg == null) return false;
+            try
+            {
+                var pkgManager = new PackageManager();
+                var pkg = pkgManager.FindPackagesForUser(string.Empty, packageFamilyName).FirstOrDefault();
+                if (pkg == null) return false;
 
-            var apps = await pkg.GetAppListEntriesAsync();
-            var firstApp = apps.FirstOrDefault();
-            if (firstApp == null) return false;
+                var apps = await pkg.GetAppListEntriesAsync();
+                if (apps.Count == 0) return false;
 
-            return await firstApp.LaunchAsync();
+                return await apps[0].LaunchAsync();
+            }
+            catch (Exception ex)
+            {
+                WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, type: ErrorType.PackageLaunchFailed));
+                return false;
+            }
         }
 
         public static InstallerType GetInstallerType(FileInfo file)

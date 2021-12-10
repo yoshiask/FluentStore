@@ -22,5 +22,6 @@ namespace FluentStore.SDK.Messages
         PackageFetchFailed,
         PackageDownloadFailed,
         PackageInstallFailed,
+        PackageLaunchFailed,
     }
 }

@@ -368,19 +368,8 @@ namespace FluentStore.Views
         {
             InstallButtonText.Text = "Launch";
             InstallButton.Click -= InstallSplitButton_Click;
-            InstallButton.Click += async (SplitButton sender, SplitButtonClickEventArgs e) =>
-            {
-                try
-                {
-                    await ViewModel.Package.LaunchAsync();
-                }
-                catch (Exception ex)
-                {
-                    // TODO: Use InfoBar
-                    Flyout flyout = new Controls.HttpErrorFlyout(418, ex.ToString());
-                    flyout.ShowAt(InstallButton);
-                }
-            };
+            InstallButton.Click += async (SplitButton sender, SplitButtonClickEventArgs e)
+                => await ViewModel.Package.LaunchAsync();
         }
 
         public ToastNotification RegisterPackageServiceMessages()
@@ -389,7 +378,7 @@ namespace FluentStore.Views
 
             WeakReferenceMessenger.Default.Register<ErrorMessage>(this, (r, m) =>
             {
-                _ = DispatcherQueue.TryEnqueue(async () =>
+                _ = DispatcherQueue.TryEnqueue(() =>
                 {
                     if (m.Context is PackageBase p)
                     {
