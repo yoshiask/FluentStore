@@ -47,7 +47,7 @@ namespace FluentStore.SDK.Helpers
 
                 bool success = installProc.ExitCode == 0;
                 if (success)
-                    WeakReferenceMessenger.Default.Send(new PackageInstallCompletedMessage(package));
+                    WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageInstallCompleted(package));
                 else
                     WeakReferenceMessenger.Default.Send(new ErrorMessage(
                         new Exception(installProc.ExitCode.ToString()), package, ErrorType.PackageInstallFailed));

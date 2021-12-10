@@ -301,7 +301,7 @@ namespace FluentStore.SDK.Packages
             if (filename != string.Empty)
                 downloadFile.MoveRename(filename);
 
-            WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, downloadFile));
+            WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageDownloadCompleted(this));
             DownloadItem = downloadFile;
             return DownloadItem;
         }
@@ -337,7 +337,7 @@ namespace FluentStore.SDK.Packages
                     Update((await StoreEdgeFDApi.GetPackageManifest(StoreId)).Data.Versions[0]);
                 }
 
-                WeakReferenceMessenger.Default.Send(new PackageFetchCompletedMessage(this));
+                WeakReferenceMessenger.Default.Send(new SuccessMessage(null, this, SuccessType.PackageFetchCompleted));
                 Status = PackageStatus.DownloadReady;
             }
             catch (Exception ex)

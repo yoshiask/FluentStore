@@ -54,6 +54,15 @@ namespace FluentStore
                 MainInfoBar.Severity = InfoBarSeverity.Error;
                 MainInfoBar.IsOpen = true;
             });
+            WeakReferenceMessenger.Default.Register<SuccessMessage>(this, (r, m) =>
+            {
+                // Don't show package fetched messages
+                if (m.Type == SuccessType.PackageFetchCompleted) return;
+
+                MainInfoBar.Title = m.Message;
+                MainInfoBar.Severity = InfoBarSeverity.Success;
+                MainInfoBar.IsOpen = true;
+            });
 
             UserService.OnLoginStateChanged += UserService_OnLoginStateChanged;
             UserService.TrySignIn(false);

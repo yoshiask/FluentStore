@@ -95,7 +95,7 @@ namespace FluentStore.SDK.Packages
             // Set the proper file name
             DownloadItem = ((FileInfo)DownloadItem).CopyRename(Path.GetFileName(PackageUri.ToString()));
 
-            WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, (FileInfo)DownloadItem));
+            WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageDownloadCompleted(this));
             Status = PackageStatus.Downloaded;
             return DownloadItem;
         }
@@ -108,7 +108,7 @@ namespace FluentStore.SDK.Packages
                 if (PackageUri == null)
                     Update(await WinGetApi.GetManifest(Urn.GetContent<NamespaceSpecificString>().UnEscapedValue, Version));
 
-                WeakReferenceMessenger.Default.Send(new PackageFetchCompletedMessage(this));
+                WeakReferenceMessenger.Default.Send(new SuccessMessage(null, this, SuccessType.PackageFetchCompleted));
                 Status = PackageStatus.DownloadReady;
             }
             catch (Exception ex)

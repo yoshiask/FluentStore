@@ -75,6 +75,36 @@ namespace FluentStore.SDK.Helpers
             };
         }
 
+        public static string GetExtensionDescription(this Models.InstallerType type)
+        {
+            Models.InstallerType typeReduced = type.Reduce();
+            string extDesc;
+            if (typeReduced == Models.InstallerType.Msix)
+            {
+                extDesc = "Windows App " + (type.HasFlag(Models.InstallerType.Bundle) ? "Bundle" : "Package");
+
+                if (type.HasFlag(Models.InstallerType.Encrypted))
+                    extDesc = "Encrypted " + extDesc;
+            }
+            else
+            {
+                extDesc = type switch
+                {
+                    Models.InstallerType.Msi => "Windows Installer",
+                    Models.InstallerType.Exe => "Installer",
+                    Models.InstallerType.Zip => "Compressed zip archive",
+                    Models.InstallerType.Inno => "Inno Setup installer",
+                    Models.InstallerType.Nullsoft => "NSIS installer",
+                    Models.InstallerType.Wix => "WiX installer",
+                    Models.InstallerType.Burn => "WiX Burn installer",
+
+                    _ => "Unknown"
+                };
+            }
+
+            return extDesc;
+        }
+
         public static Version ToVersion(this Windows.ApplicationModel.PackageVersion packageVersion)
         {
             return new(packageVersion.Major, packageVersion.Minor, packageVersion.Build, packageVersion.Revision);

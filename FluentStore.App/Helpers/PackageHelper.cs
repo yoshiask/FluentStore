@@ -74,22 +74,6 @@ namespace FluentStore.Helpers
             return notif;
         }
 
-        public static ToastNotification GenerateDownloadSuccessToast(PackageBase package)
-        {
-            if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
-                return null;
-
-            var builder = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
-                .AddToastActivationInfo($"package/{package.Urn}", ToastActivationType.Foreground)
-                .AddText(package.Title)
-                .AddText(package.Title + " is ready to install");
-
-            if (package.GetAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
-                builder.AddAppLogoOverride(image.Uri, addImageQuery: false);
-
-            return new ToastNotification(builder.GetXml());
-        }
-
         public static ToastNotification GenerateDownloadFailureToast(PackageBase package)
         {
             if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
@@ -102,25 +86,6 @@ namespace FluentStore.Helpers
 
             if (package.GetAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
                 builder.AddAppLogoOverride(image.Uri, addImageQuery: false);
-
-            return new ToastNotification(builder.GetXml());
-        }
-
-        public static ToastNotification GenerateInstallSuccessToast(PackageBase package)
-        {
-            if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
-                return null;
-
-            var builder = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
-                .AddToastActivationInfo($"package/{package.Urn}", ToastActivationType.Foreground)
-                .AddText(package.ShortTitle)
-                .AddText(package.Title + " just got installed.");
-
-            try
-            {
-                if (package.GetAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
-                    builder.AddAppLogoOverride(image.Uri, addImageQuery: false);
-            } finally { }
 
             return new ToastNotification(builder.GetXml());
         }
@@ -176,15 +141,27 @@ namespace FluentStore.Helpers
             ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateDownloadFailureToast((PackageBase)m.Context));
         }
 
-        public static void HandlePackageDownloadCompletedToast(PackageDownloadCompletedMessage m, ToastNotification progressToast)
+        public static void HandlePackageDownloadCompletedToast(SuccessMessage m, ToastNotification progressToast)
         {
             if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
                 return;
 
+            PackageBase package = (PackageBase)m.Context;
+
+            var builder = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
+                .AddToastActivationInfo($"package/{package.Urn}", ToastActivationType.Foreground)
+                .AddText(package.Title)
+                .AddText(m.Message);
+
+            if (package.GetAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
+                builder.AddAppLogoOverride(image.Uri, addImageQuery: false);
+
+            var notif = new ToastNotification(builder.GetXml());
+
             // Hide progress notification
             Hide(progressToast);
             // Show the final notification
-            ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateDownloadSuccessToast(m.Package));
+            ToastNotificationManager.GetDefault().CreateToastNotifier().Show(notif);
         }
 
         public static void HandlePackageInstallProgressToast(PackageInstallProgressMessage m, ToastNotification progressToast)
@@ -213,15 +190,31 @@ namespace FluentStore.Helpers
             ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateInstallFailureToast((PackageBase)m.Context, m.Exception));
         }
 
-        public static void HandlePackageInstallCompletedToast(PackageInstallCompletedMessage m, ToastNotification progressToast)
+        public static void HandlePackageInstallCompletedToast(SuccessMessage m, ToastNotification progressToast)
         {
             if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
                 return;
 
+            PackageBase package = (PackageBase)m.Context;
+
+            var builder = new ToastContentBuilder().SetToastScenario(ToastScenario.Reminder)
+                .AddToastActivationInfo($"package/{package.Urn}", ToastActivationType.Foreground)
+                .AddText(package.ShortTitle)
+                .AddText(package.Title + " just got installed.");
+
+            try
+            {
+                if (package.GetAppIcon().Result is SDK.Images.FileImage image && !image.Uri.IsFile)
+                    builder.AddAppLogoOverride(image.Uri, addImageQuery: false);
+            }
+            finally { }
+
+            var notif = new ToastNotification(builder.GetXml());
+
             // Hide progress notification
             Hide(progressToast);
             // Show the final notification
-            ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateInstallSuccessToast(m.Package));
+            ToastNotificationManager.GetDefault().CreateToastNotifier().Show(notif);
         }
 
         private static void Hide(ToastNotification toast)

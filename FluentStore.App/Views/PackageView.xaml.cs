@@ -252,37 +252,24 @@ namespace FluentStore.Views
 
         private async void InstallSplitButton_Click(SplitButton sender, SplitButtonClickEventArgs e)
         {
-            InstallButton.IsEnabled = false;
-
-            RegisterPackageServiceMessages();
-            VisualStateManager.GoToState(this, "Progress", true);
-
-            Flyout flyout = null;
             try
             {
+                InstallButton.IsEnabled = false;
+                RegisterPackageServiceMessages();
+                VisualStateManager.GoToState(this, "Progress", true);
+
                 if (ViewModel.Package.Status.IsLessThan(PackageStatus.Downloaded))
                     await ViewModel.Package.DownloadAsync();
+
                 if (ViewModel.Package.Status.IsAtLeast(PackageStatus.Downloaded))
                 {
                     bool installed = await ViewModel.Package.InstallAsync();
-                    if (installed)
-                    {
-                        if (await ViewModel.Package.CanLaunchAsync())
-                            UpdateInstallButtonToLaunch();
-                        // Show success
-                        flyout = new Flyout
-                        {
-                            Content = new TextBlock
-                            {
-                                Text = "Install succeeded!"
-                            }
-                        };
-                    }
+                    if (installed && await ViewModel.Package.CanLaunchAsync())
+                        UpdateInstallButtonToLaunch();
                 }
             }
             finally
             {
-                flyout?.ShowAt(InstallButton);
                 InstallButton.IsEnabled = true;
                 VisualStateManager.GoToState(this, "NoAction", true);
                 WeakReferenceMessenger.Default.UnregisterAll(this);
@@ -294,10 +281,13 @@ namespace FluentStore.Views
             InstallButton.IsEnabled = false;
 
             var progressToast = RegisterPackageServiceMessages();
-            WeakReferenceMessenger.Default.Unregister<PackageDownloadCompletedMessage>(this);
-            WeakReferenceMessenger.Default.Register<PackageDownloadCompletedMessage>(this, async (r, m) =>
+            WeakReferenceMessenger.Default.Unregister<SuccessMessage>(this);
+            WeakReferenceMessenger.Default.Register<SuccessMessage>(this, async (r, m) =>
             {
-                FileInfo file = m.InstallerFile;
+                if (m.Type != SuccessType.PackageDownloadCompleted) return;
+
+                PackageBase p = (PackageBase)m.Context;
+                FileInfo file = (FileInfo)p.DownloadItem;
                 Windows.Storage.Pickers.FileSavePicker savePicker = new()
                 {
                     SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Downloads
@@ -307,32 +297,7 @@ namespace FluentStore.Views
                 var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.Current.Window);
                 WinRT.Interop.InitializeWithWindow.Initialize(savePicker, hwnd);
 
-                SDK.Models.InstallerType type = m.Package.Type;
-                SDK.Models.InstallerType typeReduced = type.Reduce();
-                string extDesc;
-                if (typeReduced == SDK.Models.InstallerType.Msix)
-                {
-                    extDesc = "Windows App " + (type.HasFlag(SDK.Models.InstallerType.Bundle) ? "Bundle" : "Package");
-
-                    if (type.HasFlag(SDK.Models.InstallerType.Encrypted))
-                        extDesc = "Encrypted " + extDesc;
-                }
-                else
-                {
-                    extDesc = type switch
-                    {
-                        SDK.Models.InstallerType.Msi => "Windows Installer",
-                        SDK.Models.InstallerType.Exe => "Installer",
-                        SDK.Models.InstallerType.Zip => "Compressed zip archive",
-                        SDK.Models.InstallerType.Inno => "Inno Setup installer",
-                        SDK.Models.InstallerType.Nullsoft => "NSIS installer",
-                        SDK.Models.InstallerType.Wix => "WiX installer",
-                        SDK.Models.InstallerType.Burn => "WiX Burn installer",
-
-                        _ => "Unknown"
-                    };
-                }
-                savePicker.FileTypeChoices.Add(extDesc, new string[] { file.Extension });
+                savePicker.FileTypeChoices.Add(p.Type.GetExtensionDescription(), new string[] { file.Extension });
                 savePicker.SuggestedFileName = file.Name;
 
                 _ = DispatcherQueue.TryEnqueue(() => PackageHelper.HandlePackageDownloadCompletedToast(m, progressToast));
@@ -343,26 +308,14 @@ namespace FluentStore.Views
                     await Task.Run(() => file.MoveTo(userFile.Path, true));
                 }
             });
-            VisualStateManager.GoToState(this, "Progress", true);
 
-            Flyout flyout = null;
             try
             {
-                if (await ViewModel.Package.DownloadAsync() != null)
-                {
-                    // Show success
-                    flyout = new Flyout
-                    {
-                        Content = new TextBlock
-                        {
-                            Text = "Download succeeded!"
-                        }
-                    };
-                }
+                VisualStateManager.GoToState(this, "Progress", true);
+                await ViewModel.Package.DownloadAsync();
             }
             finally
             {
-                flyout?.ShowAt(InstallButton);
                 InstallButton.IsEnabled = true;
                 VisualStateManager.GoToState(this, "NoAction", true);
                 WeakReferenceMessenger.Default.UnregisterAll(this);
@@ -463,8 +416,6 @@ namespace FluentStore.Views
             {
                 _ = DispatcherQueue.TryEnqueue(async () =>
                 {
-                    VisualStateManager.GoToState(this, "NoAction", true);
-                    
                     if (m.Context is PackageBase p)
                     {
                         switch (m.Type)
@@ -538,13 +489,19 @@ namespace FluentStore.Views
                     PackageHelper.HandlePackageInstallProgressToast(m, progressToast);
                 });
             });
-            WeakReferenceMessenger.Default.Register<PackageInstallCompletedMessage>(this, (r, m) =>
+            WeakReferenceMessenger.Default.Register<SuccessMessage>(this, (r, m) =>
             {
                 _ = DispatcherQueue.TryEnqueue(() =>
                 {
-                    VisualStateManager.GoToState(this, "NoAction", true);
-
-                    PackageHelper.HandlePackageInstallCompletedToast(m, progressToast);
+                    if (m.Context is PackageBase p)
+                    {
+                        switch (m.Type)
+                        {
+                            case SuccessType.PackageInstallCompleted:
+                                PackageHelper.HandlePackageInstallCompletedToast(m, progressToast);
+                                break;
+                        }
+                    }
                 });
             });
 

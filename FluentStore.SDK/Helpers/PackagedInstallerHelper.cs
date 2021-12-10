@@ -118,7 +118,7 @@ namespace FluentStore.SDK.Helpers
                 }
                 else
                 {
-                    WeakReferenceMessenger.Default.Send(new PackageInstallCompletedMessage(package));
+                    WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageInstallCompleted(package));
                     package.Status = PackageStatus.Installed;
                 }
                 return result.IsRegistered;
