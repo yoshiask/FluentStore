@@ -111,31 +111,6 @@ namespace FluentStore.Views
             }
         }
 
-        private async void MoreButton_Click(object sender, RoutedEventArgs e)
-        {
-            var dialog = new ContentDialog
-            {
-                Title = new TextBlock
-                {
-                    Text = ViewModel.Package.Title,
-                    FontSize = 24,
-                    FontWeight = FontWeights.Bold
-                },
-                Content = new ScrollViewer
-                {
-                    Content = new TextBlock
-                    {
-                        Text = ViewModel.Package.Description,
-                        TextWrapping = TextWrapping.Wrap
-                    }
-                },
-                PrimaryButtonText = "Close",
-                IsSecondaryButtonEnabled = false,
-                XamlRoot = Content.XamlRoot
-            };
-            await dialog.ShowAsync();
-        }
-
         private async void AddToCollection_Click(object sender, RoutedEventArgs e)
         {
             FlyoutBase flyout;
@@ -420,19 +395,12 @@ namespace FluentStore.Views
                     {
                         switch (m.Type)
                         {
-                            case ErrorType.PackageFetchFailed:
-                                var noPackagesDialog = new ContentDialog()
-                                {
-                                    Title = p.Title,
-                                    Content = "Failed to fetch packages for this product.",
-                                    PrimaryButtonText = "Ok",
-                                    XamlRoot = this.XamlRoot
-                                };
-                                await noPackagesDialog.ShowAsync();
-                                break;
-
                             case ErrorType.PackageDownloadFailed:
                                 PackageHelper.HandlePackageDownloadFailedToast(m, progressToast);
+                                break;
+
+                            case ErrorType.PackageInstallFailed:
+                                PackageHelper.HandlePackageInstallFailedToast(m, progressToast);
                                 break;
                         }
                     }
