@@ -16,7 +16,7 @@
         </Grid.RowDefinitions>
 
         <NavigationView x:Name="MainNav" PaneDisplayMode="Top" Grid.Row="1" IsTitleBarAutoPaddingEnabled="False"
-                              SelectionChanged="NavigationView_SelectionChanged" BackRequested="MainNav_BackRequested">
+                        SelectionChanged="NavigationView_SelectionChanged" BackRequested="MainNav_BackRequested">
 
             <NavigationView.PaneFooter>
                 <Grid>
@@ -65,7 +65,9 @@
             <Grid>
                 <Frame x:Name="MainFrame" />
                 <ProgressBar IsIndeterminate="True" VerticalAlignment="Top"
-                                   Visibility="{x:Bind ViewModel.IsPageLoading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                             Visibility="{x:Bind ViewModel.IsPageLoading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                <InfoBar x:Name="MainInfoBar" IsOpen="False"
+                         VerticalAlignment="Bottom" Margin="8"/>
             </Grid>
 
             <NavigationView.AutoSuggestBox>

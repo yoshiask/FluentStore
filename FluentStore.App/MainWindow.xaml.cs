@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.ViewModels.Messages;
 using Microsoft.UI.Xaml;
 using System;
 using System.Runtime.InteropServices;
@@ -14,7 +15,7 @@ namespace FluentStore
     /// <summary>
     /// An empty window that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class MainWindow : Window
+    public sealed partial class MainWindow : Window, IRecipient<SetPageHeaderMessage>
     {
         private IntPtr m_hwnd;
         private WinProc newWndProc = null;
@@ -29,13 +30,6 @@ namespace FluentStore
 
             LoadIcon(@"Assets\AppIcon.ico");
             UpdateTitleBarTheme();
-
-            WeakReferenceMessenger.Default.Register<ViewModels.Messages.SetPageHeaderMessage>(this, (r, m) =>
-            {
-                Title = App.AppName;
-                if (MainContent.IsCompact)
-                    Title += " - " + m.Value;
-            });
         }
 
         [DllImport("user32")]
@@ -102,6 +96,13 @@ namespace FluentStore
         {
             BOOL isDark = MainContent.ActualTheme == ElementTheme.Dark ? BOOL.TRUE : BOOL.FALSE;
             return DwmApi.DwmSetWindowAttribute(m_hwnd, (DwmApi.DWMWINDOWATTRIBUTE)20, new(&isDark), sizeof(BOOL));
+        }
+
+        void IRecipient<SetPageHeaderMessage>.Receive(SetPageHeaderMessage m)
+        {
+            Title = App.AppName;
+            if (MainContent.IsCompact)
+                Title += " - " + m.Value;
         }
     }
 }

@@ -25,7 +25,7 @@ namespace FluentStore.SDK.Packages
             return false;
         }
 
-        public override async Task<FileSystemInfo> DownloadPackageAsync(DirectoryInfo folder = null)
+        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
             throw new NotImplementedException();
         }

@@ -273,22 +273,16 @@ namespace FluentStore.SDK.Packages
             return null;
         }
 
-        public override async Task<FileSystemInfo> DownloadPackageAsync(DirectoryInfo folder = null)
+        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
-            WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
             // Find the package URI
-            if (!await PopulatePackageUri())
-            {
-                WeakReferenceMessenger.Default.Send(new PackageFetchFailedMessage(new Exception("An unknown error occurred."), this));
+            await PopulatePackageUri();
+            if (Status.IsLessThan(PackageStatus.DownloadReady))
                 return null;
-            }
-            WeakReferenceMessenger.Default.Send(new PackageFetchCompletedMessage(this));
 
             // Download package
-            DownloadItem = await InternalPackage.DownloadPackageAsync(folder);
+            DownloadItem = await InternalPackage.DownloadAsync(folder);
             Status = InternalPackage.Status;
-
-            // Check for success
             if (Status.IsLessThan(PackageStatus.Downloaded))
                 return null;
 
@@ -312,36 +306,44 @@ namespace FluentStore.SDK.Packages
             return DownloadItem;
         }
 
-        private async Task<bool> PopulatePackageUri()
+        private async Task PopulatePackageUri()
         {
-            PlatWindows currentPlat = PlatWindowsStringConverter.Parse(AnalyticsInfo.VersionInfo.DeviceFamily);
-            var culture = System.Globalization.CultureInfo.CurrentUICulture;
-
-            if (!IsWinGet)
+            WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
+            try
             {
-                var dcathandler = new StoreLib.Services.DisplayCatalogHandler(DCatEndpoint.Production, new StoreLib.Services.Locale(culture, true));
-                await dcathandler.QueryDCATAsync(StoreId);
-                IEnumerable<PackageInstance> packs = await dcathandler.GetMainPackagesForProductAsync();
+                PlatWindows currentPlat = PlatWindowsStringConverter.Parse(AnalyticsInfo.VersionInfo.DeviceFamily);
+                var culture = System.Globalization.CultureInfo.CurrentUICulture;
 
-                if (currentPlat != PlatWindows.Xbox)
-                    packs = packs.Where(p => p.Version.Revision != 70);
-                List<PackageInstance> installables = packs.OrderByDescending(p => p.Version).ToList();
-                if (installables.Count < 1)
-                    return false;
+                if (!IsWinGet)
+                {
+                    var dcathandler = new StoreLib.Services.DisplayCatalogHandler(DCatEndpoint.Production, new StoreLib.Services.Locale(culture, true));
+                    await dcathandler.QueryDCATAsync(StoreId);
+                    IEnumerable<PackageInstance> packs = await dcathandler.GetMainPackagesForProductAsync();
 
-                // TODO: Add addtional checks that might take longer that the user can enable 
-                // if they are having issues
+                    if (currentPlat != PlatWindows.Xbox)
+                        packs = packs.Where(p => p.Version.Revision != 70);
+                    List<PackageInstance> installables = packs.OrderByDescending(p => p.Version).ToList();
+                    if (installables.Count < 1)
+                        return;
 
-                Update(installables.First());
+                    // TODO: Add addtional checks that might take longer that the user can enable 
+                    // if they are having issues
+
+                    Update(installables.First());
+                }
+                else
+                {
+                    var StoreEdgeFDApi = Ioc.Default.GetRequiredService<Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.StoreEdgeFDApi>();
+                    Update((await StoreEdgeFDApi.GetPackageManifest(StoreId)).Data.Versions[0]);
+                }
+
+                WeakReferenceMessenger.Default.Send(new PackageFetchCompletedMessage(this));
+                Status = PackageStatus.DownloadReady;
             }
-            else
+            catch (Exception ex)
             {
-                var StoreEdgeFDApi = Ioc.Default.GetRequiredService<Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.StoreEdgeFDApi>();
-                Update((await StoreEdgeFDApi.GetPackageManifest(StoreId)).Data.Versions[0]);
+                WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, this, ErrorType.PackageFetchFailed));
             }
-
-            Status = PackageStatus.DownloadReady;
-            return true;
         }
 
         public override async Task<ImageBase> CacheAppIcon()

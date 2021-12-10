@@ -74,7 +74,7 @@ namespace FluentStore.SDK
 
         public abstract Task<bool> InstallAsync();
 
-        public abstract Task<FileSystemInfo> DownloadPackageAsync(DirectoryInfo folder = null);
+        public abstract Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null);
 
         public abstract Task<bool> CanLaunchAsync();
 

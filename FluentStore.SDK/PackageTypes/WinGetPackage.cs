@@ -80,21 +80,15 @@ namespace FluentStore.SDK.Packages
             set => _Urn = value;
         }
 
-        public override async Task<FileSystemInfo> DownloadPackageAsync(DirectoryInfo folder = null)
+        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
-            WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
             // Find the package URI
-            if (!await PopulatePackageUri())
-            {
-                WeakReferenceMessenger.Default.Send(new PackageFetchFailedMessage(new Exception("An unknown error occurred."), this));
+            await PopulatePackageUri();
+            if (!Status.IsAtLeast(PackageStatus.DownloadReady))
                 return null;
-            }
-            WeakReferenceMessenger.Default.Send(new PackageFetchCompletedMessage(this));
 
             // Download package
             await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
-
-            // Check for success
             if (!Status.IsAtLeast(PackageStatus.Downloaded))
                 return null;
 
@@ -106,13 +100,21 @@ namespace FluentStore.SDK.Packages
             return DownloadItem;
         }
 
-        private async Task<bool> PopulatePackageUri()
+        private async Task PopulatePackageUri()
         {
-            if (PackageUri == null)
-                Update(await WinGetApi.GetManifest(Urn.GetContent<NamespaceSpecificString>().UnEscapedValue, Version));
+            WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
+            try
+            {
+                if (PackageUri == null)
+                    Update(await WinGetApi.GetManifest(Urn.GetContent<NamespaceSpecificString>().UnEscapedValue, Version));
 
-            Status = PackageStatus.DownloadReady;
-            return true;
+                WeakReferenceMessenger.Default.Send(new PackageFetchCompletedMessage(this));
+                Status = PackageStatus.DownloadReady;
+            }
+            catch (Exception ex)
+            {
+                WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, this, ErrorType.PackageFetchFailed));
+            }
         }
 
         public override async Task<ImageBase> CacheAppIcon()

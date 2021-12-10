@@ -92,7 +92,7 @@ namespace FluentStore.SDK.Handlers
                 // but no such produdct exists, so it has to be caught manually.
                 if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V1.ErrorResponse>(out var error))
                 {
-                    throw new Models.WebException(404, error.ErrorDescription);
+                    throw Models.WebException.Create(404, error.ErrorDescription);
                 }
                 return null;
             }

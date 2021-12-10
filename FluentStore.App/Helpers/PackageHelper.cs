@@ -165,7 +165,7 @@ namespace FluentStore.Helpers
             ToastNotificationManager.GetDefault().CreateToastNotifier().Show(progressToast);
         }
 
-        public static void HandlePackageDownloadFailedToast(PackageDownloadFailedMessage m, ToastNotification progressToast)
+        public static void HandlePackageDownloadFailedToast(ErrorMessage m, ToastNotification progressToast)
         {
             if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
                 return;
@@ -173,7 +173,7 @@ namespace FluentStore.Helpers
             // Hide progress notification
             Hide(progressToast);
             // Show the final notification
-            ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateDownloadFailureToast(m.Context));
+            ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateDownloadFailureToast((PackageBase)m.Context));
         }
 
         public static void HandlePackageDownloadCompletedToast(PackageDownloadCompletedMessage m, ToastNotification progressToast)
@@ -202,7 +202,7 @@ namespace FluentStore.Helpers
             );
         }
 
-        public static void HandlePackageInstallFailedToast(PackageInstallFailedMessage m, ToastNotification progressToast)
+        public static void HandlePackageInstallFailedToast(ErrorMessage m, ToastNotification progressToast)
         {
             if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
                 return;
@@ -210,7 +210,7 @@ namespace FluentStore.Helpers
             // Hide progress notification
             Hide(progressToast);
             // Show the final notification
-            ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateInstallFailureToast(m.Context, m.Exception));
+            ToastNotificationManager.GetDefault().CreateToastNotifier().Show(GenerateInstallFailureToast((PackageBase)m.Context, m.Exception));
         }
 
         public static void HandlePackageInstallCompletedToast(PackageInstallCompletedMessage m, ToastNotification progressToast)

@@ -34,7 +34,7 @@ namespace FluentStore.SDK.Packages
             return Task.FromResult(Images.Where(i => i.ImageType == ImageType.Screenshot).ToList());
         }
 
-        public override async Task<FileSystemInfo> DownloadPackageAsync(DirectoryInfo folder = null)
+        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
             if (folder == null)
                 folder = StorageHelper.CreatePackageDownloadFolder(Urn);
@@ -42,7 +42,7 @@ namespace FluentStore.SDK.Packages
 
             bool success = true;
             foreach (PackageBase package in Items)
-                success &= await package.DownloadPackageAsync(folder) != null;
+                success &= await package.DownloadAsync(folder) != null;
 
             return success ? folder : null;
         }

@@ -261,7 +261,7 @@ namespace FluentStore.Views
             try
             {
                 if (ViewModel.Package.Status.IsLessThan(PackageStatus.Downloaded))
-                    await ViewModel.Package.DownloadPackageAsync();
+                    await ViewModel.Package.DownloadAsync();
                 if (ViewModel.Package.Status.IsAtLeast(PackageStatus.Downloaded))
                 {
                     bool installed = await ViewModel.Package.InstallAsync();
@@ -278,22 +278,7 @@ namespace FluentStore.Views
                             }
                         };
                     }
-                    else
-                    {
-                        // Show error
-                        flyout = new Controls.HttpErrorFlyout(418, "Package was not installed, an unknown error occurred.");
-                    }
                 }
-            }
-            catch (Flurl.Http.FlurlHttpException ex)
-            {
-                // TODO: Use InfoBar
-                flyout = new Controls.HttpErrorFlyout(ex.StatusCode ?? 418, ex.ToString());
-            }
-            catch (Exception ex)
-            {
-                // TODO: Use InfoBar
-                flyout = new Controls.HttpErrorFlyout(418, ex.ToString());
             }
             finally
             {
@@ -363,9 +348,7 @@ namespace FluentStore.Views
             Flyout flyout = null;
             try
             {
-                var storageItem = await ViewModel.Package.DownloadPackageAsync();
-                bool downloaded = storageItem != null;
-                if (downloaded)
+                if (await ViewModel.Package.DownloadAsync() != null)
                 {
                     // Show success
                     flyout = new Flyout
@@ -376,21 +359,6 @@ namespace FluentStore.Views
                         }
                     };
                 }
-                else
-                {
-                    // Show error
-                    flyout = new Controls.HttpErrorFlyout(418, "Package was not downloaded, an unknown error occurred.");
-                }
-            }
-            catch (Flurl.Http.FlurlHttpException ex)
-            {
-                // TODO: Use InfoBar
-                flyout = new Controls.HttpErrorFlyout(ex.StatusCode ?? 418, ex.Message);
-            }
-            catch (Exception ex)
-            {
-                // TODO: Use InfoBar
-                flyout = new Controls.HttpErrorFlyout(418, ex.Message);
             }
             finally
             {
@@ -491,27 +459,40 @@ namespace FluentStore.Views
         {
             var progressToast = PackageHelper.GenerateProgressToast(ViewModel.Package);
 
+            WeakReferenceMessenger.Default.Register<ErrorMessage>(this, (r, m) =>
+            {
+                _ = DispatcherQueue.TryEnqueue(async () =>
+                {
+                    VisualStateManager.GoToState(this, "NoAction", true);
+                    
+                    if (m.Context is PackageBase p)
+                    {
+                        switch (m.Type)
+                        {
+                            case ErrorType.PackageFetchFailed:
+                                var noPackagesDialog = new ContentDialog()
+                                {
+                                    Title = p.Title,
+                                    Content = "Failed to fetch packages for this product.",
+                                    PrimaryButtonText = "Ok",
+                                    XamlRoot = this.XamlRoot
+                                };
+                                await noPackagesDialog.ShowAsync();
+                                break;
+
+                            case ErrorType.PackageDownloadFailed:
+                                PackageHelper.HandlePackageDownloadFailedToast(m, progressToast);
+                                break;
+                        }
+                    }
+                });
+            });
             WeakReferenceMessenger.Default.Register<PackageFetchStartedMessage>(this, (r, m) =>
             {
                 _ = DispatcherQueue.TryEnqueue(() =>
                 {
                     ProgressIndicator.IsIndeterminate = true;
                     ProgressLabel.Text = "Fetching packages...";
-                });
-            });
-            WeakReferenceMessenger.Default.Register<PackageFetchFailedMessage>(this, (r, m) =>
-            {
-                _ = DispatcherQueue.TryEnqueue(async () =>
-                {
-                    VisualStateManager.GoToState(this, "NoAction", true);
-                    var noPackagesDialog = new ContentDialog()
-                    {
-                        Title = m.Context.Title,
-                        Content = "Failed to fetch packages for this product.",
-                        PrimaryButtonText = "Ok",
-                        XamlRoot = this.XamlRoot
-                    };
-                    await noPackagesDialog.ShowAsync();
                 });
             });
             WeakReferenceMessenger.Default.Register<PackageDownloadStartedMessage>(this, (r, m) =>
@@ -533,13 +514,6 @@ namespace FluentStore.Views
                     ProgressText.Text = $"{prog * 100:##0}%";
 
                     PackageHelper.HandlePackageDownloadProgressToast(m, progressToast);
-                });
-            });
-            WeakReferenceMessenger.Default.Register<PackageDownloadFailedMessage>(this, (r, m) =>
-            {
-                _ = DispatcherQueue.TryEnqueue(() =>
-                {
-                    PackageHelper.HandlePackageDownloadFailedToast(m, progressToast);
                 });
             });
             WeakReferenceMessenger.Default.Register<PackageInstallStartedMessage>(this, (r, m) =>

@@ -20,7 +20,7 @@ namespace FluentStore.SDK.Packages
 
         public override Task<bool> CanLaunchAsync() => Task.FromResult(false);
 
-        public override async Task<FileSystemInfo> DownloadPackageAsync(DirectoryInfo folder = null)
+        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
             await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
 

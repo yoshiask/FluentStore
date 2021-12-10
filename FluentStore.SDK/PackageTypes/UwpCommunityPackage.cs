@@ -105,12 +105,12 @@ namespace FluentStore.SDK.Packages
                 return false;
         }
 
-        public override async Task<FileSystemInfo> DownloadPackageAsync(DirectoryInfo folder = null)
+        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
             LinkedPackage = await PackageService.GetPackageFromUrlAsync(PackageUri);
             if (LinkedPackage != null)
             {
-                DownloadItem = await LinkedPackage.DownloadPackageAsync(folder);
+                DownloadItem = await LinkedPackage.DownloadAsync(folder);
                 Status = LinkedPackage.Status;
                 return DownloadItem;
             }

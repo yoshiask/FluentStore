@@ -1,17 +1,18 @@
-﻿using CommunityToolkit.Mvvm.Messaging.Messages;
-using System;
+﻿using System;
 
 namespace FluentStore.SDK.Messages
 {
-    public class ErrorMessage<T> : ValueChangedMessage<Exception> where T : class
+    public class ErrorMessage
     {
-        public ErrorMessage(Exception ex, T context = null) : base(ex)
+        public ErrorMessage(Exception ex, object context = null, ErrorType type = ErrorType.None)
         {
+            Exception = ex;
             Context = context;
+            Type = type;
         }
 
-        public Exception Exception => Value;
-        public T Context { get; set; }
+        public Exception Exception { get; set; }
+        public object Context { get; set; }
         public ErrorType Type { get; set; }
     }
 
@@ -21,12 +22,5 @@ namespace FluentStore.SDK.Messages
         PackageFetchFailed,
         PackageDownloadFailed,
         PackageInstallFailed,
-    }
-
-    public class ErrorMessage : ErrorMessage<object>
-    {
-        public ErrorMessage(Exception ex, object context = null) : base(ex, context)
-        {
-        }
     }
 }

@@ -11,6 +11,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
+using FluentStore.SDK.Messages;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -42,9 +43,17 @@ namespace FluentStore
             MainFrame.Navigated += MainFrame_Navigated;
             NavService.CurrentFrame = MainFrame;
 
-            foreach(PageInfo page in NavService.Pages)
+            foreach (PageInfo page in NavService.Pages)
                 MainNav.MenuItems.Add(page.GetNavigationViewItem());
             MainNav.SelectedItem = MainNav.MenuItems[0];
+
+            WeakReferenceMessenger.Default.Register<ErrorMessage>(this, (r, m) =>
+            {
+                MainInfoBar.Title = m.Exception.Message;
+                MainInfoBar.Message = m.Exception.StackTrace;
+                MainInfoBar.Severity = InfoBarSeverity.Error;
+                MainInfoBar.IsOpen = true;
+            });
 
             UserService.OnLoginStateChanged += UserService_OnLoginStateChanged;
             UserService.TrySignIn(false);

@@ -151,7 +151,7 @@ namespace FluentStore.SDK.Helpers
                 WeakReferenceMessenger.Default.Send(new PackageDownloadStartedMessage(package));
                 HttpResponseMessage response = await HttpClient.GetAsync(downloadUri);
                 if (!response.IsSuccessStatusCode)
-                    throw new Models.WebException((int)response.StatusCode, response.ReasonPhrase);
+                    throw Models.WebException.Create((int)response.StatusCode, response.ReasonPhrase, downloadUri.ToString());
 
                 // this is horrible
                 if (response.Content.TryComputeLength(out ulong computedLength) || (computedLength = response.Content.Headers.ContentLength.GetValueOrDefault()) != 0)
@@ -165,18 +165,15 @@ namespace FluentStore.SDK.Helpers
 
                 await RandomAccessStream.CopyAndCloseAsync(contentStream, outputStream)
                     .AsTask(new Progress<ulong>(DownloadProgress));
+                stream?.Dispose();
             }
             catch (Exception ex)
             {
-                WeakReferenceMessenger.Default.Send(new PackageDownloadFailedMessage(ex, package));
+                WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, package, ErrorType.PackageDownloadFailed));
                 package.Status = PackageStatus.DownloadReady;
                 stream?.Dispose();  // Make sure file is closed, or it will fail to remove from the cache
                 cache.Remove(package.Urn);
                 return;
-            }
-            finally
-            {
-                stream?.Dispose();
             }
 
         downloaded:
