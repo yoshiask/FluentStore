@@ -58,16 +58,7 @@ namespace FluentStore.SDK.Packages
         {
             // Make sure installer is downloaded
             Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
-
-            if (await PackagedInstallerHelper.Install(this))
-            {
-                Status = PackageStatus.Installed;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return await PackagedInstallerHelper.Install(this);
         }
 
         public override async Task LaunchAsync()
@@ -92,9 +83,16 @@ namespace FluentStore.SDK.Packages
 
         public override async Task<ImageBase> CacheAppIcon()
         {
-            Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
-            return PackagedInstallerHelper.GetAppIcon(
-                (FileInfo)DownloadItem, Type.HasFlag(InstallerType.Bundle));
+            try
+            {
+                Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
+                return PackagedInstallerHelper.GetAppIcon(
+                    (FileInfo)DownloadItem, Type.HasFlag(InstallerType.Bundle));
+            }
+            catch
+            {
+                return TextImage.CreateFromName(Title, ImageType.Logo);
+            }
         }
 
         public override async Task<ImageBase> CacheHeroImage()

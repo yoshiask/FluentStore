@@ -324,7 +324,7 @@ namespace FluentStore.SDK.Packages
                         packs = packs.Where(p => p.Version.Revision != 70);
                     List<PackageInstance> installables = packs.OrderByDescending(p => p.Version).ToList();
                     if (installables.Count < 1)
-                        return;
+                        throw new Exception("Failed to locate a compatible installer.");
 
                     // TODO: Add addtional checks that might take longer that the user can enable 
                     // if they are having issues

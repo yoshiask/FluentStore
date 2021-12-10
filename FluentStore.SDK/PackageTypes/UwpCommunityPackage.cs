@@ -11,6 +11,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
 using System.IO;
+using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.SDK.Messages;
 
 namespace FluentStore.SDK.Packages
 {
@@ -107,6 +109,14 @@ namespace FluentStore.SDK.Packages
 
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
+            if (PackageUri == null)
+            {
+                // No downlod link is available
+                WeakReferenceMessenger.Default.Send(new ErrorMessage(
+                    new Exception($"There are no download links available for {Title}."), this, ErrorType.PackageFetchFailed));
+                return null;
+            }
+
             LinkedPackage = await PackageService.GetPackageFromUrlAsync(PackageUri);
             if (LinkedPackage != null)
             {

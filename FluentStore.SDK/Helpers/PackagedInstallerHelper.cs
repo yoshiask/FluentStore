@@ -242,7 +242,8 @@ namespace FluentStore.SDK.Helpers
                 } while (packageNodes.MoveNext());
 
                 // Open the APPX/MSIX
-                using Stream packStream = archive.GetEntry(smallestPackEntry.GetAttribute("FileName", string.Empty)).Open();
+                string filename = smallestPackEntry.GetAttribute("FileName", string.Empty);
+                using Stream packStream = archive.GetEntry(Flurl.Url.Encode(filename)).Open();
                 packArchive = new ZipArchive(packStream);
             }
             else
