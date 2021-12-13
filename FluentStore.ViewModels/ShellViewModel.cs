@@ -1,10 +1,10 @@
 ﻿using FluentStore.Services;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using Microsoft.Toolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK;
 using System.Linq;
 using System.Collections.Generic;
@@ -29,24 +29,12 @@ namespace FluentStore.ViewModels
                 var self = (ShellViewModel)r;
                 self.IsPageLoading = m.Value;
             });
-            WeakReferenceMessenger.Default.Register<Messages.SetPageHeaderMessage>(this, (r, m) =>
-            {
-                var self = (ShellViewModel)r;
-                self.PageHeader = m.Value;
-            });
         }
 
         private readonly UserService UserService = Ioc.Default.GetRequiredService<UserService>();
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
         private readonly ISettingsService Settings = Ioc.Default.GetRequiredService<ISettingsService>();
-
-        private string _PageHeader;
-        public string PageHeader
-        {
-            get => _PageHeader;
-            set => SetProperty(ref _PageHeader, value);
-        }
 
         private bool _IsPageLoading;
         public bool IsPageLoading
@@ -55,7 +43,7 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _IsPageLoading, value);
         }
 
-        private ObservableCollection<PackageViewModel> _SearchSuggestions = new ObservableCollection<PackageViewModel>();
+        private ObservableCollection<PackageViewModel> _SearchSuggestions = new();
         public ObservableCollection<PackageViewModel> SearchSuggestions
         {
             get => _SearchSuggestions;
@@ -127,7 +115,7 @@ namespace FluentStore.ViewModels
                 if (Settings.UseExclusionFilter)
                 {
                     // Filter out unwanted search results
-                    Regex exclusionFilter = new Regex(Settings.ExclusionFilter, RegexOptions.Compiled);
+                    Regex exclusionFilter = new(Settings.ExclusionFilter, RegexOptions.Compiled);
                     results = results.Where(pb => !exclusionFilter.IsMatch(pb.Title));
                 }
 

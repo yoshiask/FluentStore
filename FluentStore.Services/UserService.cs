@@ -1,9 +1,8 @@
 ﻿using FSAPI = FluentStoreAPI.FluentStoreAPI;
 using FluentStoreAPI.Models.Firebase;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Threading.Tasks;
-using System.Linq;
 
 namespace FluentStore.Services
 {
@@ -62,7 +61,7 @@ namespace FluentStore.Services
                     }
                 }
 
-                CurrentUser = (await FSApi.GetCurrentUserDataAsync()).First();
+                CurrentUser = (await FSApi.GetCurrentUserDataAsync())[0];
                 CurrentProfile = await FSApi.GetUserProfileAsync(CurrentUser.LocalID);
 
                 PasswordVaultService.Add(new CredentialBase(CurrentUser.LocalID, refreshToken));
@@ -82,6 +81,8 @@ namespace FluentStore.Services
 
         public async Task TrySignIn(bool useUi = true)
         {
+            if (IsLoggedIn) return;
+
             try
             {
                 var loginCredential = PasswordVaultService.FindAllByResource(CredentialBase.DEFAULT_RESOURCE)[0];
@@ -99,6 +100,7 @@ namespace FluentStore.Services
             }
 
         failed:
+            IsLoggedIn = false;
             if (useUi)
             {
                 // There is no credential stored in the locker.

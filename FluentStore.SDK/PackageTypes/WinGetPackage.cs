@@ -2,9 +2,9 @@
 using FluentStore.SDK.Images;
 using FluentStore.SDK.Messages;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Toolkit.Diagnostics;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.Messaging;
+using CommunityToolkit.Diagnostics;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +13,13 @@ using Windows.Foundation.Metadata;
 using Windows.Storage;
 using WinGetRun;
 using WinGetRun.Models;
+using System.IO;
 
 namespace FluentStore.SDK.Packages
 {
     public class WinGetPackage : PackageBase<Package>
     {
-        private readonly WinGetApi WinGetApi = Ioc.Default.GetRequiredService<WinGetApi>();
+        private readonly WinGetApi WinGetApi = Ioc.Default.GetService<WinGetApi>();
 
         public WinGetPackage(Package pack = null)
         {
@@ -38,10 +39,33 @@ namespace FluentStore.SDK.Packages
             ReleaseDate = pack.CreatedAt;
             Description = pack.Latest.Description;
             Version = pack.Versions[0];
-            Website = pack.Latest.Homepage;
+            Website = Models.Link.Create(pack.Latest.Homepage, ShortTitle + " website");
 
             // Set WinGet package properties
             PackageId = pack.GetPublisherAndPackageIds().PackageId;
+        }
+
+        public void Update(Manifest manifest)
+        {
+            Guard.IsNotNull(manifest, nameof(manifest));
+            Manifest = manifest;
+            var installer = Manifest.Installers[0];
+
+            PackageUri = new Uri(installer.Url);
+            Website = Models.Link.Create(Manifest.Homepage, ShortTitle + " website");
+
+            if (installer.InstallerType.HasValue)
+            {
+                Type = installer.InstallerType.Value.ToSDKInstallerType();
+            }
+            else if (manifest.InstallerType.HasValue)
+            {
+                Type = manifest.InstallerType.Value.ToSDKInstallerType();
+            }
+            else if (Enum.TryParse<Models.InstallerType>(Path.GetExtension(PackageUri.ToString())[1..], true, out var type))
+            {
+                Type = type;
+            }
         }
 
         private Urn _Urn;
@@ -56,60 +80,64 @@ namespace FluentStore.SDK.Packages
             set => _Urn = value;
         }
 
-        public override async Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null)
+        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
-            WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
             // Find the package URI
-            if (!await PopulatePackageUri())
-            {
-                WeakReferenceMessenger.Default.Send(new PackageFetchFailedMessage(this, new Exception("An unknown error occurred.")));
+            await PopulatePackageUri();
+            if (!Status.IsAtLeast(PackageStatus.DownloadReady))
                 return null;
-            }
-            WeakReferenceMessenger.Default.Send(new PackageFetchCompletedMessage(this));
 
             // Download package
             await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
+            if (!Status.IsAtLeast(PackageStatus.Downloaded))
+                return null;
 
             // Set the proper file name
-            await DownloadItem.RenameAsync(System.IO.Path.GetFileName(PackageUri.ToString()), NameCollisionOption.ReplaceExisting);
+            DownloadItem = ((FileInfo)DownloadItem).CopyRename(Path.GetFileName(PackageUri.ToString()));
 
-            WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, (StorageFile)DownloadItem));
+            WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageDownloadCompleted(this));
             Status = PackageStatus.Downloaded;
             return DownloadItem;
         }
 
-        private async Task<bool> PopulatePackageUri()
+        private async Task PopulatePackageUri()
         {
-            Manifest = await WinGetApi.GetManifest(Urn.GetContent<NamespaceSpecificString>().UnEscapedValue, Version);
-            PackageUri = new Uri(Manifest.Installers[0].Url);
-            Website = Manifest.Homepage;
+            WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
+            try
+            {
+                if (PackageUri == null)
+                    Update(await WinGetApi.GetManifest(Urn.GetContent<NamespaceSpecificString>().UnEscapedValue, Version));
 
-            Status = PackageStatus.DownloadReady;
-            return true;
+                WeakReferenceMessenger.Default.Send(new SuccessMessage(null, this, SuccessType.PackageFetchCompleted));
+                Status = PackageStatus.DownloadReady;
+            }
+            catch (Exception ex)
+            {
+                WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, this, ErrorType.PackageFetchFailed));
+            }
         }
 
-        public override async Task<ImageBase> GetAppIcon()
+        public override async Task<ImageBase> CacheAppIcon()
         {
-            if (Model.IconUrl != null)
+            ImageBase icon = null;
+            if (Model?.IconUrl != null)
             {
-                return new FileImage
+                icon = new FileImage
                 {
                     Url = Model.IconUrl,
                     ImageType = ImageType.Logo
                 };
             }
-            else
-            {
-                return TextImage.CreateFromName(Model.Latest.Name);
-            }
+
+            return icon ?? TextImage.CreateFromName(Model?.Latest?.Name ?? Title);
         }
 
-        public override Task<ImageBase> GetHeroImage()
+        public override async Task<ImageBase> CacheHeroImage()
         {
             return null;
         }
 
-        public override async Task<List<ImageBase>> GetScreenshots()
+        public override async Task<List<ImageBase>> CacheScreenshots()
         {
             return new List<ImageBase>();
         }
@@ -117,7 +145,7 @@ namespace FluentStore.SDK.Packages
         public override async Task<bool> InstallAsync()
         {
             // Make sure installer is downloaded
-            Guard.IsEqualTo((int)Status, (int)PackageStatus.Downloaded, nameof(Status));
+            Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
             bool isSuccess = false;
 
             // Get installer for current architecture
@@ -133,20 +161,18 @@ namespace FluentStore.SDK.Packages
                     $"This package supports {archStr}].");
             }
 
-            switch (Installer.InstallerType ?? Manifest.InstallerType)
+            switch (Type.Reduce())
             {
-                case WinGetRun.Enums.InstallerType.Appx:
-                case WinGetRun.Enums.InstallerType.Msix:
+                case Models.InstallerType.Msix:
                     isSuccess = await PackagedInstallerHelper.Install(this);
-                    var file = (StorageFile)DownloadItem;
-                    PackagedInstallerType = await PackagedInstallerHelper.GetInstallerType(file);
-                    PackageFamilyName = await PackagedInstallerHelper.GetPackageFamilyName(file, PackagedInstallerType.Value.HasFlag(Models.InstallerType.Bundle));
+                    var file = (FileInfo)DownloadItem;
+                    PackagedInstallerType = PackagedInstallerHelper.GetInstallerType(file);
+                    PackageFamilyName = PackagedInstallerHelper.GetPackageFamilyName(file, PackagedInstallerType.Value.HasFlag(Models.InstallerType.Bundle));
                     break;
 
                 default:
-                    // TODO: Use full trust component to start installer in slient mode
                     var args = Installer.Switches?.Silent ?? Manifest.Switches?.Silent;
-                    await Win32Helper.Install(this, args);
+                    isSuccess = await Win32Helper.Install(this, args);
                     break;
             }
 
@@ -190,13 +216,6 @@ namespace FluentStore.SDK.Packages
             set => SetProperty(ref _PackagedInstallerType, value);
         }
         public bool HasPackagedInstallerType => PackagedInstallerType == null;
-
-        private Uri _PackageUri;
-        public Uri PackageUri
-        {
-            get => _PackageUri;
-            set => SetProperty(ref _PackageUri, value);
-        }
 
         private string _PackageId;
         public string PackageId

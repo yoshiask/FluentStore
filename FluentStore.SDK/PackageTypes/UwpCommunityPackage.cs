@@ -2,14 +2,17 @@
 using FluentStore.Services;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Toolkit.Diagnostics;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Diagnostics;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
+using System.IO;
+using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.SDK.Messages;
 
 namespace FluentStore.SDK.Packages
 {
@@ -57,7 +60,8 @@ namespace FluentStore.SDK.Packages
 
             // Set UWPC properties
             ProjectId = (int)project.id;
-            DownloadLink = project.downloadLink;
+            if (project.downloadLink != null)
+                PackageUri = new(project.downloadLink);
         }
 
         public void UpdateWithImages(IEnumerable<string> images)
@@ -103,37 +107,57 @@ namespace FluentStore.SDK.Packages
                 return false;
         }
 
-        public override async Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null)
+        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
-            LinkedPackage = await PackageService.GetPackageFromUrlAsync(DownloadLink);
+            if (PackageUri == null)
+            {
+                // No downlod link is available
+                WeakReferenceMessenger.Default.Send(new ErrorMessage(
+                    new Exception($"There are no download links available for {Title}."), this, ErrorType.PackageFetchFailed));
+                return null;
+            }
+
+            LinkedPackage = await PackageService.GetPackageFromUrlAsync(PackageUri);
             if (LinkedPackage != null)
             {
-                DownloadItem = await LinkedPackage.DownloadPackageAsync(folder);
+                DownloadItem = await LinkedPackage.DownloadAsync(folder);
                 Status = LinkedPackage.Status;
                 return DownloadItem;
             }
             else
             {
-                Status = await NavigationService.OpenInBrowser(DownloadLink)
+                Status = await NavigationService.OpenInBrowser(PackageUri)
                     ? PackageStatus.Downloaded : PackageStatus.DownloadReady;
                 return null;
             }
         }
 
-        public override async Task<ImageBase> GetAppIcon()
+        public override async Task<ImageBase> CacheAppIcon()
         {
-            return Images.FirstOrDefault(i => i.ImageType == ImageType.Logo)
+            var icon = Images.FirstOrDefault(i => i.ImageType == ImageType.Logo)
                 ?? TextImage.CreateFromName(Title);
+
+            if (LinkedPackage != null)
+                LinkedPackage.AppIconCache = icon;
+            return icon;
         }
 
-        public override async Task<ImageBase> GetHeroImage()
+        public override async Task<ImageBase> CacheHeroImage()
         {
-            return Images.FirstOrDefault(i => i.ImageType == ImageType.Hero);
+            var img = Images.FirstOrDefault(i => i.ImageType == ImageType.Hero);
+
+            if (LinkedPackage != null)
+                LinkedPackage.HeroImageCache = img;
+            return img;
         }
 
-        public override async Task<List<ImageBase>> GetScreenshots()
+        public override async Task<List<ImageBase>> CacheScreenshots()
         {
-            return Images.Where(i => i.ImageType == ImageType.Screenshot).ToList();
+            var screenhots = Images.Where(i => i.ImageType == ImageType.Screenshot).ToList();
+
+            if (LinkedPackage != null)
+                LinkedPackage.ScreenshotsCache = screenhots;
+            return screenhots;
         }
 
         public override async Task<bool> InstallAsync()
@@ -155,13 +179,6 @@ namespace FluentStore.SDK.Packages
         {
             get => _ProjectId;
             set => SetProperty(ref _ProjectId, value);
-        }
-
-        private Url _DownloadLink;
-        public Url DownloadLink
-        {
-            get => _DownloadLink;
-            set => SetProperty(ref _DownloadLink, value);
         }
 
         private PackageBase _LinkedPackage;

@@ -2,7 +2,7 @@
 using FluentStore.SDK.Packages;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FSAPI = FluentStoreAPI.FluentStoreAPI;
@@ -15,7 +15,7 @@ namespace FluentStore.SDK.Handlers
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
         public const string NAMESPACE_COLLECTION = "fluent-store-collection";
-        public override HashSet<string> HandledNamespaces => new HashSet<string>
+        public override HashSet<string> HandledNamespaces => new()
         {
             NAMESPACE_COLLECTION,
         };

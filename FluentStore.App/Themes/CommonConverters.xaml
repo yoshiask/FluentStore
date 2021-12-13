@@ -1,0 +1,29 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:tkconverters="using:CommunityToolkit.WinUI.UI.Converters"
+    xmlns:converters="using:FluentStore.Converters">
+
+    <tkconverters:StringFormatConverter x:Key="StringFormatConverter" />
+    <tkconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    <tkconverters:CollectionVisibilityConverter x:Key="CollectionVisibilityConverter"/>
+    <tkconverters:EmptyCollectionToObjectConverter x:Key="EmptyCollectionToFalseConverter" EmptyValue="False" NotEmptyValue="True"/>
+    <tkconverters:EmptyCollectionToObjectConverter x:Key="EmptyCollectionToTrueConverter" EmptyValue="True" NotEmptyValue="False"/>
+    <tkconverters:BoolToVisibilityConverter x:Key="NotBoolToVisibilityConverter" FalseValue="Visible" TrueValue="Collapsed"/>
+    <tkconverters:EmptyStringToObjectConverter x:Key="EmptyStringToCollapsedConverter" EmptyValue="Collapsed" NotEmptyValue="Visible"/>
+    <tkconverters:EmptyStringToObjectConverter x:Key="EmptyStringToVisibleConverter" EmptyValue="Visible" NotEmptyValue="Collapsed"/>
+    <tkconverters:EmptyStringToObjectConverter x:Key="EmptyStringToTrueConverter" EmptyValue="True" NotEmptyValue="False"/>
+    <tkconverters:EmptyStringToObjectConverter x:Key="EmptyStringToFalseConverter" EmptyValue="False" NotEmptyValue="True"/>
+    <tkconverters:BoolNegationConverter x:Key="NotBoolConverter"/>
+    <tkconverters:EmptyObjectToObjectConverter x:Key="NullToFalseConverter" EmptyValue="False" NotEmptyValue="True"/>
+    <tkconverters:EmptyObjectToObjectConverter x:Key="NullToTrueConverter" EmptyValue="True" NotEmptyValue="False"/>
+
+    <converters:StreamToBitmapImageConverter x:Key="StreamToBitmapImageConverter"/>
+    <converters:NameToFontFamilyConverter x:Key="NameToFontFamilyConverter"/>
+    <converters:NumberToStarGridLength x:Key="NumberToStarGridLength"/>
+    <converters:CSSColorToBrushConverter x:Name="CSSColorToBrushConverter"/>
+    <converters:PlatWindowsEnumToVisibility x:Key="PlatWindowsEnumToVisibility"/>
+    <converters:PackageBaseEnumerableToViewModelEnumerable x:Key="PackageBaseEnumerableToViewModelEnumerable"/>
+    <converters:PackageDisplayConverter x:Key="PackageDisplayConverter"/>
+
+</ResourceDictionary>

@@ -3,10 +3,10 @@ using FluentStore.SDK.Attributes;
 using FluentStore.SDK.Images;
 using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.Input;
-using Microsoft.Toolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -139,6 +139,24 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _Screenshots, value);
         }
 
+        private ImageBase _SelectedScreenshot;
+        public ImageBase SelectedScreenshot
+        {
+            get => _SelectedScreenshot;
+            set
+            {
+                SelectedScreenshotNumLabel = (Screenshots.IndexOf(value) + 1).ToString();
+                SetProperty(ref _SelectedScreenshot, value);
+            }
+        }
+
+        private string _SelectedScreenshotNum;
+        public string SelectedScreenshotNumLabel
+        {
+            get => _SelectedScreenshotNum;
+            set => SetProperty(ref _SelectedScreenshotNum, value);
+        }
+
         public string AverageRatingString => Package != null && Package.HasReviewSummary && Package.ReviewSummary.HasAverageRating
             ? Package.ReviewSummary.AverageRating.ToString("F1")
             : string.Empty;
@@ -152,17 +170,12 @@ namespace FluentStore.ViewModels
             }
             else
             {
-                switch (obj)
+                pvm = obj switch
                 {
-                    case PackageViewModel viewModel:
-                        pvm = viewModel;
-                        break;
-                    case PackageBase package:
-                        pvm = new PackageViewModel(package);
-                        break;
-                    default:
-                        throw new ArgumentException($"'{nameof(obj)}' is an invalid type: {obj.GetType().Name}");
-                }
+                    PackageViewModel viewModel => viewModel,
+                    PackageBase package => new PackageViewModel(package),
+                    _ => throw new ArgumentException($"'{nameof(obj)}' is an invalid type: {obj.GetType().Name}"),
+                };
             }
 
             if (pvm.Package.Status < PackageStatus.Details)
@@ -212,7 +225,8 @@ namespace FluentStore.ViewModels
                             continue;
 
                         object value = prop.GetValue(Package);
-                        if (value == null)
+                        object defaultValue = prop.PropertyType.IsValueType ? Activator.CreateInstance(prop.PropertyType) : null;
+                        if (value == null || value.Equals(defaultValue) || (value is System.Collections.IList list && list.Count == 0))
                             continue;
 
                         var info = new DisplayInfo(displayAttr, value);
@@ -249,8 +263,9 @@ namespace FluentStore.ViewModels
                         if (displayAttr == null)
                             continue;
 
-                        object value = prop.GetValue(Package);
-                        if (value == null)
+                        object value = prop.GetValue(Package, null);
+                        object defaultValue = prop.PropertyType.IsValueType ? Activator.CreateInstance(prop.PropertyType) : null;
+                        if (value == null || value.Equals(defaultValue) || (value is System.Collections.IList list && list.Count == 0))
                             continue;
 
                         var info = new DisplayAdditionalInformationInfo(displayAttr, value);
@@ -266,7 +281,7 @@ namespace FluentStore.ViewModels
         }
 
         public static implicit operator PackageBase(PackageViewModel pvm) => pvm.Package;
-        public static implicit operator PackageViewModel(PackageBase pb) => new PackageViewModel(pb);
+        public static implicit operator PackageViewModel(PackageBase pb) => new(pb);
 
         public override string ToString() => Package.ToString();
     }

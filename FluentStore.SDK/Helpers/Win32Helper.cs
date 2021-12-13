@@ -1,52 +1,31 @@
 ﻿using FluentStore.SDK.Images;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using Newtonsoft.Json;
-using OwlCore.Extensions;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.Foundation.Collections;
-using Windows.Storage;
+using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.SDK.Messages;
+using Windows.System;
 
 namespace FluentStore.SDK.Helpers
 {
     public static class Win32Helper
     {
-        public static async Task InvokeWin32ComponentAsync(string applicationPath, string arguments = null, bool runAsAdmin = false, string workingDirectory = null)
+        public static ProcessorArchitecture GetSystemArchitecture()
         {
-            await InvokeWin32ComponentsAsync(applicationPath.IntoList(), arguments, runAsAdmin, workingDirectory);
-        }
-
-        public static async Task InvokeWin32ComponentsAsync(IEnumerable<string> applicationPaths, string arguments = null, bool runAsAdmin = false, string workingDirectory = null)
-        {
-            Debug.WriteLine("Launching EXE in FullTrustProcess");
-
-            var connection = await AppServiceConnectionHelper.Instance;
-            if (connection != null)
+            PInvoke.Kernel32.GetNativeSystemInfo(out var sysInfo);
+            return sysInfo.wProcessorArchitecture switch
             {
-                var value = new ValueSet()
-                {
-                    { "Arguments", "LaunchApp" },
-                    { "WorkingDirectory", workingDirectory },
-                    { "Application", applicationPaths.FirstOrDefault() },
-                    { "ApplicationList", JsonConvert.SerializeObject(applicationPaths) },
-                };
+                PInvoke.Kernel32.ProcessorArchitecture.PROCESSOR_ARCHITECTURE_INTEL => ProcessorArchitecture.X86,
+                PInvoke.Kernel32.ProcessorArchitecture.PROCESSOR_ARCHITECTURE_AMD64 => ProcessorArchitecture.X64,
+                PInvoke.Kernel32.ProcessorArchitecture.PROCESSOR_ARCHITECTURE_ARM => ProcessorArchitecture.Arm,
+                PInvoke.Kernel32.ProcessorArchitecture.PROCESSOR_ARCHITECTURE_ARM64 => ProcessorArchitecture.Arm64,
 
-                if (runAsAdmin)
-                {
-                    value.Add("Parameters", "runas");
-                }
-                else
-                {
-                    value.Add("Parameters", arguments);
-                }
-
-                await connection.SendMessageAsync(value);
-            }
+                _ => ProcessorArchitecture.Unknown,
+            };
         }
 
         /// <inheritdoc cref="PackageBase.InstallAsync"/>
@@ -54,23 +33,41 @@ namespace FluentStore.SDK.Helpers
         {
             try
             {
-                await InvokeWin32ComponentAsync(package.DownloadItem.Path, args, true);
-                return true;
+                WeakReferenceMessenger.Default.Send(new PackageInstallStartedMessage(package));
+
+                // Create and run new process for installer
+                ProcessStartInfo startInfo = new()
+                {
+                    FileName = package.DownloadItem.FullName,
+                    Arguments = args,
+                    UseShellExecute = true,
+                };
+                var installProc = Process.Start(startInfo);
+                await installProc.WaitForExitAsync();
+
+                bool success = installProc.ExitCode == 0;
+                if (success)
+                    WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageInstallCompleted(package));
+                else
+                    WeakReferenceMessenger.Default.Send(new ErrorMessage(
+                        new Exception(installProc.ExitCode.ToString()), package, ErrorType.PackageInstallFailed));
+                return success;
             }
             catch (Exception ex)
             {
+                WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, package, ErrorType.PackageInstallFailed));
                 var logger = Ioc.Default.GetRequiredService<Services.LoggerService>();
                 logger.UnhandledException(ex, "Exception from Win32 component");
                 return false;
             }
         }
 
-        /// <inheritdoc cref="PackageBase.GetAppIcon"/>
-        public static async Task<ImageBase> GetAppIcon(StorageFile file)
+        /// <inheritdoc cref="PackageBase.CacheAppIcon"/>
+        public static async Task<ImageBase> GetAppIcon(FileInfo file)
         {
             // Open package archive for reading
-            using var stream = await file.OpenReadAsync();
-            using var archive = new ZipArchive(stream.AsStream());
+            using FileStream stream = file.OpenRead();
+            using ZipArchive archive = new(stream);
 
             // Get the app icon
             ZipArchiveEntry iconEntry = archive.Entries.FirstOrDefault(e => e.FullName.StartsWith(".rsrc/ICON/1"));

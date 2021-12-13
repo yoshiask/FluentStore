@@ -1,16 +1,18 @@
-﻿using FluentStore.SDK.Images;
+﻿using CommunityToolkit.Diagnostics;
+using FluentStore.SDK.Helpers;
+using FluentStore.SDK.Images;
 using Garfoot.Utilities.FluentUrn;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.Storage;
 
 namespace FluentStore.SDK.Packages
 {
     /// <summary>
     /// Provides a default implementation of <see cref="PackageBase"/> that can be used
-    /// by packages that do not have accessible installers (i.e. <see cref="Handlers.UwpCommunityHandler"/>.
+    /// by packages that do not have accessible installers.
     /// </summary>
     public class GenericPackage<TModel> : PackageBase<TModel>
     {
@@ -18,24 +20,58 @@ namespace FluentStore.SDK.Packages
 
         public override Task<bool> CanLaunchAsync() => Task.FromResult(false);
 
-        public override Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null) => Task.FromResult<IStorageItem>(null);
+        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
+        {
+            await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
 
-        public override Task<ImageBase> GetAppIcon()
+            // Check for success
+            if (Status.IsLessThan(PackageStatus.Downloaded))
+                return null;
+
+            if (PackageUri != null && DownloadItem is FileInfo file)
+                DownloadItem = file.CopyRename(Path.GetFileName(PackageUri.AbsolutePath));
+
+            return DownloadItem;
+        }
+
+        public override Task<ImageBase> CacheAppIcon()
         {
             return Task.FromResult(Images.FirstOrDefault(i => i.ImageType == ImageType.Logo));
         }
 
-        public override Task<ImageBase> GetHeroImage()
+        public override Task<ImageBase> CacheHeroImage()
         {
             return Task.FromResult(Images.FirstOrDefault(i => i.ImageType == ImageType.Hero));
         }
 
-        public override Task<List<ImageBase>> GetScreenshots()
+        public override Task<List<ImageBase>> CacheScreenshots()
         {
             return Task.FromResult(Images.Where(i => i.ImageType == ImageType.Screenshot).ToList());
         }
 
-        public override Task<bool> InstallAsync() => throw new NotImplementedException();
+        public override async Task<bool> InstallAsync()
+        {
+            // A very basic method of installing a package. It has issues, for example Win32 installers
+            // won't be run silently, but it's better than an error.
+
+            // Make sure installer is downloaded
+            Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
+
+            bool success = false;
+            Models.InstallerType typeReduced = Type.Reduce();
+            if (typeReduced == Models.InstallerType.Win32)
+            {
+                success = await Win32Helper.Install(this);
+            }
+            else if (typeReduced == Models.InstallerType.Msix)
+            {
+                success = await PackagedInstallerHelper.Install(this);
+            }
+
+            if (success)
+                Status = PackageStatus.Installed;
+            return success;
+        }
 
         public override Task LaunchAsync() => throw new NotImplementedException();
     }

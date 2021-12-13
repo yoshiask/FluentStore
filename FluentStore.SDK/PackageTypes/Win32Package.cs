@@ -1,11 +1,12 @@
 ﻿using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Toolkit.Diagnostics;
+using CommunityToolkit.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Storage;
+using System.IO;
 
 namespace FluentStore.SDK.Packages
 {
@@ -24,22 +25,22 @@ namespace FluentStore.SDK.Packages
             return false;
         }
 
-        public override async Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null)
+        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
             throw new NotImplementedException();
         }
 
-        public override async Task<ImageBase> GetAppIcon()
+        public override async Task<ImageBase> CacheAppIcon()
         {
             return TextImage.CreateFromName(ShortTitle);
         }
 
-        public override async Task<ImageBase> GetHeroImage()
+        public override async Task<ImageBase> CacheHeroImage()
         {
             return null;
         }
 
-        public override async Task<List<ImageBase>> GetScreenshots()
+        public override async Task<List<ImageBase>> CacheScreenshots()
         {
             return new List<ImageBase>(0);
         }

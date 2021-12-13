@@ -5,10 +5,10 @@ using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
 using FluentStoreAPI.Models;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.Input;
-using Microsoft.Toolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -31,7 +31,7 @@ namespace FluentStore.ViewModels
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
         private readonly FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
 
-        private ObservableCollection<PackageViewModel> _Collections = new ObservableCollection<PackageViewModel>();
+        private ObservableCollection<PackageViewModel> _Collections = new();
         public ObservableCollection<PackageViewModel> Collections
         {
             get => _Collections;
@@ -121,7 +121,7 @@ namespace FluentStore.ViewModels
                 var collections = await FSApi.GetCollectionsAsync(UserService.CurrentUser.LocalID);
                 foreach (Collection collection in collections)
                 {
-                    CollectionPackage package = new CollectionPackage(collection);
+                    CollectionPackage package = new(collection);
                     Collections.Add(new PackageViewModel(package));
                 }
             }

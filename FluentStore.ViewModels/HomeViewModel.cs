@@ -1,10 +1,10 @@
 ﻿using FSAPI = FluentStoreAPI.FluentStoreAPI;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using Microsoft.Toolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.ViewModels.Messages;
 using FluentStore.SDK.Packages;
 using Microsoft.Marketplace.Storefront.Contracts;
@@ -12,6 +12,7 @@ using Garfoot.Utilities.FluentUrn;
 using FluentStore.SDK;
 using FluentStore.Services;
 using FluentStore.SDK.Models;
+using FluentStore.SDK.Helpers;
 
 namespace FluentStore.ViewModels
 {
@@ -33,82 +34,38 @@ namespace FluentStore.ViewModels
 
                 var page = await StorefrontApi.GetHomeRecommendations();
 
-                var featured = await FSApi.GetHomePageFeaturedAsync();
+                var featured = await FSApi.GetHomePageFeaturedAsync(Windows.ApplicationModel.Package.Current.Id.Version.ToVersion());
                 CarouselItems.Clear();
 
                 for (int i = 0; i < featured.Carousel.Count; i++)
                 {
-                    Urn packageUrn = Urn.Parse(featured.Carousel[i]);
-                    var package = await PackageService.GetPackageAsync(packageUrn);
-                    CarouselItems.Add(new PackageViewModel(package));
-                    if (i == 0)
-                        SelectedCarouselItemIndex = i;
+                    try
+                    {
+                        Urn packageUrn = Urn.Parse(featured.Carousel[i]);
+                        var package = await PackageService.GetPackageAsync(packageUrn);
+                        CarouselItems.Add(new PackageViewModel(package));
+                        if (i == 0)
+                            SelectedCarouselItemIndex = i;
+                    }
+                    catch (Flurl.Http.FlurlHttpException)
+                    {
+                        // Ignore packages that couldn't be resolved
+                    }
                 }
 
-#if DEBUG
-                // Add fake MS Store package for Fluent Store
-                MicrosoftStorePackage fakeFSPackage = new MicrosoftStorePackage
-                {
-                    Categories = { "Utilities & tools" },
-                    Description = "A unifying frontend for Windows app stores and package managers.",
-                    DeveloperName = "Joshua \"Yoshi\" Askharoun",
-                    DisplayPrice = "Free",
-                    Features =
-                    {
-                        "Download MS Store apps without installing them",
-                        "Create collections of apps to sync across devices and batch install",
-                        "Discover and install apps from multiple sources, including WinGet and the Microsoft Store"
-                    },
-                    Images =
-                    {
-                        new SDK.Images.MicrosoftStoreImage
-                        {
-                            Url = "https://github.com/yoshiask/FluentStore/blob/master/.community/Hero.png?raw=true",
-                            ImageType = SDK.Images.ImageType.Hero
-                        },
-                        new SDK.Images.MicrosoftStoreImage
-                        {
-                            Url = "https://github.com/yoshiask/FluentStore/blob/master/FluentStore/Assets/Square310x310Logo.scale-200.png?raw=true",
-                            ImageType = SDK.Images.ImageType.Logo
-                        },
-                        new SDK.Images.MicrosoftStoreImage
-                        {
-                            Url = "https://github.com/yoshiask/FluentStore/blob/master/.community/Screenshots/PackageView_MSStore.png?raw=true",
-                            ImageType = SDK.Images.ImageType.Screenshot,
-                            ImagePositionInfo = "Desktop/0"
-                        },
-                        new SDK.Images.MicrosoftStoreImage
-                        {
-                            Url = "https://github.com/yoshiask/FluentStore/blob/master/.community/Screenshots/PackageView_Collection.png?raw=true",
-                            ImageType = SDK.Images.ImageType.Screenshot,
-                            ImagePositionInfo = "Desktop/1"
-                        },
-                        new SDK.Images.MicrosoftStoreImage
-                        {
-                            Url = "https://github.com/yoshiask/FluentStore/blob/master/.community/Screenshots/SearchResultsView_VS.png?raw=true",
-                            ImageType = SDK.Images.ImageType.Screenshot,
-                            ImagePositionInfo = "Desktop/2"
-                        },
-                    },
-                    PackageFamilyName = "52374YoshiAskharoun.FluentStore_bcem08bwhrc72",
-                    PublisherDisplayName = "YoshiAsk",
-                    ReleaseDate = new System.DateTimeOffset(new System.DateTime(2021, 9, 1, 13, 0, 0)),
-                    StoreId = "123456789123",
-                    Title = "Fluent Store",
-                    Urn = Urn.Parse("urn:microsoft-store:123456789123"),
-                    Website = "https://github.com/yoshiask/FluentStore",
-                    Version = "0.1.1.0"
-                };
-                CarouselItems.Add(new PackageViewModel(fakeFSPackage));
-#endif
-
                 // Load featured packages from other sources
-                var rawFeatured = await PackageService.GetFeaturedPackagesAsync();
-                FeaturedPackages = new ObservableCollection<HandlerPackageListPair>(rawFeatured);
+                FeaturedPackages = new ObservableCollection<HandlerPackageListPair>();
+                await foreach (HandlerPackageListPair pair in PackageService.GetFeaturedPackagesAsync())
+                    FeaturedPackages.Add(pair);
             }
             catch (Flurl.Http.FlurlHttpException ex)
             {
                 NavService.ShowHttpErrorPage(ex);
+            }
+            catch (System.Exception ex)
+            {
+                var logger = Ioc.Default.GetRequiredService<LoggerService>();
+                logger.Warn(ex, ex.Message);
             }
 
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
@@ -124,7 +81,7 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _LoadFeaturedCommand, value);
         }
 
-        private ObservableCollection<PackageViewModel> _CarouselItems = new ObservableCollection<PackageViewModel>();
+        private ObservableCollection<PackageViewModel> _CarouselItems = new();
         public ObservableCollection<PackageViewModel> CarouselItems
         {
             get => _CarouselItems;
@@ -144,7 +101,6 @@ namespace FluentStore.ViewModels
             get => _SelectedCarouselItem;
             set => SetProperty(ref _SelectedCarouselItem, value);
         }
-
 
         private ObservableCollection<HandlerPackageListPair> _FeaturedPackages;
         public ObservableCollection<HandlerPackageListPair> FeaturedPackages

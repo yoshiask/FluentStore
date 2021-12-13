@@ -79,19 +79,15 @@ namespace FluentStore.SDK
         /// <summary>
         /// Gets a list of featured packages from each package handler.
         /// </summary>
-        public async Task<List<HandlerPackageListPair>> GetFeaturedPackagesAsync()
+        public async IAsyncEnumerable<HandlerPackageListPair> GetFeaturedPackagesAsync()
         {
-            var lists = new List<HandlerPackageListPair>();
-
             foreach (var handler in PackageHandlers.Values)
             {
                 var results = await handler.GetFeaturedPackagesAsync();
                 if (results.Count <= 0)
                     continue;
-                lists.Add(new HandlerPackageListPair(handler, results));
+                yield return new HandlerPackageListPair(handler, results);
             }
-
-            return lists;
         }
 
         /// <summary>

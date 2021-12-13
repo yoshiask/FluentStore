@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Windows.System;
-using WinGetRun.Enums;
 
 namespace FluentStore.SDK.Helpers
 {
@@ -24,24 +23,112 @@ namespace FluentStore.SDK.Helpers
             return (TOut)(object)dictionary[key];
         }
 
-        public static ProcessorArchitecture ToWinRTArch(this InstallerArchitecture wgArch)
+        /// <summary>
+        /// Acts exactly like <see cref="string.Join(char, string?[])"/>, but for any <see cref="IList{T}"/>.
+        /// </summary>
+        public static void Join<T>(this IList<T> list, T insert)
+        {
+            for (int i = 0; i < list.Count - 1; i += 2)
+            {
+                list.Insert(i + 1, insert);
+            }
+        }
+
+        public static ProcessorArchitecture ToWinRTArch(this WinGetRun.Enums.InstallerArchitecture wgArch)
         {
             switch (wgArch)
             {
-                case InstallerArchitecture.Neutral:
+                case WinGetRun.Enums.InstallerArchitecture.Neutral:
                     return ProcessorArchitecture.Neutral;
-                case InstallerArchitecture.X86:
+                case WinGetRun.Enums.InstallerArchitecture.X86:
                     return ProcessorArchitecture.X86;
-                case InstallerArchitecture.X64:
+                case WinGetRun.Enums.InstallerArchitecture.X64:
                     return ProcessorArchitecture.X64;
-                case InstallerArchitecture.Arm:
+                case WinGetRun.Enums.InstallerArchitecture.Arm:
                     return ProcessorArchitecture.Arm;
-                case InstallerArchitecture.Arm64:
-                    return ProcessorArchitecture.Arm64;
+                case WinGetRun.Enums.InstallerArchitecture.Arm64:
+                    if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
+                        return ProcessorArchitecture.Arm64;
+                    goto default;
 
                 default:
                     return ProcessorArchitecture.Unknown;
             }
+        }
+
+        public static Models.InstallerType ToSDKInstallerType(this WinGetRun.Enums.InstallerType type)
+        {
+            return type switch
+            {
+                WinGetRun.Enums.InstallerType.Msix => Models.InstallerType.Msix,
+                WinGetRun.Enums.InstallerType.Msi => Models.InstallerType.Msi,
+                WinGetRun.Enums.InstallerType.Appx => Models.InstallerType.AppX,
+                WinGetRun.Enums.InstallerType.Exe => Models.InstallerType.Exe,
+                WinGetRun.Enums.InstallerType.Zip => Models.InstallerType.Zip,
+                WinGetRun.Enums.InstallerType.Inno => Models.InstallerType.Inno,
+                WinGetRun.Enums.InstallerType.Nullsoft => Models.InstallerType.Nullsoft,
+                WinGetRun.Enums.InstallerType.Wix => Models.InstallerType.Wix,
+                WinGetRun.Enums.InstallerType.Burn => Models.InstallerType.Burn,
+
+                WinGetRun.Enums.InstallerType.Pwa => Models.InstallerType.Unknown,
+                _ => Models.InstallerType.Unknown,
+            };
+        }
+
+        public static string GetExtensionDescription(this Models.InstallerType type)
+        {
+            Models.InstallerType typeReduced = type.Reduce();
+            string extDesc;
+            if (typeReduced == Models.InstallerType.Msix)
+            {
+                extDesc = "Windows App " + (type.HasFlag(Models.InstallerType.Bundle) ? "Bundle" : "Package");
+
+                if (type.HasFlag(Models.InstallerType.Encrypted))
+                    extDesc = "Encrypted " + extDesc;
+            }
+            else
+            {
+                extDesc = type switch
+                {
+                    Models.InstallerType.Msi => "Windows Installer",
+                    Models.InstallerType.Exe => "Installer",
+                    Models.InstallerType.Zip => "Compressed zip archive",
+                    Models.InstallerType.Inno => "Inno Setup installer",
+                    Models.InstallerType.Nullsoft => "NSIS installer",
+                    Models.InstallerType.Wix => "WiX installer",
+                    Models.InstallerType.Burn => "WiX Burn installer",
+
+                    _ => "Unknown"
+                };
+            }
+
+            return extDesc;
+        }
+
+        public static Version ToVersion(this Windows.ApplicationModel.PackageVersion packageVersion)
+        {
+            return new(packageVersion.Major, packageVersion.Minor, packageVersion.Build, packageVersion.Revision);
+        }
+
+        /// <summary>
+        /// Reduces the installer type to its most generic type.
+        /// </summary>
+        /// <returns>
+        /// <see cref="Models.InstallerType.Msix"/> for Windows App Packages,
+        /// <see cref="Models.InstallerType.Win32"/> for traditional Win32 installers,
+        /// <see cref="Models.InstallerType.Unknown"/> for everything else.
+        /// </returns>
+        public static Models.InstallerType Reduce(this Models.InstallerType type)
+        {
+            uint genericId = (uint)type >> 28;
+            return genericId switch
+            {
+                ((uint)Models.InstallerType.Msix >> 28) => Models.InstallerType.Msix,
+                ((uint)Models.InstallerType.Win32 >> 28) => Models.InstallerType.Win32,
+
+                0 => Models.InstallerType.Unknown,
+                _ => Models.InstallerType.Unknown
+            };
         }
 
         public static string GetExtension<TEnum>(this TEnum type) where TEnum : unmanaged, Enum

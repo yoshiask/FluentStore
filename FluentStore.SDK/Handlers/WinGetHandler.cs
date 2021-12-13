@@ -2,8 +2,8 @@
 using FluentStore.SDK.Packages;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Toolkit.Diagnostics;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Diagnostics;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -17,7 +17,7 @@ namespace FluentStore.SDK.Handlers
         private readonly WinGetApi WinGetApi = Ioc.Default.GetRequiredService<WinGetApi>();
 
         public const string NAMESPACE_WINGET = "winget";
-        public override HashSet<string> HandledNamespaces => new HashSet<string>
+        public override HashSet<string> HandledNamespaces => new()
         {
             NAMESPACE_WINGET
         };
@@ -86,7 +86,7 @@ namespace FluentStore.SDK.Handlers
 
         public override async Task<PackageBase> GetPackageFromUrl(Url url)
         {
-            Regex rx = new Regex(@"^https:\/\/((www\.)?github|raw\.githubusercontent)\.com\/microsoft\/winget-pkgs(\/(blob|tree))?\/master\/manifests\/[0-9a-z]\/(?<publisherId>[^\/\s]+)\/(?<packageId>[^\/\s]+)",
+            Regex rx = new(@"^https:\/\/((www\.)?github|raw\.githubusercontent)\.com\/microsoft\/winget-pkgs(\/(blob|tree))?\/master\/manifests\/[0-9a-z]\/(?<publisherId>[^\/\s]+)\/(?<packageId>[^\/\s]+)",
                 RegexOptions.IgnoreCase);
             Match m = rx.Match(url.ToString());
             if (!m.Success)

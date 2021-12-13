@@ -1,11 +1,12 @@
 ﻿using FluentStore.SDK.Images;
 using FluentStore.SDK.Models;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Windows.Storage;
+using System.IO;
+using FluentStore.SDK.Attributes;
 
 namespace FluentStore.SDK
 {
@@ -14,29 +15,34 @@ namespace FluentStore.SDK
         public PackageBase() { }
 
         /// <summary>
-        /// Copies the properties of the supplied <see cref="PackageBase"/> to a new instance.
+        /// Copies the properties this <see cref="PackageBase"/> to the supplied instance.
         /// </summary>
-        public static TPackage Copy<TPackage>(TPackage other) where TPackage : PackageBase, new()
+        public void CopyProperties<TPackage>(ref TPackage other, bool copyStatus = false) where TPackage : PackageBase
         {
-            return new TPackage
-            {
-                Urn = other.Urn,
-                Model = other.Model,
-                Status = other.Status,
-                DownloadItem = other.DownloadItem,
-                Title = other.Title,
-                PublisherId = other.PublisherId,
-                DeveloperName = other.DeveloperName,
-                ReleaseDate = other.ReleaseDate,
-                Description = other.Description,
-                Version = other.Version,
-                ReviewSummary = other.ReviewSummary,
-                Price = other.Price,
-                DisplayPrice = other.DisplayPrice,
-                ShortTitle = other.ShortTitle,
-                Website = other.Website,
-                Images = other.Images,
-            };
+            other.Urn = Urn;
+            other.Model = Model;
+            other.DownloadItem = DownloadItem;
+            other.Type = Type;
+            other.PackageUri = PackageUri;
+            other.Title = Title;
+            other.PublisherId = PublisherId;
+            other.DeveloperName = DeveloperName;
+            other.ReleaseDate = ReleaseDate;
+            other.Description = Description;
+            other.Version = Version;
+            other.ReviewSummary = ReviewSummary;
+            other.Price = Price;
+            other.DisplayPrice = DisplayPrice;
+            other.ShortTitle = ShortTitle;
+            other.Website = Website;
+            other.PrivacyUri = PrivacyUri;
+            other.Images = Images;
+
+            other.AppIconCache ??= AppIconCache;
+            other.HeroImageCache ??= HeroImageCache;
+
+            if (copyStatus)
+                other.Status = Status;
         }
 
         /// <summary>
@@ -68,15 +74,17 @@ namespace FluentStore.SDK
 
         public abstract Task<bool> InstallAsync();
 
-        public abstract Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null);
+        public abstract Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null);
 
         public abstract Task<bool> CanLaunchAsync();
 
         public abstract Task LaunchAsync();
 
-        public virtual void OnDownloaded(IStorageItem item) { }
-
         public virtual bool Equals(PackageBase other) => this.Urn.Equals(other.Urn);
+
+        public override bool Equals(object obj) => obj is PackageBase other ? this.Equals(other) : false;
+
+        public override int GetHashCode() => Urn.GetHashCode();
 
         public override string ToString() => Title;
 
@@ -97,15 +105,25 @@ namespace FluentStore.SDK
             set => SetProperty(ref _Status, value);
         }
 
-        private IStorageItem _DownloadItem;
-        public IStorageItem DownloadItem
+        private FileSystemInfo _DownloadItem;
+        public FileSystemInfo DownloadItem
         {
             get => _DownloadItem;
-            set
-            {
-                OnDownloaded(value);
-                SetProperty(ref _DownloadItem, value);
-            }
+            set => SetProperty(ref _DownloadItem, value);
+        }
+
+        private InstallerType _Type;
+        public InstallerType Type
+        {
+            get => _Type;
+            set => SetProperty(ref _Type, value);
+        }
+
+        private Uri _PackageUri;
+        public Uri PackageUri
+        {
+            get => _PackageUri;
+            set => SetProperty(ref _PackageUri, value);
         }
 
         private string _Title;
@@ -133,6 +151,7 @@ namespace FluentStore.SDK
         /// The date this specific package was released.
         /// </summary>
         private DateTimeOffset _ReleaseDate;
+        [DisplayAdditionalInformation("Release date", "\uE163")]
         public DateTimeOffset ReleaseDate
         {
             get => _ReleaseDate;
@@ -180,39 +199,90 @@ namespace FluentStore.SDK
         private string _ShortTitle;
         public string ShortTitle
         {
-            get => _ShortTitle ?? Title;
+            get => string.IsNullOrEmpty(_ShortTitle) ? Title : _ShortTitle;
             set => _ShortTitle = value;
         }
 
-        private string _Website;
-        public string Website
+        private Link _Website;
+        [DisplayAdditionalInformation("Website", "\uE71B")]
+        public Link Website
         {
             get => _Website;
             set => SetProperty(ref _Website, value);
         }
         public bool HasWebsite => Website != null;
 
-        private List<ImageBase> _Images = new List<ImageBase>();
+        private Link _PrivacyUri;
+        [DisplayAdditionalInformation("Privacy url", "\uE928")]
+        public Link PrivacyUri
+        {
+            get => _PrivacyUri;
+            set => SetProperty(ref _PrivacyUri, value);
+        }
+
+        private List<ImageBase> _Images = new();
         public List<ImageBase> Images
         {
             get => _Images;
             set => SetProperty(ref _Images, value);
         }
 
+        public ImageBase AppIconCache;
         /// <summary>
-        /// Gets the app's icon.
+        /// Populates the image cache for the app icon.
         /// </summary>
-        public abstract Task<ImageBase> GetAppIcon();
+        public abstract Task<ImageBase> CacheAppIcon();
 
         /// <summary>
-        /// Gets the app's hero image.
+        /// Gets the app icon.
         /// </summary>
-        public abstract Task<ImageBase> GetHeroImage();
+        /// <remarks>
+        /// Uses the image cache if populated.
+        /// </remarks>
+        public async Task<ImageBase> GetAppIcon()
+        {
+            if (AppIconCache == null)
+                AppIconCache = await CacheAppIcon();
+            return AppIconCache;
+        }
+
+        public ImageBase HeroImageCache;
+        /// <summary>
+        /// Populates the image cache for the hero image.
+        /// </summary>
+        public abstract Task<ImageBase> CacheHeroImage();
 
         /// <summary>
-        /// Gets the app's screenshots.
+        /// Gets the hero image.
         /// </summary>
-        public abstract Task<List<ImageBase>> GetScreenshots();
+        /// <remarks>
+        /// Uses the image cache if populated.
+        /// </remarks>
+        public async Task<ImageBase> GetHeroImage()
+        {
+            if (HeroImageCache == null)
+                HeroImageCache = await CacheHeroImage();
+            return HeroImageCache;
+        }
+
+        public List<ImageBase> ScreenshotsCache;
+        /// <summary>
+        /// Populates the image cache for screenshots.
+        /// </summary>
+        public abstract Task<List<ImageBase>> CacheScreenshots();
+
+        /// <summary>
+        /// Gets the screenshots.
+        /// </summary>
+        /// <remarks>
+        /// Uses the image cache if populated.
+        /// </remarks>
+        public async Task<List<ImageBase>> GetScreenshots()
+        {
+            if (ScreenshotsCache == null)
+                ScreenshotsCache = await CacheScreenshots();
+            return ScreenshotsCache;
+        }
     }
 
     public abstract class PackageBase<TModel> : PackageBase
@@ -227,6 +297,8 @@ namespace FluentStore.SDK
 
     public enum PackageStatus
     {
+        Unknown,
+
         None,
 
         /// <summary>
@@ -255,7 +327,5 @@ namespace FluentStore.SDK
         /// The package has been successfully installed.
         /// </summary>
         Installed,
-
-        Unknown = 0xFFFF,
     }
 }

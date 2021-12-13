@@ -1,37 +1,34 @@
-﻿<Project Sdk="MSBuild.Sdk.Extras">
+﻿<Project Sdk="Microsoft.NET.SDK">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;uap10.0.19041</TargetFrameworks>
-        <LangVersion>8</LangVersion>
+        <TargetFramework>net5.0-windows10.0.20348.0</TargetFramework>
+        <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+        <LangVersion>latest</LangVersion>
         <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<AssemblyVersion>0.2.0.0</AssemblyVersion>
+		<FileVersion>$(AssemblyVersion)</FileVersion>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="FuzzySharp" Version="2.0.2" />
         <PackageReference Include="Garfoot.Utilities.FluentUrn" Version="1.2.1" />
-        <PackageReference Include="Microsoft.Toolkit.Diagnostics" Version="7.0.2" />
-        <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.0.2" />
-        <PackageReference Include="OwlCore" Version="0.0.23" />
+        <PackageReference Include="CommunityToolkit.Diagnostics" Version="7.1.2" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.2" />
+        <PackageReference Include="OwlCore" Version="0.0.37" />
+
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.196" />
         <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
-    </ItemGroup>
-
-    <ItemGroup Condition=" !$(TargetFramework.StartsWith('uap')) ">
-        <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.19041.1" />
-    </ItemGroup>
-
-    <ItemGroup Condition=" $(TargetFramework.StartsWith('uap')) ">
-        <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.12" />
-        <SDKReference Include="WindowsDesktop, Version=10.0.19041.0">
-            <Name>Windows Desktop Extensions for the UWP</Name>
-        </SDKReference>
+        <PackageReference Include="PInvoke.User32" Version="0.7.104" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\API\WinGetRun\WinGetRun.csproj" />
-        <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
-        <ProjectReference Include="..\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
-        <ProjectReference Include="..\StoreLib\StoreLib\StoreLib.csproj" />
+		<ProjectReference Include="..\API\StoreEdgeFD\StoreEdgeFD.csproj" />
+		<ProjectReference Include="..\API\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
+		<ProjectReference Include="..\API\StoreLib\StoreLib\StoreLib.csproj" />
+		<ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
     </ItemGroup>
 
 </Project>

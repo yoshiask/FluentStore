@@ -1,0 +1,107 @@
+﻿<Page
+    x:Class="FluentStore.Views.HomeView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FluentStore.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:tkcontrols="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:viewmodels="using:FluentStore.ViewModels"
+    xmlns:sdkmodels="using:FluentStore.SDK.Models"
+    xmlns:controls="using:FluentStore.Controls"
+    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    mc:Ignorable="d"
+    NavigationCacheMode="Required"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <interactivity:Interaction.Behaviors>
+        <core:EventTriggerBehavior EventName="Loading">
+            <core:InvokeCommandAction Command="{x:Bind ViewModel.LoadFeaturedCommand}"/>
+        </core:EventTriggerBehavior>
+    </interactivity:Interaction.Behaviors>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" MinHeight="100"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <tkcontrols:Carousel x:Name="FeaturedCarousel" ItemsSource="{x:Bind ViewModel.CarouselItems}"
+                             SelectedIndex="{x:Bind ViewModel.SelectedCarouselItemIndex, Mode=TwoWay}"
+                             SelectedItem="{x:Bind ViewModel.SelectedCarouselItem, Mode=TwoWay}"
+                             ItemMargin="16" ItemDepth="200" ManipulationMode="None">
+            <tkcontrols:Carousel.EasingFunction>
+                <CubicEase EasingMode="EaseOut" />
+            </tkcontrols:Carousel.EasingFunction>
+
+            <tkcontrols:Carousel.ItemTemplate>
+                <DataTemplate x:DataType="viewmodels:PackageViewModel">
+                    <Grid Padding="0,16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="100"/>
+                        </Grid.RowDefinitions>
+                        <ContentControl Content="{x:Bind HeroImage}" Grid.RowSpan="2"
+                                        ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
+                        <Grid Grid.Row="1" Padding="8" ColumnSpacing="8" Background="{ThemeResource SystemControlChromeMediumAcrylicElementMediumBrush}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Viewbox MaxWidth="{Binding RelativeSource={RelativeSource Mode=Self}, Path=MaxHeight}" MaxHeight="72"
+                                     Grid.RowSpan="3" HorizontalAlignment="Left" VerticalAlignment="Stretch">
+                                <ContentControl Content="{x:Bind AppIcon}"
+                                                ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
+                            </Viewbox>
+                            <TextBlock Text="{x:Bind Package.ShortTitle}" Grid.Column="1" FontSize="20"
+                                       FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{x:Bind Package.DeveloperName}" Grid.Column="1" Grid.Row="1"/>
+                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                                        x:Name="ReviewPanel"
+                                        x:Load="{x:Bind Package.HasReviewSummary}">
+                                <TextBlock Text="{x:Bind Package.ReviewSummary.ReviewCount}" FontSize="14" VerticalAlignment="Center"
+                                           x:Name="RatingCountBlock"
+                                           x:Load="{x:Bind Package.ReviewSummary.HasReviewCount}"/>
+                                <Viewbox x:Name="RatingBox" Width="90" Margin="0,0,0,-4"
+                                         x:Load="{x:Bind Package.ReviewSummary.HasAverageRating}">
+                                    <RatingControl Value="{x:Bind Package.ReviewSummary.AverageRating}" IsReadOnly="True"
+                                                         Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"/>
+                                </Viewbox>
+                            </StackPanel>
+                            <Button Grid.Column="1" Grid.RowSpan="3" HorizontalAlignment="Right"
+                                    Margin="0,0,8,0" Style="{ThemeResource AccentButtonStyle}"
+                                    FontWeight="SemiBold" Padding="8" Content="{x:Bind Package.DisplayPrice}"
+                                    Command="{x:Bind ViewPackageCommand}" CommandParameter="{x:Bind Package}"/>
+                        </Grid>
+                    </Grid>
+                </DataTemplate>
+            </tkcontrols:Carousel.ItemTemplate>
+        </tkcontrols:Carousel>
+
+        <ScrollViewer Grid.Row="1">
+            <ItemsControl ItemsSource="{x:Bind ViewModel.FeaturedPackages, Mode=OneWay}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="12"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="sdkmodels:HandlerPackageListPair">
+                        <StackPanel HorizontalAlignment="Stretch" Spacing="0">
+                            <TextBlock Text="{x:Bind PackageHandler.DisplayName}" FontSize="16" FontWeight="Bold"
+                                       VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            <controls:PackageCardGridView Packages="{x:Bind Packages, Converter={StaticResource PackageBaseEnumerableToViewModelEnumerable}}"
+                                                          MaxRows="1" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        
+    </Grid>
+</Page>

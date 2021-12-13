@@ -3,12 +3,13 @@ using FluentStore.SDK.Packages;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Marketplace.Storefront.Contracts;
-using Microsoft.Toolkit.Diagnostics;
-using Microsoft.Toolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Diagnostics;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Windows.System;
 
 namespace FluentStore.SDK.Handlers
 {
@@ -18,7 +19,7 @@ namespace FluentStore.SDK.Handlers
 
         public const string NAMESPACE_MSSTORE = "microsoft-store";
         public const string NAMESPACE_MODERNPACK = "win-modern-package";
-        public override HashSet<string> HandledNamespaces => new HashSet<string>
+        public override HashSet<string> HandledNamespaces => new()
         {
             NAMESPACE_MSSTORE,
             NAMESPACE_MODERNPACK,
@@ -29,7 +30,8 @@ namespace FluentStore.SDK.Handlers
         public override async Task<List<PackageBase>> GetFeaturedPackagesAsync()
         {
             var packages = new List<PackageBase>();
-            var page = (await StorefrontApi.GetHomeSpotlight(deviceFamily: Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily)).Payload;
+            (string deviceFamily, string arch) = GetSystemInfo();
+            var page = (await StorefrontApi.GetHomeSpotlight(deviceFamily: deviceFamily, architecture: arch)).Payload;
             packages.AddRange(
                 page.Cards.Where(card => card.ProductId.Length == 12 && card.TypeTag == "app")
                           .Select(card => new MicrosoftStorePackage(card) { Status = PackageStatus.BasicDetails })
@@ -41,7 +43,9 @@ namespace FluentStore.SDK.Handlers
         public override async Task<List<PackageBase>> SearchAsync(string query)
         {
             var packages = new List<PackageBase>();
-            var page = (await StorefrontApi.Search(query, "apps", Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily)).Payload;
+
+            (string deviceFamily, string arch) = GetSystemInfo();
+            var page = (await StorefrontApi.Search(query, "apps", deviceFamily, arch)).Payload;
             packages.AddRange(
                 page.SearchResults.Select(card => new MicrosoftStorePackage(card) { Status = PackageStatus.BasicDetails })
             );
@@ -59,7 +63,8 @@ namespace FluentStore.SDK.Handlers
 
         public override async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
         {
-            var suggs = await StorefrontApi.GetSearchSuggestions(query);
+            (string deviceFamily, string arch) = GetSystemInfo();
+            var suggs = await StorefrontApi.GetSearchSuggestions(query, deviceFamily, arch);
             var packages = new List<PackageBase>();
             packages.AddRange(
                 suggs.Payload.AssetSuggestions.Select(summ => new MicrosoftStorePackage(summary: summ) { Status = PackageStatus.BasicDetails })
@@ -78,7 +83,8 @@ namespace FluentStore.SDK.Handlers
 
         private async Task<MicrosoftStorePackage> GetPackageFromPage(string productId)
         {
-            var page = await StorefrontApi.GetPage(productId);
+            (string deviceFamily, string arch) = GetSystemInfo();
+            var page = await StorefrontApi.GetPage(productId, deviceFamily, arch);
 
             if (!page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ProductDetails>(out var details))
             {
@@ -86,8 +92,7 @@ namespace FluentStore.SDK.Handlers
                 // but no such produdct exists, so it has to be caught manually.
                 if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V1.ErrorResponse>(out var error))
                 {
-                    var NavService = Ioc.Default.GetRequiredService<Services.INavigationService>();
-                    NavService.ShowHttpErrorPage(404, error.ErrorDescription);
+                    throw Models.WebException.Create(404, error.ErrorDescription);
                 }
                 return null;
             }
@@ -116,7 +121,7 @@ namespace FluentStore.SDK.Handlers
 
         public override async Task<PackageBase> GetPackageFromUrl(Url url)
         {
-            Regex rx = new Regex(@"^https?:\/\/(?:www\.)?microsoft\.com\/(?:(?<locale>[a-z]{2}-[a-z]{2})\/)?(?:store\/apps|(?:p|store\/r)(?:\/.+)?)\/(?<id>\w{12})",
+            Regex rx = new(@"^https?:\/\/(?:www\.)?microsoft\.com\/(?:(?<locale>[a-z]{2}-[a-z]{2})\/)?(?:store\/(?:apps|productId)|(?:p|store\/r)(?:\/.+)?)\/(?<id>\w{12})",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
             Match m = rx.Match(url.ToString());
             if (!m.Success)
@@ -127,9 +132,26 @@ namespace FluentStore.SDK.Handlers
 
         public override Url GetUrlFromPackage(PackageBase package)
         {
-            if (!(package is MicrosoftStorePackage msPackage))
-                throw new System.ArgumentException();
+            if (package is not MicrosoftStorePackage msPackage)
+                throw new System.ArgumentException("Must be a " + nameof(MicrosoftStorePackage), nameof(package));
             return "https://www.microsoft.com/store/apps/" + msPackage.StoreId;
+        }
+
+        private static (string deviceFamily, string arch) GetSystemInfo()
+        {
+            // Get system information
+            string deviceFamily = Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily;
+
+            var sysArch = Helpers.Win32Helper.GetSystemArchitecture();
+            string arch = sysArch switch
+            {
+                ProcessorArchitecture.Neutral or
+                ProcessorArchitecture.Unknown => "x86",
+
+                _ => sysArch.ToString(),
+            };
+
+            return (deviceFamily, arch);
         }
     }
 }

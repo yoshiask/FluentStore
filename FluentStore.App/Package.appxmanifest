@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap rescap">
+
+    <Identity
+      Name="52374YoshiAskharoun.FluentStore"
+      Publisher="CN=CD3113F3-18EB-4B8D-9D8A-C6D373E7A464"
+      Version="0.2.0.0" />
+
+    <Properties>
+        <DisplayName>Fluent Store</DisplayName>
+        <PublisherDisplayName>Joshua Askharoun</PublisherDisplayName>
+        <Logo>Assets\StoreLogo.png</Logo>
+    </Properties>
+
+    <Dependencies>
+        <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
+        <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
+    </Dependencies>
+
+    <Resources>
+        <Resource Language="x-generate"/>
+    </Resources>
+
+    <Applications>
+        <Application Id="App"
+          Executable="$targetnametoken$.exe"
+          EntryPoint="$targetentrypoint$">
+            <uap:VisualElements
+              DisplayName="Fluent Store (Beta)"
+              Description="A unifying frontend for Windows app stores and package managers."
+              BackgroundColor="transparent"
+              Square150x150Logo="Assets\Square150x150Logo.png"
+              Square44x44Logo="Assets\Square44x44Logo.png">
+                <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"  ShortName="Fluent Store" Square71x71Logo="Assets\Square71x71Logo.png" Square310x310Logo="Assets\Square310x310Logo.png">
+                    <uap:ShowNameOnTiles>
+                        <uap:ShowOn Tile="square150x150Logo"/>
+                        <uap:ShowOn Tile="wide310x150Logo"/>
+                        <uap:ShowOn Tile="square310x310Logo"/>
+                    </uap:ShowNameOnTiles>
+                </uap:DefaultTile >
+                <uap:SplashScreen Image="Assets\SplashScreen.png" />
+            </uap:VisualElements>
+			<Extensions>
+				<uap:Extension Category="windows.protocol">
+					<uap:Protocol Name="fluentstore">
+						<uap:Logo>Assets\Square71x71Logo.png</uap:Logo>
+						<uap:DisplayName>Fluent Store</uap:DisplayName>
+					</uap:Protocol>
+				</uap:Extension>
+			</Extensions>
+        </Application>
+    </Applications>
+
+    <Capabilities>
+        <Capability Name="internetClient" />
+        <rescap:Capability Name="packageManagement" />
+        <rescap:Capability Name="packageQuery"/>
+        <rescap:Capability Name="runFullTrust" />
+    </Capabilities>
+</Package>

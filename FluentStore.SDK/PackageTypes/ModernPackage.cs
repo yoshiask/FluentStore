@@ -2,15 +2,15 @@
 using FluentStore.SDK.Images;
 using FluentStore.SDK.Models;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Toolkit.Diagnostics;
+using CommunityToolkit.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Windows.Storage;
+using System.IO;
 
 namespace FluentStore.SDK.Packages
 {
-    public class ModernPackage<TModel> : PackageBase<TModel>
+    public class ModernPackage<TModel> : GenericPackage<TModel>
     {
         private Urn _Urn;
         public override Urn Urn
@@ -35,9 +35,9 @@ namespace FluentStore.SDK.Packages
         public override bool RequiresDownloadForCompatCheck => true;
         public override async Task<string> GetCannotBeInstalledReason()
         {
-            Guard.IsNotNull(DownloadItem, nameof(DownloadItem));
-            return await PackagedInstallerHelper.GetCannotBeInstalledReason(
-                (IStorageFile)DownloadItem, Type.HasFlag(InstallerType.Bundle));
+            Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
+            return PackagedInstallerHelper.GetCannotBeInstalledReason(
+                (FileInfo)DownloadItem, Type.HasFlag(InstallerType.Bundle));
         }
 
         public override async Task<bool> CanLaunchAsync()
@@ -57,28 +57,14 @@ namespace FluentStore.SDK.Packages
         public override async Task<bool> InstallAsync()
         {
             // Make sure installer is downloaded
-            Guard.IsEqualTo((int)Status, (int)PackageStatus.Downloaded, nameof(Status));
-
-            if (await PackagedInstallerHelper.Install(this))
-            {
-                Status = PackageStatus.Installed;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
+            return await PackagedInstallerHelper.Install(this);
         }
 
         public override async Task LaunchAsync()
         {
             Guard.IsNotNull(PackageFamilyName, nameof(PackageFamilyName));
             await PackagedInstallerHelper.Launch(PackageFamilyName);
-        }
-
-        public override Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -88,35 +74,35 @@ namespace FluentStore.SDK.Packages
         /// <returns>The file extension that corresponds with the determined <see cref="InstallerType"/>.</returns>
         public async Task<string> GetInstallerType()
         {
-            Guard.IsEqualTo((int)Status, (int)PackageStatus.Downloaded, nameof(Status));
+            Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
 
             if (Type == InstallerType.Unknown)
-                Type = await PackagedInstallerHelper.GetInstallerType((StorageFile)DownloadItem);
+                Type = PackagedInstallerHelper.GetInstallerType((FileInfo)DownloadItem);
             return Type.GetExtension();
         }
 
-        public override async Task<ImageBase> GetAppIcon()
+        public override async Task<ImageBase> CacheAppIcon()
         {
-            Guard.IsNotNull(DownloadItem, nameof(DownloadItem));
-            return await PackagedInstallerHelper.GetAppIcon(
-                (StorageFile)DownloadItem, Type.HasFlag(InstallerType.Bundle));
+            try
+            {
+                Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
+                return PackagedInstallerHelper.GetAppIcon(
+                    (FileInfo)DownloadItem, Type.HasFlag(InstallerType.Bundle));
+            }
+            catch
+            {
+                return TextImage.CreateFromName(Title, ImageType.Logo);
+            }
         }
 
-        public override async Task<ImageBase> GetHeroImage()
+        public override async Task<ImageBase> CacheHeroImage()
         {
             return null;
         }
 
-        public override async Task<List<ImageBase>> GetScreenshots()
+        public override async Task<List<ImageBase>> CacheScreenshots()
         {
             return new List<ImageBase>(0);
-        }
-
-        private InstallerType _Type;
-        public InstallerType Type
-        {
-            get => _Type;
-            set => SetProperty(ref _Type, value);
         }
 
         private string _PackageFamilyName;

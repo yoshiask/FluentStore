@@ -1,5 +1,5 @@
 ﻿using Microsoft.Marketplace.Storefront.Contracts.V2;
-using Microsoft.Toolkit.Diagnostics;
+using CommunityToolkit.Diagnostics;
 
 namespace FluentStore.SDK.Images
 {
@@ -38,5 +38,7 @@ namespace FluentStore.SDK.Images
             get => _Caption;
             set => SetProperty(ref _Caption, value);
         }
+
+        public override string ToString() => Caption;
     }
 }

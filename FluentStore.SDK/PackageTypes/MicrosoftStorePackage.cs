@@ -8,20 +8,28 @@ using Microsoft.Marketplace.Storefront.Contracts.Enums;
 using Microsoft.Marketplace.Storefront.Contracts.V2;
 using Microsoft.Marketplace.Storefront.Contracts.V3;
 using Microsoft.Marketplace.Storefront.Contracts.V8.One;
-using Microsoft.Toolkit.Diagnostics;
-using Microsoft.Toolkit.Mvvm.Messaging;
+using CommunityToolkit.Diagnostics;
+using CommunityToolkit.Mvvm.Messaging;
 using StoreLib.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.Storage;
 using Windows.System.Profile;
+using System.IO;
+using Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.PackageManifest;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Toolkit.Mvvm.ComponentModel;
 
 namespace FluentStore.SDK.Packages
 {
-    public class MicrosoftStorePackage : ModernPackage<ProductDetails>
+    public class MicrosoftStorePackage : PackageBase<ProductDetails>
     {
+        private const string ACCESSIBILITY_NOTICE_TEXT =
+            "The app developer believes this " +
+            "app meets accessibility requiements, " +
+            "making it easier for everyone to use.";
+
         public MicrosoftStorePackage(CardModel card = null, ProductSummary summary = null, ProductDetails product = null)
         {
             if (card != null)
@@ -54,16 +62,23 @@ namespace FluentStore.SDK.Packages
             DisplayPrice = card.DisplayPrice;
             StoreId = card.ProductId;
 
-            // Set modern package properties
-            PackageFamilyName = card.PackageFamilyNames?[0];
-
             // Set MS Store package properties
-            PackageId = PackageFamilyName ?? StoreId;  // Unpackaged apps don't have PackageFamilyName
             Categories = card.Categories;
             Images.Clear();
             if (card.Images != null)
                 foreach (ImageItem img in card.Images)
                     Images.Add(new MicrosoftStoreImage(img));
+
+            PackageBase internalPackage = InternalPackage;
+            if (!IsWinGet)
+            {
+                var package = (ModernPackage<ProductDetails>)internalPackage;
+                package.PackageFamilyName = card.PackageFamilyNames?[0];
+                internalPackage = package;
+            }
+            Type = internalPackage.Type;
+            CopyProperties(ref internalPackage);
+            InternalPackage = internalPackage;
         }
 
         public void Update(ProductSummary summary)
@@ -113,23 +128,18 @@ namespace FluentStore.SDK.Packages
             Price = product.Price;
             DisplayPrice = product.DisplayPrice;
             ShortTitle = product.ShortTitle;
-            Website = product.AppWebsiteUrl;
+            Website = Link.Create(product.AppWebsiteUrl, ShortTitle + " website");
             StoreId = product.ProductId;
 
-            // Set modern package properties
-            PackageFamilyName = product.PackageFamilyNames?[0];
-            PublisherDisplayName = product.PublisherName;
-
             // Set MS Store package properties
-            PackageId = product.PackageFamilyNames?[0] ?? StoreId;  // Unpackaged apps don't have PackageFamilyName
             Notes = product.Notes;
             Features = product.Features;
             Categories = product.Categories;
-            PrivacyUrl = product.PrivacyUrl;
+            PrivacyUri = Link.Create(product.PrivacyUri, ShortTitle + " privacy policy");
             Platforms = product.Platforms;
             if (product.SupportUris != null)
-                foreach (SupportUri uri in product.SupportUris)
-                    SupportUrls.Add(uri.Url);
+                foreach (SupportUri uri in product.SupportUris.Where(u => u.Uri != null))
+                    SupportUrls.Add(new(uri.Uri, ShortTitle + " support"));
             Ratings = product.ProductRatings;
             PermissionsRequested = product.PermissionsRequested;
             PackageAndDeviceCapabilities = product.PackageAndDeviceCapabilities;
@@ -139,6 +149,18 @@ namespace FluentStore.SDK.Packages
             if (product.Images != null)
                 foreach (ImageItem img in product.Images)
                     Images.Add(new MicrosoftStoreImage(img));
+
+            PackageBase internalPackage = InternalPackage;
+            if (!IsWinGet)
+            {
+                var package = (ModernPackage<ProductDetails>)internalPackage;
+                package.PackageFamilyName = product.PackageFamilyNames?[0];
+                package.PublisherDisplayName = product.PublisherName;
+                internalPackage = package;
+            }
+            Type = internalPackage.Type;
+            CopyProperties(ref internalPackage);
+            InternalPackage = internalPackage;
         }
         
         public void Update(RatingSummary ratingSummary)
@@ -170,7 +192,7 @@ namespace FluentStore.SDK.Packages
             ReviewSummary.Reviews = new List<Models.Review>();
             foreach (Microsoft.Marketplace.Storefront.Contracts.V3.Review msReview in reviewList.Reviews)
             {
-                Models.Review review = new Models.Review
+                Models.Review review = new()
                 {
                     Title = msReview.Title,
                     ReviewId = msReview.ReviewId.ToString(),
@@ -196,6 +218,28 @@ namespace FluentStore.SDK.Packages
             Version = packageInstance.Version.ToString();
             PackageMoniker = packageInstance.PackageMoniker;
             PackageUri = packageInstance.PackageUri;
+
+            PackageBase internalPackage = InternalPackage;
+            CopyProperties(ref internalPackage);
+            InternalPackage = internalPackage;
+        }
+
+        public void Update(PackageManifestVersion manifest)
+        {
+            Guard.IsNotNull(manifest, nameof(manifest));
+            Manifest = manifest;
+            Version = manifest.PackageVersion;
+
+            var culture = System.Globalization.CultureInfo.CurrentCulture;
+            var installer = manifest.Installers.FirstOrDefault(i => i.InstallerLocale == culture.TwoLetterISOLanguageName && i.Markets.HasMarket(culture));
+            PackageUri = installer.InstallerUri;
+            Type = installer.InstallerType.ToSDKInstallerType();
+
+            PackageBase internalPackage = InternalPackage;
+            if (IsWinGet)
+                ((WinGetPackage)InternalPackage).Update(manifest.ToWinGetRunManifest(installer));
+            CopyProperties(ref internalPackage);
+            InternalPackage = internalPackage;
         }
 
         private Urn _Urn;
@@ -229,53 +273,80 @@ namespace FluentStore.SDK.Packages
             return null;
         }
 
-        public override async Task<IStorageItem> DownloadPackageAsync(StorageFolder folder = null)
+        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
-            WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
             // Find the package URI
-            if (!await PopulatePackageUri())
-            {
-                WeakReferenceMessenger.Default.Send(new PackageFetchFailedMessage(this, new Exception("An unknown error occurred.")));
+            await PopulatePackageUri();
+            if (Status.IsLessThan(PackageStatus.DownloadReady))
                 return null;
-            }
-            WeakReferenceMessenger.Default.Send(new PackageFetchCompletedMessage(this));
 
             // Download package
-            await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
+            DownloadItem = await InternalPackage.DownloadAsync(folder);
+            Status = InternalPackage.Status;
+            if (Status.IsLessThan(PackageStatus.Downloaded))
+                return null;
 
             // Set the proper file type and extension
-            string extension = await GetInstallerType();
-            if (extension != string.Empty)
-                await DownloadItem.RenameAsync(PackageMoniker + extension, NameCollisionOption.ReplaceExisting);
+            FileInfo downloadFile = (FileInfo)DownloadItem;
+            string filename;
+            if (!IsWinGet)
+            {
+                filename = PackageMoniker + await ((ModernPackage<ProductDetails>)InternalPackage).GetInstallerType();
+                Type = InternalPackage.Type;
+            }
+            else
+            {
+                filename = Path.GetFileName(PackageUri.ToString());
+            }
+            if (filename != string.Empty)
+                downloadFile.MoveRename(filename);
 
-            WeakReferenceMessenger.Default.Send(new PackageDownloadCompletedMessage(this, (StorageFile)DownloadItem));
-            Status = PackageStatus.Downloaded;
+            WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageDownloadCompleted(this));
+            DownloadItem = downloadFile;
             return DownloadItem;
         }
 
-        private async Task<bool> PopulatePackageUri()
+        private async Task PopulatePackageUri()
         {
-            PlatWindows? currentPlat = PlatWindowsStringConverter.Parse(AnalyticsInfo.VersionInfo.DeviceFamily);
-            var culture = System.Globalization.CultureInfo.CurrentUICulture;
+            WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
+            try
+            {
+                PlatWindows currentPlat = PlatWindowsStringConverter.Parse(AnalyticsInfo.VersionInfo.DeviceFamily);
+                var culture = System.Globalization.CultureInfo.CurrentUICulture;
 
-            var dcathandler = new StoreLib.Services.DisplayCatalogHandler(DCatEndpoint.Production, new StoreLib.Services.Locale(culture, true));
-            await dcathandler.QueryDCATAsync(StoreId);
-            IEnumerable<PackageInstance> packs = await dcathandler.GetMainPackagesForProductAsync();
+                if (!IsWinGet)
+                {
+                    var dcathandler = new StoreLib.Services.DisplayCatalogHandler(DCatEndpoint.Production, new StoreLib.Services.Locale(culture, true));
+                    await dcathandler.QueryDCATAsync(StoreId);
+                    IEnumerable<PackageInstance> packs = await dcathandler.GetMainPackagesForProductAsync();
 
-            if (currentPlat.HasValue && currentPlat.Value != PlatWindows.Xbox)
-                packs = packs.Where(p => p.Version.Revision != 70);
-            List<PackageInstance> installables = packs.OrderByDescending(p => p.Version).ToList();
-            if (installables.Count < 1)
-                return false;
-            // TODO: Add addtional checks that might take longer that the user can enable 
-            // if they are having issues
+                    if (currentPlat != PlatWindows.Xbox)
+                        packs = packs.Where(p => p.Version.Revision != 70);
+                    List<PackageInstance> installables = packs.OrderByDescending(p => p.Version).ToList();
+                    if (installables.Count < 1)
+                        throw new Exception("Failed to locate a compatible installer.");
 
-            Update(installables.First());
-            Status = PackageStatus.DownloadReady;
-            return true;
+                    // TODO: Add addtional checks that might take longer that the user can enable 
+                    // if they are having issues
+
+                    Update(installables.First());
+                }
+                else
+                {
+                    var StoreEdgeFDApi = Ioc.Default.GetRequiredService<Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.StoreEdgeFDApi>();
+                    Update((await StoreEdgeFDApi.GetPackageManifest(StoreId)).Data.Versions[0]);
+                }
+
+                WeakReferenceMessenger.Default.Send(new SuccessMessage(null, this, SuccessType.PackageFetchCompleted));
+                Status = PackageStatus.DownloadReady;
+            }
+            catch (Exception ex)
+            {
+                WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, this, ErrorType.PackageFetchFailed));
+            }
         }
 
-        public override async Task<ImageBase> GetAppIcon()
+        public override async Task<ImageBase> CacheAppIcon()
         {
             // Prefer tiles, then logos, then posters.
             var icons = Images.FindAll(i => i.ImageType == SDK.Images.ImageType.Tile);
@@ -290,36 +361,46 @@ namespace FluentStore.SDK.Packages
             if (icons.Count > 0)
                 goto done;
 
-            Guard.IsNotEmpty(icons, nameof(icons));
+            // If no app icon is specified, fall back to any image.
+            icons = Images;
 
         done:
-            return icons.OrderByDescending(i => i.Width).First();
+            var icon = icons.OrderByDescending(i => i.Width).First();
+            if (InternalPackage != null)
+                InternalPackage.AppIconCache = icon;
+            return icon;
         }
 
-        public override async Task<ImageBase> GetHeroImage()
+        public override async Task<ImageBase> CacheHeroImage()
         {
             ImageBase img = null;
             int width = -1;
             foreach (ImageBase image in Images.FindAll(i => i.ImageType == SDK.Images.ImageType.Hero))
             {
                 if (image.Width > width)
+                {
                     img = image;
+                    width = image.Width;
+                }
             }
 
+            img ??= (await GetScreenshots()).FirstOrDefault();
+            if (InternalPackage != null)
+                InternalPackage.HeroImageCache = img;
             return img;
         }
 
-        public override async Task<List<ImageBase>> GetScreenshots()
+        public override async Task<List<ImageBase>> CacheScreenshots()
         {
-            string deviceFam = AnalyticsInfo.VersionInfo.DeviceFamily.Substring("Windows.".Length);
+            string deviceFam = AnalyticsInfo.VersionInfo.DeviceFamily["Windows.".Length..];
             var screenshots = Images.Cast<MicrosoftStoreImage>().Where(i => i.ImageType == SDK.Images.ImageType.Screenshot
-                && !string.IsNullOrEmpty(i.ImagePositionInfo) && i.ImagePositionInfo.StartsWith(deviceFam));
+                && !string.IsNullOrEmpty(i.ImagePositionInfo) && i.ImagePositionInfo.StartsWith(deviceFam, StringComparison.InvariantCultureIgnoreCase));
 
-            var sorted = new List<ImageBase>(screenshots.Count());
-            foreach (var screenshot in screenshots)
+            List<ImageBase> sorted = new(screenshots.Count());
+            foreach (MicrosoftStoreImage screenshot in screenshots)
             {
                 // length + 1, to skip device family name and the "/"
-                string posStr = screenshot.ImagePositionInfo.Substring(deviceFam.Length + 1);
+                string posStr = screenshot.ImagePositionInfo[(deviceFam.Length + 1)..];
                 int pos = int.Parse(posStr);
                 if (pos >= sorted.Count)
                     sorted.Add(screenshot);
@@ -327,10 +408,32 @@ namespace FluentStore.SDK.Packages
                     sorted.Insert(pos, screenshot);
             }
 
+            if (InternalPackage != null)
+                InternalPackage.ScreenshotsCache = sorted;
             return sorted;
         }
 
-        private List<string> _Notes = new List<string>();
+        public override async Task<bool> InstallAsync()
+        {
+            if (InternalPackage != null)
+                return await InternalPackage.InstallAsync();
+            return false;
+        }
+
+        public override async Task<bool> CanLaunchAsync()
+        {
+            if (InternalPackage != null)
+                return await InternalPackage.CanLaunchAsync();
+            return false;
+        }
+
+        public override async Task LaunchAsync()
+        {
+            if (InternalPackage != null)
+                await InternalPackage.LaunchAsync();
+        }
+
+        private List<string> _Notes = new();
         [Display(Title = "What's new in this version", Rank = 3)]
         public List<string> Notes
         {
@@ -338,7 +441,7 @@ namespace FluentStore.SDK.Packages
             set => SetProperty(ref _Notes, value);
         }
 
-        private List<string> _Features = new List<string>();
+        private List<string> _Features = new();
         [Display(Rank = 2)]
         public List<string> Features
         {
@@ -346,7 +449,7 @@ namespace FluentStore.SDK.Packages
             set => SetProperty(ref _Features, value);
         }
 
-        private List<string> _Categories = new List<string>();
+        private List<string> _Categories = new();
         [DisplayAdditionalInformation(Icon = "\uE7C1")]
         public List<string> Categories
         {
@@ -354,55 +457,28 @@ namespace FluentStore.SDK.Packages
             set => SetProperty(ref _Categories, value);
         }
 
-        private string _PrivacyUrl;
-        public string PrivacyUrl
-        {
-            get => _PrivacyUrl;
-            set
-            {
-                SetProperty(ref _PrivacyUrl, value);
-                try
-                {
-                    SetProperty(ref _PrivacyUri, new Uri(value));
-                }
-                catch { }
-            }
-        }
-
-        private Uri _PrivacyUri;
-        [DisplayAdditionalInformation("Privacy url", "\uE71B")]
-        public Uri PrivacyUri
-        {
-            get => _PrivacyUri;
-            set
-            {
-                SetProperty(ref _PrivacyUri, value);
-                SetProperty(ref _PrivacyUrl, value.ToString());
-            }
-        }
-
-        private List<string> _Platforms = new List<string>();
+        private List<string> _Platforms = new();
         public List<string> Platforms
         {
             get => _Platforms;
             set => SetProperty(ref _Platforms, value);
         }
 
-        private List<string> _SupportUrls = new List<string>();
-        public List<string> SupportUrls
+        private List<Link> _SupportUrls = new();
+        public List<Link> SupportUrls
         {
             get => _SupportUrls;
             set => SetProperty(ref _SupportUrls, value);
         }
 
-        private List<ProductRating> _Ratings = new List<ProductRating>();
+        private List<ProductRating> _Ratings = new();
         public List<ProductRating> Ratings
         {
             get => _Ratings;
             set => SetProperty(ref _Ratings, value);
         }
 
-        private List<string> _PermissionsRequested = new List<string>();
+        private List<string> _PermissionsRequested = new();
         [DisplayAdditionalInformation("Permissions", "\uE8D7")]
         public List<string> PermissionsRequested
         {
@@ -410,32 +486,26 @@ namespace FluentStore.SDK.Packages
             set => SetProperty(ref _PermissionsRequested, value);
         }
 
-        private List<string> _PackageAndDeviceCapabilities = new List<string>();
+        private List<string> _PackageAndDeviceCapabilities = new();
         public List<string> PackageAndDeviceCapabilities
         {
             get => _PackageAndDeviceCapabilities;
             set => SetProperty(ref _PackageAndDeviceCapabilities, value);
         }
 
-        private List<PlatWindows> _AllowedPlatforms = new List<PlatWindows>();
+        private List<PlatWindows> _AllowedPlatforms = new();
         public List<PlatWindows> AllowedPlatforms
         {
             get => _AllowedPlatforms;
             set => SetProperty(ref _AllowedPlatforms, value);
         }
 
-        private List<WarningMessage> _WarningMessages = new List<WarningMessage>();
+        private List<WarningMessage> _WarningMessages = new();
+        [DisplayAdditionalInformation("Warnings", "\uE7BA")]
         public List<WarningMessage> WarningMessages
         {
             get => _WarningMessages;
             set => SetProperty(ref _WarningMessages, value);
-        }
-
-        private Uri _PackageUri;
-        public Uri PackageUri
-        {
-            get => _PackageUri;
-            set => SetProperty(ref _PackageUri, value);
         }
 
         private string _PackageMoniker;
@@ -452,14 +522,46 @@ namespace FluentStore.SDK.Packages
             set => SetProperty(ref _StoreId, value);
         }
 
-        private string _PackageId;
+        public bool IsWinGet => StoreId.StartsWith("XP");
+
+        private PackageManifestVersion _Manifest;
         /// <summary>
-        /// The PackageFamilyName for packaged apps, <see cref="StoreId"/> for unpackaged apps.
+        /// The manifest for this package.
         /// </summary>
-        public string PackageId
+        /// <remarks>
+        /// Only valid if this package is backed by WinGet.
+        /// </remarks>
+        public PackageManifestVersion Manifest
         {
-            get => _PackageId;
-            set => SetProperty(ref _PackageId, value);
+            get => _Manifest;
+            set => SetProperty(ref _Manifest, value);
         }
+
+        private PackageBase _InternalPackage;
+        /// <summary>
+        /// The actual package type. Currently, packaged apps are <see cref="ModernPackage{ProductDetails}"/>
+        /// and WinGet-backed apps are <see cref="WinGetPackage"/>.
+        /// </summary>
+        public PackageBase InternalPackage
+        {
+            get
+            {
+                if (_InternalPackage == null)
+                {
+                    if (IsWinGet)
+                        _InternalPackage = new WinGetPackage();
+                    else
+                        _InternalPackage = new ModernPackage<ProductDetails>();
+                }
+                return _InternalPackage;
+            }
+            set => SetProperty(ref _InternalPackage, value);
+        }
+
+        [DisplayAdditionalInformation("Accessibility", "\uE776")]
+        public string AccessibilityNotice => (Model != null && Model.Accessible) ? ACCESSIBILITY_NOTICE_TEXT : null;
+
+        [DisplayAdditionalInformation("Supported languages", "\uE8F2")]
+        public List<string> SupportedLanguages => Model?.SupportedLanguages;
     }
 }

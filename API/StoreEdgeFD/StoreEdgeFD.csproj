@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<AssemblyName>StoreEdgeFD</AssemblyName>
+		<RootNamespace>Microsoft.Marketplace.Storefront.StoreEdgeFD</RootNamespace>
+		<LangVersion>latest</LangVersion>
+		<Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Flurl.Http" Version="3.2.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
+		<ProjectReference Include="..\WinGetRun\WinGetRun.csproj" />
+	</ItemGroup>
+
+</Project>
