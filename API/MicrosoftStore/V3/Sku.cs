@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Marketplace.Storefront.Contracts.V3
@@ -16,7 +17,8 @@ namespace Microsoft.Marketplace.Storefront.Contracts.V3
         public string CurrencySymbol { get; set; }
         public string ResourceSetId { get; set; }
         public bool IsPaymentInstrumentRequired { get; set; }
-        public string FulfillmentData { get; set; }
+        [JsonProperty("FulfillmentData")]
+        public string FulfillmentDataStr { get; set; }
         public string MSAPurchaseType { get; set; }
         public List<PackageRequirements> PackageRequirements { get; set; }
         public int RemainingDaysInTrial { get; set; }
@@ -34,5 +36,17 @@ namespace Microsoft.Marketplace.Storefront.Contracts.V3
         public List<SkuDisplayRank> SkuDisplayRanks { get; set; }
         public string SkuTitle { get; set; }
         public string Description { get; set; }
+
+        private FulfillmentData _FulfillmentData;
+        [JsonIgnore]
+        public FulfillmentData FulfillmentData
+        {
+            get
+            {
+                if (_FulfillmentData == null)
+                    _FulfillmentData = JsonConvert.DeserializeObject<FulfillmentData>(FulfillmentDataStr);
+                return _FulfillmentData;
+            }
+        }
     }
 }

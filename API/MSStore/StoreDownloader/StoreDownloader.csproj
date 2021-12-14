@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\UUPMediaCreator\src\DownloadLib.NET\DownloadLib.NET.csproj" />
+		<ProjectReference Include="..\..\UUPMediaCreator\src\WindowsUpdateLib.NET\WindowsUpdateLib.NET.csproj" />
+	</ItemGroup>
+
+</Project>

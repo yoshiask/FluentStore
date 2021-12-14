@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Management;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK.Messages;
@@ -14,6 +15,8 @@ namespace FluentStore.SDK.Helpers
 {
     public static class Win32Helper
     {
+        private const string REG_NTCURRENTVERSION = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion";
+
         public static ProcessorArchitecture GetSystemArchitecture()
         {
             PInvoke.Kernel32.GetNativeSystemInfo(out var sysInfo);
@@ -26,6 +29,32 @@ namespace FluentStore.SDK.Helpers
 
                 _ => ProcessorArchitecture.Unknown,
             };
+        }
+
+        public static WindowsUpdateLib.CTAC GetSystemInfo()
+        {
+            ObjectQuery query = new("SELECT * FROM Win32_OperatingSystem");
+            ManagementObjectSearcher searcher = new(query);
+            var info = searcher.Get().Cast<ManagementObject>().FirstOrDefault();
+
+            var sku = (WindowsUpdateLib.OSSkuId)(int)(uint)info["OperatingSystemSKU"];
+            var osVersion = info["Version"].ToString();
+            var arch = GetSystemArchitecture() switch
+            {
+                ProcessorArchitecture.X86 => WindowsUpdateLib.MachineType.x86,
+                ProcessorArchitecture.X64 => WindowsUpdateLib.MachineType.amd64,
+                ProcessorArchitecture.Arm => WindowsUpdateLib.MachineType.arm,
+                ProcessorArchitecture.Arm64 => WindowsUpdateLib.MachineType.arm64,
+
+                _ => WindowsUpdateLib.MachineType.unknown
+            };
+
+            var ntCurrentVersion = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(REG_NTCURRENTVERSION);
+            var flightRing = ntCurrentVersion.GetValue("DisplayVersion").ToString();
+            var flightBranch = ntCurrentVersion.GetValue("BuildBranch").ToString();
+            osVersion += "." + ntCurrentVersion.GetValue("UBR").ToString();
+
+            return new(sku, osVersion, arch, flightRing, flightRing, "CB", flightBranch, "Production", false, true);
         }
 
         /// <inheritdoc cref="PackageBase.InstallAsync"/>

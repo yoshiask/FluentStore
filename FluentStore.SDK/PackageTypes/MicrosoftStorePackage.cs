@@ -10,16 +10,15 @@ using Microsoft.Marketplace.Storefront.Contracts.V3;
 using Microsoft.Marketplace.Storefront.Contracts.V8.One;
 using CommunityToolkit.Diagnostics;
 using CommunityToolkit.Mvvm.Messaging;
-using StoreLib.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.System.Profile;
 using System.IO;
-using Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.PackageManifest;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
+using Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.PackageManifest;
+using StoreDownloader;
 
 namespace FluentStore.SDK.Packages
 {
@@ -211,19 +210,6 @@ namespace FluentStore.SDK.Packages
             }
         }
 
-        public void Update(PackageInstance packageInstance)
-        {
-            Guard.IsNotNull(packageInstance, nameof(packageInstance));
-
-            Version = packageInstance.Version.ToString();
-            PackageMoniker = packageInstance.PackageMoniker;
-            PackageUri = packageInstance.PackageUri;
-
-            PackageBase internalPackage = InternalPackage;
-            CopyProperties(ref internalPackage);
-            InternalPackage = internalPackage;
-        }
-
         public void Update(PackageManifestVersion manifest)
         {
             Guard.IsNotNull(manifest, nameof(manifest));
@@ -275,34 +261,73 @@ namespace FluentStore.SDK.Packages
 
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
-            // Find the package URI
-            await PopulatePackageUri();
-            if (Status.IsLessThan(PackageStatus.DownloadReady))
-                return null;
-
-            // Download package
-            DownloadItem = await InternalPackage.DownloadAsync(folder);
-            Status = InternalPackage.Status;
-            if (Status.IsLessThan(PackageStatus.Downloaded))
-                return null;
-
-            // Set the proper file type and extension
             FileInfo downloadFile = (FileInfo)DownloadItem;
-            string filename;
-            if (!IsWinGet)
+
+            if (IsWinGet)
             {
-                filename = PackageMoniker + await ((ModernPackage<ProductDetails>)InternalPackage).GetInstallerType();
-                Type = InternalPackage.Type;
+                // Find the package URI
+                await PopulatePackageUri();
+                if (Status.IsLessThan(PackageStatus.DownloadReady))
+                    return null;
+
+                // Download package
+                downloadFile = (FileInfo)await InternalPackage.DownloadAsync(folder);
+                Status = InternalPackage.Status;
+
+                // Set the proper file type and extension
+                string filename = Path.GetFileName(PackageUri.ToString());
+                downloadFile.MoveRename(filename);
             }
             else
             {
-                filename = Path.GetFileName(PackageUri.ToString());
-            }
-            if (filename != string.Empty)
-                downloadFile.MoveRename(filename);
+                try
+                {
+                    // Get system and package info
+                    string[] categoryIds = new[] { Model.Skus[0].FulfillmentData.WuCategoryId };
+                    var sysInfo = Win32Helper.GetSystemInfo();
+                    folder ??= StorageHelper.GetTempDirectoryPath();
 
-            WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageDownloadCompleted(this));
+                    // Get update data
+                    WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
+                    var updates = await WindowsUpdateLib.FE3Handler.GetUpdates(categoryIds, sysInfo, "", WindowsUpdateLib.FileExchangeV3UpdateFilter.Application);
+                    if (updates == null || !updates.Any())
+                    {
+                        WeakReferenceMessenger.Default.Send(new ErrorMessage(
+                            WebException.Create(404, "No packages are available for " + ShortTitle), this, ErrorType.PackageFetchFailed));
+                        return null;
+                    }
+                    WeakReferenceMessenger.Default.Send(new SuccessMessage(null, this, SuccessType.PackageFetchCompleted));
+
+                    // Set up progress handler
+                    void DownloadProgress(DownloadLib.GeneralDownloadProgress progress)
+                    {
+                        WeakReferenceMessenger.Default.Send(
+                            new PackageDownloadProgressMessage(this, progress.DownloadedTotalBytes, progress.EstimatedTotalBytes));
+                    }
+
+                    // Start download
+                    WeakReferenceMessenger.Default.Send(new PackageDownloadStartedMessage(this));
+                    string[] files = await MSStoreDownloader.DownloadPackageAsync(updates, folder, new DownloadProgress(DownloadProgress));
+                    if (files == null || files.Length == 0)
+                        throw new Exception("Failed to download pacakges using WindowsUpdateLib");
+                    Status = InternalPackage.Status = PackageStatus.Downloaded;
+
+                    InternalPackage.DownloadItem = downloadFile = new(Path.Combine(folder.FullName, files[0]));
+                    await ((ModernPackage<ProductDetails>)InternalPackage).GetInstallerType();
+                    Type = InternalPackage.Type;
+                }
+                catch (Exception ex)
+                {
+                    WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, this, ErrorType.PackageDownloadFailed));
+                    return null;
+                }
+            }
+
+            if (Status.IsLessThan(PackageStatus.Downloaded))
+                return null;
+
             DownloadItem = downloadFile;
+            WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageDownloadCompleted(this));
             return DownloadItem;
         }
 
@@ -311,25 +336,11 @@ namespace FluentStore.SDK.Packages
             WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
             try
             {
-                PlatWindows currentPlat = PlatWindowsStringConverter.Parse(AnalyticsInfo.VersionInfo.DeviceFamily);
                 var culture = System.Globalization.CultureInfo.CurrentUICulture;
 
                 if (!IsWinGet)
                 {
-                    var dcathandler = new StoreLib.Services.DisplayCatalogHandler(DCatEndpoint.Production, new StoreLib.Services.Locale(culture, true));
-                    await dcathandler.QueryDCATAsync(StoreId);
-                    IEnumerable<PackageInstance> packs = await dcathandler.GetMainPackagesForProductAsync();
-
-                    if (currentPlat != PlatWindows.Xbox)
-                        packs = packs.Where(p => p.Version.Revision != 70);
-                    List<PackageInstance> installables = packs.OrderByDescending(p => p.Version).ToList();
-                    if (installables.Count < 1)
-                        throw new Exception("Failed to locate a compatible installer.");
-
-                    // TODO: Add addtional checks that might take longer that the user can enable 
-                    // if they are having issues
-
-                    Update(installables.First());
+                    throw new InvalidOperationException("PopulatePackageUri is only for WinGet-backed apps");
                 }
                 else
                 {

@@ -5,9 +5,9 @@
         <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
         <LangVersion>latest</LangVersion>
         <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
-		<AssemblyVersion>0.2.0.0</AssemblyVersion>
-		<FileVersion>$(AssemblyVersion)</FileVersion>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AssemblyVersion>0.2.0.0</AssemblyVersion>
+        <FileVersion>$(AssemblyVersion)</FileVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,16 +19,17 @@
 
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.196" />
+		<PackageReference Include="System.Management" Version="6.0.0" />
         <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
         <PackageReference Include="PInvoke.User32" Version="0.7.104" />
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\API\MSStore\StoreDownloader\StoreDownloader.csproj" />
         <ProjectReference Include="..\API\WinGetRun\WinGetRun.csproj" />
-		<ProjectReference Include="..\API\StoreEdgeFD\StoreEdgeFD.csproj" />
-		<ProjectReference Include="..\API\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
-		<ProjectReference Include="..\API\StoreLib\StoreLib\StoreLib.csproj" />
-		<ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
+        <ProjectReference Include="..\API\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
+        <ProjectReference Include="..\API\StoreEdgeFD\StoreEdgeFD.csproj" />
+        <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
     </ItemGroup>
 
 </Project>
