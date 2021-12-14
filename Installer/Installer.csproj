@@ -3,13 +3,14 @@
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
         <TargetFramework>net48</TargetFramework>
-        <!--<MinimumPlatformVersion>10.0.17763.0</MinimumPlatformVersion>-->
         <Nullable>enable</Nullable>
         <LangVersion>9</LangVersion>
         <UseWPF>true</UseWPF>
         <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <NoWarn>1701;1702;CS8618;CS8603;CS8625</NoWarn>
+		<AssemblyVersion>0.2.1.0</AssemblyVersion>
+		<FileVersion>$(AssemblyVersion)</FileVersion>
 
         <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
         <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -43,18 +44,22 @@
 
     <PropertyGroup Condition=" '$(Platform)' == 'x86' Or '$(Platform)' == 'AnyCPU' ">
         <RuntimeIdentifier>win-x86</RuntimeIdentifier>
+	    <DefineConstants>$(DefineConstants);X86</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Platform)' == 'x64' ">
         <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+	    <DefineConstants>$(DefineConstants);X64</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Platform)' == 'ARM' ">
         <RuntimeIdentifier>win-ARM</RuntimeIdentifier>
+	    <DefineConstants>$(DefineConstants);ARM</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Platform)' == 'ARM64' ">
         <RuntimeIdentifier>win-ARM64</RuntimeIdentifier>
+	    <DefineConstants>$(DefineConstants);ARM64</DefineConstants>
     </PropertyGroup>
 
 </Project>
