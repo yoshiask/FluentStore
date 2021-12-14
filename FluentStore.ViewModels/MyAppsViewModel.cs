@@ -7,8 +7,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using StoreLib.Models;
-using StoreLib.Services;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
@@ -58,34 +56,23 @@ namespace FluentStore.ViewModels
         {
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
 
-            // TODO: This really shouldn't have to make two separate API calls.
-            // Is there a better way to get the product ID using the package family name?
-
             try
             {
                 // Get the full product details
-                var dcat = DisplayCatalogHandler.ProductionConfig();
-                await dcat.QueryDCATAsync(SelectedApp.PackageFamilyName, IdentiferType.PackageFamilyName);
-                if (dcat.ProductListing != null && dcat.ProductListing.Products.Count > 0)
+                var package = await PackageService.GetPackageAsync(
+                    Urn.Parse($"urn:{MicrosoftStoreHandler.NAMESPACE_MODERNPACK}:{SelectedApp.PackageFamilyName}"));
+                if (package != null)
                 {
-                    var dcatProd = dcat.ProductListing.Products[0];
-                    var package = await PackageService.GetPackageAsync(Urn.Parse($"urn:{MicrosoftStoreHandler.NAMESPACE_MSSTORE}:{dcatProd.ProductId}"));
-                    if (package != null)
-                    {
-                        WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
-                        NavService.Navigate("PackageView", package);
-                        return;
-                    }
+                    WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+                    NavService.Navigate("PackageView", package);
+                    return;
                 }
-            }
-            catch (Flurl.Http.FlurlHttpException ex)
-            {
-                NavService.ShowHttpErrorPage(ex);
             }
             catch (System.Exception ex)
             {
-                // TODO: Show error message (likely from StoreLib)
-                throw;
+                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+                WeakReferenceMessenger.Default.Send(new SDK.Messages.ErrorMessage(ex));
+                return;
             }
 
             // No package was found for that package family name

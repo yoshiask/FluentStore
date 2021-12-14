@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.System;
+using Microsoft.Marketplace.Storefront.Contracts.Enums;
 
 namespace FluentStore.SDK.Handlers
 {
@@ -75,16 +76,22 @@ namespace FluentStore.SDK.Handlers
 
         public override async Task<PackageBase> GetPackage(Urn packageUrn)
         {
-            Guard.IsEqualTo(packageUrn.NamespaceIdentifier, NAMESPACE_MSSTORE, nameof(packageUrn));
+            CatalogIdType idType = packageUrn.NamespaceIdentifier switch
+            {
+                NAMESPACE_MSSTORE => CatalogIdType.ProductId,
+                NAMESPACE_MODERNPACK => CatalogIdType.PackageFamilyName,
 
-            string productId = packageUrn.GetContent<NamespaceSpecificString>().UnEscapedValue;
-            return await GetPackageFromPage(productId);
+                _ => throw new System.ArgumentException("URN not recognized", nameof(packageUrn))
+            };
+
+            string catalogId = packageUrn.GetContent<NamespaceSpecificString>().UnEscapedValue;
+            return await GetPackageFromPage(catalogId, idType);
         }
 
-        private async Task<MicrosoftStorePackage> GetPackageFromPage(string productId)
+        private async Task<MicrosoftStorePackage> GetPackageFromPage(string catalogId, CatalogIdType idType)
         {
             (string deviceFamily, string arch) = GetSystemInfo();
-            var page = await StorefrontApi.GetPage(productId, deviceFamily, arch);
+            var page = await StorefrontApi.GetPage(catalogId, idType, deviceFamily, arch);
 
             if (!page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ProductDetails>(out var details))
             {

@@ -4,6 +4,7 @@ using System.Globalization;
 using static Microsoft.Marketplace.Storefront.Contracts.UrlEx;
 using static Microsoft.Marketplace.Storefront.Contracts.Constants;
 using Newtonsoft.Json;
+using Microsoft.Marketplace.Storefront.Contracts.Enums;
 using Microsoft.Marketplace.Storefront.Contracts.V1;
 
 namespace Microsoft.Marketplace.Storefront.Contracts
@@ -13,11 +14,11 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         /// <summary>
         /// Get all the page details for the given product.
         /// </summary>
-        public async Task<ResponseItemList> GetPage(string productId, string deviceFamily = DEFAULT_DEVICEFAMILY, string architecture = DEFAULT_ARCHITECTURE, CultureInfo culture = null)
+        public async Task<ResponseItemList> GetPage(string productId, CatalogIdType idType, string deviceFamily = DEFAULT_DEVICEFAMILY, string architecture = DEFAULT_ARCHITECTURE, CultureInfo culture = null)
         {
             string json = await GetStorefrontBase(culture).AppendPathSegments("pages", "pdp")
                 .SetQueryParam("deviceFamily", deviceFamily).SetQueryParam("architecture", architecture)
-                .SetQueryParam("productId", productId)
+                .SetQueryParam("productId", productId).SetQueryParam("idType", idType)
                 .GetStringAsync();
             return JsonConvert.DeserializeObject<ResponseItemList>(json, DefaultJsonSettings);
         }
@@ -25,9 +26,10 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         /// <summary>
         /// Gets the details for the product with the given product ID.
         /// </summary>
-        public async Task<ResponseItem<V3.ProductDetails>> GetProduct(string productId, string deviceFamily = DEFAULT_DEVICEFAMILY, string architecture = DEFAULT_ARCHITECTURE, CultureInfo culture = null)
+        public async Task<ResponseItem<V3.ProductDetails>> GetProduct(string productId, CatalogIdType idType, string deviceFamily = DEFAULT_DEVICEFAMILY, string architecture = DEFAULT_ARCHITECTURE, CultureInfo culture = null)
         {
             return await GetStorefrontBase(culture).AppendPathSegments("products", productId)
+                .SetQueryParam("idType", idType)
                 .SetQueryParam("deviceFamily", deviceFamily).SetQueryParam("architecture", architecture)
                 .GetJsonAsync<ResponseItem<V3.ProductDetails>>();
         }
