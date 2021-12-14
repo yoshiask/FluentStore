@@ -4,8 +4,8 @@
         <TargetFramework>net6.0-windows10.0.22000.0</TargetFramework>
         <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
         <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
-        <AssemblyVersion>0.2.0.0</AssemblyVersion>
-        <FileVersion>$(AssemblyVersion)</FileVersion>
+		<AssemblyVersion>0.2.1.0</AssemblyVersion>
+		<FileVersion>$(AssemblyVersion)</FileVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -18,7 +18,6 @@
         <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
         <ProjectReference Include="..\API\FluentStoreAPI\FluentStoreAPI.csproj" />
         <ProjectReference Include="..\API\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
-        <ProjectReference Include="..\API\StoreLib\StoreLib\StoreLib.csproj" />
     </ItemGroup>
 
 </Project>
