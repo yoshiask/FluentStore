@@ -95,7 +95,7 @@ namespace StoreDownloader
                 files.AddRange(await FE3Handler.GetFileUrls(update, msaToken));
             }
 
-            List<UUPFile> fileList = appfiles.Select(boundApp =>
+            List<UUPFile> fileList = appfiles.Where(app => !app.Targets.Any(t => t.Contains("Xbox"))).Select(boundApp =>
             {
                 return new UUPFile(
                     files.First(x => x.Digest == boundApp.Digest),
