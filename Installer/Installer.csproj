@@ -1,5 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk"
-		 InitialTargets="CopyInstallerPackage">
+﻿<Project Sdk="Microsoft.NET.Sdk" InitialTargets="CopyInstallerPackage">
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
@@ -25,8 +24,7 @@
 	
 	<Target Name="CopyInstallerPackage" BeforeTargets="Resources">
 		<Message Text="Copied installer package" />
-		<Copy SourceFiles="Resources\Packages\FluentStore_Beta_$(Platform).zip"
-			  DestinationFiles="Resources\FluentStore_Beta.zip" />
+		<Copy SourceFiles="Resources\Packages\FluentStore_Beta_$(Platform).zip" DestinationFiles="Resources\FluentStore_Beta.zip" />
 	</Target>
 
     <ItemGroup>
@@ -36,6 +34,7 @@
         <Reference Include="System.Net.Http" />
         <Resource Include="Resources\Background.png" />
         <Resource Include="Resources\Square71x71Logo.png" />
+		<Folder Include="Resources\Packages\" />
 
         <Compile Update="DefaultResources.Designer.cs">
             <DesignTime>True</DesignTime>
