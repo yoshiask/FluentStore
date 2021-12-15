@@ -301,8 +301,9 @@ namespace FluentStore.SDK.Packages
                     // Set up progress handler
                     void DownloadProgress(DownloadLib.GeneralDownloadProgress progress)
                     {
+                        var status = progress.DownloadedStatus[0];
                         WeakReferenceMessenger.Default.Send(
-                            new PackageDownloadProgressMessage(this, progress.DownloadedTotalBytes, progress.EstimatedTotalBytes));
+                            new PackageDownloadProgressMessage(this, status.DownloadedBytes, status.File.FileSize));
                     }
 
                     // Start download
