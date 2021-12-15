@@ -1,4 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk"
+		 InitialTargets="CopyInstallerPackage">
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
@@ -21,6 +22,12 @@
         <None Remove="Resources\Background.png" />
         <None Remove="Resources\Square71x71Logo.png" />
     </ItemGroup>
+	
+	<Target Name="CopyInstallerPackage" BeforeTargets="Resources">
+		<Message Text="Copied installer package" />
+		<Copy SourceFiles="Resources\Packages\FluentStore_Beta_$(Platform).zip"
+			  DestinationFiles="Resources\FluentStore_Beta.zip" />
+	</Target>
 
     <ItemGroup>
         <PackageReference Include="PostSharp.Community.Packer" Version="1.2.0" />

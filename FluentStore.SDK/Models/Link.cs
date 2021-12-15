@@ -75,5 +75,8 @@ namespace FluentStore.SDK.Models
                 return null;
             }
         }
+
+        public static implicit operator Flurl.Url(Link link) => link.Uri;
+        public static implicit operator Uri(Link link) => link.Uri;
     }
 }

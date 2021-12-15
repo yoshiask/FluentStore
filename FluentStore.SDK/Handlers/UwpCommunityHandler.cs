@@ -87,6 +87,10 @@ namespace FluentStore.SDK.Handlers
                 .SetQueryParam("projectId", projectIdStr).GetJsonAsync<List<dynamic>>();
             package.UpdateWithCollaborators(collaborators);
 
+            var features = await BASE_URL.AppendPathSegments("projects", "features")
+                .SetQueryParam("projectId", projectIdStr).GetJsonAsync<List<string>>();
+            package.UpdateWithFeatures(features);
+
             package.Status = PackageStatus.DownloadReady;
             return package;
         }
@@ -197,6 +201,8 @@ namespace FluentStore.SDK.Handlers
 
         public override Url GetUrlFromPackage(PackageBase package)
         {
+            if (package is UwpCommunityPackage uwpcPackage && uwpcPackage.HasWebsite)
+                return uwpcPackage.Website;
             return "fluentstore://package/" + package.Urn.ToString();
         }
     }

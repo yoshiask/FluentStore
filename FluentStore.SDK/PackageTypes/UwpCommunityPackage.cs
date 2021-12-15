@@ -1,27 +1,26 @@
 ﻿using FluentStore.SDK.Images;
 using FluentStore.Services;
-using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using CommunityToolkit.Diagnostics;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.Storage;
 using System.IO;
 using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK.Messages;
+using FluentStore.SDK.Models;
+using FluentStore.SDK.Attributes;
 
 namespace FluentStore.SDK.Packages
 {
     public class UwpCommunityPackage : PackageBase<dynamic>
     {
-        INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
-        PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
+        readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
+        readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
-        public UwpCommunityPackage(dynamic project = null, IEnumerable<string> images = null, IEnumerable<dynamic> collaborators = null)
+        public UwpCommunityPackage(dynamic project = null, IEnumerable<string> images = null, IEnumerable<dynamic> collaborators = null, IEnumerable<string> features = null)
         {
             if (project != null)
                 UpdateWithProject(project);
@@ -29,6 +28,8 @@ namespace FluentStore.SDK.Packages
                 UpdateWithImages(images);
             if (collaborators != null)
                 UpdateWithCollaborators(collaborators);
+            if (features != null)
+                UpdateWithFeatures(features);
         }
 
         public void UpdateWithProject(dynamic project)
@@ -40,6 +41,8 @@ namespace FluentStore.SDK.Packages
             Title = project.appName;
             Description = project.description;
             ReleaseDate = project.createdAt;
+            if (project.externalLink != null)
+                Website = Link.Create(project.externalLink, ShortTitle + " website");
 
             if (project.heroImage != null)
                 Images.Add(new FileImage
@@ -55,13 +58,16 @@ namespace FluentStore.SDK.Packages
                     ImageType = ImageType.Logo,
                     BackgroundColor = project.accentColor,
                 });
-            else
-                Images.Add(TextImage.CreateFromName(Title));
 
             // Set UWPC properties
             ProjectId = (int)project.id;
             if (project.downloadLink != null)
                 PackageUri = new(project.downloadLink);
+            if (project.githubLink != null)
+                GithubLink = Link.Create(project.githubLink, ShortTitle + " on GitHub");
+            if (project.tags != null)
+                foreach (dynamic tag in project.tags)
+                    Tags.Add(tag.name);
         }
 
         public void UpdateWithImages(IEnumerable<string> images)
@@ -85,6 +91,13 @@ namespace FluentStore.SDK.Packages
             dynamic owner = collaborators.FirstOrDefault(c => c.isOwner == true);
             if (owner != null)
                 DeveloperName = owner.name;
+        }
+
+        public void UpdateWithFeatures(IEnumerable<string> features)
+        {
+            Guard.IsNotNull(features, nameof(features));
+
+            Features.AddRange(features);
         }
 
         private Urn _Urn;
@@ -186,6 +199,30 @@ namespace FluentStore.SDK.Packages
         {
             get => _LinkedPackage;
             set => SetProperty(ref _LinkedPackage, value);
+        }
+
+        private Link _GithubLink;
+        [DisplayAdditionalInformation("Source code", "\uE943")]
+        public Link GithubLink
+        {
+            get => _GithubLink;
+            set => SetProperty(ref _GithubLink, value);
+        }
+
+        private List<string> _Tags = new();
+        [DisplayAdditionalInformation(Icon = "\uE1CB")]
+        public List<string> Tags
+        {
+            get => _Tags;
+            set => SetProperty(ref _Tags, value);
+        }
+
+        private List<string> _Features = new();
+        [Display(Rank = 2)]
+        public List<string> Features
+        {
+            get => _Features;
+            set => SetProperty(ref _Features, value);
         }
     }
 }
