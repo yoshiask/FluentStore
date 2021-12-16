@@ -83,7 +83,11 @@ namespace FluentStore.SDK
         {
             foreach (var handler in PackageHandlers.Values)
             {
-                var results = await handler.GetFeaturedPackagesAsync();
+                List<PackageBase> results;
+                try
+                {
+                    results = await handler.GetFeaturedPackagesAsync();
+                } catch { continue; }
                 if (results.Count <= 0)
                     continue;
                 yield return new HandlerPackageListPair(handler, results);
@@ -98,7 +102,11 @@ namespace FluentStore.SDK
             var packages = new List<PackageBase>();
             foreach (var handler in PackageHandlers.Values)
             {
-                var results = await handler.SearchAsync(query);
+                List<PackageBase> results;
+                try
+                {
+                    results = await handler.SearchAsync(query);
+                } catch { continue; }
                 // Filter results already in list
                 packages.AddRange(results);
             }
@@ -117,7 +125,12 @@ namespace FluentStore.SDK
             var packages = new List<PackageBase>();
             foreach (var handler in PackageHandlers.Values)
             {
-                var results = await handler.GetSearchSuggestionsAsync(query);
+                List<PackageBase> results;
+                try
+                {
+                    results = await handler.GetSearchSuggestionsAsync(query);
+                }
+                catch { continue; }
                 // Filter results already in list
                 packages.AddRange(results);
             }

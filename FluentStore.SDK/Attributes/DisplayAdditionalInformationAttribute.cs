@@ -12,9 +12,29 @@ namespace FluentStore.SDK.Attributes
     public class DisplayAdditionalInformationAttribute : DisplayAttribute
     {
         /// <summary>
-        /// A font icon from Segoe MDL2 Assets (or Segoe Fluent Assets).
+        /// A glyph from <see cref="FontFamily"/>.
         /// </summary>
         public string Icon { get; set; }
+
+        private string _FontFamily;
+        /// <summary>
+        /// The font family to use for <see cref="Icon"/>.
+        /// </summary>
+        public string FontFamily
+        {
+            get
+            {
+                if (_FontFamily == null)
+                {
+                    if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000))
+                        _FontFamily = "Segoe Fluent Icons";
+                    else
+                        _FontFamily = "Segoe MDL2 Assets";
+                }
+                return _FontFamily;
+            }
+            set => _FontFamily = value;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DisplayAdditionalInformationAttribute"/>
@@ -36,16 +56,21 @@ namespace FluentStore.SDK.Attributes
 
     public class DisplayAdditionalInformationInfo : DisplayInfo
     {
-        public DisplayAdditionalInformationInfo(string title, int rank, string icon, object value) : base(title, rank, value)
+        public DisplayAdditionalInformationInfo(string title, int rank, string icon, string fontFamily, object value)
+            : base(title, rank, value)
         {
             Icon = icon;
+            FontFamily = fontFamily;
         }
 
-        public DisplayAdditionalInformationInfo(DisplayAdditionalInformationAttribute attr, object value) : this(attr.Title, attr.Rank, attr.Icon, value)
+        public DisplayAdditionalInformationInfo(DisplayAdditionalInformationAttribute attr, object value)
+            : this(attr.Title, attr.Rank, attr.Icon, attr.FontFamily, value)
         {
 
         }
 
         public string Icon { get; set; }
+
+        public string FontFamily { get; set; }
     }
 }

@@ -15,6 +15,7 @@
         <PackageReference Include="Garfoot.Utilities.FluentUrn" Version="1.2.1" />
         <PackageReference Include="CommunityToolkit.Diagnostics" Version="7.1.2" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.2" />
+        <PackageReference Include="Octokit" Version="0.50.0" />
         <PackageReference Include="OwlCore" Version="0.0.40" />
 
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0" />

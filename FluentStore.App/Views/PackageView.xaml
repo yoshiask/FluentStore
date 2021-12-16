@@ -291,8 +291,8 @@
                                         </Grid.ColumnDefinitions>
 
                                         <FontIcon Glyph="{x:Bind Icon}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                                  Visibility="{x:Bind Icon, Converter={StaticResource EmptyStringToCollapsedConverter}}"
-                                                  FontSize="14"/>
+                                                  FontFamily="{x:Bind FontFamily}" FontSize="14"
+                                                  Visibility="{x:Bind Icon, Converter={StaticResource EmptyStringToCollapsedConverter}}"/>
                                         <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="{x:Bind Title}"
                                                    Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left"/>
 
