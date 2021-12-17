@@ -105,11 +105,22 @@ namespace FluentStore.SDK.Helpers
 
                 // Deploy package
                 WeakReferenceMessenger.Default.Send(new PackageInstallStartedMessage(package));
-                var result = await pkgManager.AddPackageAsync(
-                    new Uri(package.DownloadItem.FullName),
-                    null,
-                    DeploymentOptions.ForceApplicationShutdown
-                ).AsTask(new Progress<DeploymentProgress>(InstallProgress));
+                IAsyncOperationWithProgress<DeploymentResult, DeploymentProgress> operation;
+                if (package.Type == InstallerType.AppInstaller)
+                {
+                    operation = pkgManager.AddPackageByAppInstallerFileAsync(
+                        new Uri(package.DownloadItem.FullName),
+                        AddPackageByAppInstallerOptions.ForceTargetAppShutdown,
+                        pkgManager.GetDefaultPackageVolume());
+                }
+                else
+                {
+                    operation = pkgManager.AddPackageAsync(
+                        new Uri(package.DownloadItem.FullName),
+                        null,
+                        DeploymentOptions.ForceApplicationShutdown);
+                }
+                var result = await operation.AsTask(new Progress<DeploymentProgress>(InstallProgress));
 
                 if (!result.IsRegistered)
                 {
