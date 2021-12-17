@@ -129,7 +129,7 @@ namespace FluentStore.SDK.PackageTypes
                             return true;
 
                         // Check if neutral
-                        return architecture_strings.Any(e => a.Name.Contains(StringComparison.InvariantCultureIgnoreCase, e.Value));
+                        return !architecture_strings.Any(e => a.Name.Contains(StringComparison.InvariantCultureIgnoreCase, e.Value));
                     }).ToList();
 
                     if (assets.Count == 0) continue;
