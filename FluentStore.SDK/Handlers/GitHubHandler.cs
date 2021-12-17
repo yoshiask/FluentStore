@@ -12,7 +12,9 @@ namespace FluentStore.SDK.Handlers
 {
     public class GitHubHandler : PackageHandlerBase
     {
-        private readonly GitHubClient client = new(new ProductHeaderValue("fluent-store"));
+        // TODO: Users will need to sign in to avoid the rate limit issues
+
+        private static readonly GitHubClient client = new(new ProductHeaderValue("fluent-store"));
 
         public const string NAMESPACE_REPO = "gh-repo";
         public override HashSet<string> HandledNamespaces => new()
@@ -44,13 +46,13 @@ namespace FluentStore.SDK.Handlers
             return new GitHubPackage(repo) { Status = PackageStatus.Details };
         }
 
-        public override Task<PackageBase> GetPackageFromUrl(Url url)
+        public override async Task<PackageBase> GetPackageFromUrl(Url url)
         {
             if (url.Host == "github.com" && url.PathSegments.Count > 2)
             {
                 string owner = url.PathSegments[^2];
                 string name = url.PathSegments[^1];
-                return GetPackage(Urn.Parse($"urn:{NAMESPACE_REPO}:{owner}:{name}"));
+                return await GetPackage(Urn.Parse($"urn:{NAMESPACE_REPO}:{owner}:{name}"));
             }
 
             return null;
@@ -69,6 +71,11 @@ namespace FluentStore.SDK.Handlers
         public override Task<List<PackageBase>> SearchAsync(string query)
         {
             throw new NotImplementedException();
+        }
+
+        public static Task<IReadOnlyList<Release>> GetReleases(Repository repo)
+        {
+            return client.Repository.Release.GetAll(repo.Id);
         }
     }
 }

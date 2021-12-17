@@ -257,37 +257,38 @@ namespace FluentStore.Views
 
             var progressToast = RegisterPackageServiceMessages();
             WeakReferenceMessenger.Default.Unregister<SuccessMessage>(this);
-            WeakReferenceMessenger.Default.Register<SuccessMessage>(this, async (r, m) =>
+            WeakReferenceMessenger.Default.Register<SuccessMessage>(this, (r, m) =>
             {
-                if (m.Type != SuccessType.PackageDownloadCompleted) return;
-
-                PackageBase p = (PackageBase)m.Context;
-                FileInfo file = (FileInfo)p.DownloadItem;
-                Windows.Storage.Pickers.FileSavePicker savePicker = new()
-                {
-                    SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Downloads
-                };
-
-                // Initialize save picker for Win32
-                var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.Current.Window);
-                WinRT.Interop.InitializeWithWindow.Initialize(savePicker, hwnd);
-
-                savePicker.FileTypeChoices.Add(p.Type.GetExtensionDescription(), new string[] { file.Extension });
-                savePicker.SuggestedFileName = file.Name;
-
                 _ = DispatcherQueue.TryEnqueue(() => PackageHelper.HandlePackageDownloadCompletedToast(m, progressToast));
-
-                var userFile = await savePicker.PickSaveFileAsync();
-                if (userFile != null)
-                {
-                    await Task.Run(() => file.MoveTo(userFile.Path, true));
-                }
             });
 
             try
             {
                 VisualStateManager.GoToState(this, "Progress", true);
-                await ViewModel.Package.DownloadAsync();
+                var downloadItem = await ViewModel.Package.DownloadAsync();
+
+                if (downloadItem != null)
+                {
+                    PackageBase p = ViewModel.Package;
+                    FileInfo file = (FileInfo)p.DownloadItem;
+                    Windows.Storage.Pickers.FileSavePicker savePicker = new()
+                    {
+                        SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Downloads
+                    };
+
+                    // Initialize save picker for Win32
+                    var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.Current.Window);
+                    WinRT.Interop.InitializeWithWindow.Initialize(savePicker, hwnd);
+
+                    savePicker.FileTypeChoices.Add(p.Type.GetExtensionDescription(), new string[] { file.Extension });
+                    savePicker.SuggestedFileName = file.Name;
+
+                    var userFile = await savePicker.PickSaveFileAsync();
+                    if (userFile != null)
+                    {
+                        await Task.Run(() => file.MoveTo(userFile.Path, true));
+                    }
+                }
             }
             finally
             {
