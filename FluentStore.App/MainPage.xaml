@@ -16,7 +16,7 @@
         </Grid.RowDefinitions>
 
         <NavigationView x:Name="MainNav" PaneDisplayMode="Top" Grid.Row="1" IsTitleBarAutoPaddingEnabled="False"
-                        SelectionChanged="NavigationView_SelectionChanged" BackRequested="MainNav_BackRequested">
+                        SelectionChanged="NavigationView_SelectionChanged">
 
             <NavigationView.PaneFooter>
                 <Grid>

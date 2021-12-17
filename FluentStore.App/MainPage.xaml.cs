@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.Helpers;
-using FluentStore.SDK;
 using FluentStore.Services;
 using FluentStore.ViewModels;
 using FluentStore.ViewModels.Messages;
@@ -41,6 +40,7 @@ namespace FluentStore
             this.InitializeComponent();
             PointerPressed += MainPage_PointerPressed;
 
+            MainNav.BackRequested += (s, e) => NavService.NavigateBack();
             MainFrame.Navigated += MainFrame_Navigated;
             NavService.CurrentFrame = MainFrame;
 
@@ -75,10 +75,14 @@ namespace FluentStore
             if (props.IsXButton1Pressed)
             {
                 // Backward
+                NavService.NavigateBack();
+                e.Handled = true;
             }
             else if (props.IsXButton2Pressed)
             {
                 // Forward
+                NavService.NavigateForward();
+                e.Handled = true;
             }
         }
 
@@ -107,11 +111,6 @@ namespace FluentStore
                         MainFrame.BackStack.Remove(entry);
                 }
             }
-        }
-
-        private void MainNav_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
-        {
-            NavService.NavigateBack();
         }
 
         private async void controlsSearchBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
