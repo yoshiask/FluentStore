@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK.Messages;
 using Windows.System;
+using FluentStore.SDK.Models;
 
 namespace FluentStore.SDK.Helpers
 {
@@ -17,17 +18,17 @@ namespace FluentStore.SDK.Helpers
     {
         private const string REG_NTCURRENTVERSION = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion";
 
-        public static ProcessorArchitecture GetSystemArchitecture()
+        public static Architecture GetSystemArchitecture()
         {
             PInvoke.Kernel32.GetNativeSystemInfo(out var sysInfo);
             return sysInfo.wProcessorArchitecture switch
             {
-                PInvoke.Kernel32.ProcessorArchitecture.PROCESSOR_ARCHITECTURE_INTEL => ProcessorArchitecture.X86,
-                PInvoke.Kernel32.ProcessorArchitecture.PROCESSOR_ARCHITECTURE_AMD64 => ProcessorArchitecture.X64,
-                PInvoke.Kernel32.ProcessorArchitecture.PROCESSOR_ARCHITECTURE_ARM => ProcessorArchitecture.Arm,
-                PInvoke.Kernel32.ProcessorArchitecture.PROCESSOR_ARCHITECTURE_ARM64 => ProcessorArchitecture.Arm64,
+                PInvoke.Kernel32.ProcessorArchitecture.PROCESSOR_ARCHITECTURE_INTEL => Architecture.x86,
+                PInvoke.Kernel32.ProcessorArchitecture.PROCESSOR_ARCHITECTURE_AMD64 => Architecture.x64,
+                PInvoke.Kernel32.ProcessorArchitecture.PROCESSOR_ARCHITECTURE_ARM => Architecture.Arm32,
+                PInvoke.Kernel32.ProcessorArchitecture.PROCESSOR_ARCHITECTURE_ARM64 => Architecture.Arm64,
 
-                _ => ProcessorArchitecture.Unknown,
+                _ => Architecture.Unknown,
             };
         }
 
@@ -41,10 +42,10 @@ namespace FluentStore.SDK.Helpers
             var osVersion = info["Version"].ToString();
             var arch = GetSystemArchitecture() switch
             {
-                ProcessorArchitecture.X86 => WindowsUpdateLib.MachineType.x86,
-                ProcessorArchitecture.X64 => WindowsUpdateLib.MachineType.amd64,
-                ProcessorArchitecture.Arm => WindowsUpdateLib.MachineType.arm,
-                ProcessorArchitecture.Arm64 => WindowsUpdateLib.MachineType.arm64,
+                Architecture.x86 => WindowsUpdateLib.MachineType.x86,
+                Architecture.x64 => WindowsUpdateLib.MachineType.amd64,
+                Architecture.Arm32 => WindowsUpdateLib.MachineType.arm,
+                Architecture.Arm64 => WindowsUpdateLib.MachineType.arm64,
 
                 _ => WindowsUpdateLib.MachineType.unknown
             };

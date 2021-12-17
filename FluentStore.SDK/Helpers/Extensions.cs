@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FluentStore.SDK.Models;
+using System;
 using System.Collections.Generic;
 using Windows.System;
 
@@ -34,26 +35,18 @@ namespace FluentStore.SDK.Helpers
             }
         }
 
-        public static ProcessorArchitecture ToWinRTArch(this WinGetRun.Enums.InstallerArchitecture wgArch)
+        public static Architecture ToSDKArch(this WinGetRun.Enums.InstallerArchitecture wgArch)
         {
-            switch (wgArch)
+            return wgArch switch
             {
-                case WinGetRun.Enums.InstallerArchitecture.Neutral:
-                    return ProcessorArchitecture.Neutral;
-                case WinGetRun.Enums.InstallerArchitecture.X86:
-                    return ProcessorArchitecture.X86;
-                case WinGetRun.Enums.InstallerArchitecture.X64:
-                    return ProcessorArchitecture.X64;
-                case WinGetRun.Enums.InstallerArchitecture.Arm:
-                    return ProcessorArchitecture.Arm;
-                case WinGetRun.Enums.InstallerArchitecture.Arm64:
-                    if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
-                        return ProcessorArchitecture.Arm64;
-                    goto default;
+                WinGetRun.Enums.InstallerArchitecture.Neutral => Architecture.Neutral,
+                WinGetRun.Enums.InstallerArchitecture.X86 => Architecture.x86,
+                WinGetRun.Enums.InstallerArchitecture.X64 => Architecture.x64,
+                WinGetRun.Enums.InstallerArchitecture.Arm => Architecture.Arm32,
+                WinGetRun.Enums.InstallerArchitecture.Arm64 => Architecture.Arm64,
 
-                default:
-                    return ProcessorArchitecture.Unknown;
-            }
+                _ => Architecture.Unknown,
+            };
         }
 
         public static Version ToVersion(this Windows.ApplicationModel.PackageVersion packageVersion)

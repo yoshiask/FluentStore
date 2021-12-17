@@ -2,7 +2,6 @@
 
 namespace FluentStore.SDK.Models
 {
-    [Flags]
     public enum InstallerType : uint
     {
         Unknown = 0,

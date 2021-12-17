@@ -152,10 +152,12 @@ namespace FluentStore.SDK.Handlers
             var sysArch = Helpers.Win32Helper.GetSystemArchitecture();
             string arch = sysArch switch
             {
-                ProcessorArchitecture.Neutral or
-                ProcessorArchitecture.Unknown => "x86",
+                Models.Architecture.Arm32 => "arm",
 
-                _ => sysArch.ToString(),
+                Models.Architecture.Neutral or
+                Models.Architecture.Unknown => "x86",
+
+                _ => sysArch.ToString()
             };
 
             return (deviceFamily, arch);

@@ -6,20 +6,41 @@ using FluentStore.SDK.Images;
 using FluentStore.SDK.Messages;
 using FluentStore.SDK.Models;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Octokit;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace FluentStore.SDK.PackageTypes
 {
     internal class GitHubPackage : PackageBase<Repository>
     {
+        private readonly Dictionary<Architecture, string[]> architecture_strings = new()
+        {
+            {
+                Architecture.x64,
+                new[] { "x64", "amd64", /*"x86_64"*/ }
+                // x86_64 has an underscore, and therefore has to be handled differently
+            },
+            {
+                Architecture.x86,
+                new[] { /*"x86",*/ "i386", "i686" }
+                // "x86" is special, see above comment
+            },
+            {
+                Architecture.Arm,
+                new[] { "arm", "arm32", "aarch32" }
+            },
+            {
+                Architecture.Arm64,
+                new[] { "arm64", "aarch64" }
+            },
+        };
+        private readonly char[] separator_chars = { ' ', '_', '-', '+', '@', '!', '.' };
+
         private Urn _Urn;
         public override Urn Urn
         {
@@ -78,37 +99,47 @@ namespace FluentStore.SDK.PackageTypes
             try
             {
                 // Fetch assets
-                if (Releases == null)
-                    Releases = await Handlers.GitHubHandler.GetReleases(Model);
+                Releases ??= await Handlers.GitHubHandler.GetReleases(Model);
 
                 // Find suitable release asset
-                string[] architecture_strings = { "x64", "amd64", "x86", "arm", "arm64" };
                 foreach (Release rel in Releases)
                 {
                     if (rel.Assets.Count == 0) continue;
 
                     // Pick proper asset for architecture
-                    IEnumerable<ReleaseAsset> assets = rel.Assets;
+                    IList<ReleaseAsset> assets = rel.Assets.ToList();
 
                     // Some assets may be architecture-specific
                     var arch = Win32Helper.GetSystemArchitecture();
                     // Exclude mismatched architectures, but keep assets that don't specify an architecture
                     assets = assets.Where(a =>
-                        a.Name.Contains(arch.ToString(), StringComparison.InvariantCultureIgnoreCase)
-                        || !a.Name.Contains(StringComparison.InvariantCultureIgnoreCase, architecture_strings));
-
-                    if (rel.Assets.Count == 0) continue;
-                    else if (assets.Count() == 1)
                     {
-                        release = rel;
-                        asset = assets.First();
-                        break;
-                    }
+                        List<string> parts = a.Name.Split(separator_chars).ToList();
+                        int x86Idx = parts.IndexOf("x86");
+                        if (x86Idx != -1)
+                        {
+                            // Contains x86
+                            bool isNextPart64 = parts[x86Idx + 1] == "64";
+                            return (arch == Architecture.x86 && !isNextPart64)
+                                || (arch == Architecture.x64 && isNextPart64);
+                        }
 
-                    // Rank assets by file type
-                    int RankAsset(ReleaseAsset a) => this.RankAsset(a.Name);
-                    assets = assets.OrderBy(RankAsset);
-                    asset = assets.First();
+                        // Check for direct match with arch
+                        if (a.Name.Contains(StringComparison.InvariantCultureIgnoreCase, architecture_strings[arch]))
+                            return true;
+
+                        // Check if neutral
+                        return architecture_strings.Any(e => a.Name.Contains(StringComparison.InvariantCultureIgnoreCase, e.Value));
+                    }).ToList();
+
+                    if (assets.Count == 0) continue;
+                    else if (assets.Count != 1)
+                    {
+                        // Rank assets by file type
+                        assets = assets.OrderBy(a => RankAsset(a.Name)).ToList();
+                    }
+                    
+                    asset = assets[0];
                     release = rel;
                     break;
                 }
@@ -164,8 +195,7 @@ namespace FluentStore.SDK.PackageTypes
 
                     // Pick file that is most likely an installer
                     // Only look at top-level files
-                    int RankAsset(ZipArchiveEntry e) => this.RankAsset(e.Name);
-                    var assets = archive.Entries.Where(e => !e.FullName.Contains('/')).OrderBy(RankAsset);
+                    var assets = archive.Entries.Where(e => !e.FullName.Contains('/')).OrderBy(e => RankAsset(e.Name));
                     if (!assets.Any())
                         throw new Exception("Failed to find a good installer candidate for " + Title);
 

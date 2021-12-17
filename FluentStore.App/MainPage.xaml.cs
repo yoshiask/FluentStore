@@ -39,6 +39,7 @@ namespace FluentStore
         public MainPage()
         {
             this.InitializeComponent();
+            PointerPressed += MainPage_PointerPressed;
 
             MainFrame.Navigated += MainFrame_Navigated;
             NavService.CurrentFrame = MainFrame;
@@ -66,6 +67,19 @@ namespace FluentStore
 
             UserService.OnLoginStateChanged += UserService_OnLoginStateChanged;
             UserService.TrySignIn(false);
+        }
+
+        private void MainPage_PointerPressed(object sender, PointerRoutedEventArgs e)
+        {
+            var props = e.GetCurrentPoint(this).Properties;
+            if (props.IsXButton1Pressed)
+            {
+                // Backward
+            }
+            else if (props.IsXButton2Pressed)
+            {
+                // Forward
+            }
         }
 
         private void UserService_OnLoginStateChanged(bool isLoggedIn)

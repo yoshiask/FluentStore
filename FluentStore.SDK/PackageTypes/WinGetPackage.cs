@@ -149,16 +149,16 @@ namespace FluentStore.SDK.Packages
             bool isSuccess = false;
 
             // Get installer for current architecture
-            var sysArch = Windows.ApplicationModel.Package.Current.Id.Architecture;
-            Installer = Manifest.Installers.Find(i => sysArch == i.Arch.ToWinRTArch());
+            var sysArch = Win32Helper.GetSystemArchitecture();
+            Installer = Manifest.Installers.Find(i => sysArch == i.Arch.ToSDKArch());
             if (Installer == null)
                 Installer = Manifest.Installers.Find(i => i.Arch == WinGetRun.Enums.InstallerArchitecture.X86
                     || i.Arch == WinGetRun.Enums.InstallerArchitecture.Neutral);
             if (Installer == null)
             {
                 string archStr = string.Join(", ", Manifest.Installers.Select(i => i.Arch));
-                throw new PlatformNotSupportedException($"Your computer's architecture is {sysArch}, which is not supported by this package." +
-                    $"This package supports {archStr}].");
+                throw new PlatformNotSupportedException($"Your computer's architecture is {sysArch}, which is not supported by this package. " +
+                    $"This package supports {archStr}.");
             }
 
             switch (Type.Reduce())
