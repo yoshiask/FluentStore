@@ -90,8 +90,7 @@ namespace FluentStore.Services
                 if (loginCredential != null)
                 {
                     bool success = await SignInAsync(null, loginCredential.Password);
-                    if (!success)
-                        goto failed;
+                    if (success) return;
                 }
             }
             catch
