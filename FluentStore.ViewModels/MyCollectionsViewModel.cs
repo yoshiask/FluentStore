@@ -87,9 +87,9 @@ namespace FluentStore.ViewModels
 
                 NavService.Navigate(SelectedCollection);
             }
-            catch (Flurl.Http.FlurlHttpException ex)
+            catch (Exception ex)
             {
-                NavService.ShowHttpErrorPage(ex);
+                WeakReferenceMessenger.Default.Send(new SDK.Messages.ErrorMessage(ex, SelectedCollection.Package));
             }
 
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
