@@ -56,84 +56,9 @@ namespace FluentStore.SDK.Helpers
             }
         }
 
-        public static Models.InstallerType ToSDKInstallerType(this WinGetRun.Enums.InstallerType type)
-        {
-            return type switch
-            {
-                WinGetRun.Enums.InstallerType.Msix => Models.InstallerType.Msix,
-                WinGetRun.Enums.InstallerType.Msi => Models.InstallerType.Msi,
-                WinGetRun.Enums.InstallerType.Appx => Models.InstallerType.AppX,
-                WinGetRun.Enums.InstallerType.Exe => Models.InstallerType.Exe,
-                WinGetRun.Enums.InstallerType.Zip => Models.InstallerType.Zip,
-                WinGetRun.Enums.InstallerType.Inno => Models.InstallerType.Inno,
-                WinGetRun.Enums.InstallerType.Nullsoft => Models.InstallerType.Nullsoft,
-                WinGetRun.Enums.InstallerType.Wix => Models.InstallerType.Wix,
-                WinGetRun.Enums.InstallerType.Burn => Models.InstallerType.Burn,
-
-                WinGetRun.Enums.InstallerType.Pwa => Models.InstallerType.Unknown,
-                _ => Models.InstallerType.Unknown,
-            };
-        }
-
-        public static string GetExtensionDescription(this Models.InstallerType type)
-        {
-            Models.InstallerType typeReduced = type.Reduce();
-            string extDesc;
-            if (typeReduced == Models.InstallerType.Msix)
-            {
-                extDesc = "Windows App " + (type.HasFlag(Models.InstallerType.Bundle) ? "Bundle" : "Package");
-
-                if (type.HasFlag(Models.InstallerType.Encrypted))
-                    extDesc = "Encrypted " + extDesc;
-            }
-            else
-            {
-                extDesc = type switch
-                {
-                    Models.InstallerType.Msi => "Windows Installer",
-                    Models.InstallerType.Exe => "Installer",
-                    Models.InstallerType.Zip => "Compressed zip archive",
-                    Models.InstallerType.Inno => "Inno Setup installer",
-                    Models.InstallerType.Nullsoft => "NSIS installer",
-                    Models.InstallerType.Wix => "WiX installer",
-                    Models.InstallerType.Burn => "WiX Burn installer",
-
-                    _ => "Unknown"
-                };
-            }
-
-            return extDesc;
-        }
-
         public static Version ToVersion(this Windows.ApplicationModel.PackageVersion packageVersion)
         {
             return new(packageVersion.Major, packageVersion.Minor, packageVersion.Build, packageVersion.Revision);
-        }
-
-        /// <summary>
-        /// Reduces the installer type to its most generic type.
-        /// </summary>
-        /// <returns>
-        /// <see cref="Models.InstallerType.Msix"/> for Windows App Packages,
-        /// <see cref="Models.InstallerType.Win32"/> for traditional Win32 installers,
-        /// <see cref="Models.InstallerType.Unknown"/> for everything else.
-        /// </returns>
-        public static Models.InstallerType Reduce(this Models.InstallerType type)
-        {
-            uint genericId = (uint)type >> 28;
-            return genericId switch
-            {
-                ((uint)Models.InstallerType.Msix >> 28) => Models.InstallerType.Msix,
-                ((uint)Models.InstallerType.Win32 >> 28) => Models.InstallerType.Win32,
-
-                0 => Models.InstallerType.Unknown,
-                _ => Models.InstallerType.Unknown
-            };
-        }
-
-        public static string GetExtension<TEnum>(this TEnum type) where TEnum : unmanaged, Enum
-        {
-            return "." + type.ToString().ToLower();
         }
 
         public static bool IsAtLeast<TEnum>(this TEnum a, TEnum b) where TEnum : unmanaged, Enum
@@ -160,6 +85,14 @@ namespace FluentStore.SDK.Helpers
             else
                 throw new ArgumentException("Argument is not a usual enum type; it is not 1, 2, 4, or 8 bytes in length.");
             return x;
+        }
+
+        public static bool Contains(this string str, StringComparison comparisonType, params string[] matches)
+        {
+            bool contains = false;
+            foreach (string match in matches)
+                contains |= str.Contains(match, comparisonType);
+            return contains;
         }
     }
 }

@@ -17,6 +17,7 @@ namespace FluentStore.SDK.Models
         MsixBundle = Msix | Bundle,
         EAppXBundle = AppX | Bundle | Encrypted,
         EMsixBundle = Msix | Bundle | Encrypted,
+        AppInstaller = Msix | 1 << 2,
 
         // Traditional [Win32] installers
         Win32 = 2 << 28,
