@@ -89,16 +89,14 @@ namespace FluentStore.SDK.PackageTypes
 
                     // Pick proper asset for architecture
                     IEnumerable<ReleaseAsset> assets = rel.Assets;
-                    if (assets.Any(a => a.Name.Contains(StringComparison.InvariantCultureIgnoreCase, architecture_strings)))
-                    {
-                        // Some assets are architecture-specific
-                        var arch = Win32Helper.GetSystemArchitecture();
 
-                        // Exclude mismatched architectures, but keep assets that don't specify an architecture
-                        assets = assets.Where(a =>
-                            a.Name.Contains(arch.ToString(), StringComparison.InvariantCultureIgnoreCase)
-                            || !a.Name.Contains(StringComparison.InvariantCultureIgnoreCase, architecture_strings));
-                    }
+                    // Some assets may be architecture-specific
+                    var arch = Win32Helper.GetSystemArchitecture();
+                    // Exclude mismatched architectures, but keep assets that don't specify an architecture
+                    assets = assets.Where(a =>
+                        a.Name.Contains(arch.ToString(), StringComparison.InvariantCultureIgnoreCase)
+                        || !a.Name.Contains(StringComparison.InvariantCultureIgnoreCase, architecture_strings));
+
                     if (rel.Assets.Count == 0) continue;
                     else if (assets.Count() == 1)
                     {
