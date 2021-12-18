@@ -31,7 +31,7 @@ namespace FluentStore.SDK.Handlers
 
         public override ImageBase GetImage()
         {
-            return new FileImage("https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png");
+            return new FileImage("ms-appx:///Assets/PackageHandlerIcons/GitHubHandler/GitHub-Mark.png");
         }
 
         public override async Task<PackageBase> GetPackage(Urn packageUrn)
