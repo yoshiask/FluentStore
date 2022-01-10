@@ -38,7 +38,7 @@ namespace FluentStore.SDK.Packages
             DeveloperName = pack.Latest.Publisher;
             ReleaseDate = pack.CreatedAt;
             Description = pack.Latest.Description;
-            Version = pack.Versions[0];
+            Version = pack.Versions[^1];
             Website = Models.Link.Create(pack.Latest.Homepage, ShortTitle + " website");
 
             // Set WinGet package properties
