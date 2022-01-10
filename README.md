@@ -21,14 +21,13 @@ Several sources are currently supported, with several more planned for the futur
 
 | Source Name       | Search | Download | Install
 ---                 | :---:  | :---:    | :---:
-| Microsoft Store   | ✅     | ✅      | ✅¹ |
+| Microsoft Store   | ✅     | ✅      | ✅  |
 | WinGet            | ✅     | ✅      | ✅  |
 | GitHub Releases   | ❌     | ☑       | ☑   |
 | Chocolatey        | ❌     | ❌      | ❌  |
-| UWP Community     | ❌     | ✅²     | ✅² |
+| UWP Community     | ❌     | ✅¹     | ✅¹ |
 
-1.  Only packaged apps can be installed. Unpackaged apps can be downloaded, but must be installed manually.
-2.  UWP Community projects do not have direct download links. Fluent Store will attempt to follow the link
+1.  UWP Community projects do not have direct download links. Fluent Store will attempt to follow the link
     and download/install it if recognized. If not, the link is opened in the default browser.
 
 ## Where to download?
