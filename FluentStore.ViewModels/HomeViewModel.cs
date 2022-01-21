@@ -6,7 +6,6 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.ViewModels.Messages;
-using FluentStore.SDK.Packages;
 using Microsoft.Marketplace.Storefront.Contracts;
 using Garfoot.Utilities.FluentUrn;
 using FluentStore.SDK;
@@ -26,6 +25,11 @@ namespace FluentStore.ViewModels
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
 
+        private void CarouselItems_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            ShowCarousel = CarouselItems.Count > 0;
+        }
+
         public async Task LoadFeaturedAsync()
         {
             try
@@ -35,6 +39,7 @@ namespace FluentStore.ViewModels
                 var page = await StorefrontApi.GetHomeRecommendations();
 
                 var featured = await FSApi.GetHomePageFeaturedAsync(Windows.ApplicationModel.Package.Current.Id.Version.ToVersion());
+                CarouselItems.CollectionChanged += CarouselItems_CollectionChanged;
                 CarouselItems.Clear();
 
                 for (int i = 0; i < featured.Carousel.Count; i++)
@@ -47,11 +52,13 @@ namespace FluentStore.ViewModels
                         if (i == 0)
                             SelectedCarouselItemIndex = i;
                     }
-                    catch (Flurl.Http.FlurlHttpException)
+                    catch (System.Exception ex)
                     {
-                        // Ignore packages that couldn't be resolved
+                        var logger = Ioc.Default.GetRequiredService<LoggerService>();
+                        logger.Warn(ex, ex.Message);
                     }
                 }
+                CarouselItems.CollectionChanged -= CarouselItems_CollectionChanged;
 
                 // Load featured packages from other sources
                 FeaturedPackages = new ObservableCollection<HandlerPackageListPair>();
@@ -79,6 +86,13 @@ namespace FluentStore.ViewModels
         {
             get => _LoadFeaturedCommand;
             set => SetProperty(ref _LoadFeaturedCommand, value);
+        }
+
+        private bool _ShowCarousel = true;
+        public bool ShowCarousel
+        {
+            get => _ShowCarousel;
+            set => SetProperty(ref _ShowCarousel, value);
         }
 
         private ObservableCollection<PackageViewModel> _CarouselItems = new();

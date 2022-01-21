@@ -12,7 +12,7 @@
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     mc:Ignorable="d"
-    NavigationCacheMode="Required"
+    NavigationCacheMode="Disabled"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <interactivity:Interaction.Behaviors>
@@ -21,15 +21,16 @@
         </core:EventTriggerBehavior>
     </interactivity:Interaction.Behaviors>
     
-    <Grid>
+    <Grid RowSpacing="4">
         <Grid.RowDefinitions>
-            <RowDefinition Height="*" MinHeight="100"/>
+            <RowDefinition Height="{x:Bind ViewModel.ShowCarousel, Converter={StaticResource BoolToHeightOrZero}, ConverterParameter=1, Mode=OneWay}"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <tkcontrols:Carousel x:Name="FeaturedCarousel" ItemsSource="{x:Bind ViewModel.CarouselItems}"
                              SelectedIndex="{x:Bind ViewModel.SelectedCarouselItemIndex, Mode=TwoWay}"
                              SelectedItem="{x:Bind ViewModel.SelectedCarouselItem, Mode=TwoWay}"
-                             ItemMargin="16" ItemDepth="200" ManipulationMode="None">
+                             ItemMargin="16" ItemDepth="200" ManipulationMode="None" MinHeight="100"
+                             x:Load="{x:Bind ViewModel.ShowCarousel, Mode=OneWay}">
             <tkcontrols:Carousel.EasingFunction>
                 <CubicEase EasingMode="EaseOut" />
             </tkcontrols:Carousel.EasingFunction>

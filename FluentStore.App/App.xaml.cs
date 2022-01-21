@@ -186,6 +186,7 @@ namespace FluentStore
             var services = new ServiceCollection();
 
             services.AddSingleton(new Microsoft.Marketplace.Storefront.Contracts.StorefrontApi());
+            services.AddSingleton<ISettingsService>(Helpers.Settings.Default);
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
             services.AddSingleton(new FluentStoreAPI.FluentStoreAPI());
@@ -194,7 +195,6 @@ namespace FluentStore
             services.AddSingleton(typeof(UserService));
             services.AddSingleton(typeof(LoggerService));
             services.AddSingleton(new SDK.PackageService());
-            services.AddSingleton<ISettingsService>(Helpers.Settings.Default);
 
             return services.BuildServiceProvider();
         }

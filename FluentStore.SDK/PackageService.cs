@@ -1,5 +1,7 @@
-﻿using FluentStore.SDK.Handlers;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using FluentStore.SDK.Handlers;
 using FluentStore.SDK.Models;
+using FluentStore.Services;
 using Flurl;
 using FuzzySharp;
 using FuzzySharp.SimilarityRatio;
@@ -26,9 +28,11 @@ namespace FluentStore.SDK
                 // Use reflection to create an instance of each handler and add it to the regsitry
                 if (_PackageHandlers == null)
                 {
-                    var emptyTypeList = new Type[0];
-                    var emptyObjectList = new object[0];
+                    ISettingsService Settings = Ioc.Default.GetRequiredService<ISettingsService>();
+                    var emptyTypeList = Array.Empty<Type>();
+                    var emptyObjectList = Array.Empty<object>();
                     _PackageHandlers = new Dictionary<string, PackageHandlerBase>();
+
                     foreach (Type type in Assembly.GetExecutingAssembly().GetTypes()
                         .Where(t => t.Namespace == "FluentStore.SDK.Handlers" && t.IsClass && t.IsPublic))
                     {
@@ -40,6 +44,10 @@ namespace FluentStore.SDK
                             var handler = (PackageHandlerBase)ctr.Invoke(emptyObjectList);
                             if (handler == null)
                                 continue;
+
+                            // Enable or disable according to user settings
+                            handler.IsEnabled = Settings.GetPackageHandlerEnabledState(type.Name);
+
                             _PackageHandlers.Add(type.Name, handler);
                         }
                         catch (Exception ex)
@@ -56,20 +64,24 @@ namespace FluentStore.SDK
             }
         }
 
-        private Dictionary<string, PackageHandlerBase> _NamespaceRegistry;
+        private Dictionary<string, int> _NamespaceRegistry;
         /// <summary>
         /// A mapping of known namespaces and the handlers that registered them.
         /// </summary>
-        public Dictionary<string, PackageHandlerBase> NamespaceRegistry
+        public Dictionary<string, int> NamespaceRegistry
         {
             get
             {
                 if (_NamespaceRegistry == null)
                 {
-                    _NamespaceRegistry = new Dictionary<string, PackageHandlerBase>();
+                    _NamespaceRegistry = new();
+                    int i = 0;
                     foreach (PackageHandlerBase handler in PackageHandlers.Values)
+                    {
                         foreach (string ns in handler.HandledNamespaces)
-                            _NamespaceRegistry.Add(ns, handler);
+                            _NamespaceRegistry.Add(ns, i);
+                        i++;
+                    }
                 }
 
                 return _NamespaceRegistry;
@@ -83,6 +95,8 @@ namespace FluentStore.SDK
         {
             foreach (var handler in PackageHandlers.Values)
             {
+                if (!handler.IsEnabled) continue;
+
                 List<PackageBase> results;
                 try
                 {
@@ -102,6 +116,8 @@ namespace FluentStore.SDK
             var packages = new List<PackageBase>();
             foreach (var handler in PackageHandlers.Values)
             {
+                if (!handler.IsEnabled) continue;
+
                 List<PackageBase> results;
                 try
                 {
@@ -125,6 +141,8 @@ namespace FluentStore.SDK
             var packages = new List<PackageBase>();
             foreach (var handler in PackageHandlers.Values)
             {
+                if (!handler.IsEnabled) continue;
+
                 List<PackageBase> results;
                 try
                 {
@@ -159,6 +177,8 @@ namespace FluentStore.SDK
             PackageBase package = null;
             foreach (PackageHandlerBase handler in PackageHandlers.Values)
             {
+                if (!handler.IsEnabled) continue;
+
                 package = await handler.GetPackageFromUrl(url);
                 if (package != null)
                     break;
@@ -183,8 +203,11 @@ namespace FluentStore.SDK
         /// <exception cref="NotSupportedException"/>
         public PackageHandlerBase GetHandlerForNamespace(string ns)
         {
-            if (NamespaceRegistry.TryGetValue(ns, out var handler))
+            if (NamespaceRegistry.TryGetValue(ns, out var handlerIdx))
             {
+                var handler = PackageHandlers.Values.ElementAt(handlerIdx);
+                if (!handler.IsEnabled)
+                    throw new InvalidOperationException($"The {handler.DisplayName} package handler is disabled. Please go to settings and re-enable it.");
                 return handler;
             }
             else

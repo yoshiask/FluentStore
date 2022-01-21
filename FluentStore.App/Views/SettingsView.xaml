@@ -47,11 +47,21 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="sdk:PackageHandlerBase">
-                                <StackPanel Spacing="8" Orientation="Horizontal">
-                                    <ContentControl Content="{x:Bind Image, Mode=OneWay}" Height="48"
+                                <Grid ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="48" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <ContentControl Content="{x:Bind Image, Mode=OneWay}"
                                                     ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
-                                    <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}" VerticalAlignment="Center"/>
-                                </StackPanel>
+                                    <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}"
+                                               Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                    <ToggleSwitch IsOn="{x:Bind IsEnabled}" Grid.Column="2" Margin="0,0,8,0"
+                                                  Style="{ThemeResource ToggleSwitchRightStyle}"
+                                                  Toggled="PackageHandlerEnable_Toggled"/>
+                                </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

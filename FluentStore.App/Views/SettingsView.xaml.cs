@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Windows.ApplicationModel;
 using Microsoft.UI.Xaml.Controls;
 using FluentStore.SDK.Helpers;
+using Microsoft.UI.Xaml;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -48,28 +49,35 @@ namespace FluentStore.Views
 			WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Settings"));
 		}
 
-		private void ClearCacheButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+		private void ClearCacheButton_Click(object sender, RoutedEventArgs e)
 		{
 			DownloadCache cache = new(createIfDoesNotExist: false);
 			cache.Clear();
 		}
 
-		private async void BugReportButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+		private async void BugReportButton_Click(object sender, RoutedEventArgs e)
         {
 			await NavigationService.OpenInBrowser("https://github.com/yoshiask/FluentStore/issues/new");
         }
 
-        private async void DonateButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private async void DonateButton_Click(object sender, RoutedEventArgs e)
         {
 			await NavigationService.OpenInBrowser("http://josh.askharoun.com/donate");
 		}
 
-        private void CrashButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private void CrashButton_Click(object sender, RoutedEventArgs e)
         {
 #if DEBUG
 			throw new System.Exception("An unhandled exception was thrown. The app should have crashed and pushed a notification " +
 				"that allows the user to view and report the error.");
 #endif
 		}
+
+        private void PackageHandlerEnable_Toggled(object sender, RoutedEventArgs e)
+        {
+			if (sender is not ToggleSwitch ts) return;
+
+			Settings.SetPackageHandlerEnabledState(ts.DataContext.GetType().Name, ts.IsOn);
+        }
     }
 }

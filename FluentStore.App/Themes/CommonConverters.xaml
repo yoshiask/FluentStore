@@ -25,5 +25,6 @@
     <converters:PlatWindowsEnumToVisibility x:Key="PlatWindowsEnumToVisibility"/>
     <converters:PackageBaseEnumerableToViewModelEnumerable x:Key="PackageBaseEnumerableToViewModelEnumerable"/>
     <converters:PackageDisplayConverter x:Key="PackageDisplayConverter"/>
+    <converters:BoolToHeightOrZero x:Key="BoolToHeightOrZero"/>
 
 </ResourceDictionary>

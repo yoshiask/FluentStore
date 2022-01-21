@@ -16,6 +16,8 @@ namespace FluentStore.SDK
         /// </remarks>
         public abstract HashSet<string> HandledNamespaces { get; }
 
+        public bool IsEnabled { get; set; }
+
         private ImageBase _Image;
         /// <summary>
         /// An image that represents this handler.
