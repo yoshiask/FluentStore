@@ -103,7 +103,7 @@ namespace StoreDownloader
                     long.Parse(boundApp.Size),
                     boundApp.Digest,
                     "sha1");
-            }).ToList();
+            }).Reverse().ToList();
 
             using var helperDl = new HttpDownloader(downloadDirectory.FullName);
             return await helperDl.DownloadAsync(fileList, progress).ConfigureAwait(false)
