@@ -1,6 +1,8 @@
 ﻿using FluentStore.SDK.Models;
+using Garfoot.Utilities.FluentUrn;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Windows.System;
 
 namespace FluentStore.SDK.Helpers
@@ -86,6 +88,21 @@ namespace FluentStore.SDK.Helpers
             foreach (string match in matches)
                 contains |= str.Contains(match, comparisonType);
             return contains;
+        }
+
+        // TODO: Does this really belong here?
+        public static bool TryParseUrn(string str, [NotNullWhen(true)] out Urn urn)
+        {
+            try
+            {
+                urn = Urn.Parse(str);
+                return true;
+            }
+            catch
+            {
+                urn = default;
+                return false;
+            }
         }
     }
 }

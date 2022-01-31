@@ -9,6 +9,7 @@ using FluentStore.SDK;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using FluentStore.SDK.Messages;
 
 namespace FluentStore.ViewModels
 {
@@ -23,9 +24,6 @@ namespace FluentStore.ViewModels
 
             WeakReferenceMessenger.Default.Register<Messages.PageLoadingMessage>(this, (r, m) =>
             {
-                // Handle the message here, with r being the recipient and m being the
-                // input messenger. Using the recipient passed as input makes it so that
-                // the lambda expression doesn't capture "this", improving performance.
                 var self = (ShellViewModel)r;
                 self.IsPageLoading = m.Value;
             });
@@ -35,6 +33,10 @@ namespace FluentStore.ViewModels
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
         private readonly ISettingsService Settings = Ioc.Default.GetRequiredService<ISettingsService>();
+        private readonly ObservableCollection<PackageViewModel> NoResultsCollection = new()
+        {
+            new(new SDK.Packages.ModernPackage<object> { Title = "No results found" })
+        };
 
         private bool _IsPageLoading;
         public bool IsPageLoading
@@ -110,6 +112,16 @@ namespace FluentStore.ViewModels
         {
             try
             {
+                if (SearchBoxText.StartsWith("urn:") && SDK.Helpers.Extensions.TryParseUrn(SearchBoxText, out var urn))
+                {
+                    // User specified a URN, not a search term
+                    PackageBase? package = await PackageService.TryGetPackageAsync(urn);
+                    SearchSuggestions = package != null
+                        ? new(new[] { new PackageViewModel(package) })
+                        : NoResultsCollection;
+                    return;
+                }
+
                 IEnumerable<PackageBase> results = await PackageService.GetSearchSuggestionsAsync(SearchBoxText);
 
                 if (Settings.UseExclusionFilter)
@@ -119,22 +131,13 @@ namespace FluentStore.ViewModels
                     results = results.Where(pb => !exclusionFilter.IsMatch(pb.Title));
                 }
 
-                if (results.Count() <= 0)
-                {
-                    SearchSuggestions = new ObservableCollection<PackageViewModel>
-                    {
-                        new PackageViewModel(new SDK.Packages.ModernPackage<object> { Title = "No results found" })
-                    };
-                }
-                else
-                {
-                    SearchSuggestions = new ObservableCollection<PackageViewModel>(results.Select(pb => new PackageViewModel(pb)));
-                }
+                SearchSuggestions = results.Any()
+                    ? new(results.Select(pb => new PackageViewModel(pb)))
+                    : NoResultsCollection;
             }
-            catch (Flurl.Http.FlurlHttpException ex)
+            catch (System.Exception ex)
             {
-                // TODO: Should this really navigate to a different page?
-                NavService.ShowHttpErrorPage(ex);
+                WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, SearchBoxText, ErrorType.HandlerSearchSuggestFailed));
             }
         }
 

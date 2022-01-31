@@ -170,6 +170,22 @@ namespace FluentStore.SDK
         }
 
         /// <summary>
+        /// Attempts to get the package with the specified <paramref name="packageUrn"/>.
+        /// </summary>
+        /// <returns>The package if successful, <see langword="null"/> if an exception is thrown.</returns>
+        public async Task<PackageBase?> TryGetPackageAsync(Urn packageUrn)
+        {
+            try
+            {
+                return await GetPackageAsync(packageUrn);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Gets the package associated with the specified URL.
         /// </summary>
         public async Task<PackageBase> GetPackageFromUrlAsync(Url url)
