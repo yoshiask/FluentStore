@@ -194,17 +194,28 @@ namespace FluentStore.SDK.PackageTypes
                     using ZipArchive archive = new(archiveStream, ZipArchiveMode.Read);
 
                     // Pick file that is most likely an installer
-                    // Only look at top-level files
-                    var assets = archive.Entries.Where(e => !e.FullName.Contains('/')).OrderBy(e => RankAsset(e.Name));
+                    IEnumerable<ZipArchiveEntry> assets = archive.Entries;
+                    if (assets.All(e => e.FullName.StartsWith(archive.Entries[0].FullName)))
+                    {
+                        // All files are in the same folder, check one level deeper
+                        // (and make sure the directory is skipped)
+                        assets = assets.Skip(1).Where(e => e.FullName.Count(c => c == '/') == 1);
+                    }
+                    else
+                    {
+                        // Only look at top-level files
+                        assets = assets.Where(e => !e.FullName.Contains('/'));
+                    }
+                    assets = assets.OrderBy(e => RankAsset(e.Name));
                     if (!assets.Any())
                         throw new Exception("Failed to find a good installer candidate for " + Title);
 
                     // Extract everything, but keep track of installer
-                    string installerFilename = assets.First().Name;
+                    ZipArchiveEntry selectedAsset = assets.First();
                     var dir = new DirectoryInfo(archiveFile.FullName[..^archiveFile.Extension.Length]);
                     archive.ExtractToDirectory(dir.FullName, true);
-                    DownloadItem = new FileInfo(Path.Combine(dir.FullName, installerFilename));
-                    Type = InstallerTypes.FromExtension(Path.GetExtension(installerFilename)[1..]);
+                    DownloadItem = new FileInfo(Path.Combine(dir.FullName, selectedAsset.FullName));
+                    Type = InstallerTypes.FromExtension(Path.GetExtension(selectedAsset.Name)[1..]);
                 }
 
                 InstallerType typeReduced = Type.Reduce();
