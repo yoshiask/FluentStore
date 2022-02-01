@@ -74,12 +74,12 @@
                     <FontIcon Glyph="&#xE946;"/>
                 </controls:SettingsBlockControl.Icon>
                 <controls:SettingsBlockControl.ExpandableContent>
-                    <TextBlock Margin="16" TextWrapping="WrapWholeWords">
+                    <TextBlock Margin="16" TextWrapping="WrapWholeWords" IsTextSelectionEnabled="True">
                             <Run Text="Fluent Store is a unifying frontend for Windows app stores and package managers."/>
                             <Run Text="You can search all repositories at once, pick out an app, and install it without ever opening a browser or command prompt."/>
                             <Run Text="With a Fluent Store Social account, you can create collections of apps to install or share in one click."/>
                             <LineBreak/><LineBreak/>
-                            <Run Text="Version "/><Run Text="{x:Bind VersionString, Mode=OneTime}"/>
+                            <Run Text="Version " FontWeight="Bold"/><Run Text="{x:Bind VersionString, Mode=OneTime}" FontWeight="Bold"/>
                     </TextBlock>
                 </controls:SettingsBlockControl.ExpandableContent>
             </controls:SettingsBlockControl>
