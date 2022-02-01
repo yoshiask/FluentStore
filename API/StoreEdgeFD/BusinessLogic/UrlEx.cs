@@ -21,7 +21,9 @@ namespace Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic
 
         public static Url GetStoreEdgeFDBase(CultureInfo culture = null, double version = 9.0)
         {
-            return Constants.STOREFRONT_API_HOST.AppendPathSegment("v" + version.ToString("0.0", CultureInfo.InvariantCulture)).SetMarket(culture);
+            return Constants.STOREFRONT_API_HOST
+                .AppendPathSegment("v" + version.ToString("0.0", CultureInfo.GetCultureInfo("en-001")))
+                .SetMarket(culture);
         }
     }
 }

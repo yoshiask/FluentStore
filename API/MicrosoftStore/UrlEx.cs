@@ -24,7 +24,9 @@ namespace Microsoft.Marketplace.Storefront.Contracts
 
         public static IFlurlRequest GetStorefrontBase(CultureInfo culture = null, double version = 9.0)
         {
-            return Constants.STOREFRONT_API_HOST.AppendPathSegment("v" + version.ToString("0.0", CultureInfo.InvariantCulture)).GetBase(culture);
+            return Constants.STOREFRONT_API_HOST
+                .AppendPathSegment("v" + version.ToString("0.0", CultureInfo.GetCultureInfo("en-001")))
+                .GetBase(culture);
         }
     }
 }
