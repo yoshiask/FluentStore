@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿using System;
+using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using System.Xml.XPath;
@@ -41,6 +42,11 @@ namespace Chocolatey
             if (xml == null)
                 return default(T);
             return xml.CreateReader().Deserialize<T>();
+        }
+
+        public static TEnum TryParseEnum<TEnum>(string value, bool ignoreCase = false) where TEnum : struct
+        {
+            return (TEnum)Enum.Parse(typeof(TEnum), value, ignoreCase);
         }
     }
 }

@@ -1,6 +1,4 @@
 using Chocolatey;
-using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -13,11 +11,11 @@ namespace ChocolateyTests
         {
             var actualResult = await Choco.SearchAsync("git");
             Assert.Equal(30, actualResult.Count);
-            foreach (var result in actualResult)
-            {
-                Assert.StartsWith("http://community.chocolatey.org/api/v2/", result.Id);
-                Assert.NotNull(result.Title);
-            }
+            
+            var firstResult = actualResult[0];
+            Assert.Equal("git", firstResult.Id);
+            Assert.Equal("Git", firstResult.Title);
+            Assert.StartsWith("https://community.chocolatey.org/api/v2/package/git/", firstResult.DownloadUrl);
         }
 
         [Fact]
@@ -27,7 +25,7 @@ namespace ChocolateyTests
             Assert.Equal(30, actualResult.Count);
             foreach (var result in actualResult)
             {
-                Assert.StartsWith("http://community.chocolatey.org/api/v2/", result.Id);
+                Assert.NotNull(result.Id);
                 Assert.NotNull(result.Title);
             }
         }
@@ -42,7 +40,7 @@ namespace ChocolateyTests
             Assert.Equal(pageSize, results1.Count);
             foreach (var result in results1)
             {
-                Assert.StartsWith("http://community.chocolatey.org/api/v2/", result.Id);
+                Assert.NotNull(result.Id);
                 Assert.NotNull(result.Title);
             }
 
@@ -50,7 +48,7 @@ namespace ChocolateyTests
             Assert.Equal(pageSize, results2.Count);
             foreach (var result in results2)
             {
-                Assert.StartsWith("http://community.chocolatey.org/api/v2/", result.Id);
+                Assert.NotNull(result.Id);
                 Assert.NotNull(result.Title);
                 Assert.DoesNotContain(results1, r1 => r1.Id == result.Id);
             }
