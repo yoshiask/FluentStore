@@ -23,9 +23,11 @@
 		<PackageReference Include="System.Management" Version="6.0.0" />
         <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
         <PackageReference Include="PInvoke.User32" Version="0.7.104" />
+		<PackageReference Include="Microsoft.PowerShell.SDK" Version="7.2.1" />
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\API\Choco\Chocolatey.csproj" />
         <ProjectReference Include="..\API\MSStore\StoreDownloader\StoreDownloader.csproj" />
         <ProjectReference Include="..\API\WinGetRun\WinGetRun.csproj" />
         <ProjectReference Include="..\API\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />

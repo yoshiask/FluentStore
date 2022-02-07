@@ -33,7 +33,7 @@ namespace Chocolatey
 
         public static async Task<Package> GetPackageAsync(string id, Version version)
         {
-            var entry = await Constants.CHOCOLATEY_API_HOST.AppendPathSegment($"Packages(Id='{id}', Version='{version}')")
+            var entry = await Constants.CHOCOLATEY_API_HOST.AppendPathSegment($"Packages(Id='{id}',Version='{version}')")
                 .GetXDocumentAsync();
             return new Package(entry.Root);
         }

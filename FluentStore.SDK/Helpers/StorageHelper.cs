@@ -10,6 +10,7 @@ using Windows.Web.Http;
 using System.IO;
 using System.Linq;
 using Windows.Storage.Streams;
+using System.IO.Compression;
 
 namespace FluentStore.SDK.Helpers
 {
@@ -179,6 +180,15 @@ namespace FluentStore.SDK.Helpers
         downloaded:
             package.DownloadItem = info;
             package.Status = PackageStatus.Downloaded;
+        }
+
+        public static DirectoryInfo ExtractArchiveToDirectory(FileInfo archiveFile, bool overwrite)
+        {
+            using FileStream archiveStream = archiveFile.OpenRead();
+            using ZipArchive archive = new(archiveStream, ZipArchiveMode.Read);
+            var dir = new DirectoryInfo(archiveFile.FullName[..^archiveFile.Extension.Length]);
+            archive.ExtractToDirectory(dir.FullName, overwrite);
+            return dir;
         }
     }
 }
