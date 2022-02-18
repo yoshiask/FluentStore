@@ -1,5 +1,4 @@
 ﻿using FluentStore.SDK;
-using FluentStore.SDK.Handlers;
 using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
 using Garfoot.Utilities.FluentUrn;
@@ -60,7 +59,7 @@ namespace FluentStore.ViewModels
             {
                 // Get the full product details
                 var package = await PackageService.GetPackageAsync(
-                    Urn.Parse($"urn:{MicrosoftStoreHandler.NAMESPACE_MODERNPACK}:{SelectedApp.PackageFamilyName}"));
+                    Urn.Parse($"urn:win-modern-package:{SelectedApp.PackageFamilyName}"));
                 if (package != null)
                 {
                     WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));

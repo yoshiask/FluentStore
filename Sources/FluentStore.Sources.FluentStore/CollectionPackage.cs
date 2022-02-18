@@ -4,8 +4,10 @@ using Garfoot.Utilities.FluentUrn;
 using CommunityToolkit.Diagnostics;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using FluentStore.SDK.Packages;
+using FluentStore.SDK;
 
-namespace FluentStore.SDK.Packages
+namespace FluentStore.Sources.FluentStore
 {
     public class CollectionPackage : GenericListPackage<Collection>
     {
@@ -52,7 +54,7 @@ namespace FluentStore.SDK.Packages
             get
             {
                 if (_Urn == null)
-                    _Urn = Urn.Parse("urn:" + Handlers.FluentStoreHandler.NAMESPACE_COLLECTION + ":" + PublisherId + ":" + Model.Id);
+                    _Urn = Urn.Parse("urn:" + FluentStoreHandler.NAMESPACE_COLLECTION + ":" + PublisherId + ":" + Model.Id);
                 return _Urn;
             }
             set => _Urn = value;

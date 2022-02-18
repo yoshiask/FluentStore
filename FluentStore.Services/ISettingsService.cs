@@ -10,6 +10,9 @@ namespace FluentStore.Services
         [DefaultSettingValue(Value = true)]
         public bool UseExclusionFilter { get; set; }
 
+        [DefaultSettingValue(Value = null)]
+        public string PluginDirectory { get; set; }
+
         /// <summary>
         /// Gets the enabled state of the specified package handler. Defaults to <c>true</c>.
         /// </summary>

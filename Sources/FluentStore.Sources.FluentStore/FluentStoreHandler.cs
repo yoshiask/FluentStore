@@ -1,13 +1,14 @@
 ﻿using FluentStore.SDK.Images;
-using FluentStore.SDK.Packages;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FSAPI = FluentStoreAPI.FluentStoreAPI;
+using FluentStore.SDK;
+using Microsoft.Extensions.DependencyInjection;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
-namespace FluentStore.SDK.Handlers
+namespace FluentStore.Sources.FluentStore
 {
     public class FluentStoreHandler : PackageHandlerBase
     {

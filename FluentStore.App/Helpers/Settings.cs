@@ -1,4 +1,6 @@
 ﻿using FluentStore.Services;
+using System;
+using System.IO;
 using Windows.Storage;
 
 namespace FluentStore.Helpers
@@ -27,6 +29,24 @@ namespace FluentStore.Helpers
         public bool UseExclusionFilter
         {
             get => Get<bool>();
+            set => Set(value);
+        }
+
+        public string PluginDirectory
+        {
+            get
+            {
+                var val = Get<string>();
+                if (val == null)
+                {
+                    string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                    DirectoryInfo dir = new(Path.Combine(localAppData, "FluentStoreBeta", "Plugins"));
+                    if (!dir.Exists)
+                        dir.Create();
+                    PluginDirectory = val = dir.FullName;
+                }
+                return val;
+            }
             set => Set(value);
         }
 

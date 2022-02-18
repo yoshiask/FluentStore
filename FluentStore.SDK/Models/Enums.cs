@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace FluentStore.SDK.Models
+﻿namespace FluentStore.SDK.Models
 {
     public enum InstallerType : uint
     {
@@ -28,5 +26,19 @@ namespace FluentStore.SDK.Models
         Nullsoft = Win32 + 5,
         Wix = Win32 + 6,
         Burn = Win32 + 7,
+    }
+
+    public enum WindowsPlatform : uint
+    {
+        Unknown     = 0b0000,
+        Windows8x   = 0b0010,
+        Universal   = 0b1000,
+
+        Desktop = (1 << 5),
+        Mobile = (1 << 6),
+        Team = (1 << 7),
+        Xbox = (1 << 8),
+        Holographic = (1 << 10),
+        IoT = (1 << 11)
     }
 }

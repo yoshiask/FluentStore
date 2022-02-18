@@ -1,20 +1,20 @@
 ﻿using FluentStore.SDK.Images;
-using FluentStore.SDK.Packages;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using CommunityToolkit.Diagnostics;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WinGetRun;
 using WinGetRun.Models;
+using FluentStore.SDK;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace FluentStore.SDK.Handlers
+namespace FluentStore.Sources.WinGet
 {
     public class WinGetHandler : PackageHandlerBase
     {
-        private readonly WinGetApi WinGetApi = Ioc.Default.GetRequiredService<WinGetApi>();
+        private readonly WinGetApi WinGetApi = new();
 
         public const string NAMESPACE_WINGET = "winget";
         public override HashSet<string> HandledNamespaces => new()

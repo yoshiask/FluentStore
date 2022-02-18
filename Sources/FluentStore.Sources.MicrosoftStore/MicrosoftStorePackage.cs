@@ -19,8 +19,11 @@ using System.IO;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.PackageManifest;
 using StoreDownloader;
+using FluentStore.SDK;
+using FluentStore.SDK.Packages;
+using FluentStore.Sources.WinGet;
 
-namespace FluentStore.SDK.Packages
+namespace FluentStore.Sources.MicrosoftStore
 {
     public class MicrosoftStorePackage : PackageBase<ProductDetails>
     {
@@ -161,7 +164,7 @@ namespace FluentStore.SDK.Packages
             CopyProperties(ref internalPackage);
             InternalPackage = internalPackage;
         }
-        
+
         public void Update(RatingSummary ratingSummary)
         {
             Guard.IsNotNull(ratingSummary, nameof(ratingSummary));
@@ -188,10 +191,10 @@ namespace FluentStore.SDK.Packages
             Guard.IsNotNull(reviewList, nameof(reviewList));
             Guard.IsNotNull(ReviewSummary, nameof(ReviewSummary));
 
-            ReviewSummary.Reviews = new List<Models.Review>();
+            ReviewSummary.Reviews = new List<SDK.Models.Review>();
             foreach (Microsoft.Marketplace.Storefront.Contracts.V3.Review msReview in reviewList.Reviews)
             {
-                Models.Review review = new()
+                SDK.Models.Review review = new()
                 {
                     Title = msReview.Title,
                     ReviewId = msReview.ReviewId.ToString(),
@@ -234,7 +237,7 @@ namespace FluentStore.SDK.Packages
             get
             {
                 if (_Urn == null)
-                    _Urn = Urn.Parse("urn:" + Handlers.MicrosoftStoreHandler.NAMESPACE_MSSTORE + ":" + StoreId);
+                    _Urn = Urn.Parse("urn:" + MicrosoftStoreHandler.NAMESPACE_MSSTORE + ":" + StoreId);
                 return _Urn;
             }
             set => _Urn = value;
@@ -284,8 +287,8 @@ namespace FluentStore.SDK.Packages
                 {
                     // Get system and package info
                     string[] categoryIds = new[] { Model.Skus[0].FulfillmentData.WuCategoryId };
-                    var sysInfo = Win32Helper.GetSystemInfo();
-                    folder ??= StorageHelper.GetTempDirectoryPath();
+                    var sysInfo = Handlers.MicrosoftStore.Win32Helper.GetSystemInfo();
+                    folder ??= StorageHelper.GetTempDirectory();
 
                     // Get update data
                     WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
@@ -534,7 +537,7 @@ namespace FluentStore.SDK.Packages
             set => SetProperty(ref _StoreId, value);
         }
 
-        public bool IsWinGet => StoreId.StartsWith("XP");
+        public bool IsWinGet => Model?.Installer?.Type == "WPM" || StoreId.StartsWith("XP");
 
         private PackageManifestVersion _Manifest;
         /// <summary>

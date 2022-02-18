@@ -13,7 +13,7 @@ namespace FluentStore.SDK.Helpers
     {
         public DownloadCache(DirectoryInfo directory = null, bool createIfDoesNotExist = true)
         {
-            directory ??= StorageHelper.GetTempDirectoryPath();
+            directory ??= StorageHelper.GetTempDirectory();
 
             CacheDatabase = new(Path.Combine(directory.FullName, CACHE_FILENAME));
             if (!CacheDatabase.Exists && createIfDoesNotExist)

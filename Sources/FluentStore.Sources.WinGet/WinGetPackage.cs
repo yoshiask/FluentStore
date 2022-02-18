@@ -9,13 +9,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.Foundation.Metadata;
-using Windows.Storage;
 using WinGetRun;
 using WinGetRun.Models;
 using System.IO;
+using FluentStore.SDK;
+using FluentStore.SDK.Models;
 
-namespace FluentStore.SDK.Packages
+namespace FluentStore.Sources.WinGet
 {
     public class WinGetPackage : PackageBase<Package>
     {
@@ -39,7 +39,7 @@ namespace FluentStore.SDK.Packages
             ReleaseDate = pack.CreatedAt;
             Description = pack.Latest.Description;
             Version = pack.Versions[^1];
-            Website = Models.Link.Create(pack.Latest.Homepage, ShortTitle + " website");
+            Website = Link.Create(pack.Latest.Homepage, ShortTitle + " website");
 
             // Set WinGet package properties
             PackageId = pack.GetPublisherAndPackageIds().PackageId;
@@ -52,7 +52,7 @@ namespace FluentStore.SDK.Packages
             var installer = Manifest.Installers[0];
 
             PackageUri = new Uri(installer.Url);
-            Website = Models.Link.Create(Manifest.Homepage, ShortTitle + " website");
+            Website = Link.Create(Manifest.Homepage, ShortTitle + " website");
 
             if (installer.InstallerType.HasValue)
             {
@@ -62,7 +62,7 @@ namespace FluentStore.SDK.Packages
             {
                 Type = manifest.InstallerType.Value.ToSDKInstallerType();
             }
-            else if (Enum.TryParse<Models.InstallerType>(Path.GetExtension(PackageUri.ToString())[1..], true, out var type))
+            else if (Enum.TryParse<InstallerType>(Path.GetExtension(PackageUri.ToString())[1..], true, out var type))
             {
                 Type = type;
             }
@@ -74,7 +74,7 @@ namespace FluentStore.SDK.Packages
             get
             {
                 if (_Urn == null)
-                    _Urn = Urn.Parse("urn:" + Handlers.WinGetHandler.NAMESPACE_WINGET + ":" + Model.Id);
+                    _Urn = Urn.Parse("urn:" + WinGetHandler.NAMESPACE_WINGET + ":" + Model.Id);
                 return _Urn;
             }
             set => _Urn = value;
@@ -163,11 +163,11 @@ namespace FluentStore.SDK.Packages
 
             switch (Type.Reduce())
             {
-                case Models.InstallerType.Msix:
+                case InstallerType.Msix:
                     isSuccess = await PackagedInstallerHelper.Install(this);
                     var file = (FileInfo)DownloadItem;
                     PackagedInstallerType = PackagedInstallerHelper.GetInstallerType(file);
-                    PackageFamilyName = PackagedInstallerHelper.GetPackageFamilyName(file, PackagedInstallerType.Value.HasFlag(Models.InstallerType.Bundle));
+                    PackageFamilyName = PackagedInstallerHelper.GetPackageFamilyName(file, PackagedInstallerType.Value.HasFlag(InstallerType.Bundle));
                     break;
 
                 default:
@@ -209,8 +209,8 @@ namespace FluentStore.SDK.Packages
         }
         public bool HasPackageFamilyName => PackageFamilyName != null;
 
-        private Models.InstallerType? _PackagedInstallerType;
-        public Models.InstallerType? PackagedInstallerType
+        private InstallerType? _PackagedInstallerType;
+        public InstallerType? PackagedInstallerType
         {
             get => _PackagedInstallerType;
             set => SetProperty(ref _PackagedInstallerType, value);

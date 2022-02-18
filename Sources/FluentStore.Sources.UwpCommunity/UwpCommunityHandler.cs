@@ -7,11 +7,10 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using FSAPI = FluentStoreAPI.FluentStoreAPI;
+using FluentStore.SDK;
 
-namespace FluentStore.SDK.Handlers
+namespace FluentStore.Sources.UwpCommunity
 {
     public class UwpCommunityHandler : PackageHandlerBase
     {

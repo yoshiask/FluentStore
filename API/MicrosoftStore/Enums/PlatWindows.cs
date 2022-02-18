@@ -12,8 +12,6 @@ namespace Microsoft.Marketplace.Storefront.Contracts.Enums
         Holographic,
         IoT,
 
-        Unknown   = 0x100,
-        Universal = 0x101,
-        Windows8x = 0x102,
+        Unknown = -1
     }
 }

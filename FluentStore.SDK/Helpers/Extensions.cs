@@ -3,7 +3,6 @@ using Garfoot.Utilities.FluentUrn;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using Windows.System;
 
 namespace FluentStore.SDK.Helpers
 {
@@ -35,20 +34,6 @@ namespace FluentStore.SDK.Helpers
             {
                 list.Insert(i + 1, insert);
             }
-        }
-
-        public static Architecture ToSDKArch(this WinGetRun.Enums.InstallerArchitecture wgArch)
-        {
-            return wgArch switch
-            {
-                WinGetRun.Enums.InstallerArchitecture.Neutral => Architecture.Neutral,
-                WinGetRun.Enums.InstallerArchitecture.X86 => Architecture.x86,
-                WinGetRun.Enums.InstallerArchitecture.X64 => Architecture.x64,
-                WinGetRun.Enums.InstallerArchitecture.Arm => Architecture.Arm32,
-                WinGetRun.Enums.InstallerArchitecture.Arm64 => Architecture.Arm64,
-
-                _ => Architecture.Unknown,
-            };
         }
 
         public static Version ToVersion(this Windows.ApplicationModel.PackageVersion packageVersion)
@@ -103,6 +88,18 @@ namespace FluentStore.SDK.Helpers
                 urn = default;
                 return false;
             }
+        }
+
+        public static WindowsPlatform ParseWindowsPlatform(string str)
+        {
+            int dotIdx = str.LastIndexOf('.');
+            if (dotIdx >= 0)
+                str = str[(dotIdx + 1)..];
+
+            if (Enum.TryParse<WindowsPlatform>(str, out var platWindows))
+                return platWindows;
+            else
+                return WindowsPlatform.Unknown;
         }
     }
 }

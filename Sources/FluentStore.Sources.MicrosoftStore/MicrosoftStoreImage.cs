@@ -1,7 +1,8 @@
 ﻿using Microsoft.Marketplace.Storefront.Contracts.V2;
 using CommunityToolkit.Diagnostics;
+using FluentStore.SDK.Images;
 
-namespace FluentStore.SDK.Images
+namespace FluentStore.Sources.MicrosoftStore
 {
     public class MicrosoftStoreImage : FileImage
     {

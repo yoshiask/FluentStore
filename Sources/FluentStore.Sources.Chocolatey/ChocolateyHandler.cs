@@ -1,8 +1,8 @@
 ﻿using Chocolatey;
 using Chocolatey.Models;
 using CommunityToolkit.Diagnostics;
+using FluentStore.SDK;
 using FluentStore.SDK.Images;
-using FluentStore.SDK.Packages;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using System;
@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace FluentStore.SDK.Handlers
+namespace FluentStore.Sources.Chocolatey
 {
     public class ChocolateyHandler : PackageHandlerBase
     {

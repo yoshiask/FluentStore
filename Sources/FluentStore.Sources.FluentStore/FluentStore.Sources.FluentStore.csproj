@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0-windows$(TargetWindowsVersion)</TargetFramework>
+        <TargetPlatformMinVersion>$(MinWindowsVersion)</TargetPlatformMinVersion>
+        <LangVersion>latest</LangVersion>
+        <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
+        <AssemblyVersion>$(FluentStoreVersion)</AssemblyVersion>
+        <FileVersion>$(AssemblyVersion)</FileVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\FluentStore.SDK\FluentStore.SDK.csproj" />
+    </ItemGroup>
+
+</Project>

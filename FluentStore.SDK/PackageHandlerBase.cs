@@ -1,6 +1,7 @@
 ﻿using FluentStore.SDK.Images;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

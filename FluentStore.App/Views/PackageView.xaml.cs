@@ -468,7 +468,8 @@ namespace FluentStore.Views
 
         private async void EditCollection_Click(object sender, RoutedEventArgs e)
         {
-            FluentStoreAPI.Models.Collection collection = ((SDK.Packages.CollectionPackage)ViewModel.Package).Model;
+            // TODO: Better than dynamic?
+            FluentStoreAPI.Models.Collection collection = ((dynamic)ViewModel.Package).Model;
             EditCollectionDetailsDialog editDialog = new(collection, Content.XamlRoot);
 
             if (await editDialog.ShowAsync() == ContentDialogResult.Primary)

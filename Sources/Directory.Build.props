@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    <Import Project="..\Directory.Build.props"/>
+
+    <UsingTask TaskName="CopyPluginToOutput.InstallPluginTask"
+               AssemblyFile="..\CopyPluginToOutput\bin\$(Configuration)\netstandard2.0\CopyPluginToOutput.dll"/>
+
+	<PropertyGroup>
+		<!-- Ensure that all dependencies get copied to the plugin directory -->
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
+</Project>
+

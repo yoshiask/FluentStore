@@ -1,7 +1,6 @@
 ﻿using FluentStore.SDK.Images;
 using FluentStore.SDK.Messages;
 using FluentStore.SDK.Models;
-using Microsoft.Marketplace.Storefront.Contracts.Enums;
 using CommunityToolkit.Diagnostics;
 using CommunityToolkit.Mvvm.Messaging;
 using System;
@@ -15,11 +14,9 @@ using System.Xml.Linq;
 using System.Xml.XPath;
 using Windows.ApplicationModel;
 using Windows.Management.Deployment;
-using Windows.Storage;
 using Windows.System;
 using Windows.System.Profile;
 using Windows.Foundation;
-using Windows.Web.Http;
 
 namespace FluentStore.SDK.Helpers
 {
@@ -58,8 +55,8 @@ namespace FluentStore.SDK.Helpers
             }
 
             // Check Windows platform
-            PlatWindows? currentPlat = PlatWindowsStringConverter.Parse(AnalyticsInfo.VersionInfo.DeviceFamily);
-            if (!currentPlat.HasValue)
+            WindowsPlatform currentPlat = Extensions.ParseWindowsPlatform(AnalyticsInfo.VersionInfo.DeviceFamily);
+            if (currentPlat == WindowsPlatform.Unknown)
             {
                 return "Cannot identify the current Windows platform.";
             }

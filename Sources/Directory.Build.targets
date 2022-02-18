@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+    <Target Name="InstallPlugin" AfterTargets="Build">
+        <InstallPluginTask OutputDir="$(MSBuildProjectDirectory)\$(OutDir)"
+                           PluginDll="$(MSBuildProjectName).dll"
+                           PluginAssemblyName="$(MSBuildProjectName)"/>
+    </Target>
+
+</Project>
+

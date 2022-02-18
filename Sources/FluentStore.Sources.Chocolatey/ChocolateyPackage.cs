@@ -1,22 +1,19 @@
-﻿using Chocolatey;
-using Chocolatey.Models;
+﻿using Chocolatey.Models;
 using CommunityToolkit.Diagnostics;
 using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.SDK;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
 using FluentStore.SDK.Messages;
 using FluentStore.SDK.Models;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Toolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
-using System.Linq;
 using System.Management.Automation;
 using System.Threading.Tasks;
 
-namespace FluentStore.SDK.Packages
+namespace FluentStore.Sources.Chocolatey
 {
     public class ChocolateyPackage : PackageBase<Package>
     {
@@ -57,7 +54,7 @@ namespace FluentStore.SDK.Packages
             {
                 if (_Urn == null)
                 {
-                    string urn = $"urn:{Handlers.ChocolateyHandler.NAMESPACE_CHOCO}:{Model.Id}";
+                    string urn = $"urn:{ChocolateyHandler.NAMESPACE_CHOCO}:{Model.Id}";
                     if (Model.Version != null)
                         urn += ":" + Model.Version.ToString();
                     _Urn = Urn.Parse(urn);
@@ -71,19 +68,19 @@ namespace FluentStore.SDK.Packages
         {
             // Find the package URI
             await PopulatePackageUri();
-            if (!Status.IsAtLeast(PackageStatus.DownloadReady))
+            if (!Status.IsAtLeast(SDK.PackageStatus.DownloadReady))
                 return null;
 
             // Download package
             await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
-            if (!Status.IsAtLeast(PackageStatus.Downloaded))
+            if (!Status.IsAtLeast(SDK.PackageStatus.Downloaded))
                 return null;
 
             // Set the proper file name
             DownloadItem = ((FileInfo)DownloadItem).CopyRename($"{Model.Id}.{Model.Version}.nupkg");
 
             WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageDownloadCompleted(this));
-            Status = PackageStatus.Downloaded;
+            Status = SDK.PackageStatus.Downloaded;
             return DownloadItem;
         }
 
@@ -96,7 +93,7 @@ namespace FluentStore.SDK.Packages
                     PackageUri = new(Model.DownloadUrl);
 
                 WeakReferenceMessenger.Default.Send(new SuccessMessage(null, this, SuccessType.PackageFetchCompleted));
-                Status = PackageStatus.DownloadReady;
+                Status = SDK.PackageStatus.DownloadReady;
             }
             catch (Exception ex)
             {
@@ -132,7 +129,7 @@ namespace FluentStore.SDK.Packages
         public override async Task<bool> InstallAsync()
         {
             // Make sure installer is downloaded
-            Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
+            Guard.IsTrue(Status.IsAtLeast(SDK.PackageStatus.Downloaded), nameof(Status));
             bool isSuccess = false;
 
             try
@@ -158,7 +155,7 @@ namespace FluentStore.SDK.Packages
             if (isSuccess)
             {
                 WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageInstallCompleted(this));
-                Status = PackageStatus.Installed;
+                Status = SDK.PackageStatus.Installed;
             }
             return isSuccess;
         }

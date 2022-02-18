@@ -27,7 +27,7 @@ namespace FluentStore.SDK.Helpers
             }
         }
 
-        public static DirectoryInfo GetTempDirectoryPath()
+        public static DirectoryInfo GetTempDirectory()
         {
             DirectoryInfo tempDir = new(Path.Combine(Path.GetTempPath(), "FluentStoreBeta"));
             if (!tempDir.Exists)
@@ -45,7 +45,7 @@ namespace FluentStore.SDK.Helpers
         {
             Guard.IsNotNull(packageUrn, nameof(packageUrn));
             if (folder == null)
-                folder = GetTempDirectoryPath();
+                folder = GetTempDirectory();
 
             return new(Path.Combine(folder.FullName, PrepUrnForFile(packageUrn)));
         }
@@ -59,7 +59,7 @@ namespace FluentStore.SDK.Helpers
 
         public static DirectoryInfo CreateTempFolderAsync(string relativePath)
         {
-            return GetTempDirectoryPath().EnsureExists(relativePath);
+            return GetTempDirectory().EnsureExists(relativePath);
         }
 
         public static DirectoryInfo EnsureExists(this DirectoryInfo folder, string relativePath)

@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Diagnostics;
+using FluentStore.SDK;
 using FluentStore.SDK.Images;
-using FluentStore.SDK.PackageTypes;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using Octokit;
@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace FluentStore.SDK.Handlers
+namespace FluentStore.Sources.GitHub
 {
     public class GitHubHandler : PackageHandlerBase
     {

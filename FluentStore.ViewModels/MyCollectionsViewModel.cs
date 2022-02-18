@@ -1,5 +1,4 @@
 ﻿using FluentStore.SDK;
-using FluentStore.SDK.Handlers;
 using FluentStore.SDK.Packages;
 using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
@@ -72,18 +71,19 @@ namespace FluentStore.ViewModels
 
             try
             {
+                // FIXME: Implement a new method on PackageBase for fetching more detailed info
                 // Get the author's display name
-                var package = (CollectionPackage)SelectedCollection.Package;
-                var authorProfile = await FSApi.GetUserProfileAsync(package.Model.AuthorId);
-                package.Update(authorProfile);
+                //var package = SelectedCollection.Package;
+                //var authorProfile = await FSApi.GetUserProfileAsync(package.Model.AuthorId);
+                //package.Update(authorProfile);
 
-                // Load items
-                foreach (string urn in package.Model.Items)
-                {
-                    // Load the product details for each item
-                    var item = await PackageService.GetPackageAsync(Urn.Parse(urn));
-                    package.Items.Add(item);
-                }
+                //// Load items
+                //foreach (string urn in package.Model.Items)
+                //{
+                //    // Load the product details for each item
+                //    var item = await PackageService.GetPackageAsync(Urn.Parse(urn));
+                //    package.Items.Add(item);
+                //}
 
                 NavService.Navigate(SelectedCollection);
             }
@@ -121,8 +121,8 @@ namespace FluentStore.ViewModels
                 var collections = await FSApi.GetCollectionsAsync(UserService.CurrentUser.LocalID);
                 foreach (Collection collection in collections)
                 {
-                    CollectionPackage package = new(collection);
-                    Collections.Add(new PackageViewModel(package));
+                    //CollectionPackage package = new(collection);
+                    //Collections.Add(new PackageViewModel(package));
                 }
             }
             catch (Flurl.Http.FlurlHttpException ex)

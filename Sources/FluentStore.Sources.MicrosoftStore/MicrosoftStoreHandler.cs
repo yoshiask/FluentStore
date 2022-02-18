@@ -1,22 +1,23 @@
 ﻿using FluentStore.SDK.Images;
-using FluentStore.SDK.Packages;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Marketplace.Storefront.Contracts;
-using CommunityToolkit.Diagnostics;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Windows.System;
 using Microsoft.Marketplace.Storefront.Contracts.Enums;
+using FluentStore.SDK;
+using FluentStore.SDK.Models;
+using FluentStore.SDK.Helpers;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace FluentStore.SDK.Handlers
+namespace FluentStore.Sources.MicrosoftStore
 {
     public class MicrosoftStoreHandler : PackageHandlerBase
     {
-        private readonly StorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<StorefrontApi>();
+        private readonly StorefrontApi StorefrontApi = new();
 
         public const string NAMESPACE_MSSTORE = "microsoft-store";
         public const string NAMESPACE_MODERNPACK = "win-modern-package";
@@ -99,7 +100,7 @@ namespace FluentStore.SDK.Handlers
                 // but no such produdct exists, so it has to be caught manually.
                 if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V1.ErrorResponse>(out var error))
                 {
-                    throw Models.WebException.Create(404, error.ErrorDescription);
+                    throw WebException.Create(404, error.ErrorDescription);
                 }
                 return null;
             }
@@ -149,13 +150,13 @@ namespace FluentStore.SDK.Handlers
             // Get system information
             string deviceFamily = Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily;
 
-            var sysArch = Helpers.Win32Helper.GetSystemArchitecture();
+            var sysArch = Win32Helper.GetSystemArchitecture();
             string arch = sysArch switch
             {
-                Models.Architecture.Arm32 => "arm",
+                Architecture.Arm32 => "arm",
 
-                Models.Architecture.Neutral or
-                Models.Architecture.Unknown => "x86",
+                Architecture.Neutral or
+                Architecture.Unknown => "x86",
 
                 _ => sysArch.ToString()
             };

@@ -1,13 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using FluentStore.SDK.Handlers;
 using FluentStore.SDK.Models;
 using FluentStore.Services;
 using Flurl;
 using FuzzySharp;
 using FuzzySharp.SimilarityRatio;
 using Garfoot.Utilities.FluentUrn;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -33,29 +34,45 @@ namespace FluentStore.SDK
                     var emptyObjectList = Array.Empty<object>();
                     _PackageHandlers = new Dictionary<string, PackageHandlerBase>();
 
-                    foreach (Type type in Assembly.GetExecutingAssembly().GetTypes()
-                        .Where(t => t.Namespace == "FluentStore.SDK.Handlers" && t.IsClass && t.IsPublic))
+                    AppDomain currentDomain = AppDomain.CurrentDomain;
+                    currentDomain.AssemblyResolve += new ResolveEventHandler(PluginLoader.LoadFromSameFolder);
+
+                    foreach (string pluginInfoPath in Directory.EnumerateFiles(Settings.PluginDirectory, "*.txt", SearchOption.AllDirectories))
                     {
-                        var ctr = type.GetConstructor(emptyTypeList);
-                        if (ctr == null)
-                            continue;
-                        try
+                        string pluginPath = Path.GetDirectoryName(pluginInfoPath);
+                        string[] dllRelativePaths = File.ReadAllLines(pluginInfoPath);
+                        foreach (string dllRelativePath in dllRelativePaths)
                         {
-                            var handler = (PackageHandlerBase)ctr.Invoke(emptyObjectList);
-                            if (handler == null)
+                            string assemblyPath = Path.Combine(pluginPath, dllRelativePath);
+                            if (string.IsNullOrWhiteSpace(assemblyPath))
                                 continue;
 
-                            // Enable or disable according to user settings
-                            handler.IsEnabled = Settings.GetPackageHandlerEnabledState(type.Name);
+                            try
+                            {
+                                var assembly = Assembly.LoadFile(assemblyPath);
+                                foreach (Type type in assembly.GetTypes()
+                                    .Where(t => t.BaseType.IsAssignableTo(typeof(PackageHandlerBase)) && t.IsPublic))
+                                {
+                                    var ctr = type.GetConstructor(emptyTypeList);
+                                    if (ctr == null)
+                                        continue;
+                                    var handler = (PackageHandlerBase)ctr.Invoke(emptyObjectList);
+                                    if (handler == null)
+                                        continue;
 
-                            _PackageHandlers.Add(type.Name, handler);
-                        }
-                        catch (Exception ex)
-                        {
+                                    // Enable or disable according to user settings
+                                    handler.IsEnabled = Settings.GetPackageHandlerEnabledState(type.Name);
+
+                                    _PackageHandlers.Add(type.Name, handler);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
 #if DEBUG
-                            System.Diagnostics.Debug.WriteLine(ex);
+                                System.Diagnostics.Debug.WriteLine(ex);
 #endif
-                            continue;
+                                continue;
+                            }
                         }
                     }
                 }
@@ -101,7 +118,8 @@ namespace FluentStore.SDK
                 try
                 {
                     results = await handler.GetFeaturedPackagesAsync();
-                } catch { continue; }
+                }
+                catch { continue; }
                 if (results.Count <= 0)
                     continue;
                 yield return new HandlerPackageListPair(handler, results);
@@ -122,7 +140,8 @@ namespace FluentStore.SDK
                 try
                 {
                     results = await handler.SearchAsync(query);
-                } catch { continue; }
+                }
+                catch { continue; }
                 // Filter results already in list
                 packages.AddRange(results);
             }

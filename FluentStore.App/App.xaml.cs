@@ -190,8 +190,6 @@ namespace FluentStore
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
             services.AddSingleton(new FluentStoreAPI.FluentStoreAPI());
-            services.AddSingleton(new WinGetRun.WinGetApi());
-            services.AddSingleton(new Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.StoreEdgeFDApi());
             services.AddSingleton(typeof(UserService));
             services.AddSingleton(typeof(LoggerService));
             services.AddSingleton(new SDK.PackageService());

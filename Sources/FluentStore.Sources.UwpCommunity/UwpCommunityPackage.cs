@@ -12,8 +12,9 @@ using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK.Messages;
 using FluentStore.SDK.Models;
 using FluentStore.SDK.Attributes;
+using FluentStore.SDK;
 
-namespace FluentStore.SDK.Packages
+namespace FluentStore.Sources.UwpCommunity
 {
     public class UwpCommunityPackage : PackageBase<dynamic>
     {
@@ -106,7 +107,7 @@ namespace FluentStore.SDK.Packages
             get
             {
                 if (_Urn == null)
-                    _Urn = Urn.Parse("urn:" + Handlers.UwpCommunityHandler.NAMESPACE_PROJECT + ":" + ProjectId);
+                    _Urn = Urn.Parse("urn:" + UwpCommunityHandler.NAMESPACE_PROJECT + ":" + ProjectId);
                 return _Urn;
             }
             set => _Urn = value;

@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Diagnostics;
 using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.SDK;
 using FluentStore.SDK.Attributes;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
@@ -14,7 +15,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FluentStore.SDK.PackageTypes
+namespace FluentStore.Sources.GitHub
 {
     internal class GitHubPackage : PackageBase<Repository>
     {
@@ -47,7 +48,7 @@ namespace FluentStore.SDK.PackageTypes
             get
             {
                 if (_Urn == null)
-                    _Urn = Urn.Parse($"urn:{Handlers.GitHubHandler.NAMESPACE_REPO}:{Model.Owner.Login}:{Model.Name}");
+                    _Urn = Urn.Parse($"urn:{GitHubHandler.NAMESPACE_REPO}:{Model.Owner.Login}:{Model.Name}");
                 return _Urn;
             }
             set => _Urn = value;
@@ -99,7 +100,7 @@ namespace FluentStore.SDK.PackageTypes
             try
             {
                 // Fetch assets
-                Releases ??= await Handlers.GitHubHandler.GetReleases(Model);
+                Releases ??= await GitHubHandler.GetReleases(Model);
 
                 // Find suitable release asset
                 foreach (Release rel in Releases)
