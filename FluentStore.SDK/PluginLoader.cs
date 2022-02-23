@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using FluentStore.Services;
+﻿using FluentStore.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,19 +14,18 @@ namespace FluentStore.SDK
         /// and registers all loaded package handlers with the provided <paramref name="packageHandlers"/>.
         /// </summary>
         /// <param name="packageHandlers">The dictionary to add loaded package handlers to.</param>
-        public static void LoadPlugins(Dictionary<string, PackageHandlerBase> packageHandlers)
+        public static Dictionary<string, PackageHandlerBase> LoadPlugins(ISettingsService settings)
         {
-            ISettingsService Settings = Ioc.Default.GetRequiredService<ISettingsService>();
             var emptyTypeList = Array.Empty<Type>();
             var emptyObjectList = Array.Empty<object>();
-            packageHandlers ??= new Dictionary<string, PackageHandlerBase>();
+            Dictionary<string, PackageHandlerBase> packageHandlers = new();
 
             // Make sure that the runtime looks for plugin dependencies
             // in the plugin's folder.
             AppDomain currentDomain = AppDomain.CurrentDomain;
             currentDomain.AssemblyResolve += LoadFromSameFolder;
 
-            foreach (string pluginInfoPath in Directory.EnumerateFiles(Settings.PluginDirectory, "*.txt", SearchOption.AllDirectories))
+            foreach (string pluginInfoPath in Directory.EnumerateFiles(settings.PluginDirectory, "*.txt", SearchOption.AllDirectories))
             {
                 // The plugin info file is a plain text file where each line is
                 // a relative path to the DLLs containing the actual implementation.
@@ -61,7 +59,7 @@ namespace FluentStore.SDK
                                 continue;
 
                             // Enable or disable according to user settings
-                            handler.IsEnabled = Settings.GetPackageHandlerEnabledState(type.Name);
+                            handler.IsEnabled = settings.GetPackageHandlerEnabledState(type.Name);
 
                             // Register handler with the type name as its ID
                             packageHandlers.Add(type.Name, handler);
@@ -78,6 +76,7 @@ namespace FluentStore.SDK
             }
 
             currentDomain.AssemblyResolve -= LoadFromSameFolder;
+            return packageHandlers;
         }
 
         private static Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)

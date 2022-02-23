@@ -5,12 +5,9 @@ using Flurl;
 using FuzzySharp;
 using FuzzySharp.SimilarityRatio;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace FluentStore.SDK
@@ -26,9 +23,8 @@ namespace FluentStore.SDK
         {
             get
             {
-                // Use reflection to create an instance of each handler and add it to the regsitry
                 if (_PackageHandlers == null)
-                    PluginLoader.LoadPlugins(_PackageHandlers);
+                    _PackageHandlers = PluginLoader.LoadPlugins(Ioc.Default.GetRequiredService<ISettingsService>());
 
                 return _PackageHandlers;
             }
