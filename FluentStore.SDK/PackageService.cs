@@ -28,54 +28,7 @@ namespace FluentStore.SDK
             {
                 // Use reflection to create an instance of each handler and add it to the regsitry
                 if (_PackageHandlers == null)
-                {
-                    ISettingsService Settings = Ioc.Default.GetRequiredService<ISettingsService>();
-                    var emptyTypeList = Array.Empty<Type>();
-                    var emptyObjectList = Array.Empty<object>();
-                    _PackageHandlers = new Dictionary<string, PackageHandlerBase>();
-
-                    AppDomain currentDomain = AppDomain.CurrentDomain;
-                    currentDomain.AssemblyResolve += new ResolveEventHandler(PluginLoader.LoadFromSameFolder);
-
-                    foreach (string pluginInfoPath in Directory.EnumerateFiles(Settings.PluginDirectory, "*.txt", SearchOption.AllDirectories))
-                    {
-                        string pluginPath = Path.GetDirectoryName(pluginInfoPath);
-                        string[] dllRelativePaths = File.ReadAllLines(pluginInfoPath);
-                        foreach (string dllRelativePath in dllRelativePaths)
-                        {
-                            string assemblyPath = Path.Combine(pluginPath, dllRelativePath);
-                            if (string.IsNullOrWhiteSpace(assemblyPath))
-                                continue;
-
-                            try
-                            {
-                                var assembly = Assembly.LoadFile(assemblyPath);
-                                foreach (Type type in assembly.GetTypes()
-                                    .Where(t => t.BaseType.IsAssignableTo(typeof(PackageHandlerBase)) && t.IsPublic))
-                                {
-                                    var ctr = type.GetConstructor(emptyTypeList);
-                                    if (ctr == null)
-                                        continue;
-                                    var handler = (PackageHandlerBase)ctr.Invoke(emptyObjectList);
-                                    if (handler == null)
-                                        continue;
-
-                                    // Enable or disable according to user settings
-                                    handler.IsEnabled = Settings.GetPackageHandlerEnabledState(type.Name);
-
-                                    _PackageHandlers.Add(type.Name, handler);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-#if DEBUG
-                                System.Diagnostics.Debug.WriteLine(ex);
-#endif
-                                continue;
-                            }
-                        }
-                    }
-                }
+                    PluginLoader.LoadPlugins(ref _PackageHandlers);
 
                 return _PackageHandlers;
             }
