@@ -28,7 +28,7 @@ namespace FluentStore.SDK
             {
                 // Use reflection to create an instance of each handler and add it to the regsitry
                 if (_PackageHandlers == null)
-                    PluginLoader.LoadPlugins(ref _PackageHandlers);
+                    PluginLoader.LoadPlugins(_PackageHandlers);
 
                 return _PackageHandlers;
             }

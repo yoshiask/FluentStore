@@ -15,7 +15,7 @@ namespace FluentStore.SDK
         /// and registers all loaded package handlers with the provided <paramref name="packageHandlers"/>.
         /// </summary>
         /// <param name="packageHandlers">The dictionary to add loaded package handlers to.</param>
-        public static void LoadPlugins(ref Dictionary<string, PackageHandlerBase> packageHandlers)
+        public static void LoadPlugins(Dictionary<string, PackageHandlerBase> packageHandlers)
         {
             ISettingsService Settings = Ioc.Default.GetRequiredService<ISettingsService>();
             var emptyTypeList = Array.Empty<Type>();
