@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace FluentStore.Services
 {
-    public class UserService : ObservableObject
+    public class UserService : ObservableObject, IUserService<User>
     {
-        private User _CurrentFirebaseUser;
-        public User CurrentUser
+        private User _User;
+        public User User
         {
-            get => _CurrentFirebaseUser;
-            internal set => SetProperty(ref _CurrentFirebaseUser, value);
+            get => _User;
+            set => SetProperty(ref _User, value);
         }
 
         private FluentStoreAPI.Models.Profile _CurrentProfile;
@@ -26,7 +26,7 @@ namespace FluentStore.Services
         public bool IsLoggedIn
         {
             get => _IsLoggedIn;
-            internal set
+            set
             {
                 SetProperty(ref _IsLoggedIn, value);
                 OnLoginStateChanged?.Invoke(value);
@@ -61,10 +61,10 @@ namespace FluentStore.Services
                     }
                 }
 
-                CurrentUser = (await FSApi.GetCurrentUserDataAsync())[0];
-                CurrentProfile = await FSApi.GetUserProfileAsync(CurrentUser.LocalID);
+                User = (await FSApi.GetCurrentUserDataAsync())[0];
+                CurrentProfile = await FSApi.GetUserProfileAsync(User.LocalID);
 
-                PasswordVaultService.Add(new CredentialBase(CurrentUser.LocalID, refreshToken));
+                PasswordVaultService.Add(new CredentialBase(User.LocalID, refreshToken));
 
                 IsLoggedIn = true;
             }
@@ -79,7 +79,7 @@ namespace FluentStore.Services
             return IsLoggedIn;
         }
 
-        public async Task TrySignIn(bool useUi = true)
+        public async Task TrySignInAsync(bool useUi = true)
         {
             if (IsLoggedIn) return;
 
@@ -108,14 +108,14 @@ namespace FluentStore.Services
             }
         }
 
-        public void SignOut()
+        public async Task SignOutAsync()
         {
-            PasswordVaultService.Remove(new CredentialBase(CurrentUser.LocalID, FSApi.RefreshToken));
+            PasswordVaultService.Remove(new CredentialBase(User.LocalID, FSApi.RefreshToken));
 
             IsLoggedIn = false;
             FSApi.Token = null;
             FSApi.RefreshToken = null;
-            CurrentUser = null;
+            User = null;
         }
     }
 }
