@@ -1,7 +1,6 @@
 ﻿using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
 using FluentStore.SDK.Models;
-using Garfoot.Utilities.FluentUrn;
 using CommunityToolkit.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -12,13 +11,6 @@ namespace FluentStore.SDK.Packages
 {
     public class ModernPackage<TModel> : GenericPackage<TModel>
     {
-        private Urn _Urn;
-        public override Urn Urn
-        {
-            get => _Urn;
-            set => _Urn = value;
-        }
-
         public override bool Equals(PackageBase other)
         {
             if (other is ModernPackage<TModel> mpackage)

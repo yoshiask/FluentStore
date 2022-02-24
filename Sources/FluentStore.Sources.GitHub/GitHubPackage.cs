@@ -42,18 +42,6 @@ namespace FluentStore.Sources.GitHub
         };
         private readonly char[] separator_chars = { ' ', '_', '-', '+', '@', '!', '.' };
 
-        private Urn _Urn;
-        public override Urn Urn
-        {
-            get
-            {
-                if (_Urn == null)
-                    _Urn = Urn.Parse($"urn:{GitHubHandler.NAMESPACE_REPO}:{Model.Owner.Login}:{Model.Name}");
-                return _Urn;
-            }
-            set => _Urn = value;
-        }
-
         public GitHubPackage(Repository repo = null, IReadOnlyList<Release> releases = null)
         {
             if (repo != null)
@@ -69,6 +57,7 @@ namespace FluentStore.Sources.GitHub
 
             // Set base properties
             Model = repo;
+            Urn = Urn.Parse($"urn:{GitHubHandler.NAMESPACE_REPO}:{Model.Owner.Login}:{Model.Name}");
             Title = repo.Name;
             DeveloperName = repo.Owner.Name ?? repo.Owner.Login;
             PublisherId = repo.Owner.Login;

@@ -1,24 +1,15 @@
 ﻿using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
-using Garfoot.Utilities.FluentUrn;
 using CommunityToolkit.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Windows.Storage;
 using System.IO;
 
 namespace FluentStore.SDK.Packages
 {
     public class Win32Package<TModel> : PackageBase<TModel>
     {
-        private Urn _Urn;
-        public override Urn Urn
-        {
-            get => _Urn;
-            set => _Urn = value;
-        }
-
         public override async Task<bool> CanLaunchAsync()
         {
             // TODO: How to check if an unpackaged app is installed?

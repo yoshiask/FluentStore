@@ -27,6 +27,7 @@ namespace FluentStore.Sources.FluentStore
             // Set base properties
             Title = collection.Name;
             PublisherId = collection.AuthorId;
+            Urn = Urn.Parse($"urn:{FluentStoreHandler.NAMESPACE_COLLECTION}:{PublisherId}:{Model.Id}");
             //ReleaseDate = collection.LastUpdateDateUtc;
             Description = collection.Description;
             ShortTitle = Title;
@@ -46,18 +47,6 @@ namespace FluentStore.Sources.FluentStore
 
             // Set base properties
             DeveloperName = author.DisplayName;
-        }
-
-        private Urn _Urn;
-        public override Urn Urn
-        {
-            get
-            {
-                if (_Urn == null)
-                    _Urn = Urn.Parse("urn:" + FluentStoreHandler.NAMESPACE_COLLECTION + ":" + PublisherId + ":" + Model.Id);
-                return _Urn;
-            }
-            set => _Urn = value;
         }
 
         public override async Task<ImageBase> CacheAppIcon()

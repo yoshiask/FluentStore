@@ -53,7 +53,7 @@ namespace FluentStore.SDK
         /// that handles this package, <see cref="Urn.UnEscapedValue"/> is the handler-specific
         /// ID of this package.
         /// </remarks>
-        public abstract Urn Urn { get; set; }
+        public Urn Urn { get; set; }
 
         /// <summary>
         /// When overridden in a derived class, gets a value indicating whether <see cref="GetCannotBeInstalledReason"/>

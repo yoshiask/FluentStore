@@ -45,7 +45,6 @@ namespace FluentStore.Sources.MicrosoftStore
         public void Update(CardModel card)
         {
             Guard.IsNotNull(card, nameof(card));
-            //Model = product;
 
             // Set base properties
             Title = card.Title;
@@ -63,6 +62,7 @@ namespace FluentStore.Sources.MicrosoftStore
             Price = card.Price;
             DisplayPrice = card.DisplayPrice;
             StoreId = card.ProductId;
+            UpdateUrn();
 
             // Set MS Store package properties
             Categories = card.Categories;
@@ -99,6 +99,7 @@ namespace FluentStore.Sources.MicrosoftStore
             }
             Price = summary.Price;
             StoreId = summary.ProductId;
+            UpdateUrn();
 
             // Set MS Store package properties
             Images.Clear();
@@ -132,6 +133,7 @@ namespace FluentStore.Sources.MicrosoftStore
             ShortTitle = product.ShortTitle;
             Website = Link.Create(product.AppWebsiteUrl, ShortTitle + " website");
             StoreId = product.ProductId;
+            UpdateUrn();
 
             // Set MS Store package properties
             Notes = product.Notes;
@@ -231,16 +233,9 @@ namespace FluentStore.Sources.MicrosoftStore
             InternalPackage = internalPackage;
         }
 
-        private Urn _Urn;
-        public override Urn Urn
+        private void UpdateUrn()
         {
-            get
-            {
-                if (_Urn == null)
-                    _Urn = Urn.Parse("urn:" + MicrosoftStoreHandler.NAMESPACE_MSSTORE + ":" + StoreId);
-                return _Urn;
-            }
-            set => _Urn = value;
+            Urn = Urn.Parse($"urn:{MicrosoftStoreHandler.NAMESPACE_MSSTORE}:{StoreId}");
         }
 
         public override bool RequiresDownloadForCompatCheck => false;

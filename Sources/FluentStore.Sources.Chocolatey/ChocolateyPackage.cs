@@ -28,6 +28,12 @@ namespace FluentStore.Sources.Chocolatey
             Guard.IsNotNull(pack, nameof(pack));
             Model = pack;
 
+            // Set URN
+            string urn = $"urn:{ChocolateyHandler.NAMESPACE_CHOCO}:{Model.Id}";
+            if (Model.Version != null)
+                urn += ":" + Model.Version.ToString();
+            Urn = Urn.Parse(urn);
+
             // Set base properties
             Title = pack.Title;
             PackageId = pack.Id;
@@ -45,23 +51,6 @@ namespace FluentStore.Sources.Chocolatey
                 Link.Create(pack.PackageSourceUrl, ShortTitle + " source"),
                 Link.Create(pack.MailingListUrl, ShortTitle + " mailing list"),
             };
-        }
-
-        private Urn _Urn;
-        public override Urn Urn
-        {
-            get
-            {
-                if (_Urn == null)
-                {
-                    string urn = $"urn:{ChocolateyHandler.NAMESPACE_CHOCO}:{Model.Id}";
-                    if (Model.Version != null)
-                        urn += ":" + Model.Version.ToString();
-                    _Urn = Urn.Parse(urn);
-                }
-                return _Urn;
-            }
-            set => _Urn = value;
         }
 
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)

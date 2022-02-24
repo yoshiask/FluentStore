@@ -1,7 +1,6 @@
 ﻿using FluentStore.SDK.Attributes;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
-using Garfoot.Utilities.FluentUrn;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -17,8 +16,6 @@ namespace FluentStore.SDK.Packages
     /// </summary>
     public class GenericListPackage<TModel> : PackageBase<TModel>
     {
-        public override Urn Urn { get; set; }
-
         public override Task<ImageBase> CacheAppIcon()
         {
             return Task.FromResult(Images.FirstOrDefault(i => i.ImageType == ImageType.Logo));

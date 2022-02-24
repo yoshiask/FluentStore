@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Diagnostics;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
-using Garfoot.Utilities.FluentUrn;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,8 +15,6 @@ namespace FluentStore.SDK.Packages
     /// </summary>
     public class GenericPackage<TModel> : PackageBase<TModel>
     {
-        public override Urn Urn { get; set; }
-
         public override Task<bool> CanLaunchAsync() => Task.FromResult(false);
 
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)

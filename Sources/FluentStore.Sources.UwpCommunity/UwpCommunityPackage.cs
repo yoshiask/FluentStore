@@ -69,6 +69,8 @@ namespace FluentStore.Sources.UwpCommunity
             if (project.tags != null)
                 foreach (dynamic tag in project.tags)
                     Tags.Add(tag.name);
+
+            Urn = Urn.Parse($"urn:{UwpCommunityHandler.NAMESPACE_PROJECT}:{ProjectId}");
         }
 
         public void UpdateWithImages(IEnumerable<string> images)
@@ -99,18 +101,6 @@ namespace FluentStore.Sources.UwpCommunity
             Guard.IsNotNull(features, nameof(features));
 
             Features.AddRange(features);
-        }
-
-        private Urn _Urn;
-        public override Urn Urn
-        {
-            get
-            {
-                if (_Urn == null)
-                    _Urn = Urn.Parse("urn:" + UwpCommunityHandler.NAMESPACE_PROJECT + ":" + ProjectId);
-                return _Urn;
-            }
-            set => _Urn = value;
         }
 
         public override async Task<bool> CanLaunchAsync()
