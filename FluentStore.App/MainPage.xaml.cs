@@ -22,8 +22,6 @@ namespace FluentStore
     public sealed partial class MainPage : UserControl
     {
         private readonly NavigationService NavService = Ioc.Default.GetService<INavigationService>() as NavigationService;
-        private readonly UserService UserService = Ioc.Default.GetService<UserService>();
-        private readonly FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetService<FluentStoreAPI.FluentStoreAPI>();
         
         public ShellViewModel ViewModel
         {
@@ -64,9 +62,6 @@ namespace FluentStore
                 MainInfoBar.Severity = InfoBarSeverity.Success;
                 MainInfoBar.IsOpen = true;
             });
-
-            UserService.OnLoginStateChanged += UserService_OnLoginStateChanged;
-            UserService.TrySignIn(false);
         }
 
         private void MainPage_PointerPressed(object sender, PointerRoutedEventArgs e)
@@ -83,33 +78,6 @@ namespace FluentStore
                 // Forward
                 NavService.NavigateForward();
                 e.Handled = true;
-            }
-        }
-
-        private void UserService_OnLoginStateChanged(bool isLoggedIn)
-        {
-            if (isLoggedIn)
-            {
-                UserButton.Visibility = Visibility.Visible;
-                SignInButton.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                UserButton.Visibility = Visibility.Collapsed;
-                SignInButton.Visibility = Visibility.Visible;
-
-                // If the current page requires sign in, navigate away
-                if (RequiresSignInAttribute.IsPresent(MainFrame.Content))
-                    NavService.Navigate(typeof(Views.HomeView));
-
-                // Remove all pages from the back stack
-                // that require authentication
-                var backStack = MainFrame.BackStack.ToArray();
-                foreach (PageStackEntry entry in backStack)
-                {
-                    if (RequiresSignInAttribute.IsPresent(entry.SourcePageType))
-                        MainFrame.BackStack.Remove(entry);
-                }
             }
         }
 
@@ -166,7 +134,7 @@ namespace FluentStore
             }
         }
 
-        private async void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
             Type page = typeof(Views.HomeView);
 
@@ -182,12 +150,6 @@ namespace FluentStore
             if (pageInfo == null) goto navigate;
 
             page = pageInfo.PageType;
-            if (pageInfo.RequiresSignIn)
-            {
-                await UserService.TrySignIn(true);
-                if (!UserService.IsLoggedIn)
-                    return;
-            }
 
         navigate:
             NavService.Navigate(page);
@@ -207,19 +169,6 @@ namespace FluentStore
                 VisualStateManager.GoToState(this, "DefaultLayout", true);
                 IsCompact = false;
                 WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage(string.Empty));
-            }
-        }
-
-        private async void EditProfileMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            var editDialog = new Views.Auth.EditProfileDialog(UserService.CurrentProfile, Content.XamlRoot);
-
-            if (await editDialog.ShowAsync() == ContentDialogResult.Primary)
-            {
-                //WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
-                // User wants to save
-                await FSApi.UpdateUserProfileAsync(UserService.CurrentUser.LocalID, editDialog.Profile);
-                //WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
             }
         }
     }

@@ -19,8 +19,6 @@ namespace FluentStore.ViewModels
         {
             GetSearchSuggestionsCommand = new AsyncRelayCommand(GetSearchSuggestionsAsync);
             SubmitQueryCommand = new AsyncRelayCommand<PackageViewModel>(SubmitQueryAsync);
-            SignInCommand = new AsyncRelayCommand(SignInAsync);
-            SignOutCommand = new RelayCommand(UserService.SignOut);
 
             WeakReferenceMessenger.Default.Register<Messages.PageLoadingMessage>(this, (r, m) =>
             {
@@ -29,8 +27,6 @@ namespace FluentStore.ViewModels
             });
         }
 
-        private readonly UserService UserService = Ioc.Default.GetRequiredService<UserService>();
-        private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
         private readonly ISettingsService Settings = Ioc.Default.GetRequiredService<ISettingsService>();
         private readonly ObservableCollection<PackageViewModel> NoResultsCollection = new()
@@ -87,27 +83,6 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _SubmitQueryCommand, value);
         }
 
-        private IAsyncRelayCommand _TestAuthCommand;
-        public IAsyncRelayCommand TestAuthCommand
-        {
-            get => _TestAuthCommand;
-            set => SetProperty(ref _TestAuthCommand, value);
-        }
-
-        private IAsyncRelayCommand _SignInCommand;
-        public IAsyncRelayCommand SignInCommand
-        {
-            get => _SignInCommand;
-            set => SetProperty(ref _SignInCommand, value);
-        }
-
-        private IRelayCommand _SignOutCommand;
-        public IRelayCommand SignOutCommand
-        {
-            get => _SignOutCommand;
-            set => SetProperty(ref _SignOutCommand, value);
-        }
-
         public async Task GetSearchSuggestionsAsync()
         {
             try
@@ -148,7 +123,5 @@ namespace FluentStore.ViewModels
             // No need to try-catch this, ViewPackage does this internally
             await pvm.ViewPackage();
         }
-
-        public async Task SignInAsync() => await UserService.TrySignIn();
     }
 }

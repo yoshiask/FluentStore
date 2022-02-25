@@ -8,6 +8,8 @@ using System;
 using Flurl.Http;
 using FluentStoreAPI;
 using FluentStoreAPI.Models.Firebase;
+using FluentStore.SDK.Users;
+using OwlCore.AbstractUI.Models;
 
 namespace FluentStore.ViewModels.Auth
 {
@@ -19,7 +21,7 @@ namespace FluentStore.ViewModels.Auth
             SignUpCommand = new AsyncRelayCommand(SignUpAsync);
         }
 
-        private readonly UserService UserService = Ioc.Default.GetRequiredService<UserService>();
+        private readonly AccountService _accountService = Ioc.Default.GetRequiredService<AccountService>();
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
         private readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
 
@@ -71,9 +73,14 @@ namespace FluentStore.ViewModels.Auth
             {
                 IsSigningIn = true;
                 FailReason = null;
-                var resp = await FSApi.SignInAsync(Email, Password);
-                if (await UserService.SignInAsync(resp.IDToken, resp.RefreshToken))
-                    NavService.Navigate("HomeView");
+
+                var button = _accountService.GetHandlerForNamespace("msal").CreateSignInUI()[0] as AbstractButton;
+                await button.Click();
+                return;
+
+                //var resp = await FSApi.SignInAsync(Email, Password);
+                //if (await UserService.GetHandlerForNamespace("fluentstore").SignInAsync(resp.IDToken, resp.RefreshToken))
+                //    NavService.Navigate("HomeView");
             }
             catch (FlurlHttpException ex)
             {
@@ -93,8 +100,8 @@ namespace FluentStore.ViewModels.Auth
                 IsSigningIn = true;
                 FailReason = null;
                 var resp = await FSApi.SignUpAndCreateProfileAsync(Email, Password, new FluentStoreAPI.Models.Profile { DisplayName = Email });
-                if (await UserService.SignInAsync(resp.IDToken, resp.RefreshToken))
-                    NavService.Navigate("HomeView");
+                //if (await UserService.GetHandlerForNamespace("fluentstore").SignInAsync(resp.IDToken, resp.RefreshToken))
+                //    NavService.Navigate("HomeView");
             }
             catch (FlurlHttpException ex)
             {

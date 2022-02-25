@@ -3,9 +3,7 @@ using FluentStore.Views;
 using Flurl;
 using CommunityToolkit.Diagnostics;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using NavigationViewItem = Microsoft.UI.Xaml.Controls.NavigationViewItem;
 
@@ -15,9 +13,9 @@ namespace FluentStore.Services
     {
         public NavigationService()
         {
-            Pages = new List<PageInfo>
+            Pages = new()
             {
-                new PageInfo()
+                new()
                 {
                     PageType = typeof(HomeView),
                     Icon = new SymbolIcon(Symbol.Home),
@@ -26,7 +24,7 @@ namespace FluentStore.Services
                     Tooltip = "Explore featured apps"
                 },
 
-                new PageInfo()
+                new()
                 {
                     PageType = typeof(MyAppsView),
                     Icon = new SymbolIcon(Symbol.AllApps),
@@ -35,7 +33,7 @@ namespace FluentStore.Services
                     Tooltip = "View your installed apps"
                 },
 
-                new PageInfo()
+                new()
                 {
                     PageType = typeof(MyCollectionsView),
                     Icon = new SymbolIcon(Symbol.List),
@@ -43,6 +41,15 @@ namespace FluentStore.Services
                     Path = "mycollections",
                     Tooltip = "Manage your app collections",
                     RequiresSignIn = true
+                },
+
+                new()
+                {
+                    PageType = typeof(Views.Auth.SignInView),
+                    Icon = new SymbolIcon(Symbol.Account),
+                    Title = "Accounts",
+                    Path = "accounts",
+                    Tooltip = "Manage your accounts",
                 },
             };
         }

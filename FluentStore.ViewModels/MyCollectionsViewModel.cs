@@ -12,6 +12,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentStore.SDK.Users;
 
 namespace FluentStore.ViewModels
 {
@@ -26,7 +27,7 @@ namespace FluentStore.ViewModels
         }
 
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
-        private readonly UserService UserService = Ioc.Default.GetRequiredService<UserService>();
+        private readonly AccountService UserService = Ioc.Default.GetRequiredService<AccountService>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
         private readonly FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
 
@@ -100,7 +101,7 @@ namespace FluentStore.ViewModels
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
             try
             {
-                await FSApi.UpdateCollectionAsync(UserService.CurrentUser.LocalID, newCollection);
+                //await FSApi.UpdateCollectionAsync(UserService.CurrentUser.LocalID, newCollection);
                 await LoadCollectionsAsync();
             }
             catch (Flurl.Http.FlurlHttpException ex)
@@ -118,7 +119,7 @@ namespace FluentStore.ViewModels
             Collections.Clear();
             try
             {
-                var collections = await FSApi.GetCollectionsAsync(UserService.CurrentUser.LocalID);
+                System.Collections.Generic.IEnumerable<Collection> collections = null;// await FSApi.GetCollectionsAsync(UserService.CurrentUser.LocalID);
                 foreach (Collection collection in collections)
                 {
                     //CollectionPackage package = new(collection);

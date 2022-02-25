@@ -23,10 +23,15 @@
         <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
         <PackageReference Include="PInvoke.User32" Version="0.7.104" />
         <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.2.1" />
+		<PackageReference Include="IdentityModel.OidcClient" Version="3.0.0" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Users\Browsers\" />
     </ItemGroup>
 
 </Project>

@@ -24,6 +24,7 @@ using Microsoft.UI.Xaml.Navigation;
 using Windows.UI.Notifications;
 using SplitButton = Microsoft.UI.Xaml.Controls.SplitButton;
 using SplitButtonClickEventArgs = Microsoft.UI.Xaml.Controls.SplitButtonClickEventArgs;
+using FluentStore.SDK.Users;
 
 namespace FluentStore.Views
 {
@@ -38,7 +39,7 @@ namespace FluentStore.Views
         }
 
         FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
-        UserService UserService = Ioc.Default.GetRequiredService<UserService>();
+        AccountService UserService = Ioc.Default.GetRequiredService<AccountService>();
         INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
         PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
@@ -114,7 +115,7 @@ namespace FluentStore.Views
         private async void AddToCollection_Click(object sender, RoutedEventArgs e)
         {
             FlyoutBase flyout;
-            if (!UserService.IsLoggedIn)
+            if (true)//!UserService.IsLoggedIn)
             {
                 flyout = new Flyout
                 {
@@ -130,7 +131,7 @@ namespace FluentStore.Views
             {
                 try
                 {
-                    string userId = UserService.CurrentUser.LocalID;
+                    string userId = null;// UserService.CurrentUser.LocalID;
                     var collections = await FSApi.GetCollectionsAsync(userId);
                     if (collections.Count > 0)
                     {
@@ -478,7 +479,7 @@ namespace FluentStore.Views
                 {
                     WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
                     // User wants to save
-                    await FSApi.UpdateCollectionAsync(UserService.CurrentUser.LocalID, editDialog.Collection);
+                    //await FSApi.UpdateCollectionAsync(UserService.CurrentUser.LocalID, editDialog.Collection);
                     await ViewModel.Refresh();
                     WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
                 }
@@ -493,7 +494,7 @@ namespace FluentStore.Views
         private void DeleteCollection_Click(object sender, RoutedEventArgs e)
         {
             FlyoutBase flyout;
-            if (!UserService.IsLoggedIn)
+            if (true)//!UserService.IsLoggedIn)
             {
                 flyout = new Flyout
                 {
@@ -530,7 +531,7 @@ namespace FluentStore.Views
                 };
                 button.Click += async (object sender, RoutedEventArgs e) =>
                 {
-                    string userId = UserService.CurrentUser.LocalID;
+                    string userId = null;// UserService.CurrentUser.LocalID;
                     // 0, urn; 1, namespace; 2, userId; 3, collectionId
                     string collectionId = ViewModel.Package.Urn.ToString().Split(':')[3];
                     try
