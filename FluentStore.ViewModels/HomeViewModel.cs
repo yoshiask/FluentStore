@@ -6,7 +6,6 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.ViewModels.Messages;
-using Microsoft.Marketplace.Storefront.Contracts;
 using Garfoot.Utilities.FluentUrn;
 using FluentStore.SDK;
 using FluentStore.Services;
@@ -35,8 +34,6 @@ namespace FluentStore.ViewModels
             try
             {
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
-
-                var page = await StorefrontApi.GetHomeRecommendations();
 
                 var featured = await FSApi.GetHomePageFeaturedAsync(Windows.ApplicationModel.Package.Current.Id.Version.ToVersion());
                 CarouselItems.CollectionChanged += CarouselItems_CollectionChanged;
@@ -78,7 +75,6 @@ namespace FluentStore.ViewModels
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
 
-        private readonly StorefrontApi StorefrontApi = Ioc.Default.GetRequiredService<StorefrontApi>();
         private readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
 
         private IAsyncRelayCommand _LoadFeaturedCommand;
