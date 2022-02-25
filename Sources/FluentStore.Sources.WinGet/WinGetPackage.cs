@@ -33,6 +33,7 @@ namespace FluentStore.Sources.WinGet
             Model = pack;
 
             // Set base properties
+            Urn = Urn.Parse($"urn:{WinGetHandler.NAMESPACE_WINGET}:{Model.Id}");
             Title = pack.Latest.Name;
             PublisherId = pack.GetPublisherAndPackageIds().PublisherId;
             DeveloperName = pack.Latest.Publisher;
@@ -66,18 +67,6 @@ namespace FluentStore.Sources.WinGet
             {
                 Type = type;
             }
-        }
-
-        private Urn _Urn;
-        public override Urn Urn
-        {
-            get
-            {
-                if (_Urn == null)
-                    _Urn = Urn.Parse("urn:" + WinGetHandler.NAMESPACE_WINGET + ":" + Model.Id);
-                return _Urn;
-            }
-            set => _Urn = value;
         }
 
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)

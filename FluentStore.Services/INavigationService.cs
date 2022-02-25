@@ -59,11 +59,14 @@ namespace FluentStore.Services
 
         public abstract Type ResolveType(string viewName);
 
-        public (Type page, object parameter) ParseProtocol(Url ptcl)
+        public ProtocolResult ParseProtocol(Url ptcl)
         {
-            Type destination = ResolveType("HomeView");
-            object parameter = null;
-            (Type page, object parameter) defaultResult = (destination, null);
+            ProtocolResult result = new()
+            {
+                Page = ResolveType("HomeView"),
+                Parameter = null,
+            };
+            ProtocolResult defaultResult = result;
 
             if (ptcl == null || string.IsNullOrWhiteSpace(ptcl.Path))
                 return defaultResult;
@@ -73,17 +76,29 @@ namespace FluentStore.Services
                 switch (string.IsNullOrEmpty(ptcl.Host) ? ptcl.Path : ptcl.Host)
                 {
                     case "package":
-                        destination = ResolveType("PackageView");
-                        parameter = Urn.Parse(ptcl.PathSegments[0]);
+                        result.Page = ResolveType("PackageView");
+                        result.Parameter = Urn.Parse(ptcl.PathSegments[0]);
                         break;
 
                     case "web":
-                        destination = ResolveType("PackageView");
-                        parameter = (Url)ptcl.Path.Substring(1);
+                        result.Page = ResolveType("PackageView");
+                        result.Parameter = (Url)ptcl.Path.Substring(1);
+                        break;
+
+                    case "auth":
+                        if (ptcl.QueryParams.TryGetFirst("noRedirect", out _))
+                        {
+                            result.Page = ResolveType("Auth.SignInView");
+                            result.Parameter = ptcl;
+                        }
+                        else
+                        {
+                            result.RedirectActivation = true;
+                        }
                         break;
 
                     case "crash":
-                        destination = ResolveType("HttpErrorPage");
+                        result.Page = ResolveType("HttpErrorPage");
                         int code = 418;
                         string message = null;
                         if (ptcl.QueryParams.TryGetFirst("code", out object codeParam))
@@ -92,13 +107,13 @@ namespace FluentStore.Services
                             message = Encoding.UTF8.GetString(Convert.FromBase64String(messageParam.ToString()));
                         if (ptcl.QueryParams.TryGetFirst("trace", out object traceParam))
                             message += "\r\n" + Encoding.UTF8.GetString(Convert.FromBase64String(messageParam.ToString()));
-                        parameter = (code, message);
+                        result.Parameter = (code, message);
                         break;
 
                     default:
                         PageInfo pageInfo = Pages.Find(p => p.Path == ptcl.Host);
-                        destination = pageInfo?.PageType ?? ResolveType("HomeView");
-                        parameter = ptcl.QueryParams;
+                        result.Page = pageInfo?.PageType ?? ResolveType("HomeView");
+                        result.Parameter = ptcl.QueryParams;
                         break;
                 }
             }
@@ -107,7 +122,7 @@ namespace FluentStore.Services
                 return defaultResult;
             }
 
-            return (destination, parameter);
+            return result;
         }
     }
 
@@ -143,5 +158,12 @@ namespace FluentStore.Services
                 return new Uri("ms-appx:///Assets/Icons/" + Path + ".png");
             }
         }
+    }
+
+    public class ProtocolResult
+    {
+        public Type Page { get; set; }
+        public object Parameter { get; set; }
+        public bool RedirectActivation { get; set; } = false;
     }
 }

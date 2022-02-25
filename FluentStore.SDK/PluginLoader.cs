@@ -1,4 +1,5 @@
-﻿using FluentStore.Services;
+﻿using FluentStore.SDK.Users;
+using FluentStore.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,16 +10,17 @@ namespace FluentStore.SDK
 {
     public static class PluginLoader
     {
+        private static readonly Type[] _emptyTypeList = Array.Empty<Type>();
+        private static readonly object[] _emptyObjectList = Array.Empty<object>();
+
         /// <summary>
         /// Attempts to load all plugins located in <see cref="ISettingsService.PluginDirectory"/>
         /// and registers all loaded package handlers with the provided <paramref name="packageHandlers"/>.
         /// </summary>
         /// <param name="packageHandlers">The dictionary to add loaded package handlers to.</param>
-        public static Dictionary<string, PackageHandlerBase> LoadPlugins(ISettingsService settings)
+        public static PluginLoadResult LoadPlugins(ISettingsService settings)
         {
-            var emptyTypeList = Array.Empty<Type>();
-            var emptyObjectList = Array.Empty<object>();
-            Dictionary<string, PackageHandlerBase> packageHandlers = new();
+            PluginLoadResult result = new();
 
             // Make sure that the runtime looks for plugin dependencies
             // in the plugin's folder.
@@ -43,26 +45,20 @@ namespace FluentStore.SDK
 
                     try
                     {
-                        // Load assembly and consider only types that inherit from PackageHandlerBase
+                        // Load assembly and consider only types that inherit from PackageHandlerBase/AccountHandlerBase
                         // and are public.
                         var assembly = Assembly.LoadFile(assemblyPath);
-                        foreach (Type type in assembly.GetTypes()
-                            .Where(t => t.BaseType.IsAssignableTo(typeof(PackageHandlerBase)) && t.IsPublic))
+
+                        foreach ((string typeName, PackageHandlerBase handler) in InstantiateAllPackageHandlers(assembly, settings))
                         {
-                            var ctr = type.GetConstructor(emptyTypeList);
-                            if (ctr == null)
-                                continue;
-
-                            // Create a new instance of the handler
-                            var handler = (PackageHandlerBase)ctr.Invoke(emptyObjectList);
-                            if (handler == null)
-                                continue;
-
-                            // Enable or disable according to user settings
-                            handler.IsEnabled = settings.GetPackageHandlerEnabledState(type.Name);
-
                             // Register handler with the type name as its ID
-                            packageHandlers.Add(type.Name, handler);
+                            result.PackageHandlers.Add(typeName, handler);
+                        }
+
+                        foreach ((string typeName, AccountHandlerBase handler) in InstantiateAllAccountHandlers(assembly, settings))
+                        {
+                            // Register handler with the type name as its ID
+                            result.AccountHandlers.Add(handler);
                         }
                     }
                     catch (Exception ex)
@@ -75,17 +71,76 @@ namespace FluentStore.SDK
                 }
             }
 
-            currentDomain.AssemblyResolve -= LoadFromSameFolder;
-            return packageHandlers;
+            return result;
         }
 
         private static Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)
         {
             string folderPath = Path.GetDirectoryName(args.RequestingAssembly.Location);
-            string assemblyPath = Path.Combine(folderPath, new AssemblyName(args.Name).Name + ".dll");
+            string assemblyFile = new AssemblyName(args.Name).Name + ".dll";
+            string assemblyPath = Path.Combine(folderPath, assemblyFile);
             if (!File.Exists(assemblyPath)) return null;
             Assembly assembly = Assembly.LoadFrom(assemblyPath);
             return assembly;
         }
+
+        private static IEnumerable<(string typeName, PackageHandlerBase handler)> InstantiateAllPackageHandlers(Assembly pluginAssembly, ISettingsService settings)
+        {
+            foreach (Type type in pluginAssembly.GetTypes()
+                .Where(t => t.BaseType.IsAssignableTo(typeof(PackageHandlerBase)) && t.IsPublic))
+            {
+                var ctr = type.GetConstructor(_emptyTypeList);
+                if (ctr == null)
+                    continue;
+
+                // Create a new instance of the handler
+                var handler = (PackageHandlerBase)ctr.Invoke(_emptyObjectList);
+                if (handler == null)
+                    continue;
+
+                // Enable or disable according to user settings
+                handler.IsEnabled = settings.GetPackageHandlerEnabledState(type.Name);
+
+                // Register handler with the type name as its ID
+                yield return (type.Name, handler);
+            }
+        }
+
+        private static IEnumerable<(string typeName, AccountHandlerBase handler)> InstantiateAllAccountHandlers(Assembly pluginAssembly, ISettingsService settings)
+        {
+            foreach (Type type in pluginAssembly.GetTypes()
+                .Where(t => t.BaseType.IsAssignableTo(typeof(AccountHandlerBase)) && t.IsPublic))
+            {
+                var ctr = type.GetConstructor(_emptyTypeList);
+                if (ctr == null)
+                    continue;
+
+                // Create a new instance of the handler
+                var handler = (AccountHandlerBase)ctr.Invoke(_emptyObjectList);
+                if (handler == null)
+                    continue;
+
+                // Enable or disable according to user settings
+                //handler.IsEnabled = settings.GetPackageHandlerEnabledState(type.Name);
+
+                // Register handler with the type name as its ID
+                yield return (type.Name, handler);
+            }
+        }
+    }
+
+    public class PluginLoadResult
+    {
+        public PluginLoadResult() : this(new(), new()) { }
+
+        public PluginLoadResult(Dictionary<string, PackageHandlerBase> packageHandlers, HashSet<AccountHandlerBase> accountHandlers)
+        {
+            PackageHandlers = packageHandlers;
+            AccountHandlers = accountHandlers;
+        }
+
+        public Dictionary<string, PackageHandlerBase> PackageHandlers { get; }
+
+        public HashSet<AccountHandlerBase> AccountHandlers { get; }
     }
 }

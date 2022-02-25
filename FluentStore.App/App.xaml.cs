@@ -1,10 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.WinUI.Notifications;
+using FluentStore.SDK;
+using FluentStore.SDK.Users;
 using FluentStore.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
 using Windows.UI.Notifications;
@@ -56,32 +59,43 @@ namespace FluentStore
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="args">Details about the launch request and process.</param>
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             Window = new()
             {
                 Title = AppName
             };
 
+            // Load plugins and initialize package and account services
+            var settings = Ioc.Default.GetRequiredService<ISettingsService>();
+            var pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
+            var accSvc = Ioc.Default.GetRequiredService<AccountService>();
+
+            var pluginLoadResult = PluginLoader.LoadPlugins(settings);
+            pkgSvc.PackageHandlers = pluginLoadResult.PackageHandlers;
+            accSvc.AccountHandlers = pluginLoadResult.AccountHandlers;
+
             var NavService = Ioc.Default.GetService<INavigationService>() as NavigationService;
-            (Type page, object parameter) destination = (typeof(Views.HomeView), null);
+            ProtocolResult result = new()
+            {
+                Page = typeof(Views.HomeView)
+            };
             try
             {
-                var activatedArgs = AppInstance.GetCurrent().GetActivatedEventArgs().Data;
-                if (activatedArgs is IProtocolActivatedEventArgs ptclArgs)
+                var activationData = AppInstance.GetCurrent().GetActivatedEventArgs().Data;
+                if (activationData is IProtocolActivatedEventArgs ptclArgs)
                 {
-                    destination = NavService.ParseProtocol(ptclArgs.Uri);
+                    result = NavService.ParseProtocol(ptclArgs.Uri);
                 }
-                else if (activatedArgs is IToastNotificationActivatedEventArgs toastArgs)
+                else if (activationData is IToastNotificationActivatedEventArgs toastArgs)
                 {
-                    destination = NavService.ParseProtocol(toastArgs.Argument);
+                    result = NavService.ParseProtocol(toastArgs.Argument);
                 }
             }
-            finally
-            {
-                NavService.Navigate(destination.page, destination.parameter);
-                Window.Activate();
-            }
+            catch { }
+
+            NavService.Navigate(result.Page, result.Parameter);
+            Window.Activate();
         }
 
         private static void OnUnhandledException(Exception ex)
@@ -185,14 +199,14 @@ namespace FluentStore
         {
             var services = new ServiceCollection();
 
+            services.AddSingleton(typeof(LoggerService));
             services.AddSingleton(new Microsoft.Marketplace.Storefront.Contracts.StorefrontApi());
             services.AddSingleton<ISettingsService>(Helpers.Settings.Default);
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
             services.AddSingleton(new FluentStoreAPI.FluentStoreAPI());
-            services.AddSingleton(typeof(UserService));
-            services.AddSingleton(typeof(LoggerService));
-            services.AddSingleton(new SDK.PackageService());
+            services.AddSingleton(new AccountService());
+            services.AddSingleton(new PackageService());
 
             return services.BuildServiceProvider();
         }

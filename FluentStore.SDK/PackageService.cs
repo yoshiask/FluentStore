@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using FluentStore.SDK.Models;
-using FluentStore.Services;
+﻿using FluentStore.SDK.Models;
 using Flurl;
 using FuzzySharp;
 using FuzzySharp.SimilarityRatio;
@@ -14,19 +12,19 @@ namespace FluentStore.SDK
 {
     public class PackageService
     {
-        private Dictionary<string, PackageHandlerBase> _PackageHandlers;
+        private IReadOnlyDictionary<string, PackageHandlerBase> _PackageHandlers;
         /// <summary>
         /// A cache of all valid package handlers. The key is the name of the <see cref="Type"/>,
         /// and the value is an instance of the <see cref="PackageHandlerBase"/>
         /// </summary>
-        public Dictionary<string, PackageHandlerBase> PackageHandlers
+        public IReadOnlyDictionary<string, PackageHandlerBase> PackageHandlers
         {
-            get
+            get => _PackageHandlers;
+            set
             {
-                if (_PackageHandlers == null)
-                    _PackageHandlers = PluginLoader.LoadPlugins(Ioc.Default.GetRequiredService<ISettingsService>());
-
-                return _PackageHandlers;
+                if (_PackageHandlers != null)
+                    CommunityToolkit.Diagnostics.ThrowHelper.ThrowInvalidOperationException($"Cannot set {nameof(PackageHandlers)} more than once.");
+                _PackageHandlers = value;
             }
         }
 
