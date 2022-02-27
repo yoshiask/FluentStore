@@ -189,11 +189,6 @@ namespace FluentStore.SDK.Users
         public abstract Task<bool> SignInAsync(CredentialBase credential);
 
         /// <summary>
-        /// Sign up with information from the sign-up form.
-        /// </summary>
-        public abstract Task<bool> SignUpAsync(AbstractUICollection signUpForm);
-
-        /// <summary>
         /// Clears the state of this handler.
         /// </summary>
         public abstract Task SignOutAsync();
