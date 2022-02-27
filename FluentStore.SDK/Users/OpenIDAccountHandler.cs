@@ -12,29 +12,29 @@ namespace FluentStore.SDK.Users
 {
     public abstract class OpenIDAccountHandler<TAccount> : AccountHandlerBase<TAccount> where TAccount : Account
     {
-        public override abstract HashSet<string> HandledNamespaces { get; }
+        private const string OPENID_SCOPES = "openid email profile offline_access";
 
         protected string Token { get; private set; }
         protected string RefreshToken { get; private set; }
+        protected string AccessToken { get; private set; }
+        protected string[] Scopes { get; set; }
 
         protected abstract string Authority { get; }
         protected abstract string ClientId { get; }
         protected abstract string ClientSecret { get; }
-        protected abstract string[] Scopes { get; }
 
         private OidcClient _client;
         private AuthorizeState _state;
 
         /// <summary>
-        /// Called when sign-in is successful. <see cref="AccountHandlerBase.CurrentUser"/>
-        /// is expected to be populated after this method is executed.
+        /// Called when sign-in is successful.
         /// </summary>
-        protected abstract Task OnSignInSuccess();
+        protected virtual Task OnSignInSuccess() => Task.CompletedTask;
 
         /// <summary>
         /// Called when sign-out is successful.
         /// </summary>
-        protected abstract Task OnSignOut();
+        protected virtual Task OnSignOut() => Task.CompletedTask;
 
         public override Task<bool> SignInAsync(CredentialBase credential) => SignInAsync(null, credential.Password);
 
@@ -51,10 +51,13 @@ namespace FluentStore.SDK.Users
         {
             try
             {
-                if (token == null)
+                Token = token;
+                RefreshToken = refreshToken;
+
+                if (Token == null)
                 {
                     // Use refresh token to get a new token
-                    var resp = await _client.RefreshTokenAsync(refreshToken);
+                    var resp = await _client.RefreshTokenAsync(RefreshToken);
                     if (resp != null)
                     {
                         Token = resp.AccessToken;
@@ -68,9 +71,11 @@ namespace FluentStore.SDK.Users
                     }
                 }
 
+                await PopulateCurrentUser();
                 await OnSignInSuccess();
 
-                SaveCredential(RefreshToken);
+                if (RefreshToken != null)
+                    SaveCredential(RefreshToken);
 
                 IsLoggedIn = true;
             }
@@ -90,6 +95,8 @@ namespace FluentStore.SDK.Users
 
         public override async Task SignOutAsync()
         {
+            await _client.LogoutAsync();
+
             await OnSignOut();
 
             RemoveCredential(RefreshToken);
@@ -101,7 +108,7 @@ namespace FluentStore.SDK.Users
             CurrentUser = null;
         }
 
-        public override AbstractUICollection CreateSignInUI()
+        public override AbstractUICollection CreateSignInForm()
         {
             AbstractButton signInButton = new("SignInButton", "Sign in with browser", type: AbstractButtonType.Confirm);
             signInButton.Clicked += async (sender, e) =>
@@ -119,6 +126,25 @@ namespace FluentStore.SDK.Users
                 Items = new AbstractUIElement[]
                 {
                     signInButton
+                }
+            };
+            return ui;
+        }
+
+        public override AbstractUICollection CreateSignUpForm()
+        {
+            AbstractButton signUpButton = new("SignUpButton", "Sign up with browser", type: AbstractButtonType.Confirm);
+            signUpButton.Clicked += async (sender, e) =>
+            {
+                INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
+                await navService.OpenInBrowser("https://signup.live.com");
+            };
+
+            AbstractUICollection ui = new("SignUpCollection")
+            {
+                Items = new AbstractUIElement[]
+                {
+                    signUpButton
                 }
             };
             return ui;
@@ -142,11 +168,15 @@ namespace FluentStore.SDK.Users
             {
                 Authority = Authority,
                 ClientId = ClientId,
-                RedirectUri = $"fluentstore://auth/{GetDefaultNamespcace()}",
-                Scope = string.Join(' ', Scopes),
+                RedirectUri = GetAuthProtocolUrl(null),
+                Scope = OPENID_SCOPES,
             };
+            if (Scopes != null)
+                options.Scope += " " + string.Join(' ', Scopes);
+
             options.Policy.Discovery.ValidateIssuerName = false;
             options.Policy.Discovery.ValidateEndpoints = false;
+            options.Policy.ValidateTokenIssuerName = false;
 
             _client = new(options);
         }

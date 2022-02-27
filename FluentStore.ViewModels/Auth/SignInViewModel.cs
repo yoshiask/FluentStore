@@ -74,7 +74,7 @@ namespace FluentStore.ViewModels.Auth
                 IsSigningIn = true;
                 FailReason = null;
 
-                var button = _accountService.GetHandlerForNamespace("msal").CreateSignInUI()[0] as AbstractButton;
+                var button = _accountService.GetHandlerForNamespace("msal").CreateSignInForm()[0] as AbstractButton;
                 await button.Click();
                 return;
 
@@ -113,5 +113,7 @@ namespace FluentStore.ViewModels.Auth
                 IsSigningIn = false;
             }
         }
+
+        public Task HandleAuthActivation(Flurl.Url url) => _accountService.RouteAuthActivation(url);
     }
 }

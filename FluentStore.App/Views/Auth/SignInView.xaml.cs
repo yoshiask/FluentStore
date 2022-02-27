@@ -23,15 +23,20 @@ namespace FluentStore.Views.Auth
             if (e.Key == Windows.System.VirtualKey.Enter)
             {
                 // Attempt to sign the user in
-                await ViewModel.SignInCommand.ExecuteAsync(null);
+                await ViewModel.SignInAsync();
             }
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
 
             WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage(string.Empty));
+
+            if (e.Parameter is Flurl.Url authCallbackUrl)
+            {
+                await ViewModel.HandleAuthActivation(authCallbackUrl);
+            }
         }
 
         private void InfoButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)

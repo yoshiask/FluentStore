@@ -22,6 +22,8 @@ namespace FluentStore
     /// </summary>
     public partial class App : Application
     {
+        private readonly SingleInstanceDesktopApp _singleInstanceApp;
+
         public const string AppName = "Fluent Store";
 
         public MainWindow Window { get; private set; }
@@ -52,6 +54,9 @@ namespace FluentStore
 
             Services = ConfigureServices();
             Ioc.Default.ConfigureServices(Services);
+
+            _singleInstanceApp = new SingleInstanceDesktopApp("FluentStoreBeta");
+            _singleInstanceApp.Launched += OnSingleInstanceLaunched;
         }
 
         /// <summary>
@@ -59,43 +64,60 @@ namespace FluentStore
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="args">Details about the launch request and process.</param>
-        protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            Window = new()
-            {
-                Title = AppName
-            };
+            _singleInstanceApp.Launch(args.Arguments);
+        }
 
-            // Load plugins and initialize package and account services
-            var settings = Ioc.Default.GetRequiredService<ISettingsService>();
-            var pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
-            var accSvc = Ioc.Default.GetRequiredService<AccountService>();
-
-            var pluginLoadResult = PluginLoader.LoadPlugins(settings);
-            pkgSvc.PackageHandlers = pluginLoadResult.PackageHandlers;
-            accSvc.AccountHandlers = pluginLoadResult.AccountHandlers;
-
-            var NavService = Ioc.Default.GetService<INavigationService>() as NavigationService;
+        private void OnSingleInstanceLaunched(object? sender, SingleInstanceLaunchEventArgs e)
+        {
+            var log = Ioc.Default.GetService<LoggerService>();
+            var navService = Ioc.Default.GetRequiredService<INavigationService>();
             ProtocolResult result = new()
             {
                 Page = typeof(Views.HomeView)
             };
             try
             {
-                var activationData = AppInstance.GetCurrent().GetActivatedEventArgs().Data;
-                if (activationData is IProtocolActivatedEventArgs ptclArgs)
-                {
-                    result = NavService.ParseProtocol(ptclArgs.Uri);
-                }
-                else if (activationData is IToastNotificationActivatedEventArgs toastArgs)
-                {
-                    result = NavService.ParseProtocol(toastArgs.Argument);
-                }
+                result = navService.ParseProtocol(e.Arguments, isFirstInstance: e.IsFirstInstance);
+                log?.Log($"Parse protocol result: {result}");
             }
             catch { }
 
-            NavService.Navigate(result.Page, result.Parameter);
-            Window.Activate();
+            log?.Log($"Is first instance?: {e.IsFirstInstance}");
+            log?.Log($"Is first launch?: {e.IsFirstLaunch}");
+            log?.Log($"Single-instance launch args: {e.Arguments}");
+            if (e.IsFirstLaunch)
+            {
+                // Load plugins and initialize package and account services
+                var settings = Ioc.Default.GetRequiredService<ISettingsService>();
+                var pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
+                var accSvc = Ioc.Default.GetRequiredService<AccountService>();
+
+                log?.Log($"Began loading plugins");
+                var pluginLoadResult = PluginLoader.LoadPlugins(settings);
+                pkgSvc.PackageHandlers = pluginLoadResult.PackageHandlers;
+                accSvc.AccountHandlers = pluginLoadResult.AccountHandlers;
+                log?.Log($"Finished loading plugins");
+
+                Window = new()
+                {
+                    Title = AppName
+                };
+            }
+            log?.Log($"Redirect activation?: {result.RedirectActivation}");
+
+            if (!result.RedirectActivation || e.IsFirstInstance)
+            {
+                log?.Log($"Navigating to {result.Page}");
+
+                // Make sure to run on UI thread
+                Current.Window.DispatcherQueue.TryEnqueue(() =>
+                {
+                    navService.Navigate(result.Page, result.Parameter);
+                    Window.Activate();
+                });
+            }
         }
 
         private static void OnUnhandledException(Exception ex)

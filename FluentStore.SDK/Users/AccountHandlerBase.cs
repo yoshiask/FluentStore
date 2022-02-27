@@ -75,6 +75,21 @@ namespace FluentStore.SDK.Users
         public virtual string GetDefaultNamespcace() => HandledNamespaces.First();
 
         /// <summary>
+        /// Creates a <see cref="Url"/> that can be used as a redirect URI for authentication.
+        /// <para>
+        /// When the app is activated using this URI, <see cref="HandleAuthActivation(Url)"/>
+        /// will be called with the URI.
+        /// </para>
+        /// </summary>
+        /// <param name="ns">
+        /// The namespace used to route auth activations to their handler.
+        /// <para>
+        /// If <see langword="null"/>, <see cref="GetDefaultNamespcace"/> will be used.
+        /// </para>
+        /// </param>
+        public virtual Url GetAuthProtocolUrl(string ns) => $"fluentstore://auth/{ns ?? GetDefaultNamespcace()}";
+
+        /// <summary>
         /// Determines if <paramref name="otherUser"/> is the signed in user.
         /// </summary>
         /// <returns>
@@ -159,19 +174,29 @@ namespace FluentStore.SDK.Users
         }
 
         /// <summary>
+        /// Gets the <see cref="AbstractUICollection"/> that represents a sign-in form.
+        /// </summary>
+        public abstract AbstractUICollection CreateSignInForm();
+        
+        /// <summary>
+        /// Gets the <see cref="AbstractUICollection"/> that represents an account creation form.
+        /// </summary>
+        public abstract AbstractUICollection CreateSignUpForm();
+
+        /// <summary>
         /// Sign in using the supplied <see cref="CredentialBase"/>. Typically called by <see cref="TrySilentSignInAsync"/>.
         /// </summary>
         public abstract Task<bool> SignInAsync(CredentialBase credential);
 
         /// <summary>
+        /// Sign up with information from the sign-up form.
+        /// </summary>
+        public abstract Task<bool> SignUpAsync(AbstractUICollection signUpForm);
+
+        /// <summary>
         /// Clears the state of this handler.
         /// </summary>
         public abstract Task SignOutAsync();
-
-        /// <summary>
-        /// Gets the <see cref="AbstractUICollection"/> that represents a sign-in form.
-        /// </summary>
-        public abstract AbstractUICollection CreateSignInUI();
 
         /// <summary>
         /// Completes the sign-in process after the app is activated.
@@ -183,6 +208,16 @@ namespace FluentStore.SDK.Users
         public abstract Task HandleAuthActivation(Url url);
 
         /// <summary>
+        /// Populates <see cref="CurrentUser"/> after a successful sign-in.
+        /// </summary>
+        /// <remarks>
+        /// This method should only be called once: immediately after sign-in,
+        /// when <see cref="CurrentUser"/> is <see langword="null"/>. All
+        /// subsequest updates should be made via <see cref="CurrentUser"/>.
+        /// </remarks>
+        protected abstract Task PopulateCurrentUser();
+
+        /// <summary>
         /// Creates an empty credential for the <see cref="CurrentUser"/>.
         /// </summary>
         /// <returns>
@@ -192,18 +227,13 @@ namespace FluentStore.SDK.Users
         private CredentialBase CreateCredential(string password)
         {
             string userName = CurrentUser.Urn.GetContent<NamespaceSpecificString>().UnEscapedValue;
-            string resource = CurrentUser.Urn.NamespaceIdentifier;
+            string resource = GetAuthProtocolUrl(CurrentUser.Urn.NamespaceIdentifier);
             return new(userName, password, resource);
         }
     }
 
     public abstract class AccountHandlerBase<TAccount> : AccountHandlerBase where TAccount : Account
     {
-        private TAccount _currentUser;
-        public new TAccount CurrentUser
-        {
-            get => _currentUser;
-            set => SetProperty(ref _currentUser, value);
-        }
+        public TAccount GetCurrentUser() => (TAccount)CurrentUser;
     }
 }

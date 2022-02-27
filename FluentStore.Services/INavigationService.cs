@@ -59,7 +59,7 @@ namespace FluentStore.Services
 
         public abstract Type ResolveType(string viewName);
 
-        public ProtocolResult ParseProtocol(Url ptcl)
+        public ProtocolResult ParseProtocol(Url ptcl, bool isFirstInstance)
         {
             ProtocolResult result = new()
             {
@@ -86,7 +86,7 @@ namespace FluentStore.Services
                         break;
 
                     case "auth":
-                        if (ptcl.QueryParams.TryGetFirst("noRedirect", out _))
+                        if (isFirstInstance)
                         {
                             result.Page = ResolveType("Auth.SignInView");
                             result.Parameter = ptcl;
@@ -165,5 +165,7 @@ namespace FluentStore.Services
         public Type Page { get; set; }
         public object Parameter { get; set; }
         public bool RedirectActivation { get; set; } = false;
+
+        public override string ToString() => $"{Page.Name} '{Parameter}'";
     }
 }
