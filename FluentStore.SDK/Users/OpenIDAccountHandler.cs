@@ -110,7 +110,7 @@ namespace FluentStore.SDK.Users
 
         protected override AbstractUICollection CreateSignInForm()
         {
-            AbstractButton signInButton = new("SignInButton", "Sign in with browser", type: AbstractButtonType.Confirm);
+            AbstractButton signInButton = new("SignInButton", "Sign in with browser", iconCode: "\uE8A7", type: AbstractButtonType.Confirm);
             signInButton.Clicked += async (sender, e) =>
             {
                 // Generate start URL, state, nonce, code challenge
@@ -123,17 +123,14 @@ namespace FluentStore.SDK.Users
 
             AbstractUICollection ui = new("SignInCollection")
             {
-                Items = new AbstractUIElement[]
-                {
-                    signInButton
-                }
+                signInButton,
             };
             return ui;
         }
 
         protected override AbstractUICollection CreateSignUpForm()
         {
-            AbstractButton signUpButton = new("SignUpButton", "Sign up with browser", type: AbstractButtonType.Confirm);
+            AbstractButton signUpButton = new("SignUpButton", "Sign up with browser", iconCode: "\uE8A7", type: AbstractButtonType.Confirm);
             signUpButton.Clicked += async (sender, e) =>
             {
                 INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
@@ -142,10 +139,7 @@ namespace FluentStore.SDK.Users
 
             AbstractUICollection ui = new("SignUpCollection")
             {
-                Items = new AbstractUIElement[]
-                {
-                    signUpButton
-                }
+                signUpButton
             };
             return ui;
         }
