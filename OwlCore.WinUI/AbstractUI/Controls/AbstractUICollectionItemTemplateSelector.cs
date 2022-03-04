@@ -105,6 +105,7 @@ namespace OwlCore.WinUI.AbstractUI.Controls
                 AbstractMultiChoiceViewModel _ => MultiChoiceTemplate,
                 AbstractBooleanViewModel _ => BooleanTemplate,
                 AbstractProgressIndicatorViewModel _ => ProgressTemplate,
+                //AbstractColorPickerViewModel _ => ColorPickerTemplate,
                 AbstractUICollectionViewModel _ => ElementCollection,
                 _ => base.SelectTemplateCore(item, container)
             };

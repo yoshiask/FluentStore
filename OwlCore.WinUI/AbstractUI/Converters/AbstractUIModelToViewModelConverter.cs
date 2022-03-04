@@ -26,7 +26,7 @@ namespace OwlCore.WinUI.AbstractUI.Converters
                 AbstractMultiChoice multiChoiceUIElement => new AbstractMultiChoiceViewModel(multiChoiceUIElement),
                 AbstractUICollection elementGroup => new AbstractUICollectionViewModel(elementGroup),
                 AbstractProgressIndicator progress => new AbstractProgressIndicatorViewModel(progress),
-                //AbstractColorPicker color => new AbstractColorPickerViewModel(color),
+                AbstractColorPicker color => new AbstractColorPickerViewModel(color),
 
                 _ => throw new NotSupportedException($"No match ViewModel was found for {value.GetType()}."),
             };
