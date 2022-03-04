@@ -31,7 +31,9 @@
     <ScrollViewer Margin="16,8">
         <StackPanel HorizontalAlignment="Stretch" Spacing="4">
             <TextBlock Text="Signed-in accounts" Style="{ThemeResource HeaderTextStyle}"/>
-            <TextBlock Text="You aren't signed into any accounts. Use the list below to see what's available."/>
+            <TextBlock Text="You aren't signed into any accounts. Use the list below to see what's available."
+                       x:Load="{x:Bind ViewModel.SignedInAccountHandlers, Mode=OneWay, Converter={StaticResource EmptyCollectionToTrueConverter}}"
+                       x:Name="NoSignedInAccountsLabel"/>
             <ItemsControl ItemsSource="{x:Bind ViewModel.SignedInAccountHandlers}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="users:AccountHandlerBase">
@@ -39,8 +41,11 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-            
+
             <TextBlock Text="Available services" Style="{ThemeResource HeaderTextStyle}"/>
+            <TextBlock Text="You're signed into all available services."
+                       x:Load="{x:Bind ViewModel.OtherAccountHandlers, Mode=OneWay, Converter={StaticResource EmptyCollectionToTrueConverter}}"
+                       x:Name="NoOtherAccountsLabel"/>
             <ItemsControl ItemsSource="{x:Bind ViewModel.OtherAccountHandlers}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="users:AccountHandlerBase">
