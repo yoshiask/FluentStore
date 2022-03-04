@@ -1,0 +1,111 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="OwlCore.WinUI.AbstractUI.Themes.AbstractUICollectionPresenterStyle"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:abstractUI="using:OwlCore.AbstractUI.ViewModels"
+    xmlns:convertvis="using:OwlCore.WinUI.Converters.Bools.Visible"
+    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:controls="using:OwlCore.WinUI.AbstractUI.Controls"
+    xmlns:automation="using:Microsoft.UI.Xaml.Automation"
+    xmlns:abstractUIVm="using:OwlCore.AbstractUI.ViewModels"
+    xmlns:themes="using:OwlCore.WinUI.AbstractUI.Themes">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="ms-appx:///OwlCore.WinUI/AbstractUI/Themes/AbstractUIResources.xaml"/>
+        <themes:AbstractBooleanStyle />
+        <themes:AbstractButtonStyle />
+        <themes:AbstractDataListStyle />
+        <themes:AbstractMultiChoiceStyle />
+        <themes:AbstractProgressIndicatorStyle />
+        <themes:AbstractRichTextBlockStyle />
+        <themes:AbstractTextBoxStyle />
+    </ResourceDictionary.MergedDictionaries>
+
+    <controls:AbstractUICollectionItemTemplateSelector x:Key="CollectionTemplateSelector">
+        <controls:AbstractUICollectionItemTemplateSelector.BooleanTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractBooleanViewModel">
+                <controls:AbstractBooleanPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.BooleanTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.ButtonTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractButtonViewModel">
+                <controls:AbstractButtonPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.ButtonTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.DataListTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractDataListViewModel">
+                <controls:AbstractDataListPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.DataListTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.MultiChoiceTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractMultiChoiceViewModel">
+                <controls:AbstractMultiChoicePresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.MultiChoiceTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.ProgressTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractProgressIndicatorViewModel">
+                <controls:AbstractProgressIndicatorPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.ProgressTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.TextBoxTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractTextBoxViewModel">
+                <controls:AbstractTextBoxPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.TextBoxTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.ElementCollection>
+            <DataTemplate x:DataType="abstractUIVm:AbstractUICollectionViewModel">
+                <controls:AbstractUICollectionPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.ElementCollection>
+    </controls:AbstractUICollectionItemTemplateSelector>
+
+    <Style TargetType="controls:AbstractUICollectionPresenter">
+        <Style.Setters>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="controls:AbstractUICollectionPresenter">
+                        <ContentControl  ContentTemplate="{StaticResource DefaultAbstractUICollectionTemplate}"
+                                         HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style.Setters>
+    </Style>
+
+    <DataTemplate x:Key="DefaultAbstractUICollectionTemplate" x:DataType="abstractUIVm:AbstractUICollectionViewModel">
+        <StackPanel Margin="0,5">
+
+            <TextBlock Text="{x:Bind Title, Mode=OneWay}"
+                       FontSize="22" 
+                       ToolTipService.ToolTip="{x:Bind TooltipText, Mode=OneWay}" 
+                       Visibility="{x:Bind convertvis:NotNullOrEmptyToVisibilityConverter.Convert(Title), Mode=OneWay}"/>
+
+            <TextBlock Text="{x:Bind Subtitle, Mode=OneWay}" 
+                       FontSize="16" Opacity="0.7"
+                       TextWrapping="WrapWholeWords"
+                       Visibility="{x:Bind convertvis:NotNullOrEmptyToVisibilityConverter.Convert(Subtitle), Mode=OneWay}"/>
+
+            <TextBlock Text="{x:Bind Items, Mode=OneWay}"/>
+            <TextBlock Text="Howdy"/>
+
+            <ItemsControl ItemsSource="{x:Bind Items, Mode=OneWay}"
+                          Margin="0,10,0,0"
+                          ItemTemplateSelector="{StaticResource CollectionTemplateSelector}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="10" Orientation="{Binding PreferredOrientation, Converter={StaticResource AbstractUIOrientationToWuxOrientationConverter}}" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </StackPanel>
+    </DataTemplate>
+    
+</ResourceDictionary>
+    

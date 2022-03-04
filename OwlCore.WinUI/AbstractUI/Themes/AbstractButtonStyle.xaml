@@ -1,0 +1,71 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="OwlCore.WinUI.AbstractUI.Themes.AbstractButtonStyle"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:abstractUI="using:OwlCore.AbstractUI.ViewModels"
+    xmlns:convertvis="using:OwlCore.WinUI.Converters.Bools.Visible"
+    xmlns:controls="using:OwlCore.WinUI.AbstractUI.Controls"
+    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:local="using:OwlCore.WinUI.AbstractUI.Themes">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="ms-appx:///OwlCore.WinUI/AbstractUI/Themes/AbstractUIResources.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <local:AbstractButtonTemplateSelector x:Key="ButtonStyleSelector">
+        <local:AbstractButtonTemplateSelector.GenericStyle>
+            <Style TargetType="Button"/>
+        </local:AbstractButtonTemplateSelector.GenericStyle>
+        <local:AbstractButtonTemplateSelector.ConfirmStyle>
+            <Style TargetType="Button">
+                <Style.Setters>
+                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="BorderBrush" Value="{ThemeResource SystemControlHighlightAccentBrush}"/>
+                </Style.Setters>
+            </Style>
+        </local:AbstractButtonTemplateSelector.ConfirmStyle>
+        <local:AbstractButtonTemplateSelector.DeleteStyle>
+            <Style TargetType="Button">
+                <Style.Setters>
+                    <Setter Property="BorderBrush" Value="Red"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                </Style.Setters>
+            </Style>
+        </local:AbstractButtonTemplateSelector.DeleteStyle>
+    </local:AbstractButtonTemplateSelector>
+
+    <Style TargetType="controls:AbstractButtonPresenter">
+        <Style.Setters>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="controls:AbstractButtonPresenter">
+                        <ContentControl ContentTemplate="{StaticResource DefaultAbstractButtonTemplate}"
+                                        HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style.Setters>
+    </Style>
+
+    <DataTemplate x:Key="DefaultAbstractButtonTemplate" x:DataType="abstractUI:AbstractButtonViewModel">
+        <StackPanel>
+            <TextBlock Text="{x:Bind Title, Mode=OneWay}" FontSize="{StaticResource DefaultAbstractUITitleFontSize}" ToolTipService.ToolTip="{x:Bind TooltipText, Mode=OneWay}" 
+                       Visibility="{x:Bind convertvis:NotNullOrEmptyToVisibilityConverter.Convert(Title), Mode=OneWay}"/>
+
+            <TextBlock Text="{x:Bind Subtitle, Mode=OneWay}" FontSize="{StaticResource DefaultAbstractUISubtitleFontSize}"
+                       FontWeight="{StaticResource DefaultAbstractUISubtitleFontWeight}"
+                       Opacity="{StaticResource DefaultAbstractUISubtitleOpacity}"
+                       TextWrapping="WrapWholeWords"
+                       Visibility="{x:Bind convertvis:NotNullOrEmptyToVisibilityConverter.Convert(Subtitle), Mode=OneWay}"/>
+
+            <Button Style="{x:Bind Type, Converter={StaticResource ButtonStyleSelector}, Mode=OneWay}" Command="{x:Bind ClickCommand}" Padding="0" MinWidth="50">
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="5">
+                    <FontIcon Glyph="{x:Bind IconCode}" FontFamily="Segoe MDL2 Assets" Grid.Column="0" FontSize="16"/>
+                    <TextBlock Text="{x:Bind Text}" Grid.Column="1"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </DataTemplate>
+
+</ResourceDictionary>

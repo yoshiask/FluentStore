@@ -1,0 +1,41 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="OwlCore.WinUI.AbstractUI.Themes.AbstractRichTextBlockStyle"
+    xmlns:convertvis="using:OwlCore.WinUI.Converters.Bools.Visible"
+    xmlns:tkcontrols="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:abstractUI="using:OwlCore.AbstractUI.ViewModels"
+    xmlns:controls="using:OwlCore.WinUI.AbstractUI.Controls">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="ms-appx:///OwlCore.WinUI/AbstractUI/Themes/AbstractUIResources.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <Style TargetType="controls:AbstractRichTextBlockPresenter">
+        <Style.Setters>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="controls:AbstractTextBoxPresenter">
+                        <ContentControl ContentTemplate="{StaticResource DefaultAbstractRichTextBlockTemplate}"
+                                        HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style.Setters>
+    </Style>
+
+    <DataTemplate x:Key="DefaultAbstractRichTextBlockTemplate" x:DataType="abstractUI:AbstractRichTextBlockViewModel">
+        <StackPanel>
+            <TextBlock Text="{x:Bind Title, Mode=OneWay}" FontSize="{StaticResource DefaultAbstractUITitleFontSize}" ToolTipService.ToolTip="{x:Bind TooltipText, Mode=OneWay}" />
+
+            <TextBlock Text="{x:Bind Subtitle, Mode=OneWay}" FontSize="{StaticResource DefaultAbstractUISubtitleFontSize}"
+                       FontWeight="{StaticResource DefaultAbstractUISubtitleFontWeight}"
+                       Opacity="{StaticResource DefaultAbstractUISubtitleOpacity}"
+                       TextWrapping="WrapWholeWords"
+                       Visibility="{x:Bind convertvis:NotNullOrEmptyToVisibilityConverter.Convert(Subtitle), Mode=OneWay}"/>
+
+            <tkcontrols:MarkdownTextBlock Text="{x:Bind RichText}"/>
+        </StackPanel>
+    </DataTemplate>
+
+</ResourceDictionary>

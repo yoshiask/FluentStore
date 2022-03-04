@@ -1,0 +1,16 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:themes="using:OwlCore.WinUI.AbstractUI.Themes">
+
+    <ResourceDictionary.MergedDictionaries>
+        <themes:AbstractBooleanStyle />
+        <themes:AbstractButtonStyle />
+        <themes:AbstractDataListStyle />
+        <themes:AbstractMultiChoiceStyle />
+        <themes:AbstractRichTextBlockStyle />
+        <themes:AbstractTextBoxStyle />
+    </ResourceDictionary.MergedDictionaries>
+    
+</ResourceDictionary>
+    

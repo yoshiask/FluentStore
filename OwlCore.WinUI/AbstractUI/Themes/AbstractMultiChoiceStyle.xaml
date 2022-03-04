@@ -1,0 +1,80 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="OwlCore.WinUI.AbstractUI.Themes.AbstractMultiChoiceStyle"
+    xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:abstractUI="using:OwlCore.AbstractUI.ViewModels"
+    xmlns:convertvis="using:OwlCore.WinUI.Converters.Bools.Visible"
+    xmlns:controls="using:OwlCore.WinUI.AbstractUI.Controls"
+    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:themes="using:OwlCore.WinUI.AbstractUI.Themes">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="ms-appx:///OwlCore.WinUI/AbstractUI/Themes/AbstractUIResources.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <Style TargetType="controls:AbstractMultiChoicePresenter">
+        <Style.Setters>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="controls:AbstractMultiChoicePresenter">
+                        <ContentControl ContentTemplate="{StaticResource DefaultAbstractMultipleChoiceTemplate}"
+                                        HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style.Setters>
+    </Style>
+
+    <DataTemplate x:Key="DefaultAbstractMultipleChoiceComboBoxTemplate" x:DataType="abstractUI:AbstractMultiChoiceViewModel">
+        <ComboBox ItemsSource="{x:Bind Items}" SelectedIndex="{x:Bind SelectedIndex, Mode=TwoWay}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate x:DataType="abstractUI:AbstractMultiChoiceItemViewModel">
+                    <TextBlock Text="{Binding Title}" />
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+            <interactivity:Interaction.Behaviors>
+                <core:EventTriggerBehavior EventName="SelectionChanged">
+                    <core:InvokeCommandAction Command="{x:Bind ItemSelectedCommand}" />
+                </core:EventTriggerBehavior>
+            </interactivity:Interaction.Behaviors>
+        </ComboBox>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DefaultAbstractMultipleChoiceRadioButtonTemplate" x:DataType="abstractUI:AbstractMultiChoiceViewModel">
+        <ItemsControl ItemsSource="{x:Bind Items}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="abstractUI:AbstractMultiChoiceItemViewModel">
+                    <RadioButton Command="{x:Bind ItemSelectedCommand}" Content="{Binding Title}" GroupName="{Binding GroupId}" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical"  />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
+    </DataTemplate>
+
+    <DataTemplate x:Key="DefaultAbstractMultipleChoiceTemplate" x:DataType="abstractUI:AbstractMultiChoiceViewModel">
+        <StackPanel>
+            <TextBlock Text="{x:Bind Title}" FontSize="{StaticResource DefaultAbstractUITitleFontSize}" ToolTipService.ToolTip="{x:Bind TooltipText}"
+                       Visibility="{x:Bind convertvis:NotNullOrEmptyToVisibilityConverter.Convert(Title)}" />
+
+            <TextBlock Text="{x:Bind Subtitle}" FontSize="{StaticResource DefaultAbstractUISubtitleFontSize}"
+                       FontWeight="{StaticResource DefaultAbstractUISubtitleFontWeight}"
+                       Opacity="{StaticResource DefaultAbstractUISubtitleOpacity}"
+                       TextWrapping="WrapWholeWords"
+                       Visibility="{x:Bind convertvis:NotNullOrEmptyToVisibilityConverter.Convert(Subtitle)}"/>
+
+            <ContentControl Content="{x:Bind}" Margin="0,5,0,0">
+                <ContentControl.ContentTemplateSelector>
+                    <themes:AbstractMultiChoiceTypeTemplateSelector ComboBoxTemplate="{StaticResource DefaultAbstractMultipleChoiceComboBoxTemplate}"
+                                                                    RadioButtonTemplate="{StaticResource DefaultAbstractMultipleChoiceRadioButtonTemplate}"/>
+                </ContentControl.ContentTemplateSelector>
+            </ContentControl>
+
+        </StackPanel>
+    </DataTemplate>
+
+</ResourceDictionary>
