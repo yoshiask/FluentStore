@@ -15,21 +15,16 @@
 
     <local:AbstractButtonTemplateSelector x:Key="ButtonStyleSelector">
         <local:AbstractButtonTemplateSelector.GenericStyle>
-            <Style TargetType="Button"/>
+            <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}"/>
         </local:AbstractButtonTemplateSelector.GenericStyle>
         <local:AbstractButtonTemplateSelector.ConfirmStyle>
-            <Style TargetType="Button">
-                <Style.Setters>
-                    <Setter Property="BorderThickness" Value="1"/>
-                    <Setter Property="BorderBrush" Value="{ThemeResource SystemControlHighlightAccentBrush}"/>
-                </Style.Setters>
-            </Style>
+            <Style TargetType="Button" BasedOn="{StaticResource AccentButtonStyle}"/>
         </local:AbstractButtonTemplateSelector.ConfirmStyle>
         <local:AbstractButtonTemplateSelector.DeleteStyle>
-            <Style TargetType="Button">
+            <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
                 <Style.Setters>
                     <Setter Property="BorderBrush" Value="Red"/>
-                    <Setter Property="BorderThickness" Value="1"/>
+                    <Setter Property="BorderThickness" Value="2"/>
                 </Style.Setters>
             </Style>
         </local:AbstractButtonTemplateSelector.DeleteStyle>
