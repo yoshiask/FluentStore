@@ -9,6 +9,10 @@
 	</PropertyGroup>
 
     <ItemGroup>
+      <None Remove="Auth\AccountsViewModel.cs~RF9b05e0f.TMP" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="CommunityToolkit.Common" Version="7.1.2" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.2" />
     </ItemGroup>

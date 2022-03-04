@@ -74,10 +74,6 @@ namespace FluentStore.ViewModels.Auth
                 IsSigningIn = true;
                 FailReason = null;
 
-                var button = _accountService.GetHandlerForNamespace("msal").CreateSignInForm()[0] as AbstractButton;
-                await button.Click();
-                return;
-
                 //var resp = await FSApi.SignInAsync(Email, Password);
                 //if (await UserService.GetHandlerForNamespace("fluentstore").SignInAsync(resp.IDToken, resp.RefreshToken))
                 //    NavService.Navigate("HomeView");

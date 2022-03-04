@@ -1,7 +1,8 @@
 {
   "profiles": {
     "FluentStore": {
-      "commandName": "MsixPackage"
+      "commandName": "MsixPackage",
+      "nativeDebugging": true
     }
   }
 }

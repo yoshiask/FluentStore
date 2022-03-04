@@ -10,5 +10,6 @@
     <x:Double x:Key="DefaultAbstractUISubtitleOpacity">0.6</x:Double>
 
     <converters:AbstractUIOrientationToWuxOrientationConverter x:Key="AbstractUIOrientationToWuxOrientationConverter" />
+    <converters:AbstractUIModelToViewModelConverter x:Key="AbstractUIModelToViewModelConverter" />
 
 </ResourceDictionary>

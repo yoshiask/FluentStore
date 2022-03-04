@@ -46,22 +46,26 @@ namespace FluentStore
                 MainNav.MenuItems.Add(page.GetNavigationViewItem());
             MainNav.SelectedItem = MainNav.MenuItems[0];
 
-            WeakReferenceMessenger.Default.Register<ErrorMessage>(this, (r, m) =>
-            {
-                MainInfoBar.Title = m.Exception.Message;
-                MainInfoBar.Message = m.Exception.StackTrace;
-                MainInfoBar.Severity = InfoBarSeverity.Error;
-                MainInfoBar.IsOpen = true;
-            });
-            WeakReferenceMessenger.Default.Register<SuccessMessage>(this, (r, m) =>
-            {
-                // Don't show package fetched messages
-                if (m.Type == SuccessType.PackageFetchCompleted) return;
+            WeakReferenceMessenger.Default.Register<ErrorMessage>(this, ErrorMessage_Recieved);
+            WeakReferenceMessenger.Default.Register<SuccessMessage>(this, SuccessMessage_Recieved);
+        }
 
-                MainInfoBar.Title = m.Message;
-                MainInfoBar.Severity = InfoBarSeverity.Success;
-                MainInfoBar.IsOpen = true;
-            });
+        private void ErrorMessage_Recieved(object r, ErrorMessage m)
+        {
+            MainInfoBar.Title = m.Exception.Message;
+            MainInfoBar.Message = m.Exception.StackTrace;
+            MainInfoBar.Severity = InfoBarSeverity.Error;
+            MainInfoBar.IsOpen = true;
+        }
+
+        private void SuccessMessage_Recieved(object r, SuccessMessage m)
+        {
+            // Don't show package fetched messages
+            if (m.Type == SuccessType.PackageFetchCompleted) return;
+
+            MainInfoBar.Title = m.Message;
+            MainInfoBar.Severity = InfoBarSeverity.Success;
+            MainInfoBar.IsOpen = true;
         }
 
         private void MainPage_PointerPressed(object sender, PointerRoutedEventArgs e)

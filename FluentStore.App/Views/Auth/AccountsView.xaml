@@ -1,0 +1,58 @@
+﻿<Page
+    x:Class="FluentStore.Views.Auth.AccountsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FluentStore.Views.Auth"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:users="using:FluentStore.SDK.Users"
+    xmlns:absuiControls="using:OwlCore.WinUI.AbstractUI.Controls"
+    xmlns:absuiThemes="using:OwlCore.WinUI.AbstractUI.Themes"
+    mc:Ignorable="d"
+    NavigationCacheMode="Disabled"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Loading="Page_Loading">
+
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <absuiThemes:AbstractUICollectionPresenterStyle/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="20" />
+                <Setter Property="FontWeight" Value="Bold" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Margin" Value="0,8,0,0" />
+            </Style>
+        </ResourceDictionary>
+    </Page.Resources>
+
+    <ScrollViewer Margin="16,8">
+        <StackPanel HorizontalAlignment="Stretch" Spacing="4">
+            <TextBlock Text="Signed-in accounts" Style="{ThemeResource HeaderTextStyle}"/>
+            <TextBlock Text="You aren't signed into any accounts. Use the list below to see what's available."/>
+            <ItemsControl ItemsSource="{x:Bind ViewModel.SignedInAccountHandlers}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="users:AccountHandlerBase">
+                        <TextBlock Text="{x:Bind DisplayName}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            
+            <TextBlock Text="Available services" Style="{ThemeResource HeaderTextStyle}"/>
+            <ItemsControl ItemsSource="{x:Bind ViewModel.OtherAccountHandlers}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="users:AccountHandlerBase">
+                        <Expander Header="{x:Bind DisplayName}" HorizontalAlignment="Stretch">
+                            <absuiControls:AbstractUICollectionPresenter DataContext="{x:Bind SignInForm, Mode=OneWay}"
+                                                                         ViewModel="{x:Bind SignInForm, Mode=OneWay, Converter={StaticResource AbstractUIModelToViewModelConverter}}"
+                                                                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"/>
+                        </Expander>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+    
+</Page>

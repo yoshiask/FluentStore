@@ -108,7 +108,7 @@ namespace FluentStore.SDK.Users
             CurrentUser = null;
         }
 
-        public override AbstractUICollection CreateSignInForm()
+        protected override AbstractUICollection CreateSignInForm()
         {
             AbstractButton signInButton = new("SignInButton", "Sign in with browser", type: AbstractButtonType.Confirm);
             signInButton.Clicked += async (sender, e) =>
@@ -131,7 +131,7 @@ namespace FluentStore.SDK.Users
             return ui;
         }
 
-        public override AbstractUICollection CreateSignUpForm()
+        protected override AbstractUICollection CreateSignUpForm()
         {
             AbstractButton signUpButton = new("SignUpButton", "Sign up with browser", type: AbstractButtonType.Confirm);
             signUpButton.Clicked += async (sender, e) =>

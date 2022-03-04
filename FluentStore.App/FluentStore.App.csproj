@@ -10,8 +10,8 @@
         <PublishProfile>win10-$(Platform).pubxml</PublishProfile>
         <UseWinUI>true</UseWinUI>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<AssemblyVersion>$(FluentStoreVersion)</AssemblyVersion>
-		<FileVersion>$(AssemblyVersion)</FileVersion>
+        <AssemblyVersion>$(FluentStoreVersion)</AssemblyVersion>
+        <FileVersion>$(AssemblyVersion)</FileVersion>
 
         <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
         <PackageCertificateThumbprint>CA050EFFDAB5866005A7649E1493764E2205F3DB</PackageCertificateThumbprint>
@@ -27,6 +27,9 @@
         <HoursBetweenUpdateChecks>48</HoursBetweenUpdateChecks>
         <AppInstallerUri>http://josh.askharoun.com/FluentStore/FluentStoreBeta.appinstaller</AppInstallerUri>
     </PropertyGroup>
+    <ItemGroup>
+      <None Remove="Views\Auth\AccountsView.xaml" />
+    </ItemGroup>
     
     <ItemGroup>
         <AppxManifest Include="Package.appxmanifest">
@@ -64,6 +67,13 @@
         <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
         <ProjectReference Include="..\FluentStore.ViewModels\FluentStore.ViewModels.csproj" />
         <ProjectReference Include="..\API\FluentStoreAPI\FluentStoreAPI.csproj" />
+        <ProjectReference Include="..\OwlCore.WinUI\OwlCore.WinUI.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Page Update="Views\Auth\AccountsView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
     </ItemGroup>
 
 </Project>

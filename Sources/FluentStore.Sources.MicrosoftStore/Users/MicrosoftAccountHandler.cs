@@ -5,7 +5,6 @@ using Microsoft.Identity.Client;
 using OwlCore.AbstractUI.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FluentStore.Sources.MicrosoftStore.Users
@@ -19,6 +18,8 @@ namespace FluentStore.Sources.MicrosoftStore.Users
         {
             NAMESPACE_MSACCOUNT,
         };
+
+        public override string DisplayName => "Microsoft Account";
 
         protected override string Authority => "https://login.microsoftonline.com/common/v2.0";
         protected override string ClientId => Secrets.MSA_CLIENTID;

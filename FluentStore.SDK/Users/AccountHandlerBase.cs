@@ -7,6 +7,7 @@ using OwlCore.AbstractUI.Models;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Users
@@ -23,8 +24,16 @@ namespace FluentStore.SDK.Users
         /// </remarks>
         public abstract HashSet<string> HandledNamespaces { get; }
 
+        /// <summary>
+        /// The display name of this handler.
+        /// </summary>
+        public abstract string DisplayName { get; }
+
+        public bool IsEnabled { get; set; }
+
         private Account _currentUser;
         private bool _isLoggedIn;
+        private AbstractUICollection _signInForm;
         private readonly IPasswordVaultService _passwordVaultService = Ioc.Default.GetService<IPasswordVaultService>();
 
         /// <summary>
@@ -43,6 +52,18 @@ namespace FluentStore.SDK.Users
         {
             get => _isLoggedIn;
             set => SetProperty(ref _isLoggedIn, value);
+        }
+
+        /// <inheritdoc cref="CreateSignInForm"/>
+        public AbstractUICollection SignInForm
+        {
+            get
+            {
+                if (_signInForm == null)
+                    _signInForm = CreateSignInForm();
+                return _signInForm;
+            }
+            set => _signInForm = value;
         }
 
         /// <summary>
@@ -174,16 +195,6 @@ namespace FluentStore.SDK.Users
         }
 
         /// <summary>
-        /// Gets the <see cref="AbstractUICollection"/> that represents a sign-in form.
-        /// </summary>
-        public abstract AbstractUICollection CreateSignInForm();
-        
-        /// <summary>
-        /// Gets the <see cref="AbstractUICollection"/> that represents an account creation form.
-        /// </summary>
-        public abstract AbstractUICollection CreateSignUpForm();
-
-        /// <summary>
         /// Sign in using the supplied <see cref="CredentialBase"/>. Typically called by <see cref="TrySilentSignInAsync"/>.
         /// </summary>
         public abstract Task<bool> SignInAsync(CredentialBase credential);
@@ -201,6 +212,16 @@ namespace FluentStore.SDK.Users
         /// The <see cref="Url"/> the app was activated with.
         /// </param>
         public abstract Task HandleAuthActivation(Url url);
+
+        /// <summary>
+        /// Gets the <see cref="AbstractUICollection"/> that represents a sign-in form.
+        /// </summary>
+        protected abstract AbstractUICollection CreateSignInForm();
+
+        /// <summary>
+        /// Gets the <see cref="AbstractUICollection"/> that represents an account creation form.
+        /// </summary>
+        protected abstract AbstractUICollection CreateSignUpForm();
 
         /// <summary>
         /// Populates <see cref="CurrentUser"/> after a successful sign-in.
@@ -229,6 +250,10 @@ namespace FluentStore.SDK.Users
 
     public abstract class AccountHandlerBase<TAccount> : AccountHandlerBase where TAccount : Account
     {
+        /// <summary>
+        /// Casts <see cref="AccountHandlerBase.CurrentUser"/> to <typeparamref name="TAccount"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TAccount GetCurrentUser() => (TAccount)CurrentUser;
     }
 }

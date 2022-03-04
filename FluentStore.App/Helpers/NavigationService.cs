@@ -45,7 +45,7 @@ namespace FluentStore.Services
 
                 new()
                 {
-                    PageType = typeof(Views.Auth.SignInView),
+                    PageType = typeof(Views.Auth.AccountsView),
                     Icon = new SymbolIcon(Symbol.Account),
                     Title = "Accounts",
                     Path = "accounts",

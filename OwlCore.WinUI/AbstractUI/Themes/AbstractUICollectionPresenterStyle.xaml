@@ -92,9 +92,6 @@
                        TextWrapping="WrapWholeWords"
                        Visibility="{x:Bind convertvis:NotNullOrEmptyToVisibilityConverter.Convert(Subtitle), Mode=OneWay}"/>
 
-            <TextBlock Text="{x:Bind Items, Mode=OneWay}"/>
-            <TextBlock Text="Howdy"/>
-
             <ItemsControl ItemsSource="{x:Bind Items, Mode=OneWay}"
                           Margin="0,10,0,0"
                           ItemTemplateSelector="{StaticResource CollectionTemplateSelector}">
