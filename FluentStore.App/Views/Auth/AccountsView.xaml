@@ -50,8 +50,7 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="users:AccountHandlerBase">
                         <Expander Header="{x:Bind DisplayName}" HorizontalAlignment="Stretch">
-                            <absuiControls:AbstractUICollectionPresenter DataContext="{x:Bind SignInForm, Mode=OneWay}"
-                                                                         ViewModel="{x:Bind SignInForm, Mode=OneWay, Converter={StaticResource AbstractUIModelToViewModelConverter}}"
+                            <absuiControls:AbstractUICollectionPresenter ViewModel="{x:Bind SignInForm, Mode=OneWay, Converter={StaticResource AbstractUIModelToViewModelConverter}}"
                                                                          HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"/>
                         </Expander>
                     </DataTemplate>
