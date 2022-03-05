@@ -33,11 +33,11 @@ namespace FluentStore.Sources.MicrosoftStore.Users
             };
         }
 
-        protected override async Task PopulateCurrentUser()
+        protected override async Task<Account> UpdateCurrentUser()
         {
-            CurrentUser = new MicrosoftAccount
+            return new MicrosoftAccount
             {
-                Urn = Urn.Parse($"urn:{NAMESPACE_MSACCOUNT}:test"),
+                Urn = new(NAMESPACE_MSACCOUNT, new RawNamespaceSpecificString("test")),
                 DisplayName = "Test Account",
                 Email = "bob@example.com",
                 Id = "test"
