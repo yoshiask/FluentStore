@@ -57,8 +57,9 @@ namespace FluentStore.SDK.Users
                 if (Token == null)
                 {
                     // Use refresh token to get a new token
+                    RefreshClient();
                     var resp = await _client.RefreshTokenAsync(RefreshToken);
-                    if (resp != null)
+                    if (!resp.IsError)
                     {
                         Token = resp.AccessToken;
                         RefreshToken = resp.RefreshToken;
@@ -66,7 +67,7 @@ namespace FluentStore.SDK.Users
                     else
                     {
 #if DEBUG
-                        System.Diagnostics.Debug.WriteLine(resp);
+                        System.Diagnostics.Debug.WriteLine(resp.Error);
 #endif
                     }
                 }

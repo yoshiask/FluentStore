@@ -100,6 +100,9 @@ namespace FluentStore
                 accSvc.AccountHandlers = pluginLoadResult.AccountHandlers;
                 log?.Log($"Finished loading plugins");
 
+                // Attempt to silently sign into any saved accounts
+                accSvc.TrySlientSignInAsync().ConfigureAwait(true);
+
                 Window = new()
                 {
                     Title = AppName

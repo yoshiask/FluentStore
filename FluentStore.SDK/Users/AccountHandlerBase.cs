@@ -76,13 +76,9 @@ namespace FluentStore.SDK.Users
 
             try
             {
-                string urnPrefix = "urn:" + GetDefaultNamespcace();
-                var loginCredential = _passwordVaultService.FindAllByResource(CredentialBase.DEFAULT_RESOURCE)
-                    .FirstOrDefault(c => c.UserName.StartsWith(urnPrefix));
-
-                if (loginCredential != null)
+                if (TryGetAllCredentials(GetDefaultNamespcace(), out var credentials))
                 {
-                    bool success = await SignInAsync(loginCredential);
+                    bool success = await SignInAsync(credentials[0]);
                     return success;
                 }
             } catch { }
@@ -169,7 +165,7 @@ namespace FluentStore.SDK.Users
             if (_passwordVaultService != null)
             {
                 string userName = userUrn.GetContent<NamespaceSpecificString>().UnEscapedValue;
-                credential = _passwordVaultService.FindAllByResource(userUrn.NamespaceIdentifier)
+                credential = GetAllCredentials(userUrn.NamespaceIdentifier)
                     .FirstOrDefault(c => c.UserName == userName);
             }
 
@@ -192,6 +188,48 @@ namespace FluentStore.SDK.Users
         {
             credential = GetCredential(userUrn);
             return credential != null;
+        }
+
+        /// <summary>
+        /// Retrieves all credentials in the password vault with the
+        /// specified namespace.
+        /// </summary>
+        /// <param name="ns">The namespace to look up.</param>
+        /// <returns>A list of matching <see cref="CredentialBase"/>s.</returns>
+        public virtual IList<CredentialBase> GetAllCredentials(string ns)
+        {
+            return _passwordVaultService.FindAllByResource(GetAuthProtocolUrl(ns));
+        }
+
+        /// <summary>
+        /// Attempts to retrieve all credentials in the password vault with the
+        /// specified namespace.
+        /// </summary>
+        /// <param name="ns">
+        /// The namespace to look up.
+        /// </param>
+        /// <param name="credentials">
+        /// A list of matching <see cref="CredentialBase"/>s.
+        /// </param>
+        /// <returns>
+        /// <see langword="false"/> if no credentials are matched.
+        /// </returns>
+        /// <remarks>
+        /// If <see langword="true"/> is returned, then <paramref name="credentials"/> is
+        /// guarenteed to be not <see langword="null"/> and have at least one element.
+        /// </remarks>
+        public bool TryGetAllCredentials(string ns, [NotNullWhen(true)] out IList<CredentialBase> credentials)
+        {
+            try
+            {
+                credentials = GetAllCredentials(ns);
+                return credentials != null && credentials.Count > 0;
+            }
+            catch
+            {
+                credentials = null;
+                return false;
+            }
         }
 
         /// <summary>
