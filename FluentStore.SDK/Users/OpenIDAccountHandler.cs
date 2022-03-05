@@ -22,6 +22,7 @@ namespace FluentStore.SDK.Users
         protected abstract string Authority { get; }
         protected abstract string ClientId { get; }
         protected abstract string ClientSecret { get; }
+        protected abstract string SignUpUrl { get; }
 
         private OidcClient _client;
         private AuthorizeState _state;
@@ -135,7 +136,7 @@ namespace FluentStore.SDK.Users
             signUpButton.Clicked += async (sender, e) =>
             {
                 INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
-                await navService.OpenInBrowser("https://signup.live.com");
+                await navService.OpenInBrowser(SignUpUrl);
             };
 
             AbstractUICollection ui = new("SignUpCollection")

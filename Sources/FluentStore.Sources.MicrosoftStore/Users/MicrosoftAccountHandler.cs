@@ -24,6 +24,7 @@ namespace FluentStore.Sources.MicrosoftStore.Users
         protected override string Authority => "https://login.microsoftonline.com/common/v2.0";
         protected override string ClientId => Secrets.MSA_CLIENTID;
         protected override string ClientSecret => Secrets.MSA_CLIENTSECRET;
+        protected override string SignUpUrl => "https://signup.live.com";
 
         public MicrosoftAccountHandler()
         {
@@ -40,7 +41,6 @@ namespace FluentStore.Sources.MicrosoftStore.Users
                 Urn = new(NAMESPACE_MSACCOUNT, new RawNamespaceSpecificString("test")),
                 DisplayName = "Test Account",
                 Email = "bob@example.com",
-                Id = "test"
             };
         }
     }
