@@ -30,5 +30,10 @@ namespace FluentStore.Views.Auth
         {
             ViewModel.LoadAccountHandlers();
         }
+
+        private void Page_Unloaded(object sender, RoutedEventArgs e)
+        {
+            ViewModel.Unload();
+        }
     }
 }

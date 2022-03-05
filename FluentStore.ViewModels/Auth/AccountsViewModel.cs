@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using FluentStore.SDK.Users;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace FluentStore.ViewModels.Auth
 {
@@ -39,6 +40,14 @@ namespace FluentStore.ViewModels.Auth
                     SignedInAccountHandlers.Add(handler);
                 else
                     OtherAccountHandlers.Add(handler);
+            }
+        }
+
+        public void Unload()
+        {
+            foreach (var handler in SignedInAccountHandlers.Union(OtherAccountHandlers))
+            {
+                handler.PropertyChanged -= Handler_PropertyChanged;
             }
         }
 
