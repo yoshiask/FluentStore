@@ -88,7 +88,7 @@ namespace FluentStore.Services
                     case "auth":
                         if (isFirstInstance)
                         {
-                            result.Page = ResolveType("Auth.SignInView");
+                            result.Page = ResolveType("Auth.AccountsView");
                             result.Parameter = ptcl;
                         }
                         else
