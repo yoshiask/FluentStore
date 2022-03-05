@@ -1,6 +1,9 @@
-﻿using FluentStore.ViewModels.Auth;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.ViewModels.Auth;
+using FluentStore.ViewModels.Messages;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -25,6 +28,18 @@ namespace FluentStore.Views.Auth
         }
         public static readonly DependencyProperty ViewModelProperty = DependencyProperty.Register(nameof(ViewModel),
             typeof(AccountsViewModel), typeof(AccountsView), new PropertyMetadata(null));
+
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+
+            WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Accounts"));
+
+            if (e.Parameter is Flurl.Url authCallbackUrl)
+            {
+                await ViewModel.HandleAuthActivation(authCallbackUrl);
+            }
+        }
 
         private void Page_Loading(FrameworkElement sender, object args)
         {

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using FluentStore.SDK.Users;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FluentStore.ViewModels.Auth
 {
@@ -50,6 +51,8 @@ namespace FluentStore.ViewModels.Auth
                 handler.PropertyChanged -= Handler_PropertyChanged;
             }
         }
+
+        public Task HandleAuthActivation(Flurl.Url url) => _accSvc.RouteAuthActivation(url);
 
         private void Handler_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
