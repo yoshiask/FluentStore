@@ -224,14 +224,10 @@ namespace FluentStore.SDK.Users
         protected abstract AbstractUICollection CreateSignUpForm();
 
         /// <summary>
-        /// Populates <see cref="CurrentUser"/> after a successful sign-in.
+        /// Gets an updated <see cref="CurrentUser"/> after a successful sign-in.
         /// </summary>
         /// <remarks>
-        /// This method should only be called once: immediately after sign-in,
-        /// when <see cref="CurrentUser"/> is <see langword="null"/>. All
-        /// subsequest updates should be made via <see cref="CurrentUser"/>.
-        /// </remarks>
-        protected abstract Task PopulateCurrentUser();
+        protected abstract Task<Account> UpdateCurrentUser();
 
         /// <summary>
         /// Creates an empty credential for the <see cref="CurrentUser"/>.
@@ -254,6 +250,12 @@ namespace FluentStore.SDK.Users
         /// Casts <see cref="AccountHandlerBase.CurrentUser"/> to <typeparamref name="TAccount"/>.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TAccount GetCurrentUser() => (TAccount)CurrentUser;
+        public TAccount GetAccount() => (TAccount)CurrentUser;
+
+        /// <summary>
+        /// Casts <see cref="AccountHandlerBase.UpdateCurrentUser"/> to <typeparamref name="TAccount"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected async Task<TAccount> UpdateAccount() => (TAccount)await UpdateCurrentUser();
     }
 }

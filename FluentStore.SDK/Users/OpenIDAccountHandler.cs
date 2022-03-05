@@ -71,7 +71,7 @@ namespace FluentStore.SDK.Users
                     }
                 }
 
-                await PopulateCurrentUser();
+                CurrentUser = await UpdateAccount();
                 await OnSignInSuccess();
 
                 if (RefreshToken != null)
