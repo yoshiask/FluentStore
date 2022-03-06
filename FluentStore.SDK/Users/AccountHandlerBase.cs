@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
 using FluentStore.Services;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
@@ -65,6 +66,10 @@ namespace FluentStore.SDK.Users
             }
             set => _signInForm = value;
         }
+
+        // FIXME: Does this really belong in a model?
+        /// <inheritdoc cref="SignOutAsync"/>
+        public IAsyncRelayCommand SignOutCommand => new AsyncRelayCommand(SignOutAsync);
 
         /// <summary>
         /// If the user is not already signed in, attempt to silently sign in
