@@ -194,10 +194,10 @@ namespace FluentStore.ViewModels
             {
                 Package = await PackageService.GetPackageAsync(Package.Urn);
             }
-            catch (Flurl.Http.FlurlHttpException ex)
+            catch (SDK.Models.WebException ex)
             {
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
-                NavigationService.ShowHttpErrorPage(ex);
+                NavigationService.ShowHttpErrorPage(ex.StatusCode, ex.Message);
             }
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
