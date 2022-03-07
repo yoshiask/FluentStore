@@ -46,11 +46,12 @@
             <Grid x:Name="ExpanderGrid" x:Load="{x:Bind IsClickable, Mode=OneWay, Converter={StaticResource NotBoolConverter}}">
                 <muxc:Expander HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Expanding="Expander_Expanding" Collapsed="Expander_Collapsed">
                     <muxc:Expander.Header>
-                        <controls:SettingsDisplayControl Icon="{x:Bind Icon, Mode=OneWay}" 
+                        <controls:SettingsDisplayControl Icon="{x:Bind Icon, Mode=OneWay}"
                                                          Margin="0,16"
-                                                         AdditionalDescriptionContent="{x:Bind AdditionalDescriptionContent, Mode=OneWay}" 
-                                                         Title="{x:Bind Title, Mode=OneWay}" 
-                                                         Description="{x:Bind Description, Mode=OneWay}" 
+                                                         AdditionalDescriptionContent="{x:Bind AdditionalDescriptionContent, Mode=OneWay}"
+                                                         Title="{x:Bind Title, Mode=OneWay}"
+                                                         TitleTemplate="{x:Bind TitleTemplate, Mode=OneWay}"
+                                                         Description="{x:Bind Description, Mode=OneWay}"
                                                          SettingsActionableElement="{x:Bind SettingsActionableElement, Mode=OneWay}"/>
                     </muxc:Expander.Header>
 
@@ -65,6 +66,7 @@
                     <controls:SettingsDisplayControl Icon="{x:Bind Icon, Mode=OneWay}" 
                                                      AdditionalDescriptionContent="{x:Bind AdditionalDescriptionContent, Mode=OneWay}" 
                                                      Title="{x:Bind Title, Mode=OneWay}" 
+                                                     TitleTemplate="{x:Bind TitleTemplate, Mode=OneWay}"
                                                      Description="{x:Bind Description, Mode=OneWay}" 
                                                      SettingsActionableElement="{x:Bind SettingsActionableElement, Mode=OneWay}"/>
                 </Button>
@@ -76,6 +78,7 @@
                 <controls:SettingsDisplayControl Icon="{x:Bind Icon, Mode=OneWay}" 
                                                  AdditionalDescriptionContent="{x:Bind AdditionalDescriptionContent, Mode=OneWay}" 
                                                  Title="{x:Bind Title, Mode=OneWay}" 
+                                                 TitleTemplate="{x:Bind TitleTemplate, Mode=OneWay}"
                                                  Description="{x:Bind Description, Mode=OneWay}" 
                                                  SettingsActionableElement="{x:Bind SettingsActionableElement, Mode=OneWay}"/>
             </Grid>

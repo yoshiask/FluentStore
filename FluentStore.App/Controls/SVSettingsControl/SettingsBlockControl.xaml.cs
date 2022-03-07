@@ -25,13 +25,21 @@ namespace FluentStore.Controls
         public static readonly DependencyProperty AdditionalDescriptionContentProperty = DependencyProperty.Register(
               nameof(AdditionalDescriptionContent), typeof(FrameworkElement), typeof(SettingsBlockControl), new PropertyMetadata(null));
 
-        public string Title
+        public object Title
         {
-            get => (string)GetValue(TitleProperty);
+            get => (object)GetValue(TitleProperty);
             set => SetValue(TitleProperty, value);
         }
         public static readonly DependencyProperty TitleProperty = DependencyProperty.Register(
-              nameof(Title), typeof(string), typeof(SettingsBlockControl), new PropertyMetadata(null));
+              nameof(Title), typeof(object), typeof(SettingsBlockControl), new PropertyMetadata(null));
+
+        public DataTemplate TitleTemplate
+        {
+            get => (DataTemplate)GetValue(TitleTemplateProperty);
+            set => SetValue(TitleTemplateProperty, value);
+        }
+        public static readonly DependencyProperty TitleTemplateProperty = DependencyProperty.Register(
+              nameof(TitleTemplate), typeof(DataTemplate), typeof(SettingsBlockControl), new PropertyMetadata(null));
 
         public string Description
         {

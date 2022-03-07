@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:users="using:FluentStore.SDK.Users"
     xmlns:absuiControls="using:OwlCore.WinUI.AbstractUI.Controls"
-    xmlns:absuiThemes="using:OwlCore.WinUI.AbstractUI.Themes"
+    xmlns:absuiThemes="using:OwlCore.WinUI.AbstractUI.Themes" xmlns:controls="using:FluentStore.Controls"
     mc:Ignorable="d"
     NavigationCacheMode="Disabled"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
@@ -38,21 +38,23 @@
             <ItemsControl ItemsSource="{x:Bind ViewModel.SignedInAccountHandlers}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="users:AccountHandlerBase">
-                        <Expander HorizontalAlignment="Stretch">
-                            <Expander.Header>
+                        <controls:SettingsBlockControl>
+                            <controls:SettingsBlockControl.Title>
                                 <TextBlock FontWeight="SemiBold">
                                     <Run Text="{x:Bind DisplayName}"/>
                                     <Run Text="·"/>
                                     <Run Text="{x:Bind CurrentUser.DisplayName}" FontWeight="Normal"/>
                                 </TextBlock>
-                            </Expander.Header>
-
-                            <StackPanel Spacing="4">
+                            </controls:SettingsBlockControl.Title>
+                            <controls:SettingsBlockControl.SettingsActionableElement>
                                 <Button Content="Sign out" Command="{x:Bind SignOutCommand}" />
+                            </controls:SettingsBlockControl.SettingsActionableElement>
+                            <controls:SettingsBlockControl.ExpandableContent>
                                 <absuiControls:AbstractUICollectionPresenter ViewModel="{x:Bind CurrentUser.ManageAccountForm, Mode=OneWay, Converter={StaticResource AbstractUIModelToViewModelConverter}}"
-                                                                             HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"/>
-                            </StackPanel>
-                        </Expander>
+                                                                             HorizontalAlignment="Center"
+                                                                             Margin="12,0,12,12"/>
+                            </controls:SettingsBlockControl.ExpandableContent>
+                        </controls:SettingsBlockControl>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
