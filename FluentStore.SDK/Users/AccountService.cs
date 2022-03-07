@@ -1,6 +1,7 @@
 ﻿using Flurl;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -68,7 +69,7 @@ namespace FluentStore.SDK.Users
         /// <summary>
         /// Gets the handler registered for the given namespace.
         /// </summary>
-        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="NotSupportedException">When no package handler is registered for the namespace.</exception>
         /// <exception cref="InvalidOperationException"/>
         public AccountHandlerBase GetHandlerForNamespace(string ns)
         {
@@ -81,6 +82,53 @@ namespace FluentStore.SDK.Users
             {
                 throw new NotSupportedException($"No package handler is registered for the namespace \"{ns}\".");
             }
+        }
+
+        /// <summary>
+        /// Attempts to get an authenticated handler registered for the namespace.
+        /// </summary>
+        /// <param name="ns">The namespace to look up.</param>
+        /// <param name="handler">The registered handler.</param>
+        /// <returns>
+        /// <see langword="true"/> if the namespace is handled, and the associated
+        /// handler is logged in.
+        /// </returns>
+        public bool TryGetAuthenticatedHandlerForNamespace(string ns, [NotNullWhen(true)] out AccountHandlerBase handler)
+        {
+            if (NamespaceRegistry.TryGetValue(ns, out var handlerIdx))
+            {
+                handler = AccountHandlers.ElementAt(handlerIdx);
+                return handler.IsLoggedIn;
+            }
+            else
+            {
+                handler = null;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Attempts to get an authenticated handler of the specified type.
+        /// </summary>
+        /// <typeparam name="THandler">The handler type to get.</typeparam>
+        /// <param name="handler">The registered handler.</param>
+        /// <returns>
+        /// <see langword="true"/> if a handler with the specified type is
+        /// registered and logged in.
+        /// </returns>
+        public bool TryGetAuthenticatedHandler<THandler>([NotNullWhen(true)] out THandler handler) where THandler : AccountHandlerBase
+        {
+            foreach (AccountHandlerBase genericHandler in AccountHandlers)
+            {
+                if (genericHandler.IsLoggedIn && genericHandler is THandler tHandler)
+                {
+                    handler = tHandler;
+                    return true;
+                }
+            }
+
+            handler = null;
+            return false;
         }
     }
 }

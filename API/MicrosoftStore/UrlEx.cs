@@ -17,16 +17,21 @@ namespace Microsoft.Marketplace.Storefront.Contracts
                       .WithHeader("Accept-Language", culture.ToString());
         }
 
-        public static IFlurlRequest GetBase(this Url url, CultureInfo culture = null)
+        public static IFlurlRequest GetStorefrontBase(RequestOptions options = default)
         {
-            return url.SetMarketAndLocale(culture).SetQueryParam("appVersion", Constants.APP_VERSION);
-        }
+            IFlurlRequest baseRequest = new Url(Constants.STOREFRONT_API_HOST)
+                .AppendPathSegment("v" + options.Version.ToString("0.0", CultureInfo.GetCultureInfo("en-001")))
+                .SetMarketAndLocale(options.Culture)
+                .SetQueryParam("appVersion", Constants.APP_VERSION)
+                .SetQueryParam("deviceFamily", options.DeviceFamily)
+                .SetQueryParam("architecture", options.DeviceArchitecture);
 
-        public static IFlurlRequest GetStorefrontBase(CultureInfo culture = null, double version = 9.0)
-        {
-            return Constants.STOREFRONT_API_HOST
-                .AppendPathSegment("v" + version.ToString("0.0", CultureInfo.GetCultureInfo("en-001")))
-                .GetBase(culture);
+            if (options.Token != null)
+            {
+                baseRequest = baseRequest.WithOAuthBearerToken(options.Token);
+            }
+
+            return baseRequest;
         }
     }
 }

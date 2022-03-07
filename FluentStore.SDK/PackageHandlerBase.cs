@@ -1,7 +1,8 @@
-﻿using FluentStore.SDK.Images;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using FluentStore.SDK.Images;
+using FluentStore.SDK.Users;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,6 +10,8 @@ namespace FluentStore.SDK
 {
     public abstract class PackageHandlerBase : IEqualityComparer<PackageHandlerBase>
     {
+        protected AccountService AccSvc { get; } = Ioc.Default.GetService<AccountService>();
+
         /// <summary>
         /// A list of all namespaces this handler can handle.
         /// </summary>
