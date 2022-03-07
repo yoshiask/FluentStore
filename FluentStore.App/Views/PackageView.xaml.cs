@@ -25,6 +25,7 @@ using Windows.UI.Notifications;
 using SplitButton = Microsoft.UI.Xaml.Controls.SplitButton;
 using SplitButtonClickEventArgs = Microsoft.UI.Xaml.Controls.SplitButtonClickEventArgs;
 using FluentStore.SDK.Users;
+using FluentStore.SDK.Models;
 
 namespace FluentStore.Views
 {
@@ -71,10 +72,10 @@ namespace FluentStore.Views
                 {
                     ViewModel = new PackageViewModel(await PackageService.GetPackageAsync(urn));
                 }
-                catch (Flurl.Http.FlurlHttpException ex)
+                catch (WebException ex)
                 {
                     WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
-                    NavigationService.ShowHttpErrorPage(ex);
+                    NavigationService.ShowHttpErrorPage(ex.StatusCode, ex.Message);
                 }
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
             }
@@ -85,10 +86,10 @@ namespace FluentStore.Views
                 {
                     ViewModel = new PackageViewModel(await PackageService.GetPackageFromUrlAsync(url));
                 }
-                catch (Flurl.Http.FlurlHttpException ex)
+                catch (WebException ex)
                 {
                     WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
-                    NavigationService.ShowHttpErrorPage(ex);
+                    NavigationService.ShowHttpErrorPage(ex.StatusCode, ex.Message);
                 }
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
             }
