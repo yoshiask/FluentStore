@@ -14,7 +14,7 @@ namespace FluentStore.Sources.GitHub
     {
         // TODO: Users will need to sign in to avoid the rate limit issues
 
-        private static readonly GitHubClient client = new(new ProductHeaderValue("fluent-store"));
+        private static readonly GitHubClient _client = new(new ProductHeaderValue("fluent-store"), Users.CredentialStore.Current);
 
         public const string NAMESPACE_REPO = "gh-repo";
         public override HashSet<string> HandledNamespaces => new()
@@ -41,14 +41,14 @@ namespace FluentStore.Sources.GitHub
             var parts = packageUrn.GetContent<NamespaceSpecificString>().UnEscapedValue.Split(new[] { '/', '\\', ':'}, 2);
             string owner = parts[0];
             string name = parts[1];
-            var repo = await client.Repository.Get(owner, name);
+            var repo = await _client.Repository.Get(owner, name);
 
             return new GitHubPackage(repo) { Status = PackageStatus.Details };
         }
 
         public override async Task<PackageBase> GetPackageFromUrl(Url url)
         {
-            if (url.Host == "github.com" && url.PathSegments.Count > 2)
+            if (url.Host == "github.com" && url.PathSegments.Count >= 2)
             {
                 string owner = url.PathSegments[^2];
                 string name = url.PathSegments[^1];
@@ -75,7 +75,9 @@ namespace FluentStore.Sources.GitHub
 
         public static Task<IReadOnlyList<Release>> GetReleases(Repository repo)
         {
-            return client.Repository.Release.GetAll(repo.Id);
+            return _client.Repository.Release.GetAll(repo.Id);
         }
+
+        internal static GitHubClient GetClient() => _client;
     }
 }

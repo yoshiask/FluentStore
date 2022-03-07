@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Users;
 using FluentStore.Services;
 using Garfoot.Utilities.FluentUrn;
@@ -24,18 +25,12 @@ namespace FluentStore.Sources.MicrosoftStore.Users
 
         protected override AbstractUICollection CreateManageAccountForm()
         {
-            AbstractButton manageButton = new("manageButton", "Manage account", iconCode: "\uE8A7", type: AbstractButtonType.Confirm);
-            manageButton.Clicked += async (sender, e) =>
-            {
-                INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
-                await navService.OpenInBrowser("https://account.microsoft.com/profile");
-            };
-
-            AbstractUICollection ui = new("ManageCollection")
-            {
-                manageButton
-            };
-            return ui;
+            return AbstractUIHelper.CreateSingleButtonUI("ManageCollection", "ManageButton", "Manage account", "\uE8A7",
+                async (sender, e) =>
+                {
+                    INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
+                    await navService.OpenInBrowser("https://account.microsoft.com/profile");
+                });
         }
     }
 }

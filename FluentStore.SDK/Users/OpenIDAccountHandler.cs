@@ -7,6 +7,7 @@ using Flurl;
 using IdentityModel.OidcClient;
 using System.Security.Claims;
 using System;
+using FluentStore.SDK.Helpers;
 
 namespace FluentStore.SDK.Users
 {
@@ -112,38 +113,26 @@ namespace FluentStore.SDK.Users
 
         protected override AbstractUICollection CreateSignInForm()
         {
-            AbstractButton signInButton = new("SignInButton", "Sign in with browser", iconCode: "\uE8A7", type: AbstractButtonType.Confirm);
-            signInButton.Clicked += async (sender, e) =>
-            {
-                // Generate start URL, state, nonce, code challenge
-                RefreshClient();
-                _state = await _client.PrepareLoginAsync();
+            return AbstractUIHelper.CreateSingleButtonUI("SignInCollection", "SignInButton", "Sign in with browser", "\uE8A7",
+                async (sender, e) =>
+                {
+                    // Generate start URL, state, nonce, code challenge
+                    RefreshClient();
+                    _state = await _client.PrepareLoginAsync();
 
-                INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
-                await navService.OpenInBrowser(_state.StartUrl);
-            };
-
-            AbstractUICollection ui = new("SignInCollection")
-            {
-                signInButton,
-            };
-            return ui;
+                    INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
+                    await navService.OpenInBrowser(_state.StartUrl);
+                });
         }
 
         protected override AbstractUICollection CreateSignUpForm()
         {
-            AbstractButton signUpButton = new("SignUpButton", "Sign up with browser", iconCode: "\uE8A7", type: AbstractButtonType.Confirm);
-            signUpButton.Clicked += async (sender, e) =>
-            {
-                INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
-                await navService.OpenInBrowser(SignUpUrl);
-            };
-
-            AbstractUICollection ui = new("SignUpCollection")
-            {
-                signUpButton
-            };
-            return ui;
+            return AbstractUIHelper.CreateSingleButtonUI("SignUpCollection", "SignUpButton", "Sign up with browser", "\uE8A7",
+                async (sender, e) =>
+                {
+                    INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
+                    await navService.OpenInBrowser(SignUpUrl);
+                });
         }
 
         public override async Task HandleAuthActivation(Url url)
@@ -158,6 +147,8 @@ namespace FluentStore.SDK.Users
             return result.Claims;
         }
 
+        protected virtual ProviderInformation GetProviderInformation() => null;
+
         private void RefreshClient()
         {
             OidcClientOptions options = new()
@@ -167,8 +158,16 @@ namespace FluentStore.SDK.Users
                 RedirectUri = GetAuthProtocolUrl(null),
                 Scope = OPENID_SCOPES,
             };
+            
             if (Scopes != null)
                 options.Scope += " " + string.Join(' ', Scopes);
+
+            if (ClientSecret != null)
+                options.ClientSecret = ClientSecret;
+
+            var providerInfo = GetProviderInformation();
+            if (providerInfo != null)
+                options.ProviderInformation = providerInfo;
 
             options.Policy.Discovery.ValidateIssuerName = false;
             options.Policy.Discovery.ValidateEndpoints = false;

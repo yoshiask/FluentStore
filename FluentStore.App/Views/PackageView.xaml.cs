@@ -77,6 +77,11 @@ namespace FluentStore.Views
                     WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
                     NavigationService.ShowHttpErrorPage(ex.StatusCode, ex.Message);
                 }
+                catch (Exception ex)
+                {
+                    WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+                    NavigationService.ShowHttpErrorPage(418, ex.Message);
+                }
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
             }
             else if (param is Flurl.Url url)
@@ -90,6 +95,11 @@ namespace FluentStore.Views
                 {
                     WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
                     NavigationService.ShowHttpErrorPage(ex.StatusCode, ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+                    NavigationService.ShowHttpErrorPage(418, ex.Message);
                 }
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
             }
