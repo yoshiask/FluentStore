@@ -69,7 +69,7 @@ namespace FluentStore
             _singleInstanceApp.Launch(args.Arguments);
         }
 
-        private void OnSingleInstanceLaunched(object? sender, SingleInstanceLaunchEventArgs e)
+        private async void OnSingleInstanceLaunched(object? sender, SingleInstanceLaunchEventArgs e)
         {
             var log = Ioc.Default.GetService<LoggerService>();
             var navService = Ioc.Default.GetRequiredService<INavigationService>();
@@ -101,7 +101,7 @@ namespace FluentStore
                 log?.Log($"Finished loading plugins");
 
                 // Attempt to silently sign into any saved accounts
-                accSvc.TrySlientSignInAsync().ConfigureAwait(true);
+                await accSvc.TrySlientSignInAsync();
 
                 Window = new()
                 {
