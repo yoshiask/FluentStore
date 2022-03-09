@@ -19,16 +19,20 @@ Several sources are currently supported, with several more planned for the futur
 | ☑       | Available in next release
 | ❌      | Not available at this time
 
-| Source Name       | Search | Download | Install
----                 | :---:  | :---:    | :---:
-| Microsoft Store   | ✅     | ✅      | ✅  |
-| WinGet            | ✅     | ✅      | ✅  |
-| GitHub Releases   | ❌     | ☑       | ☑   |
-| Chocolatey        | ❌     | ❌      | ❌  |
-| UWP Community     | ❌     | ✅¹     | ✅¹ |
+| Source Name       | Search | Download | Install | Collections
+---                 | :---:  | :---:    | :---:   | :---:
+| Microsoft Store   | ✅     | ✅      | ✅      | ☑
+| WinGet            | ✅     | ✅      | ✅      | ❌
+| GitHub Releases   | ❌     | ☑       | ☑       | ❌
+| Chocolatey        | ❌     | ❌      | ❌      | ❌
+| UWP Community     | ❌     | ✅¹     | ✅¹     | ☑
+| Fluent Store      | ❌     | ✅²     | ✅²     | ☑
 
-1.  UWP Community projects do not have direct download links. Fluent Store will attempt to follow the link
-    and download/install it if recognized. If not, the link is opened in the default browser.
+1.  UWP Community projects have 'download' links, but they do not go directly to an installer.
+    Fluent Store will attempt to follow the link and download/install it if recognized. If not, the link is opened in the default browser.
+
+2.  Fluent Store Social only supports collections, or lists of apps from other sources. It doesn't host any packages.
+    Collections can be installed by ensuring that the appropriate package source is enabled.
 
 ## Where to download?
 - [GitHub Releases](https://github.com/yoshiask/FluentStore/releases)
