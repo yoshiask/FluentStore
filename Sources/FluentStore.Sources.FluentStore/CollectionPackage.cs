@@ -9,7 +9,7 @@ using FluentStore.SDK;
 
 namespace FluentStore.Sources.FluentStore
 {
-    public class CollectionPackage : GenericListPackage<Collection>
+    public class CollectionPackage : GenericPackageCollection<Collection>
     {
         public CollectionPackage(Collection collection = null, IEnumerable<PackageBase> items = null)
         {

@@ -11,10 +11,10 @@ namespace FluentStore.SDK.Packages
 {
     /// <summary>
     /// A base class for packages that represent a list of pacakges.
-    /// For example, <see cref="CollectionPackage"/> inherits this class
-    /// and <see cref="UwpCommunityPackage"/> uses it to represent Launch events.
+    /// For example, Fluent Store's <c>CollectionPackage</c> inherits this class
+    /// and <c>UwpCommunityPackage</c> uses it to represent Launch events.
     /// </summary>
-    public class GenericListPackage<TModel> : PackageBase<TModel>
+    public class GenericPackageCollection<TModel> : PackageBase<TModel>
     {
         public override Task<ImageBase> CacheAppIcon()
         {

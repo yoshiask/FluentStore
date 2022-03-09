@@ -152,7 +152,7 @@ namespace FluentStore.Views
                         };
                         foreach (FluentStoreAPI.Models.Collection collection in collections)
                         {
-                            if (ViewModel.Package is SDK.Packages.GenericListPackage<FluentStoreAPI.Models.Collection> curCollection
+                            if (ViewModel.Package is SDK.Packages.GenericPackageCollection<FluentStoreAPI.Models.Collection> curCollection
                                 && curCollection.Model.Id == collection.Id)
                             {
                                 // ABORT! Do not add to list of options. Attempting to view a collection that contains
