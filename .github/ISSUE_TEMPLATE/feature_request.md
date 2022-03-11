@@ -1,20 +1,27 @@
----
-name: Feature request
-about: Suggest an idea for this project
-title: ''
-labels: enhancement
-assignees: ''
-
----
-
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
-
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
-
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
-
-**Additional context**
-Add any other context or screenshots about the feature request here.
+name: Feature Request
+description: Suggest an idea for this project
+labels: [enhancement]
+body:
+  - type: checkboxes
+    attributes:
+      label: Before you start...
+      options
+        - label: Have you checked if similar request have already been reported?
+          required: true
+  - type: textarea
+    attributes:
+      label: Description
+      description: A clear and concise description of what your idea is. Include things like possible use cases, drawbacks, etc.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Alternative solutions
+      description: Describe more ways this problem/idea could be solved/implemented.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Relevant Assets
+      description: |
+        A list of assets (screenshots, mockups) relevant to this feature request.
