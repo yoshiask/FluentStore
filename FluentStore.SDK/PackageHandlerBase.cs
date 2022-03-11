@@ -10,6 +10,7 @@ namespace FluentStore.SDK
 {
     public abstract class PackageHandlerBase : IEqualityComparer<PackageHandlerBase>
     {
+        private static readonly List<PackageBase> _emptyPackageList = new(0);
         protected AccountService AccSvc { get; } = Ioc.Default.GetService<AccountService>();
 
         /// <summary>
@@ -78,6 +79,15 @@ namespace FluentStore.SDK
         /// Gets the URL of the package on the source website.
         /// </summary>
         public abstract Url GetUrlFromPackage(PackageBase package);
+
+        /// <summary>
+        /// Gets a list of package collections.
+        /// </summary>
+        /// <remarks>
+        /// Typically, this method will return a list of <see cref="Packages.GenericPackageCollection{TModel}"/>,
+        /// but this is not a requirement and technically any package is allowed.
+        /// </remarks>
+        public virtual Task<List<PackageBase>> GetCollectionsAsync() => Task.FromResult(_emptyPackageList);
 
         public bool Equals(PackageHandlerBase x, PackageHandlerBase y) => x.GetType() == y.GetType();
 

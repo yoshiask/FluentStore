@@ -13,6 +13,7 @@ using FluentStore.SDK.Messages;
 using FluentStore.SDK.Models;
 using FluentStore.SDK.Attributes;
 using FluentStore.SDK;
+using Flurl.Util;
 
 namespace FluentStore.Sources.UwpCommunity
 {
@@ -70,7 +71,7 @@ namespace FluentStore.Sources.UwpCommunity
                 foreach (dynamic tag in project.tags)
                     Tags.Add(tag.name);
 
-            Urn = Urn.Parse($"urn:{UwpCommunityHandler.NAMESPACE_PROJECT}:{ProjectId}");
+            Urn = new(UwpCommunityHandler.NAMESPACE_PROJECT, new RawNamespaceSpecificString(ProjectId.ToInvariantString()));
         }
 
         public void UpdateWithImages(IEnumerable<string> images)

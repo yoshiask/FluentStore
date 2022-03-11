@@ -100,7 +100,7 @@ namespace FluentStore.Sources.UwpCommunity
 
             GenericPackageCollection<dynamic> listPackage = new()
             {
-                Urn = Urn.Parse("urn:" + NAMESPACE_LAUNCH + ":" + year),
+                Urn = new(NAMESPACE_LAUNCH, new RawNamespaceSpecificString(year)),
                 Title = "Launch " + year,
                 Description = "An annual event hosted by the UWP Community, where developers, beta testers, translators, and users work together to Launch their new and refreshed apps.",
                 DeveloperName = "UWP Community",
@@ -119,10 +119,10 @@ namespace FluentStore.Sources.UwpCommunity
 
             // Use showcase site when available
             if (year == "2021")
-                listPackage.Website = new(listPackage.Website.Uri.ToString() + "/2021", "UWP Community Launch showcase");
+                listPackage.Website = new(listPackage.Website.Uri.AppendPathSegment("2021").ToUri(), "UWP Community Launch showcase");
 
             // Set hero image
-            string heroImageUrl = "https://uwpcommunity.com/launch/2021/package/Assets/Banner.png";
+            string heroImageUrl = $"https://uwpcommunity.com/launch/{year}/package/Assets/Banner.png";
             if (year == "2020")
                 heroImageUrl = "https://uwpcommunity.com/assets/img/LaunchAppsHero.jpg";
             else if (year == "2019")
@@ -137,11 +137,6 @@ namespace FluentStore.Sources.UwpCommunity
             {
                 UwpCommunityPackage package = new(project);
                 package.Status = PackageStatus.BasicDetails;
-
-                var images = await BASE_URL.AppendPathSegments("projects", "images")
-                    .SetQueryParam("projectId", package.ProjectId).GetJsonAsync<List<string>>();
-                package.UpdateWithImages(images);
-
                 listPackage.Items.Add(package);
             }
 
