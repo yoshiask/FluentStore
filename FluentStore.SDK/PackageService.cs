@@ -178,6 +178,17 @@ namespace FluentStore.SDK
             return GetHandlerForNamespace(ns).GetUrlFromPackage(package);
         }
 
+        /// <summary>
+        /// Gets a list of package collections.
+        /// </summary>
+        /// <remarks>
+        /// Typically, this method will return a list of <see cref="Packages.GenericPackageCollection{TModel}"/>,
+        /// but this is not a requirement and technically any package is allowed.
+        /// </remarks>
+        public async Task<List<PackageBase>> GetCollectionsAsync()
+        {
+
+        }
 
         /// <summary>
         /// Gets the handler registered for the given namespace.

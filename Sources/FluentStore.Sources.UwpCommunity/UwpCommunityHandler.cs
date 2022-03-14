@@ -31,17 +31,14 @@ namespace FluentStore.Sources.UwpCommunity
 
         public override async Task<List<PackageBase>> GetFeaturedPackagesAsync()
         {
-            var now = DateTime.UtcNow;
-            int launchYear = now.Year;
-            if (now.Month < 9)
-                launchYear--;
-            var projects = (await BASE_URL.AppendPathSegments("projects", "launch", launchYear.ToString())
+            string launchYearStr = GetLastLaunchYear().ToString();
+            var projects = (await BASE_URL.AppendPathSegments("projects", "launch", launchYearStr)
                 .GetJsonAsync()).projects;
 
-            var packages = new List<PackageBase>(projects.Count);
+            List<PackageBase> packages = new(projects.Count);
             foreach (dynamic project in projects)
             {
-                var package = new UwpCommunityPackage(project)
+                UwpCommunityPackage package = new(project)
                 {
                     Status = PackageStatus.BasicDetails
                 };
@@ -156,6 +153,20 @@ namespace FluentStore.Sources.UwpCommunity
             return new List<PackageBase>(0);
         }
 
+        public override async Task<List<PackageBase>> GetCollectionsAsync()
+        {
+            int lastLaunchYear = GetLastLaunchYear();
+            List<PackageBase> collections = new(lastLaunchYear - 2019);
+
+            for (int launchYear = 2019; launchYear <= lastLaunchYear; launchYear++)
+            {
+                var launchCollection = await GetLaunchCollection(launchYear.ToString());
+                collections.Add(launchCollection);
+            }
+
+            return collections;
+        }
+
         public override ImageBase GetImage() => GetImageStatic();
         public static ImageBase GetImageStatic()
         {
@@ -198,6 +209,15 @@ namespace FluentStore.Sources.UwpCommunity
             if (package is UwpCommunityPackage uwpcPackage && uwpcPackage.HasWebsite)
                 return uwpcPackage.Website;
             return "fluentstore://package/" + package.Urn.ToString();
+        }
+
+        private static int GetLastLaunchYear()
+        {
+            var now = DateTime.UtcNow;
+            int launchYear = now.Year;
+            if (now.Month < 9)
+                launchYear--;
+            return launchYear;
         }
     }
 }
