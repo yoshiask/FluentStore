@@ -5,9 +5,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.3.0" CopyLocal="false" Publish="false" ExcludeAssets="runtime" />
-        <PackageReference Include="Microsoft.Build.Framework" Version="16.3.0" CopyLocal="false" Publish="false" ExcludeAssets="runtime" />
-        <PackageReference Include="System.Collections.Immutable" Version="1.6.0" CopyLocal="false" Publish="false" />
+        <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.1.0" CopyLocal="false" Publish="false" ExcludeAssets="runtime" />
+        <PackageReference Include="Microsoft.Build.Framework" Version="17.1.0" CopyLocal="false" Publish="false" ExcludeAssets="runtime" />
+        <PackageReference Include="System.Collections.Immutable" Version="6.0.0" CopyLocal="false" Publish="false" />
         <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" CopyLocal="false" Publish="false" />
     </ItemGroup>
 
