@@ -1,7 +1,7 @@
 ﻿using OwlCore.AbstractUI.Models;
 using System;
 
-namespace FluentStore.SDK.Helpers
+namespace FluentStore.SDK.AbstractUI
 {
     public static class AbstractUIHelper
     {

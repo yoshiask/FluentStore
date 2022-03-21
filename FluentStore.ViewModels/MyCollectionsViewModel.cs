@@ -119,11 +119,10 @@ namespace FluentStore.ViewModels
             Collections.Clear();
             try
             {
-                System.Collections.Generic.IEnumerable<Collection> collections = null;// await FSApi.GetCollectionsAsync(UserService.CurrentUser.LocalID);
-                foreach (Collection collection in collections)
+                var collections = await PackageService.GetCollectionsAsync();
+                foreach (PackageBase collection in collections)
                 {
-                    //CollectionPackage package = new(collection);
-                    //Collections.Add(new PackageViewModel(package));
+                    Collections.Add(new PackageViewModel(collection));
                 }
             }
             catch (Flurl.Http.FlurlHttpException ex)

@@ -7,7 +7,7 @@ using Flurl;
 using IdentityModel.OidcClient;
 using System.Security.Claims;
 using System;
-using FluentStore.SDK.Helpers;
+using FluentStore.SDK.AbstractUI;
 
 namespace FluentStore.SDK.Users
 {

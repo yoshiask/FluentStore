@@ -5,10 +5,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="..\FluentStore.App\Assets\*.png">
-			<Link>Assets\Packaging\%(Filename)%(Extension)</Link>
+		<Content Include="..\FluentStore.App\Assets\**\*.png">
+			<Link>Assets\Packaging\%(RecursiveDir)%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>true</CopyToOutputDirectory>
 		</Content>
-		<Folder Include="Assets\" />
 
 		<AppxManifest Include="Package.appxmanifest">
 			<SubType>Designer</SubType>

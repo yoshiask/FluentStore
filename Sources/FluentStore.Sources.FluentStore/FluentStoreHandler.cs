@@ -7,6 +7,7 @@ using FSAPI = FluentStoreAPI.FluentStoreAPI;
 using FluentStore.SDK;
 using Microsoft.Extensions.DependencyInjection;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using System.Linq;
 
 namespace FluentStore.Sources.FluentStore
 {
@@ -65,6 +66,12 @@ namespace FluentStore.Sources.FluentStore
         {
             // TODO
             return new List<PackageBase>();
+        }
+
+        public override async Task<List<PackageBase>> GetCollectionsAsync()
+        {
+            var collections = await FSApi.GetCollectionsAsync("2F2UYoF8HWrNOyzRaGe4EWONiEL003");
+            return collections.Select(c => (PackageBase)new CollectionPackage(c)).ToList();
         }
 
         public override ImageBase GetImage() => GetImageStatic();

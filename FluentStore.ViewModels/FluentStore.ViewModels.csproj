@@ -20,7 +20,6 @@
     <ItemGroup>
         <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj" />
         <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
-        <ProjectReference Include="..\API\FluentStoreAPI\FluentStoreAPI.csproj" />
         <ProjectReference Include="..\API\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
     </ItemGroup>
 

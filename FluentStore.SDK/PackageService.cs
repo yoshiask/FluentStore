@@ -187,7 +187,22 @@ namespace FluentStore.SDK
         /// </remarks>
         public async Task<List<PackageBase>> GetCollectionsAsync()
         {
+            var packages = new List<PackageBase>();
+            foreach (var handler in PackageHandlers.Values)
+            {
+                if (!handler.IsEnabled) continue;
 
+                List<PackageBase> results;
+                try
+                {
+                    results = await handler.GetCollectionsAsync();
+                }
+                catch { continue; }
+
+                packages.AddRange(results);
+            }
+
+            return packages;
         }
 
         /// <summary>

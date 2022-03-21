@@ -15,7 +15,7 @@
 
         <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
         <PackageCertificateThumbprint>CA050EFFDAB5866005A7649E1493764E2205F3DB</PackageCertificateThumbprint>
-        <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
+        <AppxPackageSigningEnabled>False</AppxPackageSigningEnabled>
         <GenerateTemporaryStoreCertificate>False</GenerateTemporaryStoreCertificate>
         <GenerateAppInstallerFile>True</GenerateAppInstallerFile>
         <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
