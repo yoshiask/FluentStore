@@ -1,12 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using FluentStore.SDK.AbstractUI;
 using FluentStore.SDK.Users;
 using FluentStore.Services;
 using Flurl;
 using OwlCore.AbstractUI.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using FSAPI = FluentStoreAPI.FluentStoreAPI;
 
@@ -73,6 +72,11 @@ namespace FluentStore.Sources.FluentStore.Users
             return IsLoggedIn;
         }
 
+        protected async Task<bool> SignInAsync(FluentStoreAPI.Models.Firebase.UserSignInResponse signInResponse)
+        {
+            return await SignInAsync(signInResponse.IDToken, signInResponse.RefreshToken);
+        }
+
         public override Task SignOutAsync()
         {
             RemoveCredential(FSApi.RefreshToken);
@@ -86,25 +90,8 @@ namespace FluentStore.Sources.FluentStore.Users
 
         protected override AbstractUICollection CreateSignInForm()
         {
-            AbstractTextBox emailBox = new("EmailBox", string.Empty, "Email");
-            AbstractTextBox passwordBox = new("PasswordBox", string.Empty, "Password");
-
-            AbstractButton button = new("SignInButton", "Sign in", type: AbstractButtonType.Confirm);
-            button.Clicked += async (sender, e) =>
-            {
-                string email = emailBox.Value;
-                string password = passwordBox.Value;
-
-
-            };
-
-            AbstractUICollection ui = new("SignInCollection")
-            {
-                emailBox,
-                passwordBox,
-                button,
-            };
-            return ui;
+            EmailPasswordForm form = new("SignInForm", OnSignInFormSubmitted);
+            return form;
         }
 
         protected override AbstractUICollection CreateSignUpForm()
@@ -112,9 +99,24 @@ namespace FluentStore.Sources.FluentStore.Users
             throw new NotImplementedException();
         }
 
-        protected override Task<Account> UpdateCurrentUser()
+        protected override async Task<Account> UpdateCurrentUser()
         {
-            throw new NotImplementedException();
+            var user = (await FSApi.GetCurrentUserDataAsync())[0];
+            var profile = await FSApi.GetUserProfileAsync(user.LocalID);
+
+            return new FluentStoreAccount(user, profile);
+        }
+
+        private async void OnSignInFormSubmitted(object sender, EventArgs e)
+        {
+            if (sender is not EmailPasswordForm epForm)
+                return;
+
+            string email = epForm.GetEmail();
+            string password = epForm.GetPassword();
+
+            var response = await FSApi.SignInAsync(email, password);
+            await SignInAsync(response);
         }
     }
 }

@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using FSAPI = FluentStoreAPI.FluentStoreAPI;
 using FluentStore.SDK;
-using Microsoft.Extensions.DependencyInjection;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Linq;
+using FluentStore.SDK.Users;
 
 namespace FluentStore.Sources.FluentStore
 {
@@ -15,6 +15,7 @@ namespace FluentStore.Sources.FluentStore
     {
         private readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
+        private readonly AccountService AccountService = Ioc.Default.GetRequiredService<AccountService>();
 
         public const string NAMESPACE_COLLECTION = "fluent-store-collection";
         public override HashSet<string> HandledNamespaces => new()
@@ -70,7 +71,8 @@ namespace FluentStore.Sources.FluentStore
 
         public override async Task<List<PackageBase>> GetCollectionsAsync()
         {
-            var collections = await FSApi.GetCollectionsAsync("2F2UYoF8HWrNOyzRaGe4EWONiEL003");
+            var accHandler = AccountService.GetHandlerForNamespace<Users.FluentStoreAccountHandler>();
+            var collections = await FSApi.GetCollectionsAsync(accHandler.CurrentUser.Id);
             return collections.Select(c => (PackageBase)new CollectionPackage(c)).ToList();
         }
 

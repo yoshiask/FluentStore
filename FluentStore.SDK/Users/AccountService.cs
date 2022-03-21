@@ -85,6 +85,37 @@ namespace FluentStore.SDK.Users
         }
 
         /// <summary>
+        /// Gets the handler of type <typeparamref name="THandler"/> registered for the given namespace.
+        /// </summary>
+        /// <exception cref="NotSupportedException">When no package handler is registered for the namespace.</exception>
+        /// <exception cref="InvalidOperationException"/>
+        public THandler GetHandlerForNamespace<THandler>(string ns) where THandler : AccountHandlerBase
+        {
+            if (NamespaceRegistry.TryGetValue(ns, out var handlerIdx))
+            {
+                var handler = AccountHandlers.ElementAt(handlerIdx);
+                if (handler is THandler tHandler)
+                    return tHandler;
+            }
+
+            throw new NotSupportedException($"No package handler is registered for the namespace \"{ns}\".");
+        }
+
+        /// <summary>
+        /// Gets the first registered handler of type <typeparamref name="THandler"/>
+        /// </summary>
+        /// <exception cref="NotSupportedException">When no package handler is registered for the namespace.</exception>
+        /// <exception cref="InvalidOperationException"/>
+        public THandler GetHandlerForNamespace<THandler>() where THandler : AccountHandlerBase
+        {
+            var tHandler = AccountHandlers.OfType<THandler>().FirstOrDefault();
+            if (tHandler != null)
+                return tHandler;
+
+            throw new NotSupportedException($"No package handler is registered for the type \"{typeof(THandler)}\".");
+        }
+
+        /// <summary>
         /// Attempts to get an authenticated handler registered for the namespace.
         /// </summary>
         /// <param name="ns">The namespace to look up.</param>

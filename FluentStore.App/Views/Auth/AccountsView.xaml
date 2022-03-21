@@ -51,7 +51,7 @@
                             </controls:SettingsBlockControl.SettingsActionableElement>
                             <controls:SettingsBlockControl.ExpandableContent>
                                 <absuiControls:AbstractUICollectionPresenter ViewModel="{x:Bind CurrentUser.ManageAccountForm, Mode=OneWay, Converter={StaticResource AbstractUIModelToViewModelConverter}}"
-                                                                             HorizontalAlignment="Center"
+                                                                             HorizontalAlignment="Stretch"
                                                                              Margin="12,0,12,12"/>
                             </controls:SettingsBlockControl.ExpandableContent>
                         </controls:SettingsBlockControl>
