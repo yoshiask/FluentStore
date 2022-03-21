@@ -37,9 +37,9 @@ namespace FluentStore.Services
                 {
                     PageType = typeof(MyCollectionsView),
                     Icon = new SymbolIcon(Symbol.List),
-                    Title = "My Collections",
-                    Path = "mycollections",
-                    Tooltip = "Manage your app collections",
+                    Title = "Collections",
+                    Path = "collections",
+                    Tooltip = "Explore and create app collections",
                     RequiresSignIn = true
                 },
 

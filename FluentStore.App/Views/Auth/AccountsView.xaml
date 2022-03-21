@@ -66,7 +66,7 @@
             <ItemsControl ItemsSource="{x:Bind ViewModel.OtherAccountHandlers}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="users:AccountHandlerBase">
-                        <Expander Header="{x:Bind DisplayName}" HorizontalAlignment="Stretch">
+                        <Expander Header="{x:Bind DisplayName}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                             <absuiControls:AbstractUICollectionPresenter ViewModel="{x:Bind SignInForm, Mode=OneWay, Converter={StaticResource AbstractUIModelToViewModelConverter}}"
                                                                          HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"/>
                         </Expander>

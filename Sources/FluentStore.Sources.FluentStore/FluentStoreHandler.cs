@@ -71,7 +71,11 @@ namespace FluentStore.Sources.FluentStore
 
         public override async Task<List<PackageBase>> GetCollectionsAsync()
         {
+            // Get current user
             var accHandler = AccountService.GetHandlerForNamespace<Users.FluentStoreAccountHandler>();
+            if (!accHandler.IsLoggedIn)
+                return _emptyPackageList;
+
             var collections = await FSApi.GetCollectionsAsync(accHandler.CurrentUser.Id);
             return collections.Select(c => (PackageBase)new CollectionPackage(c)).ToList();
         }

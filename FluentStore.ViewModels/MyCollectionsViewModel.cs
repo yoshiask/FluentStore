@@ -23,13 +23,11 @@ namespace FluentStore.ViewModels
             ViewCollectionCommand = new AsyncRelayCommand(ViewCollectionAsync);
             LoadCollectionsCommand = new AsyncRelayCommand(LoadCollectionsAsync);
 
-            WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("My Collections"));
+            WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Collections"));
         }
 
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
-        private readonly AccountService UserService = Ioc.Default.GetRequiredService<AccountService>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
-        private readonly FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
 
         private ObservableCollection<PackageViewModel> _Collections = new();
         public ObservableCollection<PackageViewModel> Collections
