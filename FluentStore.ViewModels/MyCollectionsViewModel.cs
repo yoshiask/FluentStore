@@ -1,18 +1,14 @@
 ﻿using FluentStore.SDK;
-using FluentStore.SDK.Packages;
 using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
 using FluentStoreAPI.Models;
-using Garfoot.Utilities.FluentUrn;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
-using FluentStore.SDK.Users;
 
 namespace FluentStore.ViewModels
 {
@@ -29,39 +25,40 @@ namespace FluentStore.ViewModels
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
-        private ObservableCollection<PackageViewModel> _Collections = new();
+        private ObservableCollection<PackageViewModel> _collections = new();
+        private PackageViewModel _selectedCollection;
+        private IAsyncRelayCommand _viewCollectionCommand;
+        private IAsyncRelayCommand _loadCollectionsCommand;
+        private bool _showNewCollectionTip = false;
+
         public ObservableCollection<PackageViewModel> Collections
         {
-            get => _Collections;
-            set => SetProperty(ref _Collections, value);
+            get => _collections;
+            set => SetProperty(ref _collections, value);
         }
-
-        private PackageViewModel _SelectedCollection;
+        
         public PackageViewModel SelectedCollection
         {
-            get => _SelectedCollection;
-            set => SetProperty(ref _SelectedCollection, value);
+            get => _selectedCollection;
+            set => SetProperty(ref _selectedCollection, value);
         }
 
-        private IAsyncRelayCommand _ViewCollectionCommand;
         public IAsyncRelayCommand ViewCollectionCommand
         {
-            get => _ViewCollectionCommand;
-            set => SetProperty(ref _ViewCollectionCommand, value);
+            get => _viewCollectionCommand;
+            set => SetProperty(ref _viewCollectionCommand, value);
         }
 
-        private IAsyncRelayCommand _LoadCollectionsCommand;
         public IAsyncRelayCommand LoadCollectionsCommand
         {
-            get => _LoadCollectionsCommand;
-            set => SetProperty(ref _LoadCollectionsCommand, value);
+            get => _loadCollectionsCommand;
+            set => SetProperty(ref _loadCollectionsCommand, value);
         }
 
-        private bool _ShowNewCollectionTip = false;
         public bool ShowNewCollectionTip
         {
-            get => _ShowNewCollectionTip;
-            set => SetProperty(ref _ShowNewCollectionTip, value);
+            get => _showNewCollectionTip;
+            set => SetProperty(ref _showNewCollectionTip, value);
         }
 
         public async Task ViewCollectionAsync()
@@ -104,8 +101,7 @@ namespace FluentStore.ViewModels
             }
             catch (Flurl.Http.FlurlHttpException ex)
             {
-                // TODO: Show error in InfoBar
-                NavService.ShowHttpErrorPage(ex);
+                WeakReferenceMessenger.Default.Send(new SDK.Messages.ErrorMessage(ex, newCollection));
             }
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
@@ -125,8 +121,7 @@ namespace FluentStore.ViewModels
             }
             catch (Flurl.Http.FlurlHttpException ex)
             {
-                Collections.Clear();
-                NavService.ShowHttpErrorPage(ex);
+                WeakReferenceMessenger.Default.Send(new SDK.Messages.ErrorMessage(ex));
             }
 
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
