@@ -11,6 +11,10 @@ namespace FluentStore.SDK.Packages
 {
     public class ModernPackage<TModel> : GenericPackage<TModel>
     {
+        public ModernPackage(PackageHandlerBase packageHandler) : base(packageHandler)
+        {
+        }
+
         public override bool Equals(PackageBase other)
         {
             if (other is ModernPackage<TModel> mpackage)

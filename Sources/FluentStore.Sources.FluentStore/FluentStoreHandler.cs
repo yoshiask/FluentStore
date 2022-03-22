@@ -36,7 +36,7 @@ namespace FluentStore.Sources.FluentStore
                 string collId = id[1];
 
                 var collection = await FSApi.GetCollectionAsync(userId, collId);
-                var collectionPack = new CollectionPackage(collection)
+                var collectionPack = new CollectionPackage(this, collection)
                 {
                     Status = PackageStatus.BasicDetails
                 };
@@ -77,7 +77,7 @@ namespace FluentStore.Sources.FluentStore
                 return _emptyPackageList;
 
             var collections = await FSApi.GetCollectionsAsync(accHandler.CurrentUser.Id);
-            return collections.Select(c => (PackageBase)new CollectionPackage(c) { Status = PackageStatus.BasicDetails }).ToList();
+            return collections.Select(c => (PackageBase)new CollectionPackage(this, c) { Status = PackageStatus.BasicDetails }).ToList();
         }
 
         public override ImageBase GetImage() => GetImageStatic();

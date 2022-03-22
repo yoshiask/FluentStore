@@ -32,7 +32,8 @@ namespace FluentStore.Sources.MicrosoftStore
             "app meets accessibility requiements, " +
             "making it easier for everyone to use.";
 
-        public MicrosoftStorePackage(CardModel card = null, ProductSummary summary = null, ProductDetails product = null)
+        public MicrosoftStorePackage(PackageHandlerBase packageHandler, CardModel card = null, ProductSummary summary = null, ProductDetails product = null)
+            : base(packageHandler)
         {
             if (card != null)
                 Update(card);
@@ -559,9 +560,9 @@ namespace FluentStore.Sources.MicrosoftStore
                 if (_InternalPackage == null)
                 {
                     if (IsWinGet)
-                        _InternalPackage = new WinGetPackage();
+                        _InternalPackage = new WinGetPackage(Handler);
                     else
-                        _InternalPackage = new ModernPackage<ProductDetails>();
+                        _InternalPackage = new ModernPackage<ProductDetails>(Handler);
                 }
                 return _InternalPackage;
             }

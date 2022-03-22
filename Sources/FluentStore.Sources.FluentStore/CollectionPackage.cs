@@ -14,7 +14,8 @@ namespace FluentStore.Sources.FluentStore
     {
         bool IEditablePackage.IsReadOnly { get; set; }
 
-        public CollectionPackage(Collection collection = null, IEnumerable<PackageBase> items = null)
+        public CollectionPackage(PackageHandlerBase packageHandler, Collection collection = null, IEnumerable<PackageBase> items = null)
+            : base(packageHandler)
         {
             if (collection != null)
                 Update(collection);

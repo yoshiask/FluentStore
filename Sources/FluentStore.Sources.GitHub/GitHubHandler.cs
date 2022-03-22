@@ -43,7 +43,7 @@ namespace FluentStore.Sources.GitHub
             string name = parts[1];
             var repo = await _client.Repository.Get(owner, name);
 
-            return new GitHubPackage(repo) { Status = PackageStatus.Details };
+            return new GitHubPackage(this, repo) { Status = PackageStatus.Details };
         }
 
         public override async Task<PackageBase> GetPackageFromUrl(Url url)
