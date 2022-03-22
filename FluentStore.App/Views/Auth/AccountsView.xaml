@@ -18,6 +18,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <absuiThemes:AbstractUIPresenterStyle/>
+                <absuiThemes:AbstractUICollectionPresenterStyle/>
             </ResourceDictionary.MergedDictionaries>
 
             <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
