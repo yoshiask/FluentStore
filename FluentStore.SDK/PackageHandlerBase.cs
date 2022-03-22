@@ -68,7 +68,15 @@ namespace FluentStore.SDK
         /// <summary>
         /// Gets the package with the specified <paramref name="packageUrn"/>.
         /// </summary>
-        public abstract Task<PackageBase> GetPackage(Urn packageUrn);
+        /// <param name="packageUrn">
+        /// The URN of the package to get.
+        /// </param>
+        /// <param name="targetStatus">
+        /// Specifies how much package information to load.
+        /// <see cref="PackageStatus.BasicDetails"/> and <see cref="PackageStatus.Details"/>
+        /// are the only valid options.
+        /// </param>
+        public abstract Task<PackageBase> GetPackage(Urn packageUrn, PackageStatus targetStatus = PackageStatus.Details);
 
         /// <summary>
         /// Gets the package associated with the specified URL.

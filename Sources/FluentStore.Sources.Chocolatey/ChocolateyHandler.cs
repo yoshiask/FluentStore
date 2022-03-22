@@ -22,14 +22,9 @@ namespace FluentStore.Sources.Chocolatey
 
         public override string DisplayName => "Chocolatey";
 
-        public override async Task<List<PackageBase>> GetFeaturedPackagesAsync()
-        {
-            var packages = new List<PackageBase>();
+        public override Task<List<PackageBase>> GetFeaturedPackagesAsync() => Task.FromResult(_emptyPackageList);
 
-            return packages;
-        }
-
-        public override async Task<PackageBase> GetPackage(Urn packageUrn)
+        public override async Task<PackageBase> GetPackage(Urn packageUrn, SDK.PackageStatus status = SDK.PackageStatus.Details)
         {
             Guard.IsEqualTo(packageUrn.NamespaceIdentifier, NAMESPACE_CHOCO, nameof(packageUrn));
 
@@ -38,15 +33,12 @@ namespace FluentStore.Sources.Chocolatey
             int versionIdx = urnStr.LastIndexOf(':');
             if (versionIdx <= 0)
                 throw new NotSupportedException("The choco client library does not currently support fetching package info without specifying a version.");
-            var package = await Choco.GetPackageAsync(urnStr[..(versionIdx)], Version.Parse(urnStr[(versionIdx + 1)..]));
+            var package = await Choco.GetPackageAsync(urnStr[..versionIdx], Version.Parse(urnStr[(versionIdx + 1)..]));
 
             return new ChocolateyPackage(package);
         }
 
-        public override async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
-        {
-            return new List<PackageBase>();
-        }
+        public override Task<List<PackageBase>> GetSearchSuggestionsAsync(string query) => Task.FromResult(_emptyPackageList);
 
         public override async Task<List<PackageBase>> SearchAsync(string query)
         {

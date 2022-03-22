@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using FluentStore.SDK.Helpers;
 
 namespace FluentStore.ViewModels
 {
@@ -67,19 +68,11 @@ namespace FluentStore.ViewModels
 
             try
             {
-                // FIXME: Implement a new method on PackageBase for fetching more detailed info
-                // Get the author's display name
-                //var package = SelectedCollection.Package;
-                //var authorProfile = await FSApi.GetUserProfileAsync(package.Model.AuthorId);
-                //package.Update(authorProfile);
-
-                //// Load items
-                //foreach (string urn in package.Model.Items)
-                //{
-                //    // Load the product details for each item
-                //    var item = await PackageService.GetPackageAsync(Urn.Parse(urn));
-                //    package.Items.Add(item);
-                //}
+                if (SelectedCollection.Package.Status.IsLessThan(PackageStatus.Details))
+                {
+                    // Fetch more detailed info
+                    SelectedCollection.Package = await PackageService.GetPackageAsync(SelectedCollection.Package.Urn, PackageStatus.Details);
+                }
 
                 NavService.Navigate(SelectedCollection);
             }

@@ -12,7 +12,7 @@ namespace FluentStore.Sources.GitHub
 {
     public class GitHubHandler : PackageHandlerBase
     {
-        // TODO: Users will need to sign in to avoid the rate limit issues
+        // Users need to sign in to avoid the rate limit issues
 
         private static readonly GitHubClient _client = new(new ProductHeaderValue("fluent-store"), Users.CredentialStore.Current);
 
@@ -34,7 +34,7 @@ namespace FluentStore.Sources.GitHub
             return new FileImage("ms-appx:///Assets/PackageHandlerIcons/GitHubHandler/GitHub-Mark.png");
         }
 
-        public override async Task<PackageBase> GetPackage(Urn packageUrn)
+        public override async Task<PackageBase> GetPackage(Urn packageUrn, PackageStatus status = PackageStatus.Details)
         {
             Guard.IsEqualTo(packageUrn.NamespaceIdentifier, NAMESPACE_REPO, nameof(packageUrn));
 

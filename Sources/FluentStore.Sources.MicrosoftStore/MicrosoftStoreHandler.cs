@@ -72,7 +72,7 @@ namespace FluentStore.Sources.MicrosoftStore
             return packages;
         }
 
-        public override async Task<PackageBase> GetPackage(Urn packageUrn)
+        public override async Task<PackageBase> GetPackage(Urn packageUrn, PackageStatus status = PackageStatus.Details)
         {
             CatalogIdType idType = packageUrn.NamespaceIdentifier switch
             {

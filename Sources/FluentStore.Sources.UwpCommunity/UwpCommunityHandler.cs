@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentStore.SDK;
+using FluentStore.SDK.Helpers;
 
 namespace FluentStore.Sources.UwpCommunity
 {
@@ -48,50 +49,54 @@ namespace FluentStore.Sources.UwpCommunity
             return packages;
         }
 
-        public override async Task<PackageBase> GetPackage(Urn urn)
+        public override async Task<PackageBase> GetPackage(Urn urn, PackageStatus status)
         {
             string id = urn.GetContent<NamespaceSpecificString>().UnEscapedValue;
             if (urn.NamespaceIdentifier == NAMESPACE_PROJECT)
-                return await GetPackage(id);
+                return await GetPackage(id, status);
             else if (urn.NamespaceIdentifier == NAMESPACE_LAUNCH)
-                return await GetLaunchCollection(id);
+                return await GetLaunchCollection(id, status);
 
             return null;
         }
 
-        public async Task<PackageBase> GetPackage(string projectIdStr)
+        public async Task<PackageBase> GetPackage(string projectIdStr, PackageStatus status = PackageStatus.Details)
         {
             int projectId = int.Parse(projectIdStr);
 
-            var projects = await BASE_URL.AppendPathSegments("projects").GetJsonListAsync();
+            var request = BASE_URL.AppendPathSegments("projects");
+            var projects = await request.GetJsonListAsync();
             dynamic project = projects.FirstOrDefault(p => p.id == projectId);
             if (project == null)
             {
                 var NavService = Ioc.Default.GetRequiredService<Services.INavigationService>();
-                NavService.ShowHttpErrorPage(404, "That project is not registered with the UWP Community.");
-                return null;
+                throw SDK.Models.WebException.Create(404, $"No project with ID {projectId} is registered with the UWP Community.", request.ToString());
             }
 
             UwpCommunityPackage package = new(project);
             package.Status = PackageStatus.BasicDetails;
 
-            var images = await BASE_URL.AppendPathSegments("projects", "images")
+            if (status.IsAtLeast(PackageStatus.Details))
+            {
+                var images = await BASE_URL.AppendPathSegments("projects", "images")
                 .SetQueryParam("projectId", projectIdStr).GetJsonAsync<List<string>>();
-            package.UpdateWithImages(images);
+                package.UpdateWithImages(images);
 
-            var collaborators = await BASE_URL.AppendPathSegments("projects", "collaborators")
-                .SetQueryParam("projectId", projectIdStr).GetJsonAsync<List<dynamic>>();
-            package.UpdateWithCollaborators(collaborators);
+                var collaborators = await BASE_URL.AppendPathSegments("projects", "collaborators")
+                    .SetQueryParam("projectId", projectIdStr).GetJsonAsync<List<dynamic>>();
+                package.UpdateWithCollaborators(collaborators);
 
-            var features = await BASE_URL.AppendPathSegments("projects", "features")
-                .SetQueryParam("projectId", projectIdStr).GetJsonAsync<List<string>>();
-            package.UpdateWithFeatures(features);
+                var features = await BASE_URL.AppendPathSegments("projects", "features")
+                    .SetQueryParam("projectId", projectIdStr).GetJsonAsync<List<string>>();
+                package.UpdateWithFeatures(features);
 
-            package.Status = PackageStatus.DownloadReady;
+                package.Status = PackageStatus.DownloadReady;
+            }
+            
             return package;
         }
 
-        public async Task<GenericPackageCollection<dynamic>> GetLaunchCollection(string year)
+        public async Task<GenericPackageCollection<dynamic>> GetLaunchCollection(string year, PackageStatus status)
         {
             dynamic projects = (await BASE_URL.AppendPathSegments("projects", "launch", year).GetJsonAsync()).projects;
 
@@ -102,7 +107,6 @@ namespace FluentStore.Sources.UwpCommunity
                 Description = "An annual event hosted by the UWP Community, where developers, beta testers, translators, and users work together to Launch their new and refreshed apps.",
                 DeveloperName = "UWP Community",
                 Website = new("https://uwpcommunity.com/launch", "UWP Community Launch page"),
-                DisplayPrice = "View",
                 Images =
                 {
                     new FileImage
@@ -160,7 +164,7 @@ namespace FluentStore.Sources.UwpCommunity
 
             for (int launchYear = 2019; launchYear <= lastLaunchYear; launchYear++)
             {
-                var launchCollection = await GetLaunchCollection(launchYear.ToString());
+                var launchCollection = await GetLaunchCollection(launchYear.ToString(), PackageStatus.BasicDetails);
                 collections.Add(launchCollection);
             }
 

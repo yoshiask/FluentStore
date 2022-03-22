@@ -8,6 +8,7 @@ using FluentStore.SDK;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Linq;
 using FluentStore.SDK.Users;
+using FluentStore.SDK.Helpers;
 
 namespace FluentStore.Sources.FluentStore
 {
@@ -25,12 +26,9 @@ namespace FluentStore.Sources.FluentStore
 
         public override string DisplayName => "Fluent Store";
 
-        public override async Task<List<PackageBase>> GetFeaturedPackagesAsync()
-        {
-            return new List<PackageBase>(0);
-        }
+        public override Task<List<PackageBase>> GetFeaturedPackagesAsync() => Task.FromResult(_emptyPackageList);
 
-        public override async Task<PackageBase> GetPackage(Urn urn)
+        public override async Task<PackageBase> GetPackage(Urn urn, PackageStatus status)
         {
             if (urn.NamespaceIdentifier == NAMESPACE_COLLECTION)
             {
@@ -39,35 +37,38 @@ namespace FluentStore.Sources.FluentStore
                 string collId = id[1];
 
                 var collection = await FSApi.GetCollectionAsync(userId, collId);
-                var authorProfile = await FSApi.GetUserProfileAsync(userId);
-                var items = new List<PackageBase>(collection.Items.Count);
-                foreach (string packageId in collection.Items)
+                var collectionPack = new CollectionPackage(collection)
                 {
-                    // Get details for each item
-                    Urn packageUrn = Urn.Parse(packageId);
-                    PackageBase package = await PackageService.GetPackageAsync(packageUrn);
-                    items.Add(package);
-                }
+                    Status = PackageStatus.BasicDetails
+                };
 
-                var collectionPack = new CollectionPackage(collection, items);
-                collectionPack.Update(authorProfile);
+                if (status.IsAtLeast(PackageStatus.Details))
+                {
+                    var items = new List<PackageBase>(collection.Items.Count);
+                    foreach (string packageId in collection.Items)
+                    {
+                        // Get details for each item
+                        Urn packageUrn = Urn.Parse(packageId);
+                        PackageBase package = await PackageService.GetPackageAsync(packageUrn, PackageStatus.BasicDetails);
+                        items.Add(package);
+                    }
+                    collectionPack.Update(items);
+
+                    var authorProfile = await FSApi.GetUserProfileAsync(userId);
+                    collectionPack.Update(authorProfile);
+
+                    collectionPack.Status = PackageStatus.Details;
+                }
+                
                 return collectionPack;
             }
 
             return null;
         }
 
-        public override async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
-        {
-            // TODO
-            return new List<PackageBase>();
-        }
+        public override Task<List<PackageBase>> GetSearchSuggestionsAsync(string query) => Task.FromResult(_emptyPackageList);
 
-        public override async Task<List<PackageBase>> SearchAsync(string query)
-        {
-            // TODO
-            return new List<PackageBase>();
-        }
+        public override Task<List<PackageBase>> SearchAsync(string query) => Task.FromResult(_emptyPackageList);
 
         public override async Task<List<PackageBase>> GetCollectionsAsync()
         {
@@ -77,7 +78,7 @@ namespace FluentStore.Sources.FluentStore
                 return _emptyPackageList;
 
             var collections = await FSApi.GetCollectionsAsync(accHandler.CurrentUser.Id);
-            return collections.Select(c => (PackageBase)new CollectionPackage(c)).ToList();
+            return collections.Select(c => (PackageBase)new CollectionPackage(c) { Status = PackageStatus.BasicDetails }).ToList();
         }
 
         public override ImageBase GetImage() => GetImageStatic();

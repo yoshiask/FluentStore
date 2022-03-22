@@ -128,11 +128,19 @@ namespace FluentStore.SDK
         /// <summary>
         /// Gets the package with the specified <paramref name="packageUrn"/>.
         /// </summary>
-        public async Task<PackageBase> GetPackageAsync(Urn packageUrn)
+        /// <param name="packageUrn">
+        /// The URN of the package to get.
+        /// </param>
+        /// <param name="targetStatus">
+        /// Specifies how much package information to load.
+        /// <see cref="PackageStatus.BasicDetails"/> and <see cref="PackageStatus.Details"/>
+        /// are the only valid options.
+        /// </param>
+        public async Task<PackageBase> GetPackageAsync(Urn packageUrn, PackageStatus status = PackageStatus.Details)
         {
             string ns = packageUrn.NamespaceIdentifier;
             PackageHandlerBase handler = GetHandlerForNamespace(ns);
-            return await handler.GetPackage(packageUrn);
+            return await handler.GetPackage(packageUrn, status);
         }
 
         /// <summary>

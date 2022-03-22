@@ -34,7 +34,7 @@ namespace FluentStore.Sources.WinGet
             return packages;
         }
 
-        public override async Task<PackageBase> GetPackage(Urn packageUrn)
+        public override async Task<PackageBase> GetPackage(Urn packageUrn, PackageStatus status = PackageStatus.Details)
         {
             Guard.IsEqualTo(packageUrn.NamespaceIdentifier, NAMESPACE_WINGET, nameof(packageUrn));
 
