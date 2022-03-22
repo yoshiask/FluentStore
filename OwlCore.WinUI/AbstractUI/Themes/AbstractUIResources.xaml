@@ -1,7 +1,11 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:converters="using:OwlCore.WinUI.AbstractUI.Converters">
+    x:Class="OwlCore.WinUI.AbstractUI.Themes.AbstractUIResources"
+    xmlns:converters="using:OwlCore.WinUI.AbstractUI.Converters"
+    xmlns:controls="using:OwlCore.WinUI.AbstractUI.Controls"
+    xmlns:abstractUIVm="using:OwlCore.AbstractUI.ViewModels"
+    xmlns:abstractUIVmFS="using:FluentStore.SDK.AbstractUI.ViewModels">
 
     <x:Double x:Key="DefaultAbstractUITitleFontSize">16</x:Double>
 
@@ -11,5 +15,110 @@
 
     <converters:AbstractUIOrientationToWuxOrientationConverter x:Key="AbstractUIOrientationToWuxOrientationConverter" />
     <converters:AbstractUIModelToViewModelConverter x:Key="AbstractUIModelToViewModelConverter" />
+    <converters:FormViewModelToCollectionViewModelConverter x:Key="FormViewModelToCollectionViewModelConverter"/>
+
+    <controls:AbstractUICollectionItemTemplateSelector x:Key="AbstractUITemplateSelector">
+        <controls:AbstractUICollectionItemTemplateSelector.BooleanTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractBooleanViewModel">
+                <controls:AbstractBooleanPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.BooleanTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.ButtonTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractButtonViewModel">
+                <controls:AbstractButtonPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.ButtonTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.DataListTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractDataListViewModel">
+                <controls:AbstractDataListPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.DataListTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.MultiChoiceTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractMultiChoiceViewModel">
+                <controls:AbstractMultiChoicePresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.MultiChoiceTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.ProgressTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractProgressIndicatorViewModel">
+                <controls:AbstractProgressIndicatorPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.ProgressTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.TextBoxTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractTextBoxViewModel">
+                <controls:AbstractTextBoxPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.TextBoxTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.FormTemplate>
+            <DataTemplate x:DataType="abstractUIVmFS:AbstractFormViewModel">
+                <controls:AbstractFormPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.FormTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.ElementCollection>
+            <DataTemplate x:DataType="abstractUIVm:AbstractUICollectionViewModel">
+                <controls:AbstractUICollectionPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.ElementCollection>
+    </controls:AbstractUICollectionItemTemplateSelector>
+
+    <controls:AbstractUICollectionItemTemplateSelector x:Key="CollectionTemplateSelector">
+        <controls:AbstractUICollectionItemTemplateSelector.BooleanTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractBooleanViewModel">
+                <controls:AbstractBooleanPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.BooleanTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.ButtonTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractButtonViewModel">
+                <controls:AbstractButtonPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.ButtonTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.DataListTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractDataListViewModel">
+                <controls:AbstractDataListPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.DataListTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.MultiChoiceTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractMultiChoiceViewModel">
+                <controls:AbstractMultiChoicePresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.MultiChoiceTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.ProgressTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractProgressIndicatorViewModel">
+                <controls:AbstractProgressIndicatorPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.ProgressTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.TextBoxTemplate>
+            <DataTemplate x:DataType="abstractUIVm:AbstractTextBoxViewModel">
+                <controls:AbstractTextBoxPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.TextBoxTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.FormTemplate>
+            <DataTemplate x:DataType="abstractUIVmFS:AbstractFormViewModel">
+                <!--
+                    This is intentional, so that we don't end up putting a form
+                    inside a form inside a form...
+                -->
+                <controls:AbstractUICollectionPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.FormTemplate>
+
+        <controls:AbstractUICollectionItemTemplateSelector.ElementCollection>
+            <DataTemplate x:DataType="abstractUIVm:AbstractUICollectionViewModel">
+                <controls:AbstractUICollectionPresenter />
+            </DataTemplate>
+        </controls:AbstractUICollectionItemTemplateSelector.ElementCollection>
+    </controls:AbstractUICollectionItemTemplateSelector>
 
 </ResourceDictionary>

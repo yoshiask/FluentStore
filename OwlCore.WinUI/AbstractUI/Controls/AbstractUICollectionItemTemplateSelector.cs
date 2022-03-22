@@ -3,6 +3,8 @@ using Microsoft.UI.Xaml.Controls;
 using OwlCore.AbstractUI.ViewModels;
 using Microsoft.Toolkit.Diagnostics;
 using OwlCore.AbstractUI.Models;
+using FluentStore.SDK.AbstractUI.Models;
+using FluentStore.SDK.AbstractUI.ViewModels;
 
 namespace OwlCore.WinUI.AbstractUI.Controls
 {
@@ -45,6 +47,10 @@ namespace OwlCore.WinUI.AbstractUI.Controls
             {
                 ProgressTemplate = ThrowHelper.ThrowArgumentNullException<DataTemplate>(nameof(progressTemplate));
             }
+
+            // Note that FromTemplate is absent. This is done on purpose, since the default AbstractForm template
+            // contains an AbstractUICollectionPresenter. If we attempted to load the default template, the app
+            // would crash with a StackOverflowException.
 
             TextBoxTemplate = (DataTemplate)textBoxTemplate;
             DataListTemplate = (DataTemplate)dataListTemplate;
@@ -89,6 +95,11 @@ namespace OwlCore.WinUI.AbstractUI.Controls
         /// </summary>
         public DataTemplate MultiChoiceTemplate { get; set; }
 
+        /// <summary>
+        /// The data template used to display an <see cref="AbstractForm"/>.
+        /// </summary>
+        public DataTemplate FormTemplate { get; set; }
+
         /// <inheritdoc />
         protected override DataTemplate SelectTemplateCore(object item, DependencyObject container)
         {
@@ -106,6 +117,7 @@ namespace OwlCore.WinUI.AbstractUI.Controls
                 AbstractBooleanViewModel _ => BooleanTemplate,
                 AbstractProgressIndicatorViewModel _ => ProgressTemplate,
                 //AbstractColorPickerViewModel _ => ColorPickerTemplate,
+                AbstractFormViewModel _ => FormTemplate,
                 AbstractUICollectionViewModel _ => ElementCollection,
                 _ => base.SelectTemplateCore(item, container)
             };

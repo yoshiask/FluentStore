@@ -1,0 +1,29 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="OwlCore.WinUI.AbstractUI.Themes.AbstractUIPresenterStyle"
+    xmlns:themes="using:OwlCore.WinUI.AbstractUI.Themes"
+    xmlns:controls="using:OwlCore.WinUI.AbstractUI.Controls"
+    xmlns:abstractUIVmFS="using:FluentStore.SDK.AbstractUI.ViewModels"
+    xmlns:abstractUIVm="using:OwlCore.AbstractUI.ViewModels"
+    xmlns:convertvis="using:OwlCore.WinUI.Converters.Bools.Visible">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="ms-appx:///OwlCore.WinUI/AbstractUI/Themes/AbstractUIResources.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+    <Style TargetType="controls:AbstractUIPresenter">
+        <Style.Setters>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="controls:AbstractUIPresenter">
+                        <ContentControl Content="{x:Bind ViewModel}"
+                                        ContentTemplateSelector="{StaticResource AbstractUITemplateSelector}"
+                                        HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style.Setters>
+    </Style>
+
+</ResourceDictionary>

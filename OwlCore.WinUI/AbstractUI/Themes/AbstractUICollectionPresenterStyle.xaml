@@ -9,6 +9,7 @@
     xmlns:controls="using:OwlCore.WinUI.AbstractUI.Controls"
     xmlns:automation="using:Microsoft.UI.Xaml.Automation"
     xmlns:abstractUIVm="using:OwlCore.AbstractUI.ViewModels"
+    xmlns:abstractUIVmFS="using:FluentStore.SDK.AbstractUI.ViewModels"
     xmlns:themes="using:OwlCore.WinUI.AbstractUI.Themes">
 
     <ResourceDictionary.MergedDictionaries>
@@ -20,51 +21,8 @@
         <themes:AbstractProgressIndicatorStyle />
         <themes:AbstractRichTextBlockStyle />
         <themes:AbstractTextBoxStyle />
+        <themes:AbstractFormStyle />
     </ResourceDictionary.MergedDictionaries>
-
-    <controls:AbstractUICollectionItemTemplateSelector x:Key="CollectionTemplateSelector">
-        <controls:AbstractUICollectionItemTemplateSelector.BooleanTemplate>
-            <DataTemplate x:DataType="abstractUIVm:AbstractBooleanViewModel">
-                <controls:AbstractBooleanPresenter />
-            </DataTemplate>
-        </controls:AbstractUICollectionItemTemplateSelector.BooleanTemplate>
-
-        <controls:AbstractUICollectionItemTemplateSelector.ButtonTemplate>
-            <DataTemplate x:DataType="abstractUIVm:AbstractButtonViewModel">
-                <controls:AbstractButtonPresenter />
-            </DataTemplate>
-        </controls:AbstractUICollectionItemTemplateSelector.ButtonTemplate>
-
-        <controls:AbstractUICollectionItemTemplateSelector.DataListTemplate>
-            <DataTemplate x:DataType="abstractUIVm:AbstractDataListViewModel">
-                <controls:AbstractDataListPresenter />
-            </DataTemplate>
-        </controls:AbstractUICollectionItemTemplateSelector.DataListTemplate>
-
-        <controls:AbstractUICollectionItemTemplateSelector.MultiChoiceTemplate>
-            <DataTemplate x:DataType="abstractUIVm:AbstractMultiChoiceViewModel">
-                <controls:AbstractMultiChoicePresenter />
-            </DataTemplate>
-        </controls:AbstractUICollectionItemTemplateSelector.MultiChoiceTemplate>
-
-        <controls:AbstractUICollectionItemTemplateSelector.ProgressTemplate>
-            <DataTemplate x:DataType="abstractUIVm:AbstractProgressIndicatorViewModel">
-                <controls:AbstractProgressIndicatorPresenter />
-            </DataTemplate>
-        </controls:AbstractUICollectionItemTemplateSelector.ProgressTemplate>
-
-        <controls:AbstractUICollectionItemTemplateSelector.TextBoxTemplate>
-            <DataTemplate x:DataType="abstractUIVm:AbstractTextBoxViewModel">
-                <controls:AbstractTextBoxPresenter />
-            </DataTemplate>
-        </controls:AbstractUICollectionItemTemplateSelector.TextBoxTemplate>
-
-        <controls:AbstractUICollectionItemTemplateSelector.ElementCollection>
-            <DataTemplate x:DataType="abstractUIVm:AbstractUICollectionViewModel">
-                <controls:AbstractUICollectionPresenter />
-            </DataTemplate>
-        </controls:AbstractUICollectionItemTemplateSelector.ElementCollection>
-    </controls:AbstractUICollectionItemTemplateSelector>
 
     <Style TargetType="controls:AbstractUICollectionPresenter">
         <Style.Setters>
@@ -81,7 +39,6 @@
 
     <DataTemplate x:Key="DefaultAbstractUICollectionTemplate" x:DataType="abstractUIVm:AbstractUICollectionViewModel">
         <StackPanel Margin="0,5">
-
             <TextBlock Text="{x:Bind Title, Mode=OneWay}"
                        FontSize="22" 
                        ToolTipService.ToolTip="{x:Bind TooltipText, Mode=OneWay}" 

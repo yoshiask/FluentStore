@@ -17,7 +17,7 @@
     <Page.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <absuiThemes:AbstractUICollectionPresenterStyle/>
+                <absuiThemes:AbstractUIPresenterStyle/>
             </ResourceDictionary.MergedDictionaries>
 
             <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
@@ -50,9 +50,9 @@
                                 <Button Content="Sign out" Command="{x:Bind SignOutCommand}" />
                             </controls:SettingsBlockControl.SettingsActionableElement>
                             <controls:SettingsBlockControl.ExpandableContent>
-                                <absuiControls:AbstractUICollectionPresenter ViewModel="{x:Bind CurrentUser.ManageAccountForm, Mode=OneWay, Converter={StaticResource AbstractUIModelToViewModelConverter}}"
-                                                                             HorizontalAlignment="Stretch"
-                                                                             Margin="12,0,12,12"/>
+                                <absuiControls:AbstractUIPresenter ViewModel="{x:Bind CurrentUser.ManageAccountForm, Mode=OneWay, Converter={StaticResource AbstractUIModelToViewModelConverter}}"
+                                                                   HorizontalAlignment="Stretch"
+                                                                   Margin="12,0,12,12"/>
                             </controls:SettingsBlockControl.ExpandableContent>
                         </controls:SettingsBlockControl>
                     </DataTemplate>
@@ -67,8 +67,9 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="users:AccountHandlerBase">
                         <Expander Header="{x:Bind DisplayName}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
-                            <absuiControls:AbstractUICollectionPresenter ViewModel="{x:Bind SignInForm, Mode=OneWay, Converter={StaticResource AbstractUIModelToViewModelConverter}}"
-                                                                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"/>
+                            <absuiControls:AbstractUIPresenter ViewModel="{x:Bind SignInForm, Mode=OneWay, Converter={StaticResource AbstractUIModelToViewModelConverter}}"
+                                                               HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                                               Margin="12,0,12,12"/>
                         </Expander>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

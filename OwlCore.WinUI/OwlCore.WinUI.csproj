@@ -6,13 +6,33 @@
         <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
         <UseWinUI>true</UseWinUI>
     </PropertyGroup>
+    <ItemGroup>
+      <None Remove="AbstractUI\Themes\AbstractFormStyle.xaml" />
+      <None Remove="AbstractUI\Themes\AbstractUIPresenterStyle.xaml" />
+    </ItemGroup>
 
     <ItemGroup>
-		<PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Markdown" Version="7.1.2" />
+        <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Markdown" Version="7.1.2" />
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.194" />
-		<PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="2.0.8" />
+        <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="2.0.8" />
         <PackageReference Include="OwlCore" Version="0.0.51" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\FluentStore.SDK.AbstractUI\FluentStore.SDK.AbstractUI.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Page Update="AbstractUI\Themes\AbstractUIPresenterStyle.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Page Update="AbstractUI\Themes\AbstractFormStyle.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
     </ItemGroup>
 
 </Project>

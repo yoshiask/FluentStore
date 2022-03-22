@@ -1,4 +1,6 @@
-﻿using Microsoft.UI.Xaml.Data;
+﻿using FluentStore.SDK.AbstractUI.Models;
+using FluentStore.SDK.AbstractUI.ViewModels;
+using Microsoft.UI.Xaml.Data;
 using OwlCore.AbstractUI.Models;
 using OwlCore.AbstractUI.ViewModels;
 using System;
@@ -24,6 +26,7 @@ namespace OwlCore.WinUI.AbstractUI.Converters
                 AbstractBoolean boolean => new AbstractBooleanViewModel(boolean),
                 AbstractRichTextBlock richText => new AbstractRichTextBlockViewModel(richText),
                 AbstractMultiChoice multiChoiceUIElement => new AbstractMultiChoiceViewModel(multiChoiceUIElement),
+                AbstractForm form => new AbstractFormViewModel(form),
                 AbstractUICollection elementGroup => new AbstractUICollectionViewModel(elementGroup),
                 AbstractProgressIndicator progress => new AbstractProgressIndicatorViewModel(progress),
                 AbstractColorPicker color => new AbstractColorPickerViewModel(color),
