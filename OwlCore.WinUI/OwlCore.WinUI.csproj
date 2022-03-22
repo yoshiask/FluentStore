@@ -16,7 +16,7 @@
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.194" />
         <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="2.0.8" />
-        <PackageReference Include="OwlCore" Version="0.0.51" />
+        <PackageReference Include="OwlCore" Version="0.0.58" />
     </ItemGroup>
 
     <ItemGroup>
