@@ -5,10 +5,7 @@ namespace FluentStore.SDK
 {
     public interface IEditablePackage
     {
-        public bool IsEditable { get; protected set; }
-
-        /// <inheritdoc cref="CreateEditForm"/>
-        public AbstractForm EditForm { get; protected set; }
+        public bool IsReadOnly { get; protected set; }
 
         /// <summary>
         /// Gets the <see cref="AbstractUICollection"/> that represents a form to edit this package.
@@ -16,6 +13,6 @@ namespace FluentStore.SDK
         /// <remarks>
         /// This collection should not include cancel or submit buttons.
         /// </remarks>
-        protected AbstractForm CreateEditForm();
+        public AbstractForm CreateEditForm();
     }
 }
