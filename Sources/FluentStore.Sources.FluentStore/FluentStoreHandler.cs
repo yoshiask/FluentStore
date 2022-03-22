@@ -16,7 +16,6 @@ namespace FluentStore.Sources.FluentStore
     {
         private readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
-        private readonly AccountService AccountService = Ioc.Default.GetRequiredService<AccountService>();
 
         public const string NAMESPACE_COLLECTION = "fluent-store-collection";
         public override HashSet<string> HandledNamespaces => new()
@@ -73,7 +72,7 @@ namespace FluentStore.Sources.FluentStore
         public override async Task<List<PackageBase>> GetCollectionsAsync()
         {
             // Get current user
-            var accHandler = AccountService.GetHandlerForNamespace<Users.FluentStoreAccountHandler>();
+            var accHandler = AccSvc.GetHandlerForNamespace<Users.FluentStoreAccountHandler>();
             if (!accHandler.IsLoggedIn)
                 return _emptyPackageList;
 
