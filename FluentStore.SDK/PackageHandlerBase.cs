@@ -11,7 +11,8 @@ namespace FluentStore.SDK
     public abstract class PackageHandlerBase : IEqualityComparer<PackageHandlerBase>
     {
         protected static readonly List<PackageBase> _emptyPackageList = new(0);
-        protected AccountService AccSvc { get; } = Ioc.Default.GetService<AccountService>();
+        
+        public AccountService AccSvc { get; } = Ioc.Default.GetService<AccountService>();
 
         /// <summary>
         /// A list of all namespaces this handler can handle.
