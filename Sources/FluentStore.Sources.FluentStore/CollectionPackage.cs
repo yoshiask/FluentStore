@@ -12,8 +12,30 @@ using OwlCore.AbstractUI.Models;
 
 namespace FluentStore.Sources.FluentStore
 {
-    public class CollectionPackage : GenericPackageCollection<Collection>
+    public class CollectionPackage : GenericPackageCollection<Collection>, IEditablePackageCollection, IEditablePackage, IDeletablePackage
     {
+        private bool _canEditItems = false;
+        private bool _canEdit = false;
+        private bool _canDelete = false;
+
+        public bool CanEditItems
+        {
+            get => _canEditItems;
+            set => SetProperty(ref _canEditItems, value);
+        }
+
+        public bool CanEdit
+        {
+            get => _canEdit;
+            set => SetProperty(ref _canEdit, value);
+        }
+
+        public bool CanDelete
+        {
+            get => _canDelete;
+            set => SetProperty(ref _canDelete, value);
+        }
+
         public CollectionPackage(PackageHandlerBase packageHandler, Collection collection = null, IEnumerable<PackageBase> items = null)
             : base(packageHandler)
         {
@@ -93,7 +115,7 @@ namespace FluentStore.Sources.FluentStore
 
         public override Task<List<ImageBase>> CacheScreenshots() => Task.FromResult(new List<ImageBase>(0));
 
-        public override AbstractForm CreateEditForm()
+        public AbstractForm CreateEditForm()
         {
             AbstractForm form = new($"{Urn}_EditForm", submitText: "Save", onSubmit: OnEditFormSubmit)
             {
@@ -129,12 +151,39 @@ namespace FluentStore.Sources.FluentStore
                 return;
 
             var nameBox = form.GetElement<AbstractTextBox>("NameBox");
+            Model.Name = nameBox.Value;
+
             var imageUrlBox = form.GetElement<AbstractTextBox>("ImageUrlBox");
-            var typeGlyphBox = form.GetElement<AbstractTextBox>("TileGlyphBox");
+            Model.ImageUrl = imageUrlBox.Value;
+
+            var tileGlyphBox = form.GetElement<AbstractTextBox>("TileGlyphBox");
+            Model.TileGlyph = tileGlyphBox.Value;
+
             var descriptionBox = form.GetElement<AbstractTextBox>("DescriptionBox");
+            Model.Description = descriptionBox.Value;
+
             var isPublicSwitch = form.GetElement<AbstractBoolean>("IsPublicSwitch");
+            Model.IsPublic = isPublicSwitch.State;
+        }
 
+        public void Add(PackageBase package) => Items.Add(package);
 
+        public void Remove(PackageBase package) => Items.Remove(package);
+
+        public async Task SaveAsync()
+        {
+            if (!Handler.AccSvc.TryGetAuthenticatedHandler<Users.FluentStoreAccountHandler>(out var handler))
+                throw new System.NotSupportedException($"Cannot edit {Urn}");
+
+            await ((FluentStoreHandler)Handler).FSApi.UpdateCollectionAsync(handler.CurrentUser.Id, Model);
+        }
+
+        public async Task DeleteAsync()
+        {
+            if (!Handler.AccSvc.TryGetAuthenticatedHandler<Users.FluentStoreAccountHandler>(out var handler))
+                throw new System.NotSupportedException($"Cannot delete {Urn}");
+
+            await ((FluentStoreHandler)Handler).FSApi.DeleteCollectionAsync(handler.CurrentUser.Id, Model.Id.ToString());
         }
     }
 }

@@ -14,7 +14,7 @@ namespace FluentStore.Sources.FluentStore
 {
     public class FluentStoreHandler : PackageHandlerBase
     {
-        private readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
+        internal readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
         public const string NAMESPACE_COLLECTION = "fluent-store-collection";
