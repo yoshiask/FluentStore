@@ -64,11 +64,6 @@ namespace FluentStore.SDK
         public PackageHandlerBase Handler { get; set; }
 
         /// <summary>
-        /// Whether this package can be edited.
-        /// </summary>
-        public bool CanEdit { get; protected set; }
-
-        /// <summary>
         /// When overridden in a derived class, gets a value indicating whether <see cref="GetCannotBeInstalledReason"/>
         /// and <see cref="CanBeInstalled"/> requires the package to be downloaded first.
         /// </summary>
@@ -295,22 +290,6 @@ namespace FluentStore.SDK
             if (ScreenshotsCache == null)
                 ScreenshotsCache = await CacheScreenshots();
             return ScreenshotsCache;
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="AbstractUI.Models.AbstractForm"/> representing a form
-        /// that can edit this package.
-        /// </summary>
-        /// <exception cref="NotImplementedException">
-        /// Thrown when <see cref="CanEdit"/> is <see langword="true"/> and
-        /// <see cref="CreateEditForm"/> is not overridden by a derived class.
-        /// </exception>
-        public virtual AbstractUI.Models.AbstractForm CreateEditForm()
-        {
-            if (CanEdit)
-                throw new NotImplementedException($"{nameof(CreateEditForm)} must be implemented for editable packages.");
-
-            return null;
         }
     }
 

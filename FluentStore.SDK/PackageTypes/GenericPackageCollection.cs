@@ -1,6 +1,7 @@
 ﻿using FluentStore.SDK.Attributes;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -14,7 +15,7 @@ namespace FluentStore.SDK.Packages
     /// For example, Fluent Store's <c>CollectionPackage</c> inherits this class
     /// and <c>UwpCommunityPackage</c> uses it to represent Launch events.
     /// </summary>
-    public class GenericPackageCollection<TModel> : PackageBase<TModel>
+    public class GenericPackageCollection<TModel> : PackageBase<TModel>, IPackageCollection
     {
         public GenericPackageCollection(PackageHandlerBase packageHandler) : base(packageHandler)
         {
@@ -72,12 +73,12 @@ namespace FluentStore.SDK.Packages
                 await package.LaunchAsync();
         }
 
-        private ObservableCollection<PackageBase> _Items = new();
+        private ObservableCollection<PackageBase> _items = new();
         [Display(Title = "Apps", Rank = 1)]
         public ObservableCollection<PackageBase> Items
         {
-            get => _Items;
-            set => SetProperty(ref _Items, value);
+            get => _items;
+            set => SetProperty(ref _items, value);
         }
     }
 }
