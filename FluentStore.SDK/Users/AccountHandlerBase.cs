@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Users
 {
-    public delegate void OnLoginStateChangedHandler(bool isLoggedIn);
+    public delegate void OnLoginStateChangedHandler(bool isLoggedIn, Account currentUser);
 
     public abstract class AccountHandlerBase : ObservableObject
     {
@@ -37,6 +37,8 @@ namespace FluentStore.SDK.Users
         private AbstractUICollection _signInForm;
         private readonly IPasswordVaultService _passwordVaultService = Ioc.Default.GetService<IPasswordVaultService>();
 
+        public event OnLoginStateChangedHandler OnLoginStateChanged;
+
         /// <summary>
         /// The currently signed in user. <see langword="null"/> if <see cref="IsLoggedIn"/> is <see langword="false"/>.
         /// </summary>
@@ -52,7 +54,11 @@ namespace FluentStore.SDK.Users
         public bool IsLoggedIn
         {
             get => _isLoggedIn;
-            set => SetProperty(ref _isLoggedIn, value);
+            set
+            {
+                SetProperty(ref _isLoggedIn, value);
+                OnLoginStateChanged?.Invoke(value, CurrentUser);
+            }
         }
 
         /// <inheritdoc cref="CreateSignInForm"/>
