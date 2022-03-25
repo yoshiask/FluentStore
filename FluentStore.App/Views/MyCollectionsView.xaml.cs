@@ -3,6 +3,7 @@ using FluentStoreAPI.Models;
 using System;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using OwlCore.WinUI.AbstractUI.Controls;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -28,13 +29,34 @@ namespace FluentStore.Views
             ViewModel = new MyCollectionsViewModel();
         }
 
-        private async void NewButton_Click(object sender, RoutedEventArgs e)
+        private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            var editDialog = new EditCollectionDetailsDialog(new Collection(), Content.XamlRoot);
+            // Populate "New collection" button menu
+            NewCollectionMenu.Items.Clear();
+            foreach (var handler in ViewModel.GetPackageHandlersForNewCollections())
+            {
+                var menuItem = new MenuFlyoutItem
+                {
+                    Text = handler.DisplayName,
+                    DataContext = handler
+                };
+                menuItem.Click += NewCollectionMenuItem_Click;
+
+                NewCollectionMenu.Items.Add(menuItem);
+            }
+        }
+
+        private async void NewCollectionMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not FrameworkElement element || element.DataContext is not SDK.PackageHandlerBase handler)
+                return;
+
+            var newCollection = await handler.CreateCollection() as SDK.Packages.IEditablePackage;
+            var editDialog = new AbstractFormDialog(newCollection.CreateEditForm(), Content.XamlRoot);
             if (await editDialog.ShowAsync() == ContentDialogResult.Primary)
             {
                 // User wants to save
-                await ViewModel.UpdateCollectionAsync(editDialog.Collection);
+                await ViewModel.UpdateCollectionAsync(newCollection);
             }
         }
     }

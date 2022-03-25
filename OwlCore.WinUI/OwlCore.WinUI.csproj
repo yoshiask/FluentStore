@@ -7,6 +7,7 @@
         <UseWinUI>true</UseWinUI>
     </PropertyGroup>
     <ItemGroup>
+      <None Remove="AbstractUI\Controls\AbstractFormDialog.xaml" />
       <None Remove="AbstractUI\Themes\AbstractFormStyle.xaml" />
       <None Remove="AbstractUI\Themes\AbstractUIPresenterStyle.xaml" />
     </ItemGroup>
@@ -21,6 +22,12 @@
 
     <ItemGroup>
         <ProjectReference Include="..\FluentStore.SDK.AbstractUI\FluentStore.SDK.AbstractUI.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Page Update="AbstractUI\Controls\AbstractFormDialog.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
     </ItemGroup>
 
     <ItemGroup>

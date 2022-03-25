@@ -9,7 +9,8 @@
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:controls="using:FluentStore.Controls"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    Loaded="Page_Loaded">
 
     <interactivity:Interaction.Behaviors>
         <core:EventTriggerBehavior EventName="Loaded">
@@ -28,14 +29,18 @@
                                       ViewPackageCommand="{x:Bind ViewModel.ViewCollectionCommand}"/>
 
         <CommandBar Grid.Row="1" DefaultLabelPosition="Right">
-            <AppBarButton x:Name="NewCollectionButton" Icon="Add" Label="New" Click="NewButton_Click"/>
+            <AppBarButton x:Name="NewCollectionButton" Icon="Add" Label="New">
+                <AppBarButton.Flyout>
+                    <MenuFlyout x:Name="NewCollectionMenu"/>
+                </AppBarButton.Flyout>
+            </AppBarButton>
         </CommandBar>
 
         <TeachingTip x:Name="NewCollectionTip"
-                          Target="{x:Bind NewCollectionButton}"
-                          Title="Create your first collection"
-                          Subtitle="Collections allow you to share, download, or install many apps at once."
-                          IsOpen="{x:Bind ViewModel.ShowNewCollectionTip, Mode=OneWay}">
+                     Target="{x:Bind NewCollectionButton}"
+                     Title="Create your first collection"
+                     Subtitle="Collections allow you to share, download, or install many apps at once."
+                     IsOpen="{x:Bind ViewModel.ShowNewCollectionTip, Mode=OneWay}">
             <TeachingTip.IconSource>
                 <SymbolIconSource Symbol="List" />
             </TeachingTip.IconSource>

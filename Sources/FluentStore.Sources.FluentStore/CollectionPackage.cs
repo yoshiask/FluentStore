@@ -12,7 +12,7 @@ using OwlCore.AbstractUI.Models;
 
 namespace FluentStore.Sources.FluentStore
 {
-    public class CollectionPackage : GenericPackageCollection<Collection>, IEditablePackageCollection, IEditablePackage, IDeletablePackage
+    public class CollectionPackage : GenericPackageCollection<Collection>, IPackageCollection, IEditablePackageCollection, IEditablePackage
     {
         private bool _canEditItems = false;
         private bool _canEdit = false;

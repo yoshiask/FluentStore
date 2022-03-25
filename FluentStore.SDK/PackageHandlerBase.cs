@@ -24,6 +24,16 @@ namespace FluentStore.SDK
 
         public bool IsEnabled { get; set; }
 
+        /// <summary>
+        /// Whether this handler can create packages.
+        /// </summary>
+        public bool CanCreatePackages { get; protected set; }
+
+        /// <summary>
+        /// Whether this handler can create collections.
+        /// </summary>
+        public bool CanCreateCollections { get; protected set; }
+
         private ImageBase _Image;
         /// <summary>
         /// An image that represents this handler.
@@ -97,6 +107,35 @@ namespace FluentStore.SDK
         /// but this is not a requirement and technically any package is allowed.
         /// </remarks>
         public virtual Task<List<PackageBase>> GetCollectionsAsync() => Task.FromResult(_emptyPackageList);
+
+        /// <summary>
+        /// Creates a new empty package.
+        /// </summary>
+        /// <returns>
+        /// An empty <see cref="PackageBase"/> that implements <see cref="Packages.IEditablePackage"/>.
+        /// </returns>
+        public virtual Task<PackageBase> CreatePackage()
+        {
+            if (CanCreatePackages)
+                throw new System.NotImplementedException($"{nameof(CreatePackage)} must be implemented if {nameof(CanCreatePackages)} is true.");
+
+            return Task.FromResult<PackageBase>(null);
+        }
+
+        /// <summary>
+        /// Creates a new empty collection.
+        /// </summary>
+        /// <returns>
+        /// An empty <see cref="PackageBase"/> that implements <see cref="Packages.IEditablePackage"/>
+        /// and <see cref="Packages.IEditablePackageCollection"/>.
+        /// </returns>
+        public virtual Task<PackageBase> CreateCollection()
+        {
+            if (CanCreateCollections)
+                throw new System.NotImplementedException($"{nameof(CreateCollection)} must be implemented if {nameof(CanCreateCollections)} is true.");
+
+            return Task.FromResult<PackageBase>(null);
+        }
 
         public bool Equals(PackageHandlerBase x, PackageHandlerBase y) => x.GetType() == y.GetType();
 

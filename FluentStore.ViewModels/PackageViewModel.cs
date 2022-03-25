@@ -46,6 +46,8 @@ namespace FluentStore.ViewModels
 
                 // Update derived properties
                 IsCollection = Package != null && Package.GetType().IsAssignableTo(typeof(SDK.Packages.IPackageCollection));
+                CanEdit = Package is SDK.Packages.IEditablePackage ep && ep.CanEdit;
+                CanDelete = Package is SDK.Packages.IDeletablePackage dp && dp.CanDelete;
             }
         }
 
@@ -89,6 +91,20 @@ namespace FluentStore.ViewModels
         {
             get => _IsCollection;
             private set => SetProperty(ref _IsCollection, value);
+        }
+
+        private bool _CanEdit;
+        public bool CanEdit
+        {
+            get => _CanEdit;
+            private set => SetProperty(ref _CanEdit, value);
+        }
+
+        private bool _CanDelete;
+        public bool CanDelete
+        {
+            get => _CanDelete;
+            private set => SetProperty(ref _CanDelete, value);
         }
 
         private ImageBase _AppIcon;

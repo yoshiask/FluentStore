@@ -1,0 +1,31 @@
+﻿<ContentDialog
+    x:Class="OwlCore.WinUI.AbstractUI.Controls.AbstractFormDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:OwlCore.WinUI.AbstractUI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:absuiThemes="using:OwlCore.WinUI.AbstractUI.Themes"
+    mc:Ignorable="d"
+    x:DefaultBindMode="OneWay"
+    Title="{x:Bind ViewModel.Title}"
+    PrimaryButtonText="{x:Bind ViewModel.SubmitText}"
+    PrimaryButtonCommand="{x:Bind ViewModel.SubmitCommand}"
+    SecondaryButtonText="{x:Bind ViewModel.CancelText}"
+    SecondaryButtonCommand="{x:Bind ViewModel.CancelCommand}"
+    IsSecondaryButtonEnabled="{x:Bind ViewModel.CanCancel}">
+
+    <ContentDialog.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <absuiThemes:AbstractUIPresenterStyle/>
+                <absuiThemes:AbstractUICollectionPresenterStyle/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </ContentDialog.Resources>
+
+    <controls:AbstractUICollectionPresenter ViewModel="{x:Bind ViewModel, Converter={StaticResource FormViewModelToCollectionViewModelConverter}}"
+                                            TemplateSelector="{StaticResource CollectionTemplateSelector}"
+                                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"/>
+    
+</ContentDialog>

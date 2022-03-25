@@ -77,7 +77,7 @@ namespace FluentStore.Sources.FluentStore
                 return _emptyPackageList;
 
             var collections = await FSApi.GetCollectionsAsync(accHandler.CurrentUser.Id);
-            return collections.Select(c => (PackageBase)new CollectionPackage(this, c) { Status = PackageStatus.BasicDetails }).ToList();
+            return collections.Select(c => new CollectionPackage(this, c) { Status = PackageStatus.BasicDetails }).Cast<PackageBase>().ToList();
         }
 
         public override ImageBase GetImage() => GetImageStatic();
