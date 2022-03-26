@@ -18,7 +18,7 @@ namespace FluentStore.SDK
         /// and registers all loaded package handlers with the provided <paramref name="packageHandlers"/>.
         /// </summary>
         /// <param name="packageHandlers">The dictionary to add loaded package handlers to.</param>
-        public static PluginLoadResult LoadPlugins(ISettingsService settings)
+        public static PluginLoadResult LoadPlugins(ISettingsService settings, PackageService pkgSvc, AccountService accSvc)
         {
             PluginLoadResult result = new();
 
@@ -49,16 +49,16 @@ namespace FluentStore.SDK
                         // and are public.
                         var assembly = Assembly.LoadFile(assemblyPath);
 
-                        foreach ((string typeName, PackageHandlerBase handler) in InstantiateAllPackageHandlers(assembly, settings))
+                        foreach ((string typeName, AccountHandlerBase handler) in InstantiateAllAccountHandlers(assembly, settings, pkgSvc, accSvc))
+                        {
+                            // Register handler
+                            result.AccountHandlers.Add(handler);
+                        }
+
+                        foreach ((string typeName, PackageHandlerBase handler) in InstantiateAllPackageHandlers(assembly, settings, pkgSvc, accSvc))
                         {
                             // Register handler with the type name as its ID
                             result.PackageHandlers.Add(typeName, handler);
-                        }
-
-                        foreach ((string typeName, AccountHandlerBase handler) in InstantiateAllAccountHandlers(assembly, settings))
-                        {
-                            // Register handler with the type name as its ID
-                            result.AccountHandlers.Add(handler);
                         }
                     }
                     catch (Exception ex)
@@ -69,6 +69,17 @@ namespace FluentStore.SDK
                         continue;
                     }
                 }
+            }
+
+            // Pass loaded handlers to respective services
+            accSvc.AccountHandlers = result.AccountHandlers;
+            pkgSvc.PackageHandlers = result.PackageHandlers;
+
+            // Call OnLoaded method on all handlers
+            IHandler[] handlers = result.AccountHandlers.OfType<IHandler>().Concat(result.PackageHandlers.Values.OfType<IHandler>()).ToArray();
+            foreach (var handler in handlers)
+            {
+                handler.OnLoaded();
             }
 
             return result;
@@ -84,7 +95,7 @@ namespace FluentStore.SDK
             return assembly;
         }
 
-        private static IEnumerable<(string typeName, PackageHandlerBase handler)> InstantiateAllPackageHandlers(Assembly pluginAssembly, ISettingsService settings)
+        private static IEnumerable<(string typeName, PackageHandlerBase handler)> InstantiateAllPackageHandlers(Assembly pluginAssembly, ISettingsService settings, PackageService pkgSvc, AccountService accSvc)
         {
             foreach (Type type in pluginAssembly.GetTypes()
                 .Where(t => t.BaseType.IsAssignableTo(typeof(PackageHandlerBase)) && t.IsPublic))
@@ -101,12 +112,15 @@ namespace FluentStore.SDK
                 // Enable or disable according to user settings
                 handler.IsEnabled = settings.GetPackageHandlerEnabledState(type.Name);
 
+                // Pass services to handler
+                ((IHandler)handler).SetServices(pkgSvc, accSvc);
+
                 // Register handler with the type name as its ID
                 yield return (type.Name, handler);
             }
         }
 
-        private static IEnumerable<(string typeName, AccountHandlerBase handler)> InstantiateAllAccountHandlers(Assembly pluginAssembly, ISettingsService settings)
+        private static IEnumerable<(string typeName, AccountHandlerBase handler)> InstantiateAllAccountHandlers(Assembly pluginAssembly, ISettingsService settings, PackageService pkgSvc, AccountService accSvc)
         {
             foreach (Type type in pluginAssembly.GetTypes()
                 .Where(t => t.BaseType.IsAssignableTo(typeof(AccountHandlerBase)) && t.IsPublic))
@@ -121,7 +135,10 @@ namespace FluentStore.SDK
                     continue;
 
                 // Enable or disable according to user settings
-                //handler.IsEnabled = settings.GetPackageHandlerEnabledState(type.Name);
+                //handler.IsEnabled = settings.GetAccountHandlerEnabledState(type.Name);
+
+                // Pass services to handler
+                ((IHandler)handler).SetServices(pkgSvc, accSvc);
 
                 // Register handler with the type name as its ID
                 yield return (type.Name, handler);

@@ -15,8 +15,11 @@ namespace FluentStore.SDK.Users
 {
     public delegate void OnLoginStateChangedHandler(bool isLoggedIn, Account currentUser);
 
-    public abstract class AccountHandlerBase : ObservableObject
+    public abstract class AccountHandlerBase : ObservableObject, IHandler
     {
+        public PackageService PkgSvc { get; set; }
+        public AccountService AccSvc { get; set; }
+
         /// <summary>
         /// A list of all namespaces this handler can handle.
         /// </summary>
@@ -291,6 +294,8 @@ namespace FluentStore.SDK.Users
             string resource = GetAuthProtocolUrl(CurrentUser.Urn.NamespaceIdentifier);
             return new(userName, password, resource);
         }
+
+        public virtual void OnLoaded() { }
     }
 
     public abstract class AccountHandlerBase<TAccount> : AccountHandlerBase where TAccount : Account

@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using FluentStore.SDK.Images;
+﻿using FluentStore.SDK.Images;
 using FluentStore.SDK.Users;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
@@ -8,11 +7,12 @@ using System.Threading.Tasks;
 
 namespace FluentStore.SDK
 {
-    public abstract class PackageHandlerBase : IEqualityComparer<PackageHandlerBase>
+    public abstract class PackageHandlerBase : IHandler, IEqualityComparer<PackageHandlerBase>
     {
         protected static readonly List<PackageBase> _emptyPackageList = new(0);
-        
-        public AccountService AccSvc { get; } = Ioc.Default.GetService<AccountService>();
+
+        public PackageService PkgSvc { get; set; }
+        public AccountService AccSvc { get; set; }
 
         /// <summary>
         /// A list of all namespaces this handler can handle.
@@ -136,6 +136,8 @@ namespace FluentStore.SDK
 
             return Task.FromResult<PackageBase>(null);
         }
+
+        public virtual void OnLoaded() { }
 
         public bool Equals(PackageHandlerBase x, PackageHandlerBase y) => x.GetType() == y.GetType();
 

@@ -15,7 +15,6 @@ namespace FluentStore.Sources.FluentStore
     public class FluentStoreHandler : PackageHandlerBase
     {
         internal readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
-        private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
         public const string NAMESPACE_COLLECTION = "fluent-store-collection";
         public override HashSet<string> HandledNamespaces => new()
@@ -24,6 +23,8 @@ namespace FluentStore.Sources.FluentStore
         };
 
         public override string DisplayName => "Fluent Store";
+
+        internal Users.FluentStoreAccountHandler AccHandler { get; private set; }
 
         public override Task<List<PackageBase>> GetFeaturedPackagesAsync() => Task.FromResult(_emptyPackageList);
 
@@ -48,7 +49,7 @@ namespace FluentStore.Sources.FluentStore
                     {
                         // Get details for each item
                         Urn packageUrn = Urn.Parse(packageId);
-                        PackageBase package = await PackageService.GetPackageAsync(packageUrn, PackageStatus.BasicDetails);
+                        PackageBase package = await PkgSvc.GetPackageAsync(packageUrn, PackageStatus.BasicDetails);
                         items.Add(package);
                     }
                     collectionPack.Update(items);
@@ -80,6 +81,12 @@ namespace FluentStore.Sources.FluentStore
             return collections.Select(c => new CollectionPackage(this, c) { Status = PackageStatus.BasicDetails }).Cast<PackageBase>().ToList();
         }
 
+        public override async Task<PackageBase> CreateCollection()
+        {
+            CollectionPackage pkg = new(this, new());
+            return pkg;
+        }
+
         public override ImageBase GetImage() => GetImageStatic();
         public static ImageBase GetImageStatic()
         {
@@ -98,6 +105,21 @@ namespace FluentStore.Sources.FluentStore
         public override Url GetUrlFromPackage(PackageBase package)
         {
             return "fluentstore://package/" + package.Urn.ToString();
+        }
+
+        public override void OnLoaded()
+        {
+            // Subscribe to login changes
+            AccHandler = AccSvc.GetHandlerForNamespace<Users.FluentStoreAccountHandler>();
+            AccHandler.OnLoginStateChanged += AccHandler_OnLoginStateChanged;
+
+            // Call login changed handler to make sure the states are synced
+            AccHandler_OnLoginStateChanged(AccHandler.IsLoggedIn, AccHandler.CurrentUser);
+        }
+
+        private void AccHandler_OnLoginStateChanged(bool isLoggedIn, Account currentUser)
+        {
+            CanCreateCollections = isLoggedIn;
         }
     }
 }

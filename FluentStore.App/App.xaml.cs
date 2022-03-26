@@ -95,9 +95,7 @@ namespace FluentStore
                 var accSvc = Ioc.Default.GetRequiredService<AccountService>();
 
                 log?.Log($"Began loading plugins");
-                var pluginLoadResult = PluginLoader.LoadPlugins(settings);
-                pkgSvc.PackageHandlers = pluginLoadResult.PackageHandlers;
-                accSvc.AccountHandlers = pluginLoadResult.AccountHandlers;
+                var pluginLoadResult = PluginLoader.LoadPlugins(settings, pkgSvc, accSvc);
                 log?.Log($"Finished loading plugins");
 
                 // Attempt to silently sign into any saved accounts
