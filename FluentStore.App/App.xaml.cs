@@ -98,11 +98,10 @@ namespace FluentStore
                 log?.Log($"Began loading plugins");
                 var pluginLoadResult = PluginLoader.LoadPlugins(settings, passwordVaultService);
                 pkgSvc.PackageHandlers = pluginLoadResult.PackageHandlers;
-                accSvc.AccountHandlers = pluginLoadResult.AccountHandlers;
                 log?.Log($"Finished loading plugins");
 
                 // Attempt to silently sign into any saved accounts
-                await accSvc.TrySlientSignInAsync();
+                await pkgSvc.TrySlientSignInAsync();
 
                 Window = new()
                 {

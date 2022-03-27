@@ -251,5 +251,52 @@ namespace FluentStore.SDK
         /// Gets the display name for the handler registered for the given namespace.
         /// </summary>
         public string GetHandlerDisplayName(string ns) => GetHandlerForNamespace(ns).DisplayName;
+
+
+        #region Account handling
+
+        /// <summary>
+        /// Attempts a silent sign-in using saved credentials
+        /// on all available account handlers.
+        /// </summary>
+        public async Task TrySlientSignInAsync()
+        {
+            foreach (var handler in PackageHandlers)
+            {
+                if (!handler.IsEnabled || handler.AccountHandler == null) continue;
+
+                await handler.AccountHandler.TrySilentSignInAsync();
+            }
+        }
+
+        /// <summary>
+        /// Passes control to the appropriate <see cref="Users.AccountHandlerBase"/>
+        /// after the app is activated with the <c>auth</c> protocol.
+        /// </summary>
+        /// <param name="url">
+        /// The <see cref="Url"/> the app was activated with.
+        /// </param>
+        public async Task RouteAuthActivation(Url url)
+        {
+            string id = url.PathSegments.Last();
+            var handler = GetAccountHandler(id);
+            await handler.HandleAuthActivation(url);
+        }
+
+        /// <summary>
+        /// Gets the account handler with the given ID.
+        /// </summary>
+        /// <exception cref="NotSupportedException">When no account handler matches the given ID.</exception>
+        /// <exception cref="InvalidOperationException"/>
+        public Users.AccountHandlerBase GetAccountHandler(string id)
+        {
+            var handler = PackageHandlers.Select(ph => ph.AccountHandler).FirstOrDefault(ah => ah != null && ah.Id == id);
+            if (handler != null)
+                return handler;
+
+            throw new NotSupportedException($"Could not find an account handler with ID \"{id}\".");
+        }
+
+        #endregion
     }
 }

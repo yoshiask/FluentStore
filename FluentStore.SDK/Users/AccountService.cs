@@ -25,36 +25,7 @@ namespace FluentStore.SDK.Users
             }
         }
 
-        public async Task TrySlientSignInAsync()
-        {
-            foreach (var handler in AccountHandlers)
-            {
-                //if (!handler.IsEnabled) continue;
-
-                await handler.TrySilentSignInAsync();
-            }
-        }
-
-        public async Task RouteAuthActivation(Url url)
-        {
-            string ns = url.PathSegments.Last();
-            var handler = GetHandler(ns);
-            await handler.HandleAuthActivation(url);
-        }
-
-        /// <summary>
-        /// Gets the handler with the given ID.
-        /// </summary>
-        /// <exception cref="NotSupportedException">When no account handler matches the given ID.</exception>
-        /// <exception cref="InvalidOperationException"/>
-        public AccountHandlerBase GetHandler(string id)
-        {
-            var handler = AccountHandlers.FirstOrDefault(h => h.Id == id);
-            if (handler != null)
-                return handler;
-
-            throw new NotSupportedException($"Could not find an account handler with ID \"{id}\".");
-        }
+        
 
         /// <summary>
         /// Attempts to get an authenticated handler with the given ID.
