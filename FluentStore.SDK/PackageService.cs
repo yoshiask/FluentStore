@@ -12,12 +12,11 @@ namespace FluentStore.SDK
 {
     public class PackageService
     {
-        private IReadOnlyDictionary<string, PackageHandlerBase> _PackageHandlers;
+        private IReadOnlySet<PackageHandlerBase> _PackageHandlers;
         /// <summary>
-        /// A cache of all valid package handlers. The key is the name of the <see cref="Type"/>,
-        /// and the value is an instance of the <see cref="PackageHandlerBase"/>
+        /// A cache of all valid package handlers.
         /// </summary>
-        public IReadOnlyDictionary<string, PackageHandlerBase> PackageHandlers
+        public IReadOnlySet<PackageHandlerBase> PackageHandlers
         {
             get => _PackageHandlers;
             set
@@ -40,7 +39,7 @@ namespace FluentStore.SDK
                 {
                     _NamespaceRegistry = new();
                     int i = 0;
-                    foreach (PackageHandlerBase handler in PackageHandlers.Values)
+                    foreach (PackageHandlerBase handler in PackageHandlers)
                     {
                         foreach (string ns in handler.HandledNamespaces)
                             _NamespaceRegistry.Add(ns, i);
@@ -57,7 +56,7 @@ namespace FluentStore.SDK
         /// </summary>
         public async IAsyncEnumerable<HandlerPackageListPair> GetFeaturedPackagesAsync()
         {
-            foreach (var handler in PackageHandlers.Values)
+            foreach (var handler in PackageHandlers)
             {
                 if (!handler.IsEnabled) continue;
 
@@ -79,7 +78,7 @@ namespace FluentStore.SDK
         public async Task<List<PackageBase>> SearchAsync(string query)
         {
             var packages = new List<PackageBase>();
-            foreach (var handler in PackageHandlers.Values)
+            foreach (var handler in PackageHandlers)
             {
                 if (!handler.IsEnabled) continue;
 
@@ -105,7 +104,7 @@ namespace FluentStore.SDK
         public async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
         {
             var packages = new List<PackageBase>();
-            foreach (var handler in PackageHandlers.Values)
+            foreach (var handler in PackageHandlers)
             {
                 if (!handler.IsEnabled) continue;
 
@@ -165,7 +164,7 @@ namespace FluentStore.SDK
         public async Task<PackageBase> GetPackageFromUrlAsync(Url url)
         {
             PackageBase package = null;
-            foreach (PackageHandlerBase handler in PackageHandlers.Values)
+            foreach (PackageHandlerBase handler in PackageHandlers)
             {
                 if (!handler.IsEnabled) continue;
 
@@ -196,7 +195,7 @@ namespace FluentStore.SDK
         public async Task<List<PackageBase>> GetCollectionsAsync()
         {
             var packages = new List<PackageBase>();
-            foreach (var handler in PackageHandlers.Values)
+            foreach (var handler in PackageHandlers)
             {
                 if (!handler.IsEnabled) continue;
 
@@ -221,7 +220,7 @@ namespace FluentStore.SDK
         {
             if (NamespaceRegistry.TryGetValue(ns, out var handlerIdx))
             {
-                var handler = PackageHandlers.Values.ElementAt(handlerIdx);
+                var handler = PackageHandlers.ElementAt(handlerIdx);
                 if (!handler.IsEnabled)
                     throw new InvalidOperationException($"The {handler.DisplayName} package handler is disabled. Please go to settings and re-enable it.");
                 return handler;
@@ -229,22 +228,6 @@ namespace FluentStore.SDK
             else
             {
                 throw new NotSupportedException("No package handler is registered for the namespace \"" + ns + "\".");
-            }
-        }
-
-        /// <summary>
-        /// Gets the handler with the given [class] name.
-        /// </summary>
-        /// <exception cref="NotSupportedException"/>
-        public PackageHandlerBase GetHandlerByName(string name)
-        {
-            if (PackageHandlers.TryGetValue(name, out var handler))
-            {
-                return handler;
-            }
-            else
-            {
-                throw new NotSupportedException("A package handler with the name \"" + name + "\" was not registered.");
             }
         }
 

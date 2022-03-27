@@ -50,13 +50,13 @@ namespace FluentStore.SDK
                         // and are public.
                         var assembly = Assembly.LoadFile(assemblyPath);
 
-                        foreach ((string typeName, PackageHandlerBase handler) in InstantiateAllPackageHandlers(assembly, settings))
+                        foreach (PackageHandlerBase handler in InstantiateAllPackageHandlers(assembly, settings))
                         {
                             // Register handler with the type name as its ID
-                            result.PackageHandlers.Add(typeName, handler);
+                            result.PackageHandlers.Add(handler);
                         }
 
-                        foreach ((string typeName, AccountHandlerBase handler) in InstantiateAllAccountHandlers(assembly, settings, passwordVaultService))
+                        foreach (AccountHandlerBase handler in InstantiateAllAccountHandlers(assembly, settings, passwordVaultService))
                         {
                             // Register handler with the type name as its ID
                             result.AccountHandlers.Add(handler);
@@ -85,7 +85,7 @@ namespace FluentStore.SDK
             return assembly;
         }
 
-        private static IEnumerable<(string typeName, PackageHandlerBase handler)> InstantiateAllPackageHandlers(Assembly pluginAssembly, ISettingsService settings)
+        private static IEnumerable<PackageHandlerBase> InstantiateAllPackageHandlers(Assembly pluginAssembly, ISettingsService settings)
         {
             foreach (Type type in pluginAssembly.GetTypes()
                 .Where(t => t.BaseType.IsAssignableTo(typeof(PackageHandlerBase)) && t.IsPublic))
@@ -103,11 +103,11 @@ namespace FluentStore.SDK
                 handler.IsEnabled = settings.GetPackageHandlerEnabledState(type.Name);
 
                 // Register handler with the type name as its ID
-                yield return (type.Name, handler);
+                yield return handler;
             }
         }
 
-        private static IEnumerable<(string typeName, AccountHandlerBase handler)> InstantiateAllAccountHandlers(Assembly pluginAssembly, ISettingsService settings, IPasswordVaultService passwordVaultService)
+        private static IEnumerable<AccountHandlerBase> InstantiateAllAccountHandlers(Assembly pluginAssembly, ISettingsService settings, IPasswordVaultService passwordVaultService)
         {
             object[] accHandlerCtorArgs = new object[] { passwordVaultService };
 
@@ -127,7 +127,7 @@ namespace FluentStore.SDK
                 //handler.IsEnabled = settings.GetPackageHandlerEnabledState(type.Name);
 
                 // Register handler with the type name as its ID
-                yield return (type.Name, handler);
+                yield return handler;
             }
         }
     }
@@ -136,13 +136,13 @@ namespace FluentStore.SDK
     {
         public PluginLoadResult() : this(new(), new()) { }
 
-        public PluginLoadResult(Dictionary<string, PackageHandlerBase> packageHandlers, HashSet<AccountHandlerBase> accountHandlers)
+        public PluginLoadResult(HashSet<PackageHandlerBase> packageHandlers, HashSet<AccountHandlerBase> accountHandlers)
         {
             PackageHandlers = packageHandlers;
             AccountHandlers = accountHandlers;
         }
 
-        public Dictionary<string, PackageHandlerBase> PackageHandlers { get; }
+        public HashSet<PackageHandlerBase> PackageHandlers { get; }
 
         public HashSet<AccountHandlerBase> AccountHandlers { get; }
     }
