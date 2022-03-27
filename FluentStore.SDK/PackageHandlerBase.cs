@@ -1,5 +1,6 @@
 ﻿using FluentStore.SDK.Images;
 using FluentStore.SDK.Users;
+using FluentStore.Services;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using System.Collections.Generic;
@@ -10,6 +11,18 @@ namespace FluentStore.SDK
     public abstract class PackageHandlerBase : IEqualityComparer<PackageHandlerBase>
     {
         protected static readonly List<PackageBase> _emptyPackageList = new(0);
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="PackageHandlerBase"/>.
+        /// </summary>
+        /// <param name="passwordVaultService">
+        /// The <see cref="IPasswordVaultService"/> to be used when
+        /// instantiating a new <see cref="AccountHandlerBase"/>.
+        /// </param>
+        public PackageHandlerBase(IPasswordVaultService passwordVaultService)
+        {
+
+        }
 
         /// <summary>
         /// A list of all namespaces this handler can handle.
@@ -106,5 +119,78 @@ namespace FluentStore.SDK
         public bool Equals(PackageHandlerBase x, PackageHandlerBase y) => x.GetType() == y.GetType();
 
         public int GetHashCode(PackageHandlerBase obj) => obj.GetType().GetHashCode();
+
+        #region Package editing
+
+        /// <summary>
+        /// Determines whether the specified package can be edited.
+        /// </summary>
+        /// <param name="package">
+        /// The package to check.
+        /// </param>
+        public virtual bool CanEditPackage(PackageBase package) => false;
+
+        /// <summary>
+        /// Determines whether packages can be added or removed from the specified
+        /// package collection.
+        /// </summary>
+        /// <param name="package">
+        /// The collection to check.
+        /// </param>
+        public virtual bool CanEditCollection(PackageBase package) => false;
+
+        /// <summary>
+        /// Attempts to save changes made to the package.
+        /// </summary>
+        /// <param name="package">
+        /// The package with changes to apply.
+        /// </param>
+        /// <returns>
+        /// Whether the package was saved successfully.
+        /// </returns>
+        public virtual Task<bool> SavePackageAsync(PackageBase package) => Task.FromResult(false);
+
+        #endregion
+
+        #region Package deleting
+
+        /// <summary>
+        /// Determines whether the specified package can be deleted.
+        /// </summary>
+        /// <param name="package">
+        /// The package to check.
+        /// </param>
+        public virtual bool CanDeletePackage(PackageBase package) => false;
+
+        /// <summary>
+        /// Attempts to delete the package.
+        /// </summary>
+        /// <param name="package">
+        /// The package to delete.
+        /// </param>
+        /// <returns>
+        /// Whether the package was deleted successfully.
+        /// </returns>
+        public virtual Task<bool> DeletePackageAsync(PackageBase package) => Task.FromResult(false);
+
+        #endregion
+
+        #region Package creation
+
+        /// <summary>
+        /// Determines whether new packages can be created.
+        /// </summary>
+        public virtual bool CanCreatePackage() => false;
+
+        /// <summary>
+        /// Creates a new package.
+        /// </summary>
+        /// <returns>
+        /// The new package if <see cref="CanCreatePackage"/> is <see langword="true"/>,
+        /// <see langword="null"/> if <see langword="false"/>.
+        /// </returns>
+        public virtual Task<PackageBase> CreatePackage() => Task.FromResult<PackageBase>(null);
+
+        #endregion
     }
 }
