@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using FluentStore.SDK.Images;
+﻿using FluentStore.SDK.Images;
 using FluentStore.SDK.Users;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
@@ -11,7 +10,6 @@ namespace FluentStore.SDK
     public abstract class PackageHandlerBase : IEqualityComparer<PackageHandlerBase>
     {
         protected static readonly List<PackageBase> _emptyPackageList = new(0);
-        protected AccountService AccSvc { get; } = Ioc.Default.GetService<AccountService>();
 
         /// <summary>
         /// A list of all namespaces this handler can handle.
@@ -21,6 +19,9 @@ namespace FluentStore.SDK
         /// </remarks>
         public abstract HashSet<string> HandledNamespaces { get; }
 
+        /// <summary>
+        /// Whether this package handler is enabled.
+        /// </summary>
         public bool IsEnabled { get; set; }
 
         private ImageBase _Image;
@@ -39,6 +40,11 @@ namespace FluentStore.SDK
                 return _Image;
             }
         }
+
+        /// <summary>
+        /// The current account handler for this package handler.
+        /// </summary>
+        public AccountHandlerBase AccountHandler { get; protected set; }
 
         /// <summary>
         /// The display name of this handler.
