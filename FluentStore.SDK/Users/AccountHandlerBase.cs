@@ -44,10 +44,6 @@ namespace FluentStore.SDK.Users
         /// </summary>
         public bool IsLoggedIn { get; protected set; }
 
-        // FIXME: Does this really belong in a model?
-        /// <inheritdoc cref="SignOutAsync"/>
-        public IAsyncRelayCommand SignOutCommand => new AsyncRelayCommand(SignOutAsync);
-
         /// <summary>
         /// If the user is not already signed in, attempt to silently sign in
         /// using credentials saved by <see cref="IPasswordVaultService"/>.
