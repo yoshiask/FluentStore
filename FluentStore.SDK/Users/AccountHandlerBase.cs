@@ -17,12 +17,9 @@ namespace FluentStore.SDK.Users
         private readonly IPasswordVaultService _passwordVaultService = Ioc.Default.GetService<IPasswordVaultService>();
 
         /// <summary>
-        /// A list of all namespaces this handler can handle.
+        /// A unique identifier for this type of account handler.
         /// </summary>
-        /// <remarks>
-        /// Namespaces cannot be shared across handlers.
-        /// </remarks>
-        public abstract HashSet<string> HandledNamespaces { get; }
+        public abstract string Id { get; }
 
         /// <summary>
         /// The display name of this handler.
@@ -54,7 +51,7 @@ namespace FluentStore.SDK.Users
 
             try
             {
-                if (TryGetAllCredentials(GetDefaultNamespcace(), out var credentials))
+                if (TryGetAllCredentials(out var credentials))
                 {
                     bool success = await SignInAsync(credentials[0]);
                     return success;
@@ -65,24 +62,13 @@ namespace FluentStore.SDK.Users
         }
 
         /// <summary>
-        /// Gets the namespace this handler uses by default for accounts.
-        /// </summary>
-        public virtual string GetDefaultNamespcace() => HandledNamespaces.First();
-
-        /// <summary>
         /// Creates a <see cref="Url"/> that can be used as a redirect URI for authentication.
         /// <para>
         /// When the app is activated using this URI, <see cref="HandleAuthActivation(Url)"/>
         /// will be called with the URI.
         /// </para>
         /// </summary>
-        /// <param name="ns">
-        /// The namespace used to route auth activations to their handler.
-        /// <para>
-        /// If <see langword="null"/>, <see cref="GetDefaultNamespcace"/> will be used.
-        /// </para>
-        /// </param>
-        public virtual Url GetAuthProtocolUrl(string ns) => $"fluentstore://auth/{ns ?? GetDefaultNamespcace()}";
+        public virtual Url GetAuthProtocolUrl() => $"fluentstore://auth/{Id}";
 
         /// <summary>
         /// Determines if <paramref name="otherUser"/> is the signed in user.
@@ -136,15 +122,14 @@ namespace FluentStore.SDK.Users
         /// <see langword="null"/> if no credential exists.
         /// </para>
         /// </returns>
-        public virtual CredentialBase GetCredential(Urn userUrn)
+        public virtual CredentialBase GetCredential(string userId)
         {
             CredentialBase credential = null;
 
             if (_passwordVaultService != null)
             {
-                string userName = userUrn.GetContent<NamespaceSpecificString>().UnEscapedValue;
-                credential = GetAllCredentials(userUrn.NamespaceIdentifier)
-                    .FirstOrDefault(c => c.UserName == userName);
+                credential = GetAllCredentials()
+                    .FirstOrDefault(c => c.UserName == userId);
             }
 
             return credential;
@@ -162,9 +147,9 @@ namespace FluentStore.SDK.Users
         /// <returns>
         /// <see langword="false"/> if no credential exists.
         /// </returns>
-        public bool TryGetCredential(Urn userUrn, [NotNullWhen(true)] out CredentialBase credential)
+        public bool TryGetCredential(string userId, [NotNullWhen(true)] out CredentialBase credential)
         {
-            credential = GetCredential(userUrn);
+            credential = GetCredential(userId);
             return credential != null;
         }
 
@@ -174,9 +159,9 @@ namespace FluentStore.SDK.Users
         /// </summary>
         /// <param name="ns">The namespace to look up.</param>
         /// <returns>A list of matching <see cref="CredentialBase"/>s.</returns>
-        public virtual IList<CredentialBase> GetAllCredentials(string ns)
+        public virtual IList<CredentialBase> GetAllCredentials()
         {
-            return _passwordVaultService.FindAllByResource(GetAuthProtocolUrl(ns));
+            return _passwordVaultService.FindAllByResource(GetAuthProtocolUrl());
         }
 
         /// <summary>
@@ -196,11 +181,11 @@ namespace FluentStore.SDK.Users
         /// If <see langword="true"/> is returned, then <paramref name="credentials"/> is
         /// guarenteed to be not <see langword="null"/> and have at least one element.
         /// </remarks>
-        public bool TryGetAllCredentials(string ns, [NotNullWhen(true)] out IList<CredentialBase> credentials)
+        public bool TryGetAllCredentials([NotNullWhen(true)] out IList<CredentialBase> credentials)
         {
             try
             {
-                credentials = GetAllCredentials(ns);
+                credentials = GetAllCredentials();
                 return credentials != null && credentials.Count > 0;
             }
             catch
@@ -254,9 +239,7 @@ namespace FluentStore.SDK.Users
         /// </returns>
         private CredentialBase CreateCredential(string password)
         {
-            string userName = CurrentUser.Urn.GetContent<NamespaceSpecificString>().UnEscapedValue;
-            string resource = GetAuthProtocolUrl(CurrentUser.Urn.NamespaceIdentifier);
-            return new(userName, password, resource);
+            return new(userName: CurrentUser.Id, password: password, resource: GetAuthProtocolUrl());
         }
     }
 

@@ -155,7 +155,7 @@ namespace FluentStore.SDK.Users
             {
                 Authority = Authority,
                 ClientId = ClientId,
-                RedirectUri = GetAuthProtocolUrl(null),
+                RedirectUri = GetAuthProtocolUrl(),
                 Scope = OPENID_SCOPES,
             };
             

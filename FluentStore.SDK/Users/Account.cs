@@ -1,5 +1,4 @@
-﻿using Garfoot.Utilities.FluentUrn;
-using OwlCore.AbstractUI.Models;
+﻿using OwlCore.AbstractUI.Models;
 using System;
 
 namespace FluentStore.SDK.Users
@@ -8,13 +7,7 @@ namespace FluentStore.SDK.Users
     {
         private AbstractUICollection _manageAccountForm;
 
-        public Urn Urn { get; set; }
-
-        public string DisplayName { get; set; }
-
-        public string Email { get; set; }
-
-        public string Id => Urn.GetContent<NamespaceSpecificString>().UnEscapedValue;
+        public string Id { get; set; }
 
         /// <inheritdoc cref="CreateManageAccountForm"/>
         public AbstractUICollection ManageAccountForm
@@ -33,10 +26,10 @@ namespace FluentStore.SDK.Users
         /// </summary>
         protected abstract AbstractUICollection CreateManageAccountForm();
 
-        public bool Equals(Account other) => Urn.Equals(other.Urn);
+        public bool Equals(Account other) => Id.Equals(other.Id);
 
         public override bool Equals(object obj) => obj is Account other && this.Equals(other);
 
-        public override int GetHashCode() => Urn.GetHashCode();
+        public override int GetHashCode() => Id.GetHashCode();
     }
 }
