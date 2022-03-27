@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using FluentStore.Services;
 using Flurl;
@@ -13,10 +12,10 @@ using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Users
 {
-    public delegate void OnLoginStateChangedHandler(bool isLoggedIn);
-
-    public abstract class AccountHandlerBase : ObservableObject
+    public abstract class AccountHandlerBase
     {
+        private readonly IPasswordVaultService _passwordVaultService = Ioc.Default.GetService<IPasswordVaultService>();
+
         /// <summary>
         /// A list of all namespaces this handler can handle.
         /// </summary>
@@ -30,42 +29,20 @@ namespace FluentStore.SDK.Users
         /// </summary>
         public abstract string DisplayName { get; }
 
+        /// <summary>
+        /// Whether this account handler is enabled.
+        /// </summary>
         public bool IsEnabled { get; set; }
-
-        private Account _currentUser;
-        private bool _isLoggedIn;
-        private AbstractUICollection _signInForm;
-        private readonly IPasswordVaultService _passwordVaultService = Ioc.Default.GetService<IPasswordVaultService>();
 
         /// <summary>
         /// The currently signed in user. <see langword="null"/> if <see cref="IsLoggedIn"/> is <see langword="false"/>.
         /// </summary>
-        public Account CurrentUser
-        {
-            get => _currentUser;
-            set => SetProperty(ref _currentUser, value);
-        }
+        public Account CurrentUser { get; protected set; }
 
         /// <summary>
         /// Whether a user is signed in.
         /// </summary>
-        public bool IsLoggedIn
-        {
-            get => _isLoggedIn;
-            set => SetProperty(ref _isLoggedIn, value);
-        }
-
-        /// <inheritdoc cref="CreateSignInForm"/>
-        public AbstractUICollection SignInForm
-        {
-            get
-            {
-                if (_signInForm == null)
-                    _signInForm = CreateSignInForm();
-                return _signInForm;
-            }
-            set => _signInForm = value;
-        }
+        public bool IsLoggedIn { get; protected set; }
 
         // FIXME: Does this really belong in a model?
         /// <inheritdoc cref="SignOutAsync"/>
