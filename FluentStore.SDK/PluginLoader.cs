@@ -11,6 +11,7 @@ namespace FluentStore.SDK
     public static class PluginLoader
     {
         private static readonly Type[] _emptyTypeList = Array.Empty<Type>();
+        private static readonly Type[] _accHandlerTypeList = new[] { typeof(IPasswordVaultService) };
         private static readonly object[] _emptyObjectList = Array.Empty<object>();
 
         /// <summary>
@@ -18,7 +19,7 @@ namespace FluentStore.SDK
         /// and registers all loaded package handlers with the provided <paramref name="packageHandlers"/>.
         /// </summary>
         /// <param name="packageHandlers">The dictionary to add loaded package handlers to.</param>
-        public static PluginLoadResult LoadPlugins(ISettingsService settings)
+        public static PluginLoadResult LoadPlugins(ISettingsService settings, IPasswordVaultService passwordVaultService)
         {
             PluginLoadResult result = new();
 
@@ -55,7 +56,7 @@ namespace FluentStore.SDK
                             result.PackageHandlers.Add(typeName, handler);
                         }
 
-                        foreach ((string typeName, AccountHandlerBase handler) in InstantiateAllAccountHandlers(assembly, settings))
+                        foreach ((string typeName, AccountHandlerBase handler) in InstantiateAllAccountHandlers(assembly, settings, passwordVaultService))
                         {
                             // Register handler with the type name as its ID
                             result.AccountHandlers.Add(handler);
@@ -106,17 +107,19 @@ namespace FluentStore.SDK
             }
         }
 
-        private static IEnumerable<(string typeName, AccountHandlerBase handler)> InstantiateAllAccountHandlers(Assembly pluginAssembly, ISettingsService settings)
+        private static IEnumerable<(string typeName, AccountHandlerBase handler)> InstantiateAllAccountHandlers(Assembly pluginAssembly, ISettingsService settings, IPasswordVaultService passwordVaultService)
         {
+            object[] accHandlerCtorArgs = new object[] { passwordVaultService };
+
             foreach (Type type in pluginAssembly.GetTypes()
                 .Where(t => t.BaseType.IsAssignableTo(typeof(AccountHandlerBase)) && t.IsPublic))
             {
-                var ctr = type.GetConstructor(_emptyTypeList);
+                var ctr = type.GetConstructor(_accHandlerTypeList);
                 if (ctr == null)
                     continue;
 
                 // Create a new instance of the handler
-                var handler = (AccountHandlerBase)ctr.Invoke(_emptyObjectList);
+                var handler = (AccountHandlerBase)ctr.Invoke(accHandlerCtorArgs);
                 if (handler == null)
                     continue;
 

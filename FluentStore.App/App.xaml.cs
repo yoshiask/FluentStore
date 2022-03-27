@@ -91,11 +91,12 @@ namespace FluentStore
             {
                 // Load plugins and initialize package and account services
                 var settings = Ioc.Default.GetRequiredService<ISettingsService>();
+                var passwordVaultService = Ioc.Default.GetRequiredService<IPasswordVaultService>();
                 var pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
                 var accSvc = Ioc.Default.GetRequiredService<AccountService>();
 
                 log?.Log($"Began loading plugins");
-                var pluginLoadResult = PluginLoader.LoadPlugins(settings);
+                var pluginLoadResult = PluginLoader.LoadPlugins(settings, passwordVaultService);
                 pkgSvc.PackageHandlers = pluginLoadResult.PackageHandlers;
                 accSvc.AccountHandlers = pluginLoadResult.AccountHandlers;
                 log?.Log($"Finished loading plugins");

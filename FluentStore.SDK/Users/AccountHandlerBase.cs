@@ -14,7 +14,12 @@ namespace FluentStore.SDK.Users
 {
     public abstract class AccountHandlerBase
     {
-        private readonly IPasswordVaultService _passwordVaultService = Ioc.Default.GetService<IPasswordVaultService>();
+        private readonly IPasswordVaultService _passwordVaultService;
+
+        public AccountHandlerBase(IPasswordVaultService passwordVaultService)
+        {
+            _passwordVaultService = passwordVaultService;
+        }
 
         /// <summary>
         /// A unique identifier for this type of account handler.
@@ -245,6 +250,10 @@ namespace FluentStore.SDK.Users
 
     public abstract class AccountHandlerBase<TAccount> : AccountHandlerBase where TAccount : Account
     {
+        public AccountHandlerBase(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
+        {
+        }
+
         /// <summary>
         /// Casts <see cref="AccountHandlerBase.CurrentUser"/> to <typeparamref name="TAccount"/>.
         /// </summary>

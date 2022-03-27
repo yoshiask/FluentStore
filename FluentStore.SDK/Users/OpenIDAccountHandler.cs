@@ -28,6 +28,10 @@ namespace FluentStore.SDK.Users
         private OidcClient _client;
         private AuthorizeState _state;
 
+        protected OpenIDAccountHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
+        {
+        }
+
         /// <summary>
         /// Called when sign-in is successful.
         /// </summary>
