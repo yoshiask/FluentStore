@@ -6,14 +6,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentStore.SDK.Packages;
 using FluentStore.SDK;
-using FluentStore.SDK.AbstractUI.Models;
 
 namespace FluentStore.Sources.FluentStore
 {
-    public class CollectionPackage : GenericPackageCollection<Collection>, IEditablePackage
+    public class CollectionPackage : GenericPackageCollection<Collection>
     {
-        bool IEditablePackage.IsReadOnly { get; set; }
-
         public CollectionPackage(Collection collection = null, IEnumerable<PackageBase> items = null)
         {
             if (collection != null)
@@ -90,11 +87,6 @@ namespace FluentStore.Sources.FluentStore
         public override async Task<List<ImageBase>> CacheScreenshots()
         {
             return new List<ImageBase>(0);
-        }
-
-        AbstractForm IEditablePackage.CreateEditForm()
-        {
-            throw new System.NotImplementedException();
         }
     }
 }

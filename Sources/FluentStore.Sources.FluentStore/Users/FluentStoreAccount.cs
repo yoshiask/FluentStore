@@ -1,9 +1,6 @@
-﻿using FluentStore.SDK.AbstractUI;
-using FluentStore.SDK.Users;
+﻿using FluentStore.SDK.Users;
 using FluentStoreAPI.Models;
 using FluentStoreAPI.Models.Firebase;
-using Garfoot.Utilities.FluentUrn;
-using OwlCore.AbstractUI.Models;
 
 namespace FluentStore.Sources.FluentStore.Users
 {
@@ -19,7 +16,7 @@ namespace FluentStore.Sources.FluentStore.Users
 
         public void Update(User user)
         {
-            Urn = new(FluentStoreAccountHandler.NAMESPACE_FSUSER, new RawNamespaceSpecificString(user.LocalID));
+            Id = user.LocalID;
             DisplayName = user.DisplayName;
             Email = user.Email;
         }
@@ -27,15 +24,6 @@ namespace FluentStore.Sources.FluentStore.Users
         public void Update(Profile profile)
         {
             DisplayName = profile.DisplayName;
-        }
-
-        protected override AbstractUICollection CreateManageAccountForm()
-        {
-            return AbstractUIHelper.CreateSingleButtonUI("ManageCollection", "ManageButton", "Manage account", "\uE8A7",
-                (sender, e) =>
-                {
-                    
-                });
         }
     }
 }

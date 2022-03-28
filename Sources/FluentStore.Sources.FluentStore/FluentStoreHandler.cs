@@ -3,21 +3,26 @@ using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using FSAPI = FluentStoreAPI.FluentStoreAPI;
 using FluentStore.SDK;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Linq;
-using FluentStore.SDK.Users;
 using FluentStore.SDK.Helpers;
+using FluentStore.Services;
 
 namespace FluentStore.Sources.FluentStore
 {
     public class FluentStoreHandler : PackageHandlerBase
     {
-        private readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
+        public const string NAMESPACE_COLLECTION = "fluent-store-collection";
+
+        private readonly FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
-        public const string NAMESPACE_COLLECTION = "fluent-store-collection";
+        public FluentStoreHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
+        {
+            AccountHandler = new Users.FluentStoreAccountHandler(FSApi, passwordVaultService);
+        }
+
         public override HashSet<string> HandledNamespaces => new()
         {
             NAMESPACE_COLLECTION,
@@ -72,11 +77,10 @@ namespace FluentStore.Sources.FluentStore
         public override async Task<List<PackageBase>> GetCollectionsAsync()
         {
             // Get current user
-            var accHandler = AccSvc.GetHandlerForNamespace<Users.FluentStoreAccountHandler>();
-            if (!accHandler.IsLoggedIn)
+            if (!AccountHandler.IsLoggedIn)
                 return _emptyPackageList;
 
-            var collections = await FSApi.GetCollectionsAsync(accHandler.CurrentUser.Id);
+            var collections = await FSApi.GetCollectionsAsync(AccountHandler.CurrentUser.Id);
             return collections.Select(c => (PackageBase)new CollectionPackage(c) { Status = PackageStatus.BasicDetails }).ToList();
         }
 
