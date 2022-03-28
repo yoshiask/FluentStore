@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Diagnostics;
 using FluentStore.SDK;
 using FluentStore.SDK.Images;
+using FluentStore.Services;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using Octokit;
@@ -12,11 +13,16 @@ namespace FluentStore.Sources.GitHub
 {
     public class GitHubHandler : PackageHandlerBase
     {
-        // Users need to sign in to avoid the rate limit issues
-
-        private static readonly GitHubClient _client = new(new ProductHeaderValue("fluent-store"), Users.CredentialStore.Current);
-
         public const string NAMESPACE_REPO = "gh-repo";
+
+        private static readonly Users.CredentialStore _credentialStore = new();
+        private static readonly GitHubClient _client = new(new ProductHeaderValue("fluent-store"), _credentialStore);
+
+        public GitHubHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
+        {
+            AccountHandler = new Users.GitHubAccountHandler(_client, _credentialStore, passwordVaultService);
+        }
+
         public override HashSet<string> HandledNamespaces => new()
         {
             NAMESPACE_REPO
@@ -77,7 +83,5 @@ namespace FluentStore.Sources.GitHub
         {
             return _client.Repository.Release.GetAll(repo.Id);
         }
-
-        internal static GitHubClient GetClient() => _client;
     }
 }
