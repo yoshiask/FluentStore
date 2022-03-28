@@ -196,7 +196,7 @@ namespace FluentStore.SDK
         /// The new package if <see cref="CanCreatePackage"/> is <see langword="true"/>,
         /// <see langword="null"/> if <see langword="false"/>.
         /// </returns>
-        public virtual Task<PackageBase> CreatePackage() => Task.FromResult<PackageBase>(null);
+        public virtual Task<PackageBase> CreatePackageAsync() => Task.FromResult<PackageBase>(null);
 
         #endregion
     }
