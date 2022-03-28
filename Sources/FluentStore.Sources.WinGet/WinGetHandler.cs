@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using WinGetRun;
 using WinGetRun.Models;
 using FluentStore.SDK;
-using Microsoft.Extensions.DependencyInjection;
+using FluentStore.Services;
 
 namespace FluentStore.Sources.WinGet
 {
@@ -17,6 +17,12 @@ namespace FluentStore.Sources.WinGet
         private readonly WinGetApi WinGetApi = new();
 
         public const string NAMESPACE_WINGET = "winget";
+
+        public WinGetHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
+        {
+
+        }
+
         public override HashSet<string> HandledNamespaces => new()
         {
             NAMESPACE_WINGET
@@ -97,7 +103,7 @@ namespace FluentStore.Sources.WinGet
 
         public override Url GetUrlFromPackage(PackageBase package)
         {
-            if (!(package is WinGetPackage wgPackage))
+            if (package is not WinGetPackage wgPackage)
                 throw new System.ArgumentException();
 
             char sortChar = wgPackage.PublisherId[0];
