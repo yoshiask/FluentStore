@@ -1,4 +1,5 @@
-﻿using FluentStore.SDK.Images;
+﻿using FluentStore.SDK.AbstractUI.Models;
+using FluentStore.SDK.Images;
 using FluentStore.SDK.Users;
 using FluentStore.Services;
 using Flurl;
@@ -138,6 +139,12 @@ namespace FluentStore.SDK
         /// The collection to check.
         /// </param>
         public virtual bool CanEditCollection(PackageBase package) => false;
+
+        /// <summary>
+        /// Creates an AbstractUI component that represents a form to edit
+        /// the provided package.
+        /// </summary>
+        public virtual AbstractForm CreateEditForm(PackageBase package) => null;
 
         /// <summary>
         /// Attempts to save changes made to the package.
