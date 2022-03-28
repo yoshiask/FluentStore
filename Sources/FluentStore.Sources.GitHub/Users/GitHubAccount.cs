@@ -15,7 +15,7 @@ namespace FluentStore.Sources.GitHub.Users
 
         public void Update(Octokit.User user)
         {
-            Urn = new(GitHubAccountHandler.NAMESPACE_GHUSER, new RawNamespaceSpecificString(user.Id.ToString()));
+            Id = user.Id.ToString();
             DisplayName = user.Name;
             GitHubUser = user;
         }

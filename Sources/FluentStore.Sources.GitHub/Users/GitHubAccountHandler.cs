@@ -1,12 +1,14 @@
 ﻿using CommunityToolkit.Diagnostics;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using FluentStore.SDK.AbstractUI;
+using FluentStore.SDK.AbstractUI.Models;
 using FluentStore.SDK.Users;
 using FluentStore.Services;
 using Flurl;
 using Octokit;
 using OwlCore.AbstractUI.Models;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FluentStore.Sources.GitHub.Users
@@ -96,14 +98,14 @@ namespace FluentStore.Sources.GitHub.Users
             await SignInAsync(response.AccessToken);
         }
 
-        public override AbstractUICollection CreateSignInForm()
+        public override AbstractForm CreateSignInForm()
         {
-            return AbstractUIHelper.CreateSingleButtonUI("SignInCollection", "SignInButton", "Sign in with browser", "\uE8A7",
+            return AbstractUIHelper.CreateSingleButtonForm("SignInCollection", "Click the button below to sign in with browser.", "Sign in",
                 async (sender, e) =>
                 {
                     // Generate start URL
                     // https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#1-request-a-users-github-identity
-                    Octokit.OauthLoginRequest request = new(Secrets.GH_CLIENTID)
+                    OauthLoginRequest request = new(Secrets.GH_CLIENTID)
                     {
                         RedirectUri = GetAuthProtocolUrl().ToUri()
                     };
@@ -116,40 +118,35 @@ namespace FluentStore.Sources.GitHub.Users
                 });
         }
 
-        public override AbstractUICollection CreateSignUpForm()
+        public override AbstractForm CreateSignUpForm()
         {
             throw new NotImplementedException();
         }
 
-        public override AbstractUICollection CreateManageAccountForm()
+        public override AbstractForm CreateManageAccountForm()
         {
-            return AbstractUIHelper.CreateSingleButtonUI("ManageCollection", "ManageButton", "Manage account", "\uE8A7",
-                async (sender, e) =>
-                {
-                    INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
-                    await navService.OpenInBrowser(GetAccount().GitHubUser.HtmlUrl);
-                });
+            return AbstractUIHelper.CreateOpenInBrowserForm("ManageCollection", "Manage your account on the website.",
+                GetAccount().GitHubUser.HtmlUrl, Ioc.Default.GetRequiredService<INavigationService>());
 
             // FIXME: The update call returns HTTP 404
-            AbstractButton manageButton = new("manageButton", "Save", iconCode: "\uE74E", type: AbstractButtonType.Confirm);
-            manageButton.Clicked += ManageButton_Clicked;
-
-            AbstractUICollection ui = new("ManageCollection")
+            AbstractForm form = new("ManageCollection", onSubmit: ManageButton_Clicked)
             {
                 new AbstractTextBox(ABSUI_ID_NAMEBOX, DisplayName, "Name"),
                 new AbstractTextBox(ABSUI_ID_BIOBOX, GetAccount().GitHubUser.Bio, "Bio"),
                 new AbstractTextBox(ABSUI_ID_COMPANYBOX, GetAccount().GitHubUser.Company, "Company"),
                 new AbstractTextBox(ABSUI_ID_LOCATIONBOX, GetAccount().GitHubUser.Location, "Location"),
-                manageButton
             };
-            return ui;
+            return form;
         }
 
         private async void ManageButton_Clicked(object sender, EventArgs e)
         {
+            if (sender is not AbstractForm form)
+                return;
+
             UserUpdate update = new();
 
-            foreach (AbstractTextBox box in ManageAccountForm.Where(elem => elem is AbstractTextBox))
+            foreach (AbstractTextBox box in form.Where(elem => elem is AbstractTextBox))
             {
                 string val = box.Value;
                 switch (box.Id)

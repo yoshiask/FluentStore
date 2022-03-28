@@ -1,4 +1,5 @@
-﻿using FluentStore.Services;
+﻿using FluentStore.SDK.AbstractUI.Models;
+using FluentStore.Services;
 using Flurl;
 using OwlCore.AbstractUI.Models;
 using System.Collections.Generic;
@@ -236,19 +237,19 @@ namespace FluentStore.SDK.Users
         public abstract Task HandleAuthActivation(Url url);
 
         /// <summary>
-        /// Creates an <see cref="AbstractUICollection"/> that represents a sign-in form.
+        /// Creates an <see cref="AbstractForm"/> that represents a sign-in form.
         /// </summary>
-        public abstract AbstractUICollection CreateSignInForm();
+        public abstract AbstractForm CreateSignInForm();
 
         /// <summary>
-        /// Creates an <see cref="AbstractUICollection"/> that represents an account creation form.
+        /// Creates an <see cref="AbstractForm"/> that represents an account creation form.
         /// </summary>
-        public abstract AbstractUICollection CreateSignUpForm();
+        public abstract AbstractForm CreateSignUpForm();
 
         /// <summary>
-        /// Creates an <see cref="AbstractUICollection"/> that represents an account management form.
+        /// Creates an <see cref="AbstractForm"/> that represents an account management form.
         /// </summary>
-        public abstract AbstractUICollection CreateManageAccountForm();
+        public abstract AbstractForm CreateManageAccountForm();
 
         /// <summary>
         /// Gets an updated <see cref="CurrentUser"/> after a successful sign-in.

@@ -2,7 +2,6 @@
 using FluentStore.SDK.Users;
 using FluentStore.Services;
 using Flurl;
-using OwlCore.AbstractUI.Models;
 using System;
 using System.Threading.Tasks;
 
@@ -86,18 +85,18 @@ namespace FluentStore.Sources.FluentStore.Users
             return Task.CompletedTask;
         }
 
-        public override AbstractUICollection CreateSignInForm()
+        public override AbstractForm CreateSignInForm()
         {
             EmailPasswordForm form = new("SignInForm", OnSignInFormSubmitted);
             return form;
         }
 
-        public override AbstractUICollection CreateSignUpForm()
+        public override AbstractForm CreateSignUpForm()
         {
             throw new NotImplementedException();
         }
 
-        public override AbstractUICollection CreateManageAccountForm()
+        public override AbstractForm CreateManageAccountForm()
         {
             throw new NotImplementedException();
         }

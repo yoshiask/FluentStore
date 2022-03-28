@@ -1,13 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Threading.Tasks;
 using FluentStore.Services;
-using OwlCore.AbstractUI.Models;
 using System.Collections.Generic;
 using Flurl;
 using IdentityModel.OidcClient;
 using System.Security.Claims;
 using System;
 using FluentStore.SDK.AbstractUI;
+using FluentStore.SDK.AbstractUI.Models;
 
 namespace FluentStore.SDK.Users
 {
@@ -115,9 +115,9 @@ namespace FluentStore.SDK.Users
             CurrentUser = null;
         }
 
-        public override AbstractUICollection CreateSignInForm()
+        public override AbstractForm CreateSignInForm()
         {
-            return AbstractUIHelper.CreateSingleButtonUI("SignInCollection", "SignInButton", "Sign in with browser", "\uE8A7",
+            return AbstractUIHelper.CreateSingleButtonForm("SignInCollection", "Click the button below to sign in with browser.", "Sign in",
                 async (sender, e) =>
                 {
                     // Generate start URL, state, nonce, code challenge
@@ -129,9 +129,9 @@ namespace FluentStore.SDK.Users
                 });
         }
 
-        public override AbstractUICollection CreateSignUpForm()
+        public override AbstractForm CreateSignUpForm()
         {
-            return AbstractUIHelper.CreateSingleButtonUI("SignUpCollection", "SignUpButton", "Sign up with browser", "\uE8A7",
+            return AbstractUIHelper.CreateSingleButtonForm("SignUpCollection", "Click the button below to sign up in your browser.", "Sign up",
                 async (sender, e) =>
                 {
                     INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();

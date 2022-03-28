@@ -10,4 +10,8 @@
         <PackageReference Include="OwlCore" Version="0.0.58" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
+    </ItemGroup>
+
 </Project>

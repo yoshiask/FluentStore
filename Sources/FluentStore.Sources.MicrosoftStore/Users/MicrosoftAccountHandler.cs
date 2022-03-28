@@ -1,10 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using FluentStore.SDK.AbstractUI;
+using FluentStore.SDK.AbstractUI.Models;
 using FluentStore.SDK.Users;
 using FluentStore.Services;
 using Microsoft.Graph;
 using Microsoft.Marketplace.Storefront.Contracts;
-using OwlCore.AbstractUI.Models;
 using System.Threading.Tasks;
 
 namespace FluentStore.Sources.MicrosoftStore.Users
@@ -41,14 +41,11 @@ namespace FluentStore.Sources.MicrosoftStore.Users
             return new MicrosoftAccount(user);
         }
 
-        public override AbstractUICollection CreateManageAccountForm()
+        public override AbstractForm CreateManageAccountForm()
         {
-            return AbstractUIHelper.CreateSingleButtonUI("ManageCollection", "ManageButton", "Manage account", "\uE8A7",
-                async (sender, e) =>
-                {
-                    INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
-                    await navService.OpenInBrowser("https://account.microsoft.com/profile");
-                });
+            INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
+            return AbstractUIHelper.CreateOpenInBrowserForm("ManageCollection", "Manage your account on the website.",
+                "https://account.microsoft.com/profile", navService);
         }
 
         /// <summary>
