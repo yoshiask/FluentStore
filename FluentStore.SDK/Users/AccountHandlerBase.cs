@@ -9,8 +9,11 @@ using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Users
 {
+    public delegate void OnLoginStateChangedHandler(AccountHandlerBase sender, bool isLoggedIn);
+
     public abstract class AccountHandlerBase
     {
+        private bool _isLoggedIn = false;
         private readonly IPasswordVaultService _passwordVaultService;
 
         public AccountHandlerBase(IPasswordVaultService passwordVaultService)
@@ -41,7 +44,23 @@ namespace FluentStore.SDK.Users
         /// <summary>
         /// Whether a user is signed in.
         /// </summary>
-        public bool IsLoggedIn { get; protected set; }
+        public bool IsLoggedIn
+        {
+            get => _isLoggedIn;
+            protected set
+            {
+                if (_isLoggedIn == value)
+                    return;
+
+                _isLoggedIn = value;
+                OnLoginStateChanged?.Invoke(this, _isLoggedIn);
+            }
+        }
+
+        /// <summary>
+        /// Fired when <see cref="IsLoggedIn"/> changes value.
+        /// </summary>
+        public event OnLoginStateChangedHandler OnLoginStateChanged;
 
         /// <summary>
         /// If the user is not already signed in, attempt to silently sign in

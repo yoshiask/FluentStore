@@ -93,7 +93,6 @@ namespace FluentStore
                 var settings = Ioc.Default.GetRequiredService<ISettingsService>();
                 var passwordVaultService = Ioc.Default.GetRequiredService<IPasswordVaultService>();
                 var pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
-                var accSvc = Ioc.Default.GetRequiredService<AccountService>();
 
                 log?.Log($"Began loading plugins");
                 var pluginLoadResult = PluginLoader.LoadPlugins(settings, passwordVaultService);

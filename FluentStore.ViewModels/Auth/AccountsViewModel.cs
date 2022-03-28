@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using FluentStore.SDK;
 using FluentStore.SDK.Users;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace FluentStore.ViewModels.Auth
 
         }
 
-        private readonly AccountService _accSvc = Ioc.Default.GetRequiredService<AccountService>();
+        private readonly PackageService _pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
 
         private ObservableCollection<AccountHandlerBase> _signedInAccountHandlers = new();
         public ObservableCollection<AccountHandlerBase> SignedInAccountHandlers
@@ -32,10 +33,10 @@ namespace FluentStore.ViewModels.Auth
 
         public void LoadAccountHandlers()
         {
-            foreach (var handler in _accSvc.AccountHandlers)
+            foreach (var handler in _pkgSvc.GetAccountHandlers())
             {
                 // Listen to property changed events to detect when a sign in occurs.
-                handler.PropertyChanged += Handler_PropertyChanged;
+                handler.OnLoginStateChanged += Handler_LoginStateChanged;
 
                 if (handler.IsLoggedIn)
                     SignedInAccountHandlers.Add(handler);
@@ -48,18 +49,15 @@ namespace FluentStore.ViewModels.Auth
         {
             foreach (var handler in SignedInAccountHandlers.Union(OtherAccountHandlers))
             {
-                handler.PropertyChanged -= Handler_PropertyChanged;
+                handler.OnLoginStateChanged -= Handler_LoginStateChanged;
             }
         }
 
-        public Task HandleAuthActivation(Flurl.Url url) => _accSvc.RouteAuthActivation(url);
+        public Task HandleAuthActivation(Flurl.Url url) => _pkgSvc.RouteAuthActivation(url);
 
-        private void Handler_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void Handler_LoginStateChanged(AccountHandlerBase handler, bool isLoggedIn)
         {
-            if (e.PropertyName != nameof(AccountHandlerBase.IsLoggedIn) || sender is not AccountHandlerBase handler)
-                return;
-
-            if (handler.IsLoggedIn)
+            if (isLoggedIn)
             {
                 SignedInAccountHandlers.Add(handler);
                 OtherAccountHandlers.Remove(handler);

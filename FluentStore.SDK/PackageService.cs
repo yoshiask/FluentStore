@@ -297,6 +297,19 @@ namespace FluentStore.SDK
             throw new NotSupportedException($"Could not find an account handler with ID \"{id}\".");
         }
 
+        /// <summary>
+        /// Gets all available account handlers.
+        /// </summary>
+        /// <param name="includeDisabled">
+        /// Whether to include disabled account handlers.
+        /// </param>
+        public IEnumerable<Users.AccountHandlerBase> GetAccountHandlers(bool includeDisabled = false)
+        {
+            return PackageHandlers.Where(ph => ph.IsEnabled)
+                .Select(ph => ph.AccountHandler)
+                .Where(ah => ah != null && (ah.IsEnabled || includeDisabled));
+        }
+
         #endregion
     }
 }
