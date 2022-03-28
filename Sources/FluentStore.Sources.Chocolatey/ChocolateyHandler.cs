@@ -3,6 +3,7 @@ using Chocolatey.Models;
 using CommunityToolkit.Diagnostics;
 using FluentStore.SDK;
 using FluentStore.SDK.Images;
+using FluentStore.Services;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using System;
@@ -15,6 +16,11 @@ namespace FluentStore.Sources.Chocolatey
     public class ChocolateyHandler : PackageHandlerBase
     {
         public const string NAMESPACE_CHOCO = "choco";
+
+        public ChocolateyHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
+        {
+        }
+
         public override HashSet<string> HandledNamespaces => new()
         {
             NAMESPACE_CHOCO
