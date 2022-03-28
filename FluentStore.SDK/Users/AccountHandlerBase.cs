@@ -236,14 +236,19 @@ namespace FluentStore.SDK.Users
         public abstract Task HandleAuthActivation(Url url);
 
         /// <summary>
-        /// Gets the <see cref="AbstractUICollection"/> that represents a sign-in form.
+        /// Creates an <see cref="AbstractUICollection"/> that represents a sign-in form.
         /// </summary>
-        protected abstract AbstractUICollection CreateSignInForm();
+        public abstract AbstractUICollection CreateSignInForm();
 
         /// <summary>
-        /// Gets the <see cref="AbstractUICollection"/> that represents an account creation form.
+        /// Creates an <see cref="AbstractUICollection"/> that represents an account creation form.
         /// </summary>
-        protected abstract AbstractUICollection CreateSignUpForm();
+        public abstract AbstractUICollection CreateSignUpForm();
+
+        /// <summary>
+        /// Creates an <see cref="AbstractUICollection"/> that represents an account management form.
+        /// </summary>
+        public abstract AbstractUICollection CreateManageAccountForm();
 
         /// <summary>
         /// Gets an updated <see cref="CurrentUser"/> after a successful sign-in.
