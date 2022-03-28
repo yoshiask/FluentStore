@@ -115,7 +115,7 @@ namespace FluentStore.SDK.Users
             CurrentUser = null;
         }
 
-        protected override AbstractUICollection CreateSignInForm()
+        public override AbstractUICollection CreateSignInForm()
         {
             return AbstractUIHelper.CreateSingleButtonUI("SignInCollection", "SignInButton", "Sign in with browser", "\uE8A7",
                 async (sender, e) =>
@@ -129,7 +129,7 @@ namespace FluentStore.SDK.Users
                 });
         }
 
-        protected override AbstractUICollection CreateSignUpForm()
+        public override AbstractUICollection CreateSignUpForm()
         {
             return AbstractUIHelper.CreateSingleButtonUI("SignUpCollection", "SignUpButton", "Sign up with browser", "\uE8A7",
                 async (sender, e) =>
