@@ -2,7 +2,6 @@
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Marketplace.Storefront.Contracts;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -11,7 +10,6 @@ using Microsoft.Marketplace.Storefront.Contracts.Enums;
 using FluentStore.SDK;
 using FluentStore.SDK.Models;
 using FluentStore.SDK.Helpers;
-using Microsoft.Extensions.DependencyInjection;
 using FluentStore.Services;
 
 namespace FluentStore.Sources.MicrosoftStore
@@ -25,7 +23,7 @@ namespace FluentStore.Sources.MicrosoftStore
 
         public MicrosoftStoreHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
         {
-
+            AccountHandler = new Users.MicrosoftAccountHandler(passwordVaultService);
         }
 
         public override HashSet<string> HandledNamespaces => new()
