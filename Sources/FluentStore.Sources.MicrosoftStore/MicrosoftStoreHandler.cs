@@ -12,15 +12,22 @@ using FluentStore.SDK;
 using FluentStore.SDK.Models;
 using FluentStore.SDK.Helpers;
 using Microsoft.Extensions.DependencyInjection;
+using FluentStore.Services;
 
 namespace FluentStore.Sources.MicrosoftStore
 {
-    public class MicrosoftStoreHandler : PackageHandlerBase
+    public class MicrosoftStoreHandler : PackageHandlerBase<Users.MicrosoftAccountHandler>
     {
         private readonly StorefrontApi StorefrontApi = new();
 
         public const string NAMESPACE_MSSTORE = "microsoft-store";
         public const string NAMESPACE_MODERNPACK = "win-modern-package";
+
+        public MicrosoftStoreHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
+        {
+
+        }
+
         public override HashSet<string> HandledNamespaces => new()
         {
             NAMESPACE_MSSTORE,
@@ -160,9 +167,10 @@ namespace FluentStore.Sources.MicrosoftStore
             };
 
             // Get user token if available
-            if (AccSvc.TryGetAuthenticatedHandler<Users.MicrosoftAccountHandler>(out var accHandler))
+            var accHandler = GetAccountHandler();
+            if (accHandler.IsLoggedIn)
             {
-                options.Token = accHandler.GetToken();
+                accHandler.AuthenticateRequest(options);
             }
 
             return options;

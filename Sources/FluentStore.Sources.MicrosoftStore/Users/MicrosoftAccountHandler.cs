@@ -1,11 +1,10 @@
-﻿using FluentStore.SDK.Users;
-using Flurl;
-using Garfoot.Utilities.FluentUrn;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using FluentStore.SDK.AbstractUI;
+using FluentStore.SDK.Users;
+using FluentStore.Services;
 using Microsoft.Graph;
-using Microsoft.Identity.Client;
+using Microsoft.Marketplace.Storefront.Contracts;
 using OwlCore.AbstractUI.Models;
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FluentStore.Sources.MicrosoftStore.Users
@@ -14,12 +13,10 @@ namespace FluentStore.Sources.MicrosoftStore.Users
     {
         public const string APPIDURI_MSGRAPH = "https://graph.microsoft.com/";
         public const string BASEURL_MSGRAPH = APPIDURI_MSGRAPH + "v1.0/";
-        public const string NAMESPACE_MSACCOUNT = "msal";
 
-        public override HashSet<string> HandledNamespaces => new()
-        {
-            NAMESPACE_MSACCOUNT,
-        };
+        private GraphServiceClient _graphClient;
+
+        public override string Id => "msal";
 
         public override string DisplayName => "Microsoft Account";
 
@@ -28,9 +25,7 @@ namespace FluentStore.Sources.MicrosoftStore.Users
         protected override string ClientSecret => Secrets.MSA_CLIENTSECRET;
         protected override string SignUpUrl => "https://signup.live.com";
 
-        private GraphServiceClient _graphClient;
-
-        public MicrosoftAccountHandler()
+        public MicrosoftAccountHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
         {
             Scopes = new[]
             {
@@ -46,12 +41,25 @@ namespace FluentStore.Sources.MicrosoftStore.Users
             return new MicrosoftAccount(user);
         }
 
+        public override AbstractUICollection CreateManageAccountForm()
+        {
+            return AbstractUIHelper.CreateSingleButtonUI("ManageCollection", "ManageButton", "Manage account", "\uE8A7",
+                async (sender, e) =>
+                {
+                    INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
+                    await navService.OpenInBrowser("https://account.microsoft.com/profile");
+                });
+        }
+
         /// <summary>
-        /// Gets the current token.
+        /// Sets the token of the logged-in user.
         /// </summary>
-        /// <remarks>
-        /// For internal use only. See <see cref="MicrosoftStoreHandler"/>.
-        /// </remarks>
-        internal string GetToken() => Token;
+        /// <param name="requestOptions">
+        /// The <see cref="RequestOptions"/> to set authentication on.
+        /// </param>
+        public void AuthenticateRequest(RequestOptions requestOptions)
+        {
+            requestOptions.Token = Token;
+        }
     }
 }

@@ -5,6 +5,7 @@ using FluentStore.Services;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace FluentStore.SDK
@@ -199,5 +200,21 @@ namespace FluentStore.SDK
         public virtual Task<PackageBase> CreatePackageAsync() => Task.FromResult<PackageBase>(null);
 
         #endregion
+    }
+
+    /// <inheritdoc cref="PackageHandlerBase"/>
+    public abstract class PackageHandlerBase<TAccountHandler> : PackageHandlerBase
+        where TAccountHandler : AccountHandlerBase
+    {
+        public PackageHandlerBase(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
+        {
+
+        }
+
+        /// <summary>
+        /// Casts <see cref="AccountHandler"/> to <typeparamref name="TAccountHandler"/>.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TAccountHandler GetAccountHandler() => (TAccountHandler)AccountHandler;
     }
 }
