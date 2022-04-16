@@ -81,5 +81,31 @@ namespace Microsoft.Marketplace.Storefront.Contracts
                 .SetQueryParam("prefix", query)
                 .GetJsonAsync<ResponseItem<V3.AutoSuggestions>>();
         }
+
+        /// <summary>
+        /// Gets a list of collections.
+        /// </summary>
+        public async Task<ResponseItem<V4.CollectionDetail>> GetCollections(int pageSize = 15, RequestOptions options = null)
+        {
+            return await GetStorefrontBase(options).AppendPathSegments("canvas", "listofcollections")
+                .SetQueryParam("cardsEnabled", true)
+                .SetQueryParam("pageSize", pageSize)
+                .SetQueryParam("site", "Channels")
+                .SetQueryParam("collectionId", "MerchandiserContent/Apps/Collection-C/CollectionCAppsPage")
+                .GetJsonAsync<ResponseItem<V4.CollectionDetail>>();
+        }
+
+        /// <summary>
+        /// Get all the details for the given collection.
+        /// </summary>
+        public async Task<ResponseItem<V4.CollectionDetail>> GetCollection(string collectionId, RequestOptions options = null)
+        {
+            return await GetStorefrontBase(options).AppendPathSegments("canvas", "collections")
+                .SetQueryParam("site", "Channels")
+                .SetQueryParam("collectionId", collectionId)
+                .SetQueryParam("deviceFamilyVersion", 2814751208898560)  // NOTE: What is this? Without it, most of the cards are missing
+                .SetQueryParam("cardsEnabled", true)
+                .GetJsonAsync<ResponseItem<V4.CollectionDetail>>();
+        }
     }
 }
