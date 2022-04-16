@@ -26,6 +26,8 @@ using SplitButton = Microsoft.UI.Xaml.Controls.SplitButton;
 using SplitButtonClickEventArgs = Microsoft.UI.Xaml.Controls.SplitButtonClickEventArgs;
 using FluentStore.SDK.Users;
 using FluentStore.SDK.Models;
+using System.Linq;
+using OwlCore.WinUI.AbstractUI.Controls;
 
 namespace FluentStore.Views
 {
@@ -39,7 +41,6 @@ namespace FluentStore.Views
             ViewModel = new PackageViewModel();
         }
 
-        FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
         INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
         PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
@@ -124,116 +125,62 @@ namespace FluentStore.Views
 
         private async void AddToCollection_Click(object sender, RoutedEventArgs e)
         {
-            FlyoutBase flyout;
-            if (true)//!UserService.IsLoggedIn)
+            try
             {
-                flyout = new Flyout
-                {
-                    Content = new TextBlock
-                    {
-                        Text = "Please create an account or\r\nlog in to access this feature.",
-                        TextWrapping = TextWrapping.Wrap
-                    },
-                    Placement = FlyoutPlacementMode.Bottom
-                };
-            }
-            else
-            {
-                try
-                {
-                    string userId = null;// UserService.CurrentUser.LocalID;
-                    var collections = await FSApi.GetCollectionsAsync(userId);
-                    if (collections.Count > 0)
-                    {
-                        flyout = new MenuFlyout
-                        {
-                            Placement = FlyoutPlacementMode.BottomEdgeAlignedLeft
-                        };
-                        foreach (FluentStoreAPI.Models.Collection collection in collections)
-                        {
-                            if (ViewModel.Package is SDK.Packages.GenericPackageCollection<FluentStoreAPI.Models.Collection> curCollection
-                                && curCollection.Model.Id == collection.Id)
-                            {
-                                // ABORT! Do not add to list of options. Attempting to view a collection that contains
-                                // itself results in an infinite loop.
-                                continue;
-                            }
+                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
 
-                            var item = new MenuFlyoutItem
-                            {
-                                Text = collection.Name,
-                                Tag = collection
-                            };
-                            item.Click += (object s, RoutedEventArgs e) =>
-                            {
-                                var it = (MenuFlyoutItem)s;
-                                var col = (FluentStoreAPI.Models.Collection)it.Tag;
-                                col.Items ??= new System.Collections.Generic.List<string>(1);
-                                col.Items.Add(ViewModel.Package.Urn.ToString());
-                            };
-                            ((MenuFlyout)flyout).Items.Add(item);
-                        }
-                        flyout.Closed += async (s, e) =>
-                        {
-                            foreach (var it in ((MenuFlyout)s).Items)
-                            {
-                                var col = (FluentStoreAPI.Models.Collection)it.Tag;
-                                await FSApi.UpdateCollectionAsync(userId, col);
-                            }
-                        };
-                    }
-                    else
-                    {
-                        var myCollectionsLink = new Hyperlink
-                        {
-                            Inlines =
-                            {
-                                new Run { Text = "My Collections" }
-                            },
-                        };
-                        myCollectionsLink.Click += (sender, args) =>
-                        {
-                            NavigationService.Navigate(typeof(MyCollectionsView));
-                        };
-                        var noCollectionsContent = new TextBlock
-                        {
-                            TextWrapping = TextWrapping.Wrap,
-                            Inlines =
-                            {
-                                new Run { Text = "You don't have any collections." },
-                                new LineBreak(),
-                                new Run { Text = "Go to " },
-                                myCollectionsLink,
-                                new Run { Text = " to create one." }
-                            }
-                        };
-
-                        flyout = new Flyout
-                        {
-                            Content = noCollectionsContent,
-                            Placement = FlyoutPlacementMode.Bottom
-                        };
-                    }
-                }
-                catch (Flurl.Http.FlurlHttpException ex)
+                var collections = (await PackageService.GetCollectionsAsync())
+                    .Where(p => p.PackageHandler.CanEditCollection(p)).ToList();
+                if (collections.Count > 0)
                 {
-                    flyout = new Controls.HttpErrorFlyout(ex.StatusCode ?? 418, ex.Message);
-                }
-                catch
-                {
-                    flyout = new Flyout
+                    var flyout = new MenuFlyout
                     {
-                        Content = new TextBlock
-                        {
-                            Text = "Please create an account or\r\nlog in to access this feature.",
-                            TextWrapping = TextWrapping.Wrap
-                        },
-                        Placement = FlyoutPlacementMode.Bottom
+                        Placement = FlyoutPlacementMode.BottomEdgeAlignedLeft
                     };
+
+                    foreach (var package in collections)
+                    {
+                        if (ViewModel.Package == package
+                            || package is not SDK.Packages.IPackageCollection collection)
+                        {
+                            // ABORT! Do not add to list of options. Attempting to view a collection that contains
+                            // itself results in an infinite loop.
+                            continue;
+                        }
+
+                        var item = new MenuFlyoutItem
+                        {
+                            Text = package.Title,
+                            Tag = package
+                        };
+                        item.Click += async (object s, RoutedEventArgs e) =>
+                        {
+                            // Add package to collection
+                            var it = (MenuFlyoutItem)s;
+                            var col = (SDK.Packages.IPackageCollection)it.Tag;
+                            col.Items.Add(ViewModel.Package);
+
+                            // Save collection
+                            var package = (PackageBase)it.Tag;
+                            await package.PackageHandler.SavePackageAsync(package);
+                        };
+                        flyout.Items.Add(item);
+                    }
+
+                    flyout.ShowAt((FrameworkElement)sender);
+                }
+                else
+                {
+                    WeakReferenceMessenger.Default.Send(new WarningMessage(
+                        "You don't have any collections.\r\nGo to 'Collections' to create one."));
                 }
             }
+            catch (Exception ex)
+            {
+                WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, ViewModel, ErrorType.PackageSaveFailed));
+            }
 
-            flyout.ShowAt((Button)sender);
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
 
         private async void InstallSplitButton_Click(SplitButton sender, SplitButtonClickEventArgs e)
@@ -477,84 +424,67 @@ namespace FluentStore.Views
             return progressToast;
         }
 
-        private async void EditCollection_Click(object sender, RoutedEventArgs e)
+        private async void EditPackage_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Better than dynamic?
-            FluentStoreAPI.Models.Collection collection = ((dynamic)ViewModel.Package).Model;
-            EditCollectionDetailsDialog editDialog = new(collection, Content.XamlRoot);
-
+            var editDialog = new AbstractFormDialog(ViewModel.Package.PackageHandler.CreateEditForm(ViewModel), Content.XamlRoot);
             if (await editDialog.ShowAsync() == ContentDialogResult.Primary)
             {
                 try
                 {
                     WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+
                     // User wants to save
-                    //await FSApi.UpdateCollectionAsync(UserService.CurrentUser.LocalID, editDialog.Collection);
+                    await ViewModel.Package.PackageHandler.SavePackageAsync(ViewModel);
                     await ViewModel.Refresh();
+
                     WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
                 }
-                catch (Flurl.Http.FlurlHttpException ex)
+                catch (Exception ex)
                 {
-                    new Controls.HttpErrorFlyout(ex.StatusCode ?? 418, ex.Message)
-                        .ShowAt(InstallButton);
+                    WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, ViewModel, ErrorType.PackageSaveFailed));
                 }
             }
         }
 
-        private void DeleteCollection_Click(object sender, RoutedEventArgs e)
+        private void DeletePackage_Click(object sender, RoutedEventArgs e)
         {
-            FlyoutBase flyout;
-            if (true)//!UserService.IsLoggedIn)
+            var button = new Button
             {
-                flyout = new Flyout
-                {
-                    Content = new TextBlock
-                    {
-                        Text = "Please create an account or\r\nlog in to access this feature.",
-                        TextWrapping = TextWrapping.Wrap
-                    },
-                    Placement = FlyoutPlacementMode.Bottom
-                };
-            }
-            else
+                Content = "Yes, delete forever",
+            };
+            var flyout = new Flyout
             {
-                var button = new Button
+                Content = new StackPanel
                 {
-                    Content = "Yes, delete forever",
-                };
-                flyout = new Flyout
-                {
-                    Content = new StackPanel
+                    Spacing = 8,
+                    Children =
                     {
-                        Spacing = 8,
-                        Children =
+                        new TextBlock
                         {
-                            new TextBlock
-                            {
-                                Text = $"You are about to delete \"{ViewModel.Package.Title}\".\r\nDo you want to continue?",
-                                TextWrapping = TextWrapping.Wrap
-                            },
-                            button
-                        }
-                    },
-                    Placement = FlyoutPlacementMode.Bottom
-                };
-                button.Click += async (object sender, RoutedEventArgs e) =>
+                            Text = $"You are about to delete \"{ViewModel.Package.Title}\".\r\nDo you want to continue?",
+                            TextWrapping = TextWrapping.Wrap
+                        },
+                        button
+                    }
+                },
+                Placement = FlyoutPlacementMode.Bottom
+            };
+            button.Click += async (object sender, RoutedEventArgs e) =>
+            {
+                try
                 {
-                    string userId = null;// UserService.CurrentUser.LocalID;
-                    // 0, urn; 1, namespace; 2, userId; 3, collectionId
-                    string collectionId = ViewModel.Package.Urn.ToString().Split(':')[3];
-                    try
-                    {
-                        if (await FSApi.DeleteCollectionAsync(userId, collectionId))
-                            NavigationService.NavigateBack();
-                    }
-                    catch (Flurl.Http.FlurlHttpException ex)
-                    {
-                        // TODO: Show error message
-                    }
-                };
-            }
+                    WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+                    bool deleted = await ViewModel.Package.PackageHandler.DeletePackageAsync(ViewModel);
+                    WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+
+                    if (deleted)
+                        NavigationService.NavigateBack();
+                }
+                catch (Exception ex)
+                {
+                    WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, ViewModel, ErrorType.PackageDeleteFailed));
+                }
+            };
 
             flyout.ShowAt((FrameworkElement)sender);
         }

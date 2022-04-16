@@ -45,7 +45,9 @@ namespace FluentStore.ViewModels
                 DisplayAdditionalInformationProperties = null;
 
                 // Update derived properties
-                IsCollection = Package != null && Package.GetType().IsAssignableTo(typeof(SDK.Packages.GenericPackageCollection<>));
+                IsCollection = Package != null && Package.GetType().IsAssignableTo(typeof(SDK.Packages.IPackageCollection));
+                CanEdit = Package?.PackageHandler?.CanEditPackage(Package) ?? false;
+                CanDelete = Package?.PackageHandler?.CanDeletePackage(Package) ?? false;
             }
         }
 
@@ -89,6 +91,20 @@ namespace FluentStore.ViewModels
         {
             get => _IsCollection;
             private set => SetProperty(ref _IsCollection, value);
+        }
+
+        private bool _CanEdit;
+        public bool CanEdit
+        {
+            get => _CanEdit;
+            set => SetProperty(ref _CanEdit, value);
+        }
+
+        private bool _CanDelete;
+        public bool CanDelete
+        {
+            get => _CanDelete;
+            set => SetProperty(ref _CanDelete, value);
         }
 
         private ImageBase _AppIcon;

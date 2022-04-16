@@ -113,8 +113,8 @@ namespace FluentStore.SDK
         /// Gets a list of package collections.
         /// </summary>
         /// <remarks>
-        /// Typically, this method will return a list of <see cref="Packages.GenericPackageCollection{TModel}"/>,
-        /// but this is not a requirement and technically any package is allowed.
+        /// This method will return a list of <see cref="PackageBase{TModel}"/>s that implement <see cref="Packages.IPackageCollection"/>,
+        /// such as <see cref="Packages.GenericPackageCollection{TModel}"/>.
         /// </remarks>
         public virtual Task<List<PackageBase>> GetCollectionsAsync() => Task.FromResult(_emptyPackageList);
 
