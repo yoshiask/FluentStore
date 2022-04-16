@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.IO;
 using FluentStore.SDK.Attributes;
+using FluentStore.SDK.Helpers;
 
 namespace FluentStore.SDK
 {
@@ -88,9 +89,17 @@ namespace FluentStore.SDK
 
         public abstract Task LaunchAsync();
 
-        public virtual bool Equals(PackageBase other) => this.Urn == other.Urn;
+        public virtual bool Equals(PackageBase other) => this.Urn?.EscapedValue == other?.Urn?.EscapedValue;
 
         public override bool Equals(object obj) => obj is PackageBase other ? this.Equals(other) : false;
+
+        public static bool operator ==(PackageBase lhs, PackageBase rhs)
+        {
+            // Equals handles case of null on right side.
+            return (lhs is null && rhs is null) || lhs.Equals(rhs);
+        }
+
+        public static bool operator !=(PackageBase lhs, PackageBase rhs) => !(lhs == rhs);
 
         public override int GetHashCode() => Urn.GetHashCode();
 
