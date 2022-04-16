@@ -42,7 +42,8 @@ namespace FluentStore.Sources.GitHub
         };
         private readonly char[] separator_chars = { ' ', '_', '-', '+', '@', '!', '.' };
 
-        public GitHubPackage(Repository repo = null, IReadOnlyList<Release> releases = null)
+        public GitHubPackage(PackageHandlerBase packageHandler, Repository repo = null, IReadOnlyList<Release> releases = null)
+            : base(packageHandler)
         {
             if (repo != null)
                 Update(repo);

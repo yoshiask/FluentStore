@@ -31,6 +31,12 @@ namespace FluentStore.Sources.FluentStore
             //ReleaseDate = collection.LastUpdateDateUtc;
             Description = collection.Description;
             ShortTitle = Title;
+
+            // Determine if collection can be edited
+            if (Handler.AccSvc.TryGetAuthenticatedHandler<Users.FluentStoreAccountHandler>(out var accHandler))
+            {
+                CanEdit = accHandler.CurrentUser.Id == collection.AuthorId;
+            }
         }
 
         public void Update(IEnumerable<PackageBase> items)
@@ -79,14 +85,71 @@ namespace FluentStore.Sources.FluentStore
             return image;
         }
 
-        public override async Task<ImageBase> CacheHeroImage()
+        public override Task<ImageBase> CacheHeroImage() => Task.FromResult<ImageBase>(null);
+
+        public override Task<List<ImageBase>> CacheScreenshots() => Task.FromResult(new List<ImageBase>(0));
+
+        public AbstractForm CreateEditForm()
         {
-            return null;
+            AbstractForm form = new($"{Urn}_EditForm", submitText: "Save", onSubmit: OnEditFormSubmit)
+            {
+                new AbstractTextBox("NameBox", string.Empty, "Name")
+                {
+                    TooltipText = "The name of the collection"
+                },
+                new AbstractTextBox("ImageUrlBox", string.Empty, "Icon URL")
+                {
+                    TooltipText = "A link to an image to be used as an icon"
+                },
+                new AbstractTextBox("TileGlyphBox", string.Empty, "Icon text")
+                {
+                    TooltipText = "Text to be shown in place of an icon if no image is provided"
+                },
+                new AbstractTextBox("DescriptionBox", string.Empty, "Description")
+                {
+                    TooltipText = "A description of the collection"
+                },
+                new AbstractBoolean("IsPublicSwitch", "Public?")
+                {
+                    TooltipText = "Determines if this collection is visible to others"
+                },
+            };
+            form.Title = "Editing " + ShortTitle;
+
+            return form;
         }
 
-        public override async Task<List<ImageBase>> CacheScreenshots()
+        private void OnEditFormSubmit(object sender, System.EventArgs args)
         {
-            return new List<ImageBase>(0);
+            if (sender is not AbstractForm form)
+                return;
+
+            var nameBox = form.GetElement<AbstractTextBox>("NameBox");
+            Model.Name = nameBox.Value;
+
+            var imageUrlBox = form.GetElement<AbstractTextBox>("ImageUrlBox");
+            Model.ImageUrl = imageUrlBox.Value;
+
+            var tileGlyphBox = form.GetElement<AbstractTextBox>("TileGlyphBox");
+            Model.TileGlyph = tileGlyphBox.Value;
+
+            var descriptionBox = form.GetElement<AbstractTextBox>("DescriptionBox");
+            Model.Description = descriptionBox.Value;
+
+            var isPublicSwitch = form.GetElement<AbstractBoolean>("IsPublicSwitch");
+            Model.IsPublic = isPublicSwitch.State;
+        }
+
+        public void Add(PackageBase package) => Items.Add(package);
+
+        public void Remove(PackageBase package) => Items.Remove(package);
+
+        public async Task SaveAsync()
+        {
+            if (!Handler.AccSvc.TryGetAuthenticatedHandler<Users.FluentStoreAccountHandler>(out var handler))
+                throw new System.NotSupportedException($"Cannot edit {Urn}");
+
+            await ((FluentStoreHandler)Handler).FSApi.UpdateCollectionAsync(handler.CurrentUser.Id, Model);
         }
     }
 }

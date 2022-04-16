@@ -37,10 +37,10 @@
         </CommandBar>
 
         <TeachingTip x:Name="NewCollectionTip"
-                          Target="{x:Bind NewCollectionButton}"
-                          Title="Create your first collection"
-                          Subtitle="Collections allow you to share, download, or install many apps at once."
-                          IsOpen="{x:Bind ViewModel.ShowNewCollectionTip, Mode=OneWay}">
+                     Target="{x:Bind NewCollectionButton}"
+                     Title="Create your first collection"
+                     Subtitle="Collections allow you to share, download, or install many apps at once."
+                     IsOpen="{x:Bind ViewModel.ShowNewCollectionTip, Mode=OneWay}">
             <TeachingTip.IconSource>
                 <SymbolIconSource Symbol="List" />
             </TeachingTip.IconSource>

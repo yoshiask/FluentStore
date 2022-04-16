@@ -12,7 +12,10 @@ namespace FluentStore.SDK
 {
     public abstract class PackageBase : ObservableObject, IEquatable<PackageBase>
     {
-        public PackageBase() { }
+        public PackageBase(PackageHandlerBase packageHandler)
+        {
+            Handler = packageHandler;
+        }
 
         /// <summary>
         /// Copies the properties this <see cref="PackageBase"/> to the supplied instance.
@@ -54,6 +57,11 @@ namespace FluentStore.SDK
         /// ID of this package.
         /// </remarks>
         public Urn Urn { get; set; }
+
+        /// <summary>
+        /// The package handler that loaded this package.
+        /// </summary>
+        public PackageHandlerBase Handler { get; set; }
 
         /// <summary>
         /// When overridden in a derived class, gets a value indicating whether <see cref="GetCannotBeInstalledReason"/>
@@ -287,6 +295,10 @@ namespace FluentStore.SDK
 
     public abstract class PackageBase<TModel> : PackageBase
     {
+        public PackageBase(PackageHandlerBase packageHandler) : base(packageHandler)
+        {
+        }
+
         private TModel _Model;
         public new TModel Model
         {

@@ -21,7 +21,8 @@ namespace FluentStore.Sources.WinGet
     {
         private readonly WinGetApi WinGetApi = Ioc.Default.GetService<WinGetApi>();
 
-        public WinGetPackage(Package pack = null)
+        public WinGetPackage(PackageHandlerBase packageHandler, Package pack = null)
+            : base(packageHandler)
         {
             if (pack != null)
                 Update(pack);

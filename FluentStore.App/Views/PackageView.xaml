@@ -153,11 +153,11 @@
                                 </SplitButton>
                             </AppBarElementContainer>
 
-                            <AppBarButton Label="Edit details" Icon="Edit" Click="EditCollection_Click"
-                                          Visibility="{x:Bind ViewModel.IsCollection, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            <AppBarButton Label="Edit" Icon="Edit" Click="EditPackage_Click"
+                                          Visibility="{x:Bind ViewModel.CanEdit, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
                             <AppBarButton Label="Delete" Icon="Delete" Click="DeleteCollection_Click"
-                                          Visibility="{x:Bind ViewModel.IsCollection, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                          Visibility="{x:Bind ViewModel.CanDelete, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
                         </CommandBar>
 

@@ -47,7 +47,7 @@ namespace FluentStore.Sources.UwpCommunity
             List<PackageBase> packages = new(projects.Count);
             foreach (dynamic project in projects)
             {
-                UwpCommunityPackage package = new(project)
+                UwpCommunityPackage package = new(this, project)
                 {
                     Status = PackageStatus.BasicDetails
                 };
@@ -81,7 +81,7 @@ namespace FluentStore.Sources.UwpCommunity
                 throw SDK.Models.WebException.Create(404, $"No project with ID {projectId} is registered with the UWP Community.", request.ToString());
             }
 
-            UwpCommunityPackage package = new(project);
+            UwpCommunityPackage package = new(this, project);
             package.Status = PackageStatus.BasicDetails;
 
             if (status.IsAtLeast(PackageStatus.Details))
@@ -108,7 +108,7 @@ namespace FluentStore.Sources.UwpCommunity
         {
             dynamic projects = (await BASE_URL.AppendPathSegments("projects", "launch", year).GetJsonAsync()).projects;
 
-            GenericPackageCollection<dynamic> listPackage = new()
+            GenericPackageCollection<dynamic> listPackage = new(this)
             {
                 Urn = new(NAMESPACE_LAUNCH, new RawNamespaceSpecificString(year)),
                 Title = "Launch " + year,
@@ -144,7 +144,7 @@ namespace FluentStore.Sources.UwpCommunity
 
             foreach (dynamic project in projects)
             {
-                UwpCommunityPackage package = new(project);
+                UwpCommunityPackage package = new(this, project);
                 package.Status = PackageStatus.BasicDetails;
                 listPackage.Items.Add(package);
             }

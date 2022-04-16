@@ -37,6 +37,8 @@ namespace FluentStore.SDK.Users
         /// </summary>
         public bool IsEnabled { get; set; } = true;
 
+        public event OnLoginStateChangedHandler OnLoginStateChanged;
+
         /// <summary>
         /// The currently signed in user. <see langword="null"/> if <see cref="IsLoggedIn"/> is <see langword="false"/>.
         /// </summary>
@@ -268,6 +270,8 @@ namespace FluentStore.SDK.Users
         {
             return new(userName: CurrentUser.Id, password: password, resource: GetAuthProtocolUrl());
         }
+
+        public virtual void OnLoaded() { }
     }
 
     public abstract class AccountHandlerBase<TAccount> : AccountHandlerBase where TAccount : Account

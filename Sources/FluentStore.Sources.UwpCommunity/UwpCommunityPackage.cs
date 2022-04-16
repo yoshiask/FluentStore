@@ -22,7 +22,8 @@ namespace FluentStore.Sources.UwpCommunity
         readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
         readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
-        public UwpCommunityPackage(dynamic project = null, IEnumerable<string> images = null, IEnumerable<dynamic> collaborators = null, IEnumerable<string> features = null)
+        public UwpCommunityPackage(PackageHandlerBase packageHandler, dynamic project = null, IEnumerable<string> images = null, IEnumerable<dynamic> collaborators = null, IEnumerable<string> features = null)
+            : base(packageHandler)
         {
             if (project != null)
                 UpdateWithProject(project);

@@ -64,6 +64,17 @@ namespace FluentStore.SDK
                 }
             }
 
+            // Pass loaded handlers to respective services
+            accSvc.AccountHandlers = result.AccountHandlers;
+            pkgSvc.PackageHandlers = result.PackageHandlers;
+
+            // Call OnLoaded method on all handlers
+            IHandler[] handlers = result.AccountHandlers.OfType<IHandler>().Concat(result.PackageHandlers.Values.OfType<IHandler>()).ToArray();
+            foreach (var handler in handlers)
+            {
+                handler.OnLoaded();
+            }
+
             return result;
         }
 
@@ -95,6 +106,9 @@ namespace FluentStore.SDK
 
                 // Enable or disable according to user settings
                 handler.IsEnabled = settings.GetPackageHandlerEnabledState(type.Name);
+
+                // Pass services to handler
+                ((IHandler)handler).SetServices(pkgSvc, accSvc);
 
                 // Register handler with the type name as its ID
                 yield return handler;

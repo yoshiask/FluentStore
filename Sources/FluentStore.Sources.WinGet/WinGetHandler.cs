@@ -35,7 +35,7 @@ namespace FluentStore.Sources.WinGet
             var packages = new List<PackageBase>();
             var featured = await WinGetApi.GetFeatured();
             foreach (Package wgPackage in featured)
-                packages.Add(new WinGetPackage(wgPackage));
+                packages.Add(new WinGetPackage(this, wgPackage));
 
             return packages;
         }
@@ -45,7 +45,7 @@ namespace FluentStore.Sources.WinGet
             Guard.IsEqualTo(packageUrn.NamespaceIdentifier, NAMESPACE_WINGET, nameof(packageUrn));
 
             var package = await WinGetApi.GetPackage(packageUrn.GetContent<NamespaceSpecificString>().UnEscapedValue);
-            return new WinGetPackage(package);
+            return new WinGetPackage(this, package);
         }
 
         public override async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
@@ -57,7 +57,7 @@ namespace FluentStore.Sources.WinGet
             };
             var firstPage = await WinGetApi.SearchPackages(query: query, pageOptions: pageOptions);
             foreach (Package wgPackage in firstPage.Packages)
-                packages.Add(new WinGetPackage(wgPackage));
+                packages.Add(new WinGetPackage(this, wgPackage));
 
             return packages;
         }
@@ -75,7 +75,7 @@ namespace FluentStore.Sources.WinGet
                 pageOptions.Page = p;
                 var page = await WinGetApi.SearchPackages(query: query, pageOptions: pageOptions);
                 foreach (Package wgPackage in page.Packages)
-                    packages.Add(new WinGetPackage(wgPackage));
+                    packages.Add(new WinGetPackage(this, wgPackage));
             }
 
             return packages;

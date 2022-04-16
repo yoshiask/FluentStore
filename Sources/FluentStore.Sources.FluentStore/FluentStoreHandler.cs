@@ -38,6 +38,8 @@ namespace FluentStore.Sources.FluentStore
 
         public override string DisplayName => "Fluent Store";
 
+        internal Users.FluentStoreAccountHandler AccHandler { get; private set; }
+
         public override Task<List<PackageBase>> GetFeaturedPackagesAsync() => Task.FromResult(_emptyPackageList);
 
         public override async Task<PackageBase> GetPackage(Urn urn, PackageStatus status)
@@ -49,7 +51,7 @@ namespace FluentStore.Sources.FluentStore
                 string collId = id[1];
 
                 var collection = await FSApi.GetCollectionAsync(userId, collId);
-                var collectionPack = new CollectionPackage(collection)
+                var collectionPack = new CollectionPackage(this, collection)
                 {
                     Status = PackageStatus.BasicDetails
                 };
@@ -61,7 +63,7 @@ namespace FluentStore.Sources.FluentStore
                     {
                         // Get details for each item
                         Urn packageUrn = Urn.Parse(packageId);
-                        PackageBase package = await PackageService.GetPackageAsync(packageUrn, PackageStatus.BasicDetails);
+                        PackageBase package = await PkgSvc.GetPackageAsync(packageUrn, PackageStatus.BasicDetails);
                         items.Add(package);
                     }
                     collectionPack.Update(items);

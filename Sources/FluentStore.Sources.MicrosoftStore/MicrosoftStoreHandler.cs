@@ -42,7 +42,7 @@ namespace FluentStore.Sources.MicrosoftStore
             var page = (await StorefrontApi.GetHomeSpotlight(options: GetSystemOptions())).Payload;
             packages.AddRange(
                 page.Cards.Where(card => card.ProductId.Length == 12 && card.TypeTag == "app")
-                          .Select(card => new MicrosoftStorePackage(card) { Status = PackageStatus.BasicDetails })
+                          .Select(card => new MicrosoftStorePackage(this, card) { Status = PackageStatus.BasicDetails })
             );
 
             return packages;
@@ -54,14 +54,14 @@ namespace FluentStore.Sources.MicrosoftStore
 
             var page = (await StorefrontApi.Search(query, "apps", GetSystemOptions())).Payload;
             packages.AddRange(
-                page.SearchResults.Select(card => new MicrosoftStorePackage(card) { Status = PackageStatus.BasicDetails })
+                page.SearchResults.Select(card => new MicrosoftStorePackage(this, card) { Status = PackageStatus.BasicDetails })
             );
 
             for (int p = 1; p < 3 && page.NextUri != null; p++)
             {
                 page = (await StorefrontApi.NextSearchPage(page)).Payload;
                 packages.AddRange(
-                    page.SearchResults.Select(card => new MicrosoftStorePackage(card) { Status = PackageStatus.BasicDetails })
+                    page.SearchResults.Select(card => new MicrosoftStorePackage(this, card) { Status = PackageStatus.BasicDetails })
                 );
             }
 
@@ -73,7 +73,7 @@ namespace FluentStore.Sources.MicrosoftStore
             var suggs = await StorefrontApi.GetSearchSuggestions(query, GetSystemOptions());
             var packages = new List<PackageBase>();
             packages.AddRange(
-                suggs.Payload.AssetSuggestions.Select(summ => new MicrosoftStorePackage(summary: summ) { Status = PackageStatus.BasicDetails })
+                suggs.Payload.AssetSuggestions.Select(summ => new MicrosoftStorePackage(this, summary: summ) { Status = PackageStatus.BasicDetails })
             );
 
             return packages;

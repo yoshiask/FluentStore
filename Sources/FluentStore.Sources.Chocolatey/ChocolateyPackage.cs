@@ -17,7 +17,8 @@ namespace FluentStore.Sources.Chocolatey
 {
     public class ChocolateyPackage : PackageBase<Package>
     {
-        public ChocolateyPackage(Package pack = null)
+        public ChocolateyPackage(PackageHandlerBase packageHandler, Package pack = null)
+            : base(packageHandler)
         {
             if (pack != null)
                 Update(pack);

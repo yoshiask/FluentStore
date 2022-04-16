@@ -26,6 +26,7 @@ using SplitButton = Microsoft.UI.Xaml.Controls.SplitButton;
 using SplitButtonClickEventArgs = Microsoft.UI.Xaml.Controls.SplitButtonClickEventArgs;
 using FluentStore.SDK.Users;
 using FluentStore.SDK.Models;
+using OwlCore.WinUI.AbstractUI.Controls;
 
 namespace FluentStore.Views
 {
@@ -337,7 +338,7 @@ namespace FluentStore.Views
             NavigationService.OpenInBrowser(appUrl);
         }
 
-        private void ShareDataRequested(DataTransferManager sender, DataRequestedEventArgs args, Flurl.Url appUrl)
+        private async void ShareDataRequested(DataTransferManager sender, DataRequestedEventArgs args, Flurl.Url appUrl)
         {
             var appUri = appUrl.ToUri();
             DataPackage linkPackage = new DataPackage();
@@ -351,6 +352,8 @@ namespace FluentStore.Views
             if (typeof(SDK.Images.StreamImage).IsAssignableFrom(ViewModel.AppIcon.GetType()))
             {
                 var img = (SDK.Images.StreamImage)ViewModel.AppIcon;
+                var imgStream = await img.GetImageStreamAsync();
+                request.Data.Properties.Thumbnail = Windows.Storage.Streams.RandomAccessStreamReference.CreateFromStream(imgStream.AsRandomAccessStream());
             }
         }
 
@@ -477,26 +480,32 @@ namespace FluentStore.Views
             return progressToast;
         }
 
-        private async void EditCollection_Click(object sender, RoutedEventArgs e)
+        private async void EditPackage_Click(object sender, RoutedEventArgs e)
         {
-            // TODO: Better than dynamic?
-            FluentStoreAPI.Models.Collection collection = ((dynamic)ViewModel.Package).Model;
-            EditCollectionDetailsDialog editDialog = new(collection, Content.XamlRoot);
+            // Check if package is editable
+            if (ViewModel.Package is not SDK.Packages.IEditablePackage package)
+                return;
+
+            AbstractFormDialog editDialog = new(package.CreateEditForm(), Content.XamlRoot);
 
             if (await editDialog.ShowAsync() == ContentDialogResult.Primary)
             {
                 try
                 {
                     WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+
                     // User wants to save
-                    //await FSApi.UpdateCollectionAsync(UserService.CurrentUser.LocalID, editDialog.Collection);
+                    await package.SaveAsync();
                     await ViewModel.Refresh();
-                    WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
                 }
-                catch (Flurl.Http.FlurlHttpException ex)
+                catch (WebException ex)
                 {
-                    new Controls.HttpErrorFlyout(ex.StatusCode ?? 418, ex.Message)
+                    new Controls.HttpErrorFlyout(ex.StatusCode, ex.Message)
                         .ShowAt(InstallButton);
+                }
+                finally
+                {
+                    WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
                 }
             }
         }
