@@ -17,15 +17,15 @@ namespace FluentStore.ViewModels.Auth
 
         private readonly PackageService _pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
 
-        private ObservableCollection<AccountHandlerBase> _signedInAccountHandlers = new();
-        public ObservableCollection<AccountHandlerBase> SignedInAccountHandlers
+        private ObservableCollection<AccountHandlerViewModel> _signedInAccountHandlers = new();
+        public ObservableCollection<AccountHandlerViewModel> SignedInAccountHandlers
         {
             get => _signedInAccountHandlers;
             set => SetProperty(ref _signedInAccountHandlers, value);
         }
 
-        private ObservableCollection<AccountHandlerBase> _otherAccountHandlers = new();
-        public ObservableCollection<AccountHandlerBase> OtherAccountHandlers
+        private ObservableCollection<AccountHandlerViewModel> _otherAccountHandlers = new();
+        public ObservableCollection<AccountHandlerViewModel> OtherAccountHandlers
         {
             get => _otherAccountHandlers;
             set => SetProperty(ref _otherAccountHandlers, value);
@@ -35,21 +35,24 @@ namespace FluentStore.ViewModels.Auth
         {
             foreach (var handler in _pkgSvc.GetAccountHandlers())
             {
+                // Wrap handler in a view model
+                AccountHandlerViewModel handlerViewModel = new(handler);
+
                 // Listen to property changed events to detect when a sign in occurs.
                 handler.OnLoginStateChanged += Handler_LoginStateChanged;
 
                 if (handler.IsLoggedIn)
-                    SignedInAccountHandlers.Add(handler);
+                    SignedInAccountHandlers.Add(handlerViewModel);
                 else
-                    OtherAccountHandlers.Add(handler);
+                    OtherAccountHandlers.Add(handlerViewModel);
             }
         }
 
         public void Unload()
         {
-            foreach (var handler in SignedInAccountHandlers.Union(OtherAccountHandlers))
+            foreach (var handlerViewModel in SignedInAccountHandlers.Union(OtherAccountHandlers))
             {
-                handler.OnLoginStateChanged -= Handler_LoginStateChanged;
+                handlerViewModel.Handler.OnLoginStateChanged -= Handler_LoginStateChanged;
             }
         }
 
@@ -59,13 +62,15 @@ namespace FluentStore.ViewModels.Auth
         {
             if (isLoggedIn)
             {
-                SignedInAccountHandlers.Add(handler);
-                OtherAccountHandlers.Remove(handler);
+                var handlerViewModel = OtherAccountHandlers.First(vm => vm.Handler == handler);
+                SignedInAccountHandlers.Add(handlerViewModel);
+                OtherAccountHandlers.Remove(handlerViewModel);
             }
             else
             {
-                OtherAccountHandlers.Add(handler);
-                SignedInAccountHandlers.Remove(handler);
+                var vm = SignedInAccountHandlers.First(vm => vm.Handler == handler);
+                OtherAccountHandlers.Add(vm);
+                SignedInAccountHandlers.Remove(vm);
             }
         }
     }
