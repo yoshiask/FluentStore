@@ -35,7 +35,7 @@ namespace FluentStore.SDK.Users
         /// <summary>
         /// Whether this account handler is enabled.
         /// </summary>
-        public bool IsEnabled { get; set; }
+        public bool IsEnabled { get; set; } = true;
 
         /// <summary>
         /// The currently signed in user. <see langword="null"/> if <see cref="IsLoggedIn"/> is <see langword="false"/>.
