@@ -51,12 +51,12 @@ namespace FluentStore.Views
             if (sender is not FrameworkElement element || element.DataContext is not SDK.PackageHandlerBase handler)
                 return;
 
-            var newCollection = await handler.CreateCollection() as SDK.Packages.IEditablePackage;
-            var editDialog = new AbstractFormDialog(newCollection.CreateEditForm(), Content.XamlRoot);
+            var newCollection = await handler.CreateCollectionAsync();
+            var editDialog = new AbstractFormDialog(handler.CreateEditForm(newCollection), Content.XamlRoot);
             if (await editDialog.ShowAsync() == ContentDialogResult.Primary)
             {
                 // User wants to save
-                await ViewModel.UpdateCollectionAsync(newCollection);
+                await ViewModel.UpdateCollectionAsync(handler, newCollection);
             }
         }
     }

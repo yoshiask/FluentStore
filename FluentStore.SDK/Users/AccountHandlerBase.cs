@@ -1,9 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.DependencyInjection;
-using CommunityToolkit.Mvvm.Input;
+﻿using FluentStore.SDK.AbstractUI.Models;
 using FluentStore.Services;
 using Flurl;
-using Garfoot.Utilities.FluentUrn;
 using OwlCore.AbstractUI.Models;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -13,43 +10,39 @@ using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Users
 {
-    public delegate void OnLoginStateChangedHandler(bool isLoggedIn, Account currentUser);
+    public delegate void OnLoginStateChangedHandler(AccountHandlerBase sender, bool isLoggedIn);
 
-    public abstract class AccountHandlerBase : ObservableObject, IHandler
+    public abstract class AccountHandlerBase
     {
-        public PackageService PkgSvc { get; set; }
-        public AccountService AccSvc { get; set; }
+        private bool _isLoggedIn = false;
+        private readonly IPasswordVaultService _passwordVaultService;
+
+        public AccountHandlerBase(IPasswordVaultService passwordVaultService)
+        {
+            _passwordVaultService = passwordVaultService;
+        }
 
         /// <summary>
-        /// A list of all namespaces this handler can handle.
+        /// A unique identifier for this type of account handler.
         /// </summary>
-        /// <remarks>
-        /// Namespaces cannot be shared across handlers.
-        /// </remarks>
-        public abstract HashSet<string> HandledNamespaces { get; }
+        public abstract string Id { get; }
 
         /// <summary>
         /// The display name of this handler.
         /// </summary>
         public abstract string DisplayName { get; }
 
-        public bool IsEnabled { get; set; }
-
-        private Account _currentUser;
-        private bool _isLoggedIn;
-        private AbstractUICollection _signInForm;
-        private readonly IPasswordVaultService _passwordVaultService = Ioc.Default.GetService<IPasswordVaultService>();
+        /// <summary>
+        /// Whether this account handler is enabled.
+        /// </summary>
+        public bool IsEnabled { get; set; } = true;
 
         public event OnLoginStateChangedHandler OnLoginStateChanged;
 
         /// <summary>
         /// The currently signed in user. <see langword="null"/> if <see cref="IsLoggedIn"/> is <see langword="false"/>.
         /// </summary>
-        public Account CurrentUser
-        {
-            get => _currentUser;
-            set => SetProperty(ref _currentUser, value);
-        }
+        public Account CurrentUser { get; protected set; }
 
         /// <summary>
         /// Whether a user is signed in.
@@ -57,28 +50,20 @@ namespace FluentStore.SDK.Users
         public bool IsLoggedIn
         {
             get => _isLoggedIn;
-            set
+            protected set
             {
-                SetProperty(ref _isLoggedIn, value);
-                OnLoginStateChanged?.Invoke(value, CurrentUser);
+                if (_isLoggedIn == value)
+                    return;
+
+                _isLoggedIn = value;
+                OnLoginStateChanged?.Invoke(this, _isLoggedIn);
             }
         }
 
-        /// <inheritdoc cref="CreateSignInForm"/>
-        public AbstractUICollection SignInForm
-        {
-            get
-            {
-                if (_signInForm == null)
-                    _signInForm = CreateSignInForm();
-                return _signInForm;
-            }
-            set => _signInForm = value;
-        }
-
-        // FIXME: Does this really belong in a model?
-        /// <inheritdoc cref="SignOutAsync"/>
-        public IAsyncRelayCommand SignOutCommand => new AsyncRelayCommand(SignOutAsync);
+        /// <summary>
+        /// Fired when <see cref="IsLoggedIn"/> changes value.
+        /// </summary>
+        public event OnLoginStateChangedHandler OnLoginStateChanged;
 
         /// <summary>
         /// If the user is not already signed in, attempt to silently sign in
@@ -90,7 +75,7 @@ namespace FluentStore.SDK.Users
 
             try
             {
-                if (TryGetAllCredentials(GetDefaultNamespcace(), out var credentials))
+                if (TryGetAllCredentials(out var credentials))
                 {
                     bool success = await SignInAsync(credentials[0]);
                     return success;
@@ -101,24 +86,13 @@ namespace FluentStore.SDK.Users
         }
 
         /// <summary>
-        /// Gets the namespace this handler uses by default for accounts.
-        /// </summary>
-        public virtual string GetDefaultNamespcace() => HandledNamespaces.First();
-
-        /// <summary>
         /// Creates a <see cref="Url"/> that can be used as a redirect URI for authentication.
         /// <para>
         /// When the app is activated using this URI, <see cref="HandleAuthActivation(Url)"/>
         /// will be called with the URI.
         /// </para>
         /// </summary>
-        /// <param name="ns">
-        /// The namespace used to route auth activations to their handler.
-        /// <para>
-        /// If <see langword="null"/>, <see cref="GetDefaultNamespcace"/> will be used.
-        /// </para>
-        /// </param>
-        public virtual Url GetAuthProtocolUrl(string ns) => $"fluentstore://auth/{ns ?? GetDefaultNamespcace()}";
+        public virtual Url GetAuthProtocolUrl() => $"fluentstore://auth/{Id}";
 
         /// <summary>
         /// Determines if <paramref name="otherUser"/> is the signed in user.
@@ -172,15 +146,14 @@ namespace FluentStore.SDK.Users
         /// <see langword="null"/> if no credential exists.
         /// </para>
         /// </returns>
-        public virtual CredentialBase GetCredential(Urn userUrn)
+        public virtual CredentialBase GetCredential(string userId)
         {
             CredentialBase credential = null;
 
             if (_passwordVaultService != null)
             {
-                string userName = userUrn.GetContent<NamespaceSpecificString>().UnEscapedValue;
-                credential = GetAllCredentials(userUrn.NamespaceIdentifier)
-                    .FirstOrDefault(c => c.UserName == userName);
+                credential = GetAllCredentials()
+                    .FirstOrDefault(c => c.UserName == userId);
             }
 
             return credential;
@@ -198,9 +171,9 @@ namespace FluentStore.SDK.Users
         /// <returns>
         /// <see langword="false"/> if no credential exists.
         /// </returns>
-        public bool TryGetCredential(Urn userUrn, [NotNullWhen(true)] out CredentialBase credential)
+        public bool TryGetCredential(string userId, [NotNullWhen(true)] out CredentialBase credential)
         {
-            credential = GetCredential(userUrn);
+            credential = GetCredential(userId);
             return credential != null;
         }
 
@@ -210,9 +183,9 @@ namespace FluentStore.SDK.Users
         /// </summary>
         /// <param name="ns">The namespace to look up.</param>
         /// <returns>A list of matching <see cref="CredentialBase"/>s.</returns>
-        public virtual IList<CredentialBase> GetAllCredentials(string ns)
+        public virtual IList<CredentialBase> GetAllCredentials()
         {
-            return _passwordVaultService.FindAllByResource(GetAuthProtocolUrl(ns));
+            return _passwordVaultService.FindAllByResource(GetAuthProtocolUrl());
         }
 
         /// <summary>
@@ -232,11 +205,11 @@ namespace FluentStore.SDK.Users
         /// If <see langword="true"/> is returned, then <paramref name="credentials"/> is
         /// guarenteed to be not <see langword="null"/> and have at least one element.
         /// </remarks>
-        public bool TryGetAllCredentials(string ns, [NotNullWhen(true)] out IList<CredentialBase> credentials)
+        public bool TryGetAllCredentials([NotNullWhen(true)] out IList<CredentialBase> credentials)
         {
             try
             {
-                credentials = GetAllCredentials(ns);
+                credentials = GetAllCredentials();
                 return credentials != null && credentials.Count > 0;
             }
             catch
@@ -266,14 +239,19 @@ namespace FluentStore.SDK.Users
         public abstract Task HandleAuthActivation(Url url);
 
         /// <summary>
-        /// Gets the <see cref="AbstractUICollection"/> that represents a sign-in form.
+        /// Creates an <see cref="AbstractForm"/> that represents a sign-in form.
         /// </summary>
-        protected abstract AbstractUICollection CreateSignInForm();
+        public abstract AbstractForm CreateSignInForm();
 
         /// <summary>
-        /// Gets the <see cref="AbstractUICollection"/> that represents an account creation form.
+        /// Creates an <see cref="AbstractForm"/> that represents an account creation form.
         /// </summary>
-        protected abstract AbstractUICollection CreateSignUpForm();
+        public abstract AbstractForm CreateSignUpForm();
+
+        /// <summary>
+        /// Creates an <see cref="AbstractForm"/> that represents an account management form.
+        /// </summary>
+        public abstract AbstractForm CreateManageAccountForm();
 
         /// <summary>
         /// Gets an updated <see cref="CurrentUser"/> after a successful sign-in.
@@ -290,9 +268,7 @@ namespace FluentStore.SDK.Users
         /// </returns>
         private CredentialBase CreateCredential(string password)
         {
-            string userName = CurrentUser.Urn.GetContent<NamespaceSpecificString>().UnEscapedValue;
-            string resource = GetAuthProtocolUrl(CurrentUser.Urn.NamespaceIdentifier);
-            return new(userName, password, resource);
+            return new(userName: CurrentUser.Id, password: password, resource: GetAuthProtocolUrl());
         }
 
         public virtual void OnLoaded() { }
@@ -300,6 +276,10 @@ namespace FluentStore.SDK.Users
 
     public abstract class AccountHandlerBase<TAccount> : AccountHandlerBase where TAccount : Account
     {
+        public AccountHandlerBase(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
+        {
+        }
+
         /// <summary>
         /// Casts <see cref="AccountHandlerBase.CurrentUser"/> to <typeparamref name="TAccount"/>.
         /// </summary>

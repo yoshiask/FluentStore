@@ -13,12 +13,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.2" />
+        <PackageReference Include="Flurl.Http" Version="3.2.0" />
         <PackageReference Include="Garfoot.Utilities.FluentUrn" Version="1.2.1" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\API\FluentStoreAPI\FluentStoreAPI.csproj" />
     </ItemGroup>
 
 </Project>

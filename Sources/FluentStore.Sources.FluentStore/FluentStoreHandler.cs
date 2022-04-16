@@ -3,20 +3,34 @@ using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using FSAPI = FluentStoreAPI.FluentStoreAPI;
 using FluentStore.SDK;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Linq;
-using FluentStore.SDK.Users;
 using FluentStore.SDK.Helpers;
+using FluentStore.Services;
+using FluentStore.SDK.AbstractUI.Models;
+using OwlCore.AbstractUI.Models;
+using System;
 
 namespace FluentStore.Sources.FluentStore
 {
     public class FluentStoreHandler : PackageHandlerBase
     {
-        internal readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
-
         public const string NAMESPACE_COLLECTION = "fluent-store-collection";
+
+        private readonly FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
+        private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
+        private const string NameBoxId = "NameBox";
+        private const string ImageUrlBoxId = "ImageUrlBox";
+        private const string TileGlyphBoxId = "TileGlyphBox";
+        private const string DescriptionBoxId = "DescriptionBox";
+        private const string IsPublicSwitchId = "IsPublicSwitch";
+
+        public FluentStoreHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
+        {
+            AccountHandler = new Users.FluentStoreAccountHandler(FSApi, passwordVaultService);
+        }
+
         public override HashSet<string> HandledNamespaces => new()
         {
             NAMESPACE_COLLECTION,
@@ -73,18 +87,11 @@ namespace FluentStore.Sources.FluentStore
         public override async Task<List<PackageBase>> GetCollectionsAsync()
         {
             // Get current user
-            var accHandler = AccSvc.GetHandlerForNamespace<Users.FluentStoreAccountHandler>();
-            if (!accHandler.IsLoggedIn)
+            if (!AccountHandler.IsLoggedIn)
                 return _emptyPackageList;
 
-            var collections = await FSApi.GetCollectionsAsync(accHandler.CurrentUser.Id);
-            return collections.Select(c => new CollectionPackage(this, c) { Status = PackageStatus.BasicDetails }).Cast<PackageBase>().ToList();
-        }
-
-        public override async Task<PackageBase> CreateCollection()
-        {
-            CollectionPackage pkg = new(this, new());
-            return pkg;
+            var collections = await FSApi.GetCollectionsAsync(AccountHandler.CurrentUser.Id);
+            return collections.Select(c => (PackageBase)new CollectionPackage(c) { Status = PackageStatus.BasicDetails }).ToList();
         }
 
         public override ImageBase GetImage() => GetImageStatic();
@@ -107,19 +114,95 @@ namespace FluentStore.Sources.FluentStore
             return "fluentstore://package/" + package.Urn.ToString();
         }
 
-        public override void OnLoaded()
+        public override AbstractForm CreateEditForm(PackageBase package)
         {
-            // Subscribe to login changes
-            AccHandler = AccSvc.GetHandlerForNamespace<Users.FluentStoreAccountHandler>();
-            AccHandler.OnLoginStateChanged += AccHandler_OnLoginStateChanged;
+            if (package is not CollectionPackage collectionPackage)
+                return null;
+            var collection = collectionPackage.Model;
 
-            // Call login changed handler to make sure the states are synced
-            AccHandler_OnLoginStateChanged(AccHandler.IsLoggedIn, AccHandler.CurrentUser);
+            void CollectionEditForm_Submitted(object sender, EventArgs e)
+            {
+                if (sender is not AbstractForm form)
+                    return;
+
+                var nameBox = form.OfType<AbstractTextBox>().First(a => a.Id == NameBoxId);
+                collection.Name = nameBox.Value;
+
+                var imageUrlBox = form.OfType<AbstractTextBox>().First(a => a.Id == ImageUrlBoxId);
+                collection.ImageUrl = imageUrlBox.Value;
+
+                var tileGlyphBox = form.OfType<AbstractTextBox>().First(a => a.Id == TileGlyphBoxId);
+                collection.TileGlyph = tileGlyphBox.Value;
+
+                var descriptionBox = form.OfType<AbstractTextBox>().First(a => a.Id == DescriptionBoxId);
+                collection.Description = descriptionBox.Value;
+
+                var isPublicSwitch = form.OfType<AbstractBoolean>().First(a => a.Id == IsPublicSwitchId);
+                collection.IsPublic = isPublicSwitch.State;
+            }
+
+            AbstractForm form = new("CollectionEditForm", "Save", onSubmit: CollectionEditForm_Submitted)
+            {
+                new AbstractTextBox(NameBoxId, collection.Name, "Name")
+                {
+                    Subtitle = "Name",
+                    TooltipText = "The name of the collection.",
+                },
+                new AbstractTextBox(ImageUrlBoxId, collection.ImageUrl, "Image link")
+                {
+                    Subtitle = "Icon",
+                    TooltipText = "A link to an image to be used as an icon.",
+                },
+                new AbstractTextBox(TileGlyphBoxId, collection.TileGlyph, "Short indicator")
+                {
+                    Subtitle = "Short indicator",
+                    TooltipText = "Text to be shown on the collection's tile if no image is provided.",
+                },
+                new AbstractTextBox(DescriptionBoxId, collection.Description, "Description")
+                {
+                    Subtitle = "Description",
+                    TooltipText = "A description of the collection.",
+                },
+                new AbstractBoolean(IsPublicSwitchId, "Public")
+                {
+                    State = collection.IsPublic,
+                    TooltipText = "Determines if this collection is visible to others."
+                }
+            };
+            form.Title = "Editing collection details";
+            
+            return form;
         }
 
-        private void AccHandler_OnLoginStateChanged(bool isLoggedIn, Account currentUser)
+        public override bool CanCreateCollection() => AccountHandler.IsLoggedIn;
+
+        public override bool CanDeletePackage(PackageBase package)
         {
-            CanCreateCollections = isLoggedIn;
+            return package is CollectionPackage collectionPackage
+                && AccountHandler.IsLoggedIn
+                && collectionPackage.Model.AuthorId == AccountHandler.CurrentUser.Id;
+        }
+
+        public override async Task<PackageBase> CreateCollectionAsync()
+        {
+            FluentStoreAPI.Models.Collection collection = new()
+            {
+                AuthorId = AccountHandler.CurrentUser.Id,
+                IsPublic = true,
+            };
+            return new CollectionPackage(collection);
+        }
+
+        public override async Task<bool> SavePackageAsync(PackageBase package)
+        {
+            switch (package)
+            {
+                case CollectionPackage collectionPackage:
+                    return await FSApi.UpdateCollectionAsync(AccountHandler.CurrentUser.Id, collectionPackage.Model);
+
+                default:
+                    return false;
+            }
         }
     }
 }

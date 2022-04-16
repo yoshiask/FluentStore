@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:users="using:FluentStore.SDK.Users"
+    xmlns:authVm="using:FluentStore.ViewModels.Auth"
     xmlns:absuiControls="using:OwlCore.WinUI.AbstractUI.Controls"
     xmlns:absuiThemes="using:OwlCore.WinUI.AbstractUI.Themes" xmlns:controls="using:FluentStore.Controls"
     mc:Ignorable="d"
@@ -38,20 +39,20 @@
                        x:Name="NoSignedInAccountsLabel"/>
             <ItemsControl ItemsSource="{x:Bind ViewModel.SignedInAccountHandlers}">
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="users:AccountHandlerBase">
+                    <DataTemplate x:DataType="authVm:AccountHandlerViewModel">
                         <controls:SettingsBlockControl>
                             <controls:SettingsBlockControl.Title>
                                 <TextBlock FontWeight="SemiBold">
-                                    <Run Text="{x:Bind DisplayName}"/>
+                                    <Run Text="{x:Bind Handler.DisplayName}"/>
                                     <Run Text="·"/>
-                                    <Run Text="{x:Bind CurrentUser.DisplayName}" FontWeight="Normal"/>
+                                    <Run Text="{x:Bind Handler.CurrentUser.DisplayName}" FontWeight="Normal"/>
                                 </TextBlock>
                             </controls:SettingsBlockControl.Title>
                             <controls:SettingsBlockControl.SettingsActionableElement>
                                 <Button Content="Sign out" Command="{x:Bind SignOutCommand}" />
                             </controls:SettingsBlockControl.SettingsActionableElement>
                             <controls:SettingsBlockControl.ExpandableContent>
-                                <absuiControls:AbstractUIPresenter ViewModel="{x:Bind CurrentUser.ManageAccountForm, Mode=OneWay, Converter={StaticResource AbstractUIModelToViewModelConverter}}"
+                                <absuiControls:AbstractUIPresenter ViewModel="{x:Bind CreateManageAccountForm(), Mode=OneWay}"
                                                                    HorizontalAlignment="Stretch"
                                                                    Margin="12,0,12,12"/>
                             </controls:SettingsBlockControl.ExpandableContent>
@@ -66,16 +67,18 @@
                        x:Name="NoOtherAccountsLabel"/>
             <ItemsControl ItemsSource="{x:Bind ViewModel.OtherAccountHandlers}">
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="users:AccountHandlerBase">
-                        <Expander Header="{x:Bind DisplayName}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
-                            <absuiControls:AbstractUIPresenter ViewModel="{x:Bind SignInForm, Mode=OneWay, Converter={StaticResource AbstractUIModelToViewModelConverter}}"
-                                                               HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                                                               Margin="12,0,12,12"/>
-                        </Expander>
+                    <DataTemplate x:DataType="authVm:AccountHandlerViewModel">
+                        <controls:SettingsBlockControl Title="{x:Bind Handler.DisplayName}">
+                            <controls:SettingsBlockControl.ExpandableContent>
+                                <absuiControls:AbstractUIPresenter ViewModel="{x:Bind CreateSignInForm(), Mode=OneWay}"
+                                                                   HorizontalAlignment="Stretch"
+                                                                   Margin="12,0,12,12"/>
+                            </controls:SettingsBlockControl.ExpandableContent>
+                        </controls:SettingsBlockControl>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </StackPanel>
     </ScrollViewer>
-    
+
 </Page>

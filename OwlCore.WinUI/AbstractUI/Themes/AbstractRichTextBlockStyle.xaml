@@ -34,7 +34,7 @@
                        TextWrapping="WrapWholeWords"
                        Visibility="{x:Bind convertvis:NotNullOrEmptyToVisibilityConverter.Convert(Subtitle), Mode=OneWay}"/>
 
-            <tkcontrols:MarkdownTextBlock Text="{x:Bind RichText}"/>
+            <tkcontrols:MarkdownTextBlock Text="{x:Bind RichText}" Background="Transparent"/>
         </StackPanel>
     </DataTemplate>
 

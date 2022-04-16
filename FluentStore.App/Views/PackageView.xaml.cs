@@ -41,7 +41,6 @@ namespace FluentStore.Views
         }
 
         FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
-        AccountService UserService = Ioc.Default.GetRequiredService<AccountService>();
         INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
         PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 

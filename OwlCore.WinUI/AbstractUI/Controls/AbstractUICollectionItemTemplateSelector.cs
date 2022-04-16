@@ -23,6 +23,11 @@ namespace OwlCore.WinUI.AbstractUI.Controls
                 TextBoxTemplate = ThrowHelper.ThrowArgumentNullException<DataTemplate>(nameof(textBoxTemplate));
             }
 
+            if (!new Themes.AbstractRichTextBlockStyle().TryGetValue("DefaultAbstractRichTextBlockTemplate", out var richTextBlockTemplate))
+            {
+                RichTextBlockTemplate = ThrowHelper.ThrowArgumentNullException<DataTemplate>(nameof(richTextBlockTemplate));
+            }
+
             if (!new Themes.AbstractDataListStyle().TryGetValue("DefaultAbstractDataListTemplate", out var dataListTemplate))
             {
                 DataListTemplate = ThrowHelper.ThrowArgumentNullException<DataTemplate>(nameof(dataListTemplate));
@@ -53,6 +58,7 @@ namespace OwlCore.WinUI.AbstractUI.Controls
             // would crash with a StackOverflowException.
 
             TextBoxTemplate = (DataTemplate)textBoxTemplate;
+            RichTextBlockTemplate = (DataTemplate)richTextBlockTemplate;
             DataListTemplate = (DataTemplate)dataListTemplate;
             ButtonTemplate = (DataTemplate)buttonTemplate;
             MultiChoiceTemplate = (DataTemplate)multiChoiceTemplate;
@@ -69,6 +75,11 @@ namespace OwlCore.WinUI.AbstractUI.Controls
         /// The data template used to display an <see cref="AbstractTextBox"/>.
         /// </summary>
         public DataTemplate TextBoxTemplate { get; set; }
+
+        /// <summary>
+        /// The data template used to display an <see cref="AbstractRichTextBlock"/>.
+        /// </summary>
+        public DataTemplate RichTextBlockTemplate { get; set; }
 
         /// <summary>
         /// The data template used to display an <see cref="AbstractDataList"/>.
@@ -111,6 +122,7 @@ namespace OwlCore.WinUI.AbstractUI.Controls
             return item switch
             {
                 AbstractTextBoxViewModel _ => TextBoxTemplate,
+                AbstractRichTextBlockViewModel _ => RichTextBlockTemplate,
                 AbstractDataListViewModel _ => DataListTemplate,
                 AbstractButtonViewModel _ => ButtonTemplate,
                 AbstractMultiChoiceViewModel _ => MultiChoiceTemplate,

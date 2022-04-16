@@ -1,4 +1,6 @@
-﻿using OwlCore.AbstractUI.Models;
+﻿using FluentStore.SDK.AbstractUI.Models;
+using FluentStore.Services;
+using OwlCore.AbstractUI.Models;
 using System;
 using System.Linq;
 
@@ -18,6 +20,19 @@ namespace FluentStore.SDK.AbstractUI
             return ui;
         }
 
+        public static AbstractForm CreateSingleButtonForm(string formId, string formBody, string buttonText, EventHandler onClick)
+        {
+            AbstractForm form = new(formId, submitText: buttonText, canCancel: false, onSubmit: onClick);
+            form.Add(new AbstractRichTextBlock("formBody", formBody));
+            return form;
+        }
+
+        public static AbstractForm CreateOpenInBrowserForm(string formId, string formBody, Flurl.Url url, INavigationService navService)
+        {
+            return CreateSingleButtonForm(formId, formBody, "Open in browser",
+                async (sender, e) => await navService.OpenInBrowser(url));
+        }
+        
         public static TElement GetElement<TElement>(this AbstractUICollection collection, string id) where TElement : AbstractUIElement
         {
             return collection.OfType<TElement>().FirstOrDefault(x => x.Id == id);

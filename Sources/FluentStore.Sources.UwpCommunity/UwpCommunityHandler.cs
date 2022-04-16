@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentStore.SDK;
 using FluentStore.SDK.Helpers;
+using FluentStore.Services;
 
 namespace FluentStore.Sources.UwpCommunity
 {
@@ -22,6 +23,13 @@ namespace FluentStore.Sources.UwpCommunity
 
         public const string NAMESPACE_PROJECT = "uwpc-projects";
         public const string NAMESPACE_LAUNCH = "uwpc-launch";
+
+        public UwpCommunityHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
+        {
+            // TODO: Create UWPC account handler
+            //AccountHandler = new Users.UwpCommunityAccountHandler(passwordVaultService);
+        }
+
         public override HashSet<string> HandledNamespaces => new()
         {
             NAMESPACE_PROJECT,
@@ -145,17 +153,9 @@ namespace FluentStore.Sources.UwpCommunity
             return listPackage;
         }
 
-        public override async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
-        {
-            // TODO
-            return new List<PackageBase>(0);
-        }
+        public override Task<List<PackageBase>> GetSearchSuggestionsAsync(string query) => Task.FromResult(_emptyPackageList);
 
-        public override async Task<List<PackageBase>> SearchAsync(string query)
-        {
-            // TODO
-            return new List<PackageBase>(0);
-        }
+        public override Task<List<PackageBase>> SearchAsync(string query) => Task.FromResult(_emptyPackageList);
 
         public override async Task<List<PackageBase>> GetCollectionsAsync()
         {
@@ -171,8 +171,7 @@ namespace FluentStore.Sources.UwpCommunity
             return collections;
         }
 
-        public override ImageBase GetImage() => GetImageStatic();
-        public static ImageBase GetImageStatic()
+        public override ImageBase GetImage()
         {
             return new FileImage
             {
@@ -188,21 +187,6 @@ namespace FluentStore.Sources.UwpCommunity
                 {
                     return await GetPackage(projectId.ToString());
                 }
-
-                // TODO: This code is here just in case the UWPC website gets more complicated.
-                //Regex launchRx = new Regex(@"\/launch\/(?<launchYear>\d+)\/?\?project=(?<projId>\d+)");
-                //Match launchMc = launchRx.Match(url);
-                //if (launchMc.Success)
-                //{
-                //    return await GetPackage(launchMc.Groups["projId"].Value);
-                //}
-
-                //Regex projectsRx = new Regex(@"\/projects\/?(\?project=)?(?<projId>\d+)");
-                //Match projectsMc = projectsRx.Match(url);
-                //if (projectsMc.Success)
-                //{
-                //    return await GetPackage(launchMc.Groups["projId"].Value);
-                //}
             }
 
             return null;

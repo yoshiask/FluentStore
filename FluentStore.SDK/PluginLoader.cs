@@ -10,15 +10,14 @@ namespace FluentStore.SDK
 {
     public static class PluginLoader
     {
-        private static readonly Type[] _emptyTypeList = Array.Empty<Type>();
-        private static readonly object[] _emptyObjectList = Array.Empty<object>();
+        private static readonly Type[] _ctorTypeList = new[] { typeof(IPasswordVaultService) };
 
         /// <summary>
         /// Attempts to load all plugins located in <see cref="ISettingsService.PluginDirectory"/>
         /// and registers all loaded package handlers with the provided <paramref name="packageHandlers"/>.
         /// </summary>
         /// <param name="packageHandlers">The dictionary to add loaded package handlers to.</param>
-        public static PluginLoadResult LoadPlugins(ISettingsService settings, PackageService pkgSvc, AccountService accSvc)
+        public static PluginLoadResult LoadPlugins(ISettingsService settings, IPasswordVaultService passwordVaultService)
         {
             PluginLoadResult result = new();
 
@@ -45,20 +44,14 @@ namespace FluentStore.SDK
 
                     try
                     {
-                        // Load assembly and consider only types that inherit from PackageHandlerBase/AccountHandlerBase
+                        // Load assembly and consider only types that inherit from PackageHandlerBase
                         // and are public.
                         var assembly = Assembly.LoadFile(assemblyPath);
 
-                        foreach ((string typeName, AccountHandlerBase handler) in InstantiateAllAccountHandlers(assembly, settings, pkgSvc, accSvc))
+                        foreach (PackageHandlerBase handler in InstantiateAllPackageHandlers(assembly, settings, passwordVaultService))
                         {
                             // Register handler
-                            result.AccountHandlers.Add(handler);
-                        }
-
-                        foreach ((string typeName, PackageHandlerBase handler) in InstantiateAllPackageHandlers(assembly, settings, pkgSvc, accSvc))
-                        {
-                            // Register handler with the type name as its ID
-                            result.PackageHandlers.Add(typeName, handler);
+                            result.PackageHandlers.Add(handler);
                         }
                     }
                     catch (Exception ex)
@@ -95,17 +88,19 @@ namespace FluentStore.SDK
             return assembly;
         }
 
-        private static IEnumerable<(string typeName, PackageHandlerBase handler)> InstantiateAllPackageHandlers(Assembly pluginAssembly, ISettingsService settings, PackageService pkgSvc, AccountService accSvc)
+        private static IEnumerable<PackageHandlerBase> InstantiateAllPackageHandlers(Assembly pluginAssembly, ISettingsService settings, IPasswordVaultService passwordVaultService)
         {
+            object[] ctorArgs = new object[] { passwordVaultService };
+
             foreach (Type type in pluginAssembly.GetTypes()
                 .Where(t => t.BaseType.IsAssignableTo(typeof(PackageHandlerBase)) && t.IsPublic))
             {
-                var ctr = type.GetConstructor(_emptyTypeList);
+                var ctr = type.GetConstructor(_ctorTypeList);
                 if (ctr == null)
                     continue;
 
                 // Create a new instance of the handler
-                var handler = (PackageHandlerBase)ctr.Invoke(_emptyObjectList);
+                var handler = (PackageHandlerBase)ctr.Invoke(ctorArgs);
                 if (handler == null)
                     continue;
 
@@ -116,48 +111,20 @@ namespace FluentStore.SDK
                 ((IHandler)handler).SetServices(pkgSvc, accSvc);
 
                 // Register handler with the type name as its ID
-                yield return (type.Name, handler);
-            }
-        }
-
-        private static IEnumerable<(string typeName, AccountHandlerBase handler)> InstantiateAllAccountHandlers(Assembly pluginAssembly, ISettingsService settings, PackageService pkgSvc, AccountService accSvc)
-        {
-            foreach (Type type in pluginAssembly.GetTypes()
-                .Where(t => t.BaseType.IsAssignableTo(typeof(AccountHandlerBase)) && t.IsPublic))
-            {
-                var ctr = type.GetConstructor(_emptyTypeList);
-                if (ctr == null)
-                    continue;
-
-                // Create a new instance of the handler
-                var handler = (AccountHandlerBase)ctr.Invoke(_emptyObjectList);
-                if (handler == null)
-                    continue;
-
-                // Enable or disable according to user settings
-                //handler.IsEnabled = settings.GetAccountHandlerEnabledState(type.Name);
-
-                // Pass services to handler
-                ((IHandler)handler).SetServices(pkgSvc, accSvc);
-
-                // Register handler with the type name as its ID
-                yield return (type.Name, handler);
+                yield return handler;
             }
         }
     }
 
     public class PluginLoadResult
     {
-        public PluginLoadResult() : this(new(), new()) { }
+        public PluginLoadResult() : this(new()) { }
 
-        public PluginLoadResult(Dictionary<string, PackageHandlerBase> packageHandlers, HashSet<AccountHandlerBase> accountHandlers)
+        public PluginLoadResult(HashSet<PackageHandlerBase> packageHandlers)
         {
             PackageHandlers = packageHandlers;
-            AccountHandlers = accountHandlers;
         }
 
-        public Dictionary<string, PackageHandlerBase> PackageHandlers { get; }
-
-        public HashSet<AccountHandlerBase> AccountHandlers { get; }
+        public HashSet<PackageHandlerBase> PackageHandlers { get; }
     }
 }

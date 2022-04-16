@@ -6,38 +6,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentStore.SDK.Packages;
 using FluentStore.SDK;
-using FluentStore.SDK.AbstractUI;
-using FluentStore.SDK.AbstractUI.Models;
-using OwlCore.AbstractUI.Models;
 
 namespace FluentStore.Sources.FluentStore
 {
-    public class CollectionPackage : GenericPackageCollection<Collection>, IPackageCollection, IEditablePackageCollection, IEditablePackage
+    public class CollectionPackage : GenericPackageCollection<Collection>
     {
-        private bool _canEditItems = false;
-        private bool _canEdit = false;
-        private bool _canDelete = false;
-
-        public bool CanEditItems
-        {
-            get => _canEditItems;
-            set => SetProperty(ref _canEditItems, value);
-        }
-
-        public bool CanEdit
-        {
-            get => _canEdit;
-            set => SetProperty(ref _canEdit, value);
-        }
-
-        public bool CanDelete
-        {
-            get => _canDelete;
-            set => SetProperty(ref _canDelete, value);
-        }
-
-        public CollectionPackage(PackageHandlerBase packageHandler, Collection collection = null, IEnumerable<PackageBase> items = null)
-            : base(packageHandler)
+        public CollectionPackage(Collection collection = null, IEnumerable<PackageBase> items = null)
         {
             if (collection != null)
                 Update(collection);
@@ -176,14 +150,6 @@ namespace FluentStore.Sources.FluentStore
                 throw new System.NotSupportedException($"Cannot edit {Urn}");
 
             await ((FluentStoreHandler)Handler).FSApi.UpdateCollectionAsync(handler.CurrentUser.Id, Model);
-        }
-
-        public async Task DeleteAsync()
-        {
-            if (!Handler.AccSvc.TryGetAuthenticatedHandler<Users.FluentStoreAccountHandler>(out var handler))
-                throw new System.NotSupportedException($"Cannot delete {Urn}");
-
-            await ((FluentStoreHandler)Handler).FSApi.DeleteCollectionAsync(handler.CurrentUser.Id, Model.Id.ToString());
         }
     }
 }

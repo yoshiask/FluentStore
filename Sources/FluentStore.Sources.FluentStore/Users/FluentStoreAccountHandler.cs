@@ -1,26 +1,23 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using FluentStore.SDK.AbstractUI.Models;
+﻿using FluentStore.SDK.AbstractUI.Models;
 using FluentStore.SDK.Users;
 using FluentStore.Services;
 using Flurl;
-using OwlCore.AbstractUI.Models;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using FSAPI = FluentStoreAPI.FluentStoreAPI;
 
 namespace FluentStore.Sources.FluentStore.Users
 {
     public class FluentStoreAccountHandler : AccountHandlerBase<FluentStoreAccount>
     {
-        private readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
+        private readonly FluentStoreAPI.FluentStoreAPI FSApi;
 
-        public const string NAMESPACE_FSUSER = "fluent-store-user";
-
-        public override HashSet<string> HandledNamespaces => new()
+        public FluentStoreAccountHandler(FluentStoreAPI.FluentStoreAPI fsApi, IPasswordVaultService passwordVault)
+            : base(passwordVault)
         {
-            NAMESPACE_FSUSER
-        };
+            FSApi = fsApi;
+        }
+
+        public override string Id => "fluent-store-user";
 
         public override string DisplayName => "Fluent Store";
 
@@ -88,13 +85,18 @@ namespace FluentStore.Sources.FluentStore.Users
             return Task.CompletedTask;
         }
 
-        protected override AbstractUICollection CreateSignInForm()
+        public override AbstractForm CreateSignInForm()
         {
             EmailPasswordForm form = new("SignInForm", OnSignInFormSubmitted);
             return form;
         }
 
-        protected override AbstractUICollection CreateSignUpForm()
+        public override AbstractForm CreateSignUpForm()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override AbstractForm CreateManageAccountForm()
         {
             throw new NotImplementedException();
         }

@@ -91,15 +91,16 @@ namespace FluentStore
             {
                 // Load plugins and initialize package and account services
                 var settings = Ioc.Default.GetRequiredService<ISettingsService>();
+                var passwordVaultService = Ioc.Default.GetRequiredService<IPasswordVaultService>();
                 var pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
-                var accSvc = Ioc.Default.GetRequiredService<AccountService>();
 
                 log?.Log($"Began loading plugins");
-                var pluginLoadResult = PluginLoader.LoadPlugins(settings, pkgSvc, accSvc);
+                var pluginLoadResult = PluginLoader.LoadPlugins(settings, passwordVaultService);
+                pkgSvc.PackageHandlers = pluginLoadResult.PackageHandlers;
                 log?.Log($"Finished loading plugins");
 
                 // Attempt to silently sign into any saved accounts
-                await accSvc.TrySlientSignInAsync();
+                await pkgSvc.TrySlientSignInAsync();
 
                 Window = new()
                 {
@@ -228,7 +229,6 @@ namespace FluentStore
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
             services.AddSingleton(new FluentStoreAPI.FluentStoreAPI());
-            services.AddSingleton(new AccountService());
             services.AddSingleton(new PackageService());
 
             return services.BuildServiceProvider();

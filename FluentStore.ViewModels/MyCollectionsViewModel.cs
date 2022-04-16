@@ -9,6 +9,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using FluentStore.SDK.Helpers;
+using FluentStore.SDK.Packages;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -85,15 +86,15 @@ namespace FluentStore.ViewModels
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
 
-        public async Task UpdateCollectionAsync(SDK.Packages.IEditablePackage newCollection)
+        public async Task UpdateCollectionAsync(PackageHandlerBase handler, PackageBase newCollection)
         {
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
             try
             {
-                await newCollection.SaveAsync();
+                await handler.SavePackageAsync(newCollection);
                 await LoadCollectionsAsync();
             }
-            catch (Flurl.Http.FlurlHttpException ex)
+            catch (Exception ex)
             {
                 WeakReferenceMessenger.Default.Send(new SDK.Messages.ErrorMessage(ex, newCollection));
             }
@@ -113,7 +114,7 @@ namespace FluentStore.ViewModels
                     Collections.Add(new PackageViewModel(collection));
                 }
             }
-            catch (Flurl.Http.FlurlHttpException ex)
+            catch (Exception ex)
             {
                 WeakReferenceMessenger.Default.Send(new SDK.Messages.ErrorMessage(ex));
             }
@@ -123,12 +124,9 @@ namespace FluentStore.ViewModels
             ShowNewCollectionTip = Collections.Count <= 0;
         }
 
-        /// <summary>
-        /// Gets a list of package handlers than support creating new collections.
-        /// </summary>
         public IEnumerable<PackageHandlerBase> GetPackageHandlersForNewCollections()
         {
-            return PackageService.PackageHandlers.Values.Where(h => h.CanCreateCollections);
+            return PackageService.PackageHandlers.Where(ph => ph.IsEnabled && ph.CanCreateCollection());
         }
     }
 }
