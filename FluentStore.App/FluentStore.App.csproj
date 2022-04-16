@@ -43,7 +43,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.2" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.196" />
         <PackageReference Include="Garfoot.Utilities.FluentUrn" Version="1.2.1" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />

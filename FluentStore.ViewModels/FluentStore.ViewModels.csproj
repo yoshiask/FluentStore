@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net6.0-windows$(TargetWindowsVersion)</TargetFramework>
         <TargetPlatformMinVersion>$(MinWindowsVersion)</TargetPlatformMinVersion>
-        <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
+        <Platforms>AnyCPU;x64;x86;ARM64</Platforms>
         <AssemblyVersion>$(FluentStoreVersion)</AssemblyVersion>
         <FileVersion>$(AssemblyVersion)</FileVersion>
     </PropertyGroup>

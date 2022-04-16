@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0;net6.0-windows$(TargetWindowsVersion)</TargetFrameworks>
-        <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
+        <Platforms>AnyCPU;x64;x86;ARM64</Platforms>
         <LangVersion>latest</LangVersion>
 		<AssemblyVersion>$(FluentStoreVersion)</AssemblyVersion>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
