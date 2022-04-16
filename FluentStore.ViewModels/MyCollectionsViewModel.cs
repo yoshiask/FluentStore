@@ -94,7 +94,7 @@ namespace FluentStore.ViewModels
                 await handler.SavePackageAsync(newCollection);
                 await LoadCollectionsAsync();
             }
-            catch (Flurl.Http.FlurlHttpException ex)
+            catch (Exception ex)
             {
                 WeakReferenceMessenger.Default.Send(new SDK.Messages.ErrorMessage(ex, newCollection));
             }
@@ -114,7 +114,7 @@ namespace FluentStore.ViewModels
                     Collections.Add(new PackageViewModel(collection));
                 }
             }
-            catch (Flurl.Http.FlurlHttpException ex)
+            catch (Exception ex)
             {
                 WeakReferenceMessenger.Default.Send(new SDK.Messages.ErrorMessage(ex));
             }
