@@ -5,7 +5,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="..\FluentStore.App\Assets\**\*.png">
+		<Content Include="..\FluentStore.App\Assets\**\*.*">
 			<Link>Assets\Packaging\%(RecursiveDir)%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>true</CopyToOutputDirectory>
 		</Content>
