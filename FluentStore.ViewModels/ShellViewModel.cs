@@ -31,7 +31,7 @@ namespace FluentStore.ViewModels
         private readonly ISettingsService Settings = Ioc.Default.GetRequiredService<ISettingsService>();
         private readonly ObservableCollection<PackageViewModel> NoResultsCollection = new()
         {
-            new(new SDK.Packages.ModernPackage<object> { Title = "No results found" })
+            new(new SDK.Packages.GenericPackage<object>(null) { Title = "No results found" })
         };
 
         private bool _IsPageLoading;

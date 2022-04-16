@@ -144,7 +144,7 @@ namespace FluentStore.Sources.UwpCommunity
 
             foreach (dynamic project in projects)
             {
-                UwpCommunityPackage package = new(project);
+                UwpCommunityPackage package = new(this, project);
                 package.Status = PackageStatus.BasicDetails;
                 listPackage.Items.Add(package);
             }
