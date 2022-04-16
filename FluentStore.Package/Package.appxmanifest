@@ -9,7 +9,7 @@
     <Identity
       Name="52374YoshiAskharoun.FluentStore"
       Publisher="CN=Joshua Askharoun, O=Joshua Askharoun, S=Texas, C=US"
-      Version="0.2.1.0" />
+      Version="0.3.0.0" />
 
     <Properties>
         <DisplayName>Fluent Store</DisplayName>
