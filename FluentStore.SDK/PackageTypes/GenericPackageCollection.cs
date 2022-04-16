@@ -14,7 +14,7 @@ namespace FluentStore.SDK.Packages
     /// For example, Fluent Store's <c>CollectionPackage</c> inherits this class
     /// and <c>UwpCommunityPackage</c> uses it to represent Launch events.
     /// </summary>
-    public class GenericPackageCollection<TModel> : PackageBase<TModel>
+    public class GenericPackageCollection<TModel> : PackageBase<TModel>, IPackageCollection
     {
         public override Task<ImageBase> CacheAppIcon()
         {

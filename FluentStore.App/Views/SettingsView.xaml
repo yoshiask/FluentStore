@@ -39,7 +39,7 @@
             <controls:SettingsBlockControl Title="Package sources" Icon="Shop"
                                            Description="View, enable, or disable available package handlers">
                 <controls:SettingsBlockControl.ExpandableContent>
-                    <ItemsControl ItemsSource="{x:Bind PackageService.PackageHandlers.Values, Mode=OneWay}">
+                    <ItemsControl ItemsSource="{x:Bind PackageService.PackageHandlers, Mode=OneWay}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Spacing="8"/>

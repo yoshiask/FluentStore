@@ -191,6 +191,11 @@ namespace FluentStore.SDK
         public virtual bool CanCreatePackage() => false;
 
         /// <summary>
+        /// Determines whether new collections can be created.
+        /// </summary>
+        public virtual bool CanCreateCollection() => false;
+
+        /// <summary>
         /// Creates a new package.
         /// </summary>
         /// <returns>
@@ -198,6 +203,20 @@ namespace FluentStore.SDK
         /// <see langword="null"/> if <see langword="false"/>.
         /// </returns>
         public virtual Task<PackageBase> CreatePackageAsync() => Task.FromResult<PackageBase>(null);
+
+        /// <summary>
+        /// Creates a new empty collection.
+        /// </summary>
+        /// <returns>
+        /// The new package if <see cref="CanCreateCollection"/> is <see langword="true"/>,
+        /// <see langword="null"/> if <see langword="false"/>.
+        /// </returns>
+        /// <remarks>
+        /// To ensure compatibility, this should return an instance of a package that inherits
+        /// <see cref="PackageBase"/> and implements <see cref="Packages.IPackageCollection"/>,
+        /// such as <see cref="Packages.GenericPackageCollection{TModel}"/>.
+        /// </remarks>
+        public virtual Task<PackageBase> CreateCollectionAsync() => Task.FromResult<PackageBase>(null);
 
         #endregion
     }

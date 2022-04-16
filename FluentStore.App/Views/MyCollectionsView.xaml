@@ -28,7 +28,11 @@
                                       ViewPackageCommand="{x:Bind ViewModel.ViewCollectionCommand}"/>
 
         <CommandBar Grid.Row="1" DefaultLabelPosition="Right">
-            <AppBarButton x:Name="NewCollectionButton" Icon="Add" Label="New" Click="NewButton_Click"/>
+            <AppBarButton x:Name="NewCollectionButton" Icon="Add" Label="New">
+                <AppBarButton.Flyout>
+                    <MenuFlyout x:Name="NewCollectionMenu"/>
+                </AppBarButton.Flyout>
+            </AppBarButton>
         </CommandBar>
 
         <TeachingTip x:Name="NewCollectionTip"

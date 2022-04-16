@@ -2,14 +2,14 @@
 
     <PropertyGroup>
         <TargetFramework>net6.0-windows$(TargetWindowsVersion)</TargetFramework>
-		<TargetPlatformMinVersion>$(MinWindowsVersion)</TargetPlatformMinVersion>
-		<Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
-		<AssemblyVersion>$(FluentStoreVersion)</AssemblyVersion>
-		<FileVersion>$(AssemblyVersion)</FileVersion>
-	</PropertyGroup>
+        <TargetPlatformMinVersion>$(MinWindowsVersion)</TargetPlatformMinVersion>
+        <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
+        <AssemblyVersion>$(FluentStoreVersion)</AssemblyVersion>
+        <FileVersion>$(AssemblyVersion)</FileVersion>
+    </PropertyGroup>
 
     <ItemGroup>
-      <None Remove="Auth\AccountsViewModel.cs~RF9b05e0f.TMP" />
+        <None Remove="Auth\AccountsViewModel.cs~RF9b05e0f.TMP" />
     </ItemGroup>
 
     <ItemGroup>
@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\API\FluentStoreAPI\FluentStoreAPI.csproj" />
         <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj" />
         <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
         <ProjectReference Include="..\API\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />

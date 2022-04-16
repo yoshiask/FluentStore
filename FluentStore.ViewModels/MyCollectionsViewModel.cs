@@ -1,7 +1,6 @@
 ﻿using FluentStore.SDK;
 using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
-using FluentStoreAPI.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
@@ -10,6 +9,9 @@ using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using FluentStore.SDK.Helpers;
+using FluentStore.SDK.Packages;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace FluentStore.ViewModels
 {
@@ -84,12 +86,12 @@ namespace FluentStore.ViewModels
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
 
-        public async Task UpdateCollectionAsync(Collection newCollection)
+        public async Task UpdateCollectionAsync(PackageHandlerBase handler, PackageBase newCollection)
         {
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
             try
             {
-                //await FSApi.UpdateCollectionAsync(UserService.CurrentUser.LocalID, newCollection);
+                await handler.SavePackageAsync(newCollection);
                 await LoadCollectionsAsync();
             }
             catch (Flurl.Http.FlurlHttpException ex)
@@ -120,6 +122,11 @@ namespace FluentStore.ViewModels
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
 
             ShowNewCollectionTip = Collections.Count <= 0;
+        }
+
+        public IEnumerable<PackageHandlerBase> GetPackageHandlersForNewCollections()
+        {
+            return PackageService.PackageHandlers.Where(ph => ph.IsEnabled && ph.CanCreateCollection());
         }
     }
 }
