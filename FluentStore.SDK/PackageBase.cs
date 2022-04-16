@@ -88,7 +88,7 @@ namespace FluentStore.SDK
 
         public abstract Task LaunchAsync();
 
-        public virtual bool Equals(PackageBase other) => this.Urn.Equals(other.Urn);
+        public virtual bool Equals(PackageBase other) => this.Urn == other.Urn;
 
         public override bool Equals(object obj) => obj is PackageBase other ? this.Equals(other) : false;
 
