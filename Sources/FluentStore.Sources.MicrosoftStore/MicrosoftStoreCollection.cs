@@ -1,22 +1,8 @@
-﻿using FluentStore.SDK.Attributes;
-using FluentStore.SDK.Helpers;
-using FluentStore.SDK.Images;
-using FluentStore.SDK.Messages;
-using FluentStore.SDK.Models;
+﻿using FluentStore.SDK.Images;
 using Garfoot.Utilities.FluentUrn;
-using Microsoft.Marketplace.Storefront.Contracts.V2;
-using Microsoft.Marketplace.Storefront.Contracts.V3;
 using Microsoft.Marketplace.Storefront.Contracts.V4;
-using Microsoft.Marketplace.Storefront.Contracts.V8.One;
 using CommunityToolkit.Diagnostics;
-using CommunityToolkit.Mvvm.Messaging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Windows.System.Profile;
-using System.IO;
-using StoreDownloader;
 using FluentStore.SDK;
 using FluentStore.SDK.Packages;
 
@@ -24,7 +10,8 @@ namespace FluentStore.Sources.MicrosoftStore
 {
     public class MicrosoftStoreCollection : GenericPackageCollection<CollectionDetail>
     {
-        public MicrosoftStoreCollection(CollectionDetail collectionDetail = null)
+        public MicrosoftStoreCollection(PackageHandlerBase packageHandler, CollectionDetail collectionDetail = null)
+            : base(packageHandler)
         {
             if (collectionDetail != null)
                 Update(collectionDetail);
@@ -53,7 +40,7 @@ namespace FluentStore.Sources.MicrosoftStore
 
             Items.Clear();
             foreach (var card in collectionDetail.Cards)
-                Items.Add(new MicrosoftStorePackage(card));
+                Items.Add(new MicrosoftStorePackage(PackageHandler, card));
 
             Status = PackageStatus.DownloadReady;
         }

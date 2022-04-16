@@ -15,6 +15,11 @@ namespace FluentStore.SDK.Packages
     /// </summary>
     public class GenericPackage<TModel> : PackageBase<TModel>
     {
+        public GenericPackage(PackageHandlerBase packageHandler) : base(packageHandler)
+        {
+
+        }
+
         public override Task<bool> CanLaunchAsync() => Task.FromResult(false);
 
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)

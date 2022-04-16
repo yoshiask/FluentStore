@@ -10,6 +10,11 @@ namespace FluentStore.SDK.Packages
 {
     public class Win32Package<TModel> : PackageBase<TModel>
     {
+        public Win32Package(PackageHandlerBase packageHandler) : base(packageHandler)
+        {
+
+        }
+
         public override async Task<bool> CanLaunchAsync()
         {
             // TODO: How to check if an unpackaged app is installed?

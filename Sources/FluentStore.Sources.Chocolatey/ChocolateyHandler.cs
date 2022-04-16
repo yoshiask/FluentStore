@@ -41,7 +41,7 @@ namespace FluentStore.Sources.Chocolatey
                 throw new NotSupportedException("The choco client library does not currently support fetching package info without specifying a version.");
             var package = await Choco.GetPackageAsync(urnStr[..versionIdx], Version.Parse(urnStr[(versionIdx + 1)..]));
 
-            return new ChocolateyPackage(package);
+            return new ChocolateyPackage(this, package);
         }
 
         public override Task<List<PackageBase>> GetSearchSuggestionsAsync(string query) => Task.FromResult(_emptyPackageList);
@@ -51,7 +51,7 @@ namespace FluentStore.Sources.Chocolatey
             List<PackageBase> packages = new();
             var results = await Choco.SearchAsync(query);
             foreach (Package chocoPackage in results)
-                packages.Add(new ChocolateyPackage(chocoPackage));
+                packages.Add(new ChocolateyPackage(this, chocoPackage));
 
             return packages;
         }

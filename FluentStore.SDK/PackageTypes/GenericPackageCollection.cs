@@ -16,6 +16,11 @@ namespace FluentStore.SDK.Packages
     /// </summary>
     public class GenericPackageCollection<TModel> : PackageBase<TModel>, IPackageCollection
     {
+        public GenericPackageCollection(PackageHandlerBase packageHandler) : base(packageHandler)
+        {
+
+        }
+
         public override Task<ImageBase> CacheAppIcon()
         {
             return Task.FromResult(Images.FirstOrDefault(i => i.ImageType == ImageType.Logo));

@@ -22,6 +22,7 @@ using StoreDownloader;
 using FluentStore.SDK;
 using FluentStore.SDK.Packages;
 using FluentStore.Sources.WinGet;
+using StoreWarningMessage = Microsoft.Marketplace.Storefront.Contracts.V3.WarningMessage;
 
 namespace FluentStore.Sources.MicrosoftStore
 {
@@ -32,7 +33,8 @@ namespace FluentStore.Sources.MicrosoftStore
             "app meets accessibility requiements, " +
             "making it easier for everyone to use.";
 
-        public MicrosoftStorePackage(CardModel card = null, ProductSummary summary = null, ProductDetails product = null)
+        public MicrosoftStorePackage(PackageHandlerBase packageHandler, CardModel card = null, ProductSummary summary = null, ProductDetails product = null)
+            : base(packageHandler)
         {
             if (card != null)
                 Update(card);
@@ -510,9 +512,9 @@ namespace FluentStore.Sources.MicrosoftStore
             set => SetProperty(ref _AllowedPlatforms, value);
         }
 
-        private List<WarningMessage> _WarningMessages = new();
+        private List<StoreWarningMessage> _WarningMessages = new();
         [DisplayAdditionalInformation("Warnings", "\uE7BA")]
-        public List<WarningMessage> WarningMessages
+        public List<StoreWarningMessage> WarningMessages
         {
             get => _WarningMessages;
             set => SetProperty(ref _WarningMessages, value);
@@ -559,9 +561,9 @@ namespace FluentStore.Sources.MicrosoftStore
                 if (_InternalPackage == null)
                 {
                     if (IsWinGet)
-                        _InternalPackage = new WinGetPackage();
+                        _InternalPackage = new WinGetPackage(PackageHandler);
                     else
-                        _InternalPackage = new ModernPackage<ProductDetails>();
+                        _InternalPackage = new ModernPackage<ProductDetails>(PackageHandler);
                 }
                 return _InternalPackage;
             }

@@ -49,7 +49,7 @@ namespace FluentStore.Sources.FluentStore
                 string collId = id[1];
 
                 var collection = await FSApi.GetCollectionAsync(userId, collId);
-                var collectionPack = new CollectionPackage(collection)
+                var collectionPack = new CollectionPackage(this, collection)
                 {
                     Status = PackageStatus.BasicDetails
                 };
@@ -89,7 +89,7 @@ namespace FluentStore.Sources.FluentStore
                 return _emptyPackageList;
 
             var collections = await FSApi.GetCollectionsAsync(AccountHandler.CurrentUser.Id);
-            return collections.Select(c => (PackageBase)new CollectionPackage(c) { Status = PackageStatus.BasicDetails }).ToList();
+            return collections.Select(c => (PackageBase)new CollectionPackage(this, c) { Status = PackageStatus.BasicDetails }).ToList();
         }
 
         public override ImageBase GetImage() => GetImageStatic();
@@ -172,14 +172,20 @@ namespace FluentStore.Sources.FluentStore
             return form;
         }
 
+        public override bool CanCreatePackage() => false;
+
         public override bool CanCreateCollection() => AccountHandler.IsLoggedIn;
 
-        public override bool CanDeletePackage(PackageBase package)
+        public override bool CanEditPackage(PackageBase package)
         {
             return package is CollectionPackage collectionPackage
                 && AccountHandler.IsLoggedIn
                 && collectionPackage.Model.AuthorId == AccountHandler.CurrentUser.Id;
         }
+
+        public override bool CanEditCollection(PackageBase package) => CanEditPackage(package);
+
+        public override bool CanDeletePackage(PackageBase package) => CanEditPackage(package);
 
         public override async Task<PackageBase> CreateCollectionAsync()
         {
@@ -188,7 +194,7 @@ namespace FluentStore.Sources.FluentStore
                 AuthorId = AccountHandler.CurrentUser.Id,
                 IsPublic = true,
             };
-            return new CollectionPackage(collection);
+            return new CollectionPackage(this, collection);
         }
 
         public override async Task<bool> SavePackageAsync(PackageBase package)
@@ -197,6 +203,18 @@ namespace FluentStore.Sources.FluentStore
             {
                 case CollectionPackage collectionPackage:
                     return await FSApi.UpdateCollectionAsync(AccountHandler.CurrentUser.Id, collectionPackage.Model);
+
+                default:
+                    return false;
+            }
+        }
+
+        public override async Task<bool> DeletePackageAsync(PackageBase package)
+        {
+            switch (package)
+            {
+                case CollectionPackage collectionPackage:
+                    return await FSApi.DeleteCollectionAsync(AccountHandler.CurrentUser.Id, collectionPackage.Model.Id.ToString());
 
                 default:
                     return false;

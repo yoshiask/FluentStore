@@ -108,7 +108,7 @@ namespace FluentStore.Sources.UwpCommunity
         {
             dynamic projects = (await BASE_URL.AppendPathSegments("projects", "launch", year).GetJsonAsync()).projects;
 
-            GenericPackageCollection<dynamic> listPackage = new()
+            GenericPackageCollection<dynamic> listPackage = new(this)
             {
                 Urn = new(NAMESPACE_LAUNCH, new RawNamespaceSpecificString(year)),
                 Title = "Launch " + year,
