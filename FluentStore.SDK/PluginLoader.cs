@@ -1,10 +1,11 @@
-﻿using FluentStore.SDK.Users;
-using FluentStore.Services;
+﻿using FluentStore.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace FluentStore.SDK
 {
@@ -65,6 +66,30 @@ namespace FluentStore.SDK
             }
 
             return result;
+        }
+
+        public static async Task DownloadPlugins(ISettingsService settings, IEnumerable<string> pluginUrls)
+        {
+            System.Net.Http.HttpClient client = new();
+            foreach (string url in pluginUrls)
+            {
+                string dir = Path.Combine(settings.PluginDirectory, Path.GetFileNameWithoutExtension(url));
+                if (Directory.Exists(dir))
+                    continue;
+
+                try
+                {
+                    var response = await client.GetStreamAsync(url);
+                    using ZipArchive archive = new(response);
+                    archive.ExtractToDirectory(dir);
+                }
+                catch (Exception ex)
+                {
+#if DEBUG
+                    System.Diagnostics.Debug.WriteLine(ex);
+#endif
+                }
+            }
         }
 
         private static Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)

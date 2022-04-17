@@ -20,6 +20,7 @@ namespace FluentStore
         private IntPtr m_hwnd;
         private WinProc newWndProc = null;
         private IntPtr oldWndProc = IntPtr.Zero;
+        private MainPage MainContent;
 
         public MainWindow()
         {
@@ -30,6 +31,12 @@ namespace FluentStore
 
             LoadIcon(@"Assets\AppIcon.ico");
             UpdateTitleBarTheme();
+        }
+
+        public void StartApp()
+        {
+            MainContent = new();
+            Content = MainContent;
         }
 
         [DllImport("user32")]
@@ -94,7 +101,7 @@ namespace FluentStore
 
         private unsafe HRESULT UpdateTitleBarTheme()
         {
-            BOOL isDark = MainContent.ActualTheme == ElementTheme.Dark ? BOOL.TRUE : BOOL.FALSE;
+            BOOL isDark = ((FrameworkElement)Content).ActualTheme == ElementTheme.Dark ? BOOL.TRUE : BOOL.FALSE;
             return DwmApi.DwmSetWindowAttribute(m_hwnd, (DwmApi.DWMWINDOWATTRIBUTE)20, new(&isDark), sizeof(BOOL));
         }
 

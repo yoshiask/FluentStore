@@ -7,6 +7,12 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <local:MainPage x:Name="MainContent"/>
+    <Grid>
+        <StackPanel Spacing="8" VerticalAlignment="Center" HorizontalAlignment="Stretch"
+                    MaxWidth="400">
+            <Image Source="/Assets/SplashScreen.png" MaxHeight="300"/>
+            <ProgressBar IsIndeterminate="True"/>
+        </StackPanel>
+    </Grid>
 
 </Window>

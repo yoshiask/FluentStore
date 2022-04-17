@@ -1,12 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.WinUI.Notifications;
 using FluentStore.SDK;
+using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Users;
 using FluentStore.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
 using System;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
@@ -87,10 +89,34 @@ namespace FluentStore
             log?.Log($"Is first instance?: {e.IsFirstInstance}");
             log?.Log($"Is first launch?: {e.IsFirstLaunch}");
             log?.Log($"Single-instance launch args: {e.Arguments}");
+
+            var settings = Ioc.Default.GetRequiredService<ISettingsService>();
+
             if (e.IsFirstLaunch)
             {
+                Window = new()
+                {
+                    Title = AppName
+                };
+                
+                // Make sure to run on UI thread
+                Window.DispatcherQueue.TryEnqueue(() =>
+                {
+                    Window.Activate();
+                });
+
+                // Check if app was updated
+                switch (Helpers.Settings.Default.GetAppUpdateStatus())
+                {
+                    case AppUpdateStatus.NewlyInstalled:
+                        // Download and install default plugins
+                        var fsApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
+                        var defaults = await fsApi.GetDefaultPlugins(Windows.ApplicationModel.Package.Current.Id.Version.ToVersion());
+                        await PluginLoader.DownloadPlugins(settings, defaults);
+                        break;
+                }
+
                 // Load plugins and initialize package and account services
-                var settings = Ioc.Default.GetRequiredService<ISettingsService>();
                 var passwordVaultService = Ioc.Default.GetRequiredService<IPasswordVaultService>();
                 var pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
 
@@ -101,11 +127,6 @@ namespace FluentStore
 
                 // Attempt to silently sign into any saved accounts
                 await pkgSvc.TrySlientSignInAsync();
-
-                Window = new()
-                {
-                    Title = AppName
-                };
             }
             log?.Log($"Redirect activation?: {result.RedirectActivation}");
 
@@ -116,8 +137,8 @@ namespace FluentStore
                 // Make sure to run on UI thread
                 Current.Window.DispatcherQueue.TryEnqueue(() =>
                 {
+                    Window.StartApp();
                     navService.Navigate(result.Page, result.Parameter);
-                    Window.Activate();
                 });
             }
         }
