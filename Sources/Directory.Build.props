@@ -5,9 +5,19 @@
     <UsingTask TaskName="CopyPluginToOutput.InstallPluginTask"
                AssemblyFile="..\CopyPluginToOutput\bin\$(Configuration)\netstandard2.0\CopyPluginToOutput.dll"/>
 
-	<PropertyGroup>
-		<!-- Ensure that all dependencies get copied to the plugin directory -->
-		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-	</PropertyGroup>
+    <PropertyGroup>
+        <!-- Ensure that all dependencies get copied to the plugin directory -->
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <TargetFramework>net6.0-windows$(TargetWindowsVersion)</TargetFramework>
+        <TargetPlatformMinVersion>$(MinWindowsVersion)</TargetPlatformMinVersion>
+        <LangVersion>latest</LangVersion>
+        <Platforms>x64;x86;ARM64</Platforms>
+        <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
+        <AssemblyVersion>$(FluentStoreVersion)</AssemblyVersion>
+        <FileVersion>$(AssemblyVersion)</FileVersion>
+    </PropertyGroup>
 </Project>
 

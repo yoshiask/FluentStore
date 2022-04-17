@@ -1,15 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>net6.0-windows$(TargetWindowsVersion)</TargetFramework>
-        <TargetPlatformMinVersion>$(MinWindowsVersion)</TargetPlatformMinVersion>
-        <LangVersion>latest</LangVersion>
-        <Platforms>AnyCPU;x64;x86;ARM64</Platforms>
-        <AssemblyVersion>$(FluentStoreVersion)</AssemblyVersion>
-        <FileVersion>$(AssemblyVersion)</FileVersion>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    </PropertyGroup>
-
+    
     <ItemGroup>
         <PackageReference Include="Octokit" Version="0.50.0" />
         <ProjectReference Include="..\..\FluentStore.SDK\FluentStore.SDK.csproj" />
