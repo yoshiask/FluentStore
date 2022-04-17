@@ -106,12 +106,13 @@ namespace FluentStore
                 });
 
                 // Check if app was updated
+                var appVersion = Windows.ApplicationModel.Package.Current.Id.Version.ToVersion();
                 switch (Helpers.Settings.Default.GetAppUpdateStatus())
                 {
                     case AppUpdateStatus.NewlyInstalled:
                         // Download and install default plugins
                         var fsApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
-                        var defaults = await fsApi.GetDefaultPlugins(Windows.ApplicationModel.Package.Current.Id.Version.ToVersion());
+                        var defaults = await fsApi.GetDefaultPlugins(appVersion);
                         await PluginLoader.DownloadPlugins(settings, defaults);
                         break;
                 }
@@ -127,6 +128,9 @@ namespace FluentStore
 
                 // Attempt to silently sign into any saved accounts
                 await pkgSvc.TrySlientSignInAsync();
+
+                // Update last launched version
+                Helpers.Settings.Default.LastLaunchedVersion = appVersion;
             }
             log?.Log($"Redirect activation?: {result.RedirectActivation}");
 
