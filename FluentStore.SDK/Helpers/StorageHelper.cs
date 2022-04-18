@@ -190,5 +190,12 @@ namespace FluentStore.SDK.Helpers
             archive.ExtractToDirectory(dir.FullName, overwrite);
             return dir;
         }
+
+        internal static string GetFileId(FileSystemInfo file)
+        {
+            using var fs = File.Open(file.FullName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            Vanara.PInvoke.Kernel32.GetFileInformationByHandle(fs.SafeFileHandle, out var info);
+            return $"{(info.nFileIndexHigh << 32) | info.nFileIndexLow:x}";
+        }
     }
 }

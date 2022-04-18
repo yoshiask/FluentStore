@@ -1,70 +1,56 @@
 ﻿using FluentStore.SDK.Helpers;
 using FluentStore.Services;
+using OwlCore.AbstractStorage;
+using OwlCore.Services;
 using System;
 using System.IO;
-using Windows.Storage;
 
 namespace FluentStore.Helpers
 {
-    public class Settings : ObservableSettings, ISettingsService
+    public class Settings : SettingsBase, ISettingsService
     {
         private const string KEY_PackageHandlerEnabled = "PackageHandlerEnabled";
-
         private static readonly Settings settings = new();
+        private static readonly DefaultSettingValues defVals = new();
+
         public static Settings Default => settings;
 
-        public Settings() : base(ApplicationData.Current.LocalSettings,
-            new()
-            {
-                { KEY_PackageHandlerEnabled, ApplicationData.Current.LocalSettings.CreateContainer(KEY_PackageHandlerEnabled, ApplicationDataCreateDisposition.Always) }
-            })
+        public Settings() : base(GetSettingsFolder(), new NewtonsoftStreamSerializer())
         {
         }
 
         public string ExclusionFilter
         {
-            get => Get<string>();
-            set => Set(value);
+            get => GetSetting(defVals.ExclusionFilter);
+            set => SetSetting(value);
         }
 
         public bool UseExclusionFilter
         {
-            get => Get<bool>();
-            set => Set(value);
+            get => GetSetting(defVals.UseExclusionFilter);
+            set => SetSetting(value);
         }
 
         public string PluginDirectory
         {
-            get
-            {
-                var val = Get<string>();
-                if (val == null)
-                {
-                    string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                    DirectoryInfo dir = new(Path.Combine(localAppData, "FluentStoreBeta", "Plugins"));
-                    if (!dir.Exists)
-                        dir.Create();
-                    PluginDirectory = val = dir.FullName;
-                }
-                return val;
-            }
-            set => Set(value);
+            get => GetSetting(defVals.PluginDirectory);
+            set => SetSetting(value);
         }
 
         public Version LastLaunchedVersion
         {
-            get => Get<Version>();
-            set => Set(value);
+            get => GetSetting(defVals.LastLaunchedVersion);
+            set => SetSetting(value);
         }
 
         public bool GetPackageHandlerEnabledState(string typeName)
         {
-            return Get<bool>(KEY_PackageHandlerEnabled, typeName, true);
+            return GetSetting(() => true, GetPackageHandlerEnabledKey(typeName));
         }
 
         public void SetPackageHandlerEnabledState(string typeName, bool enabled)
         {
-            Set(KEY_PackageHandlerEnabled, enabled, typeName);
+            SetSetting(enabled, GetPackageHandlerEnabledKey(typeName));
         }
 
         public AppUpdateStatus GetAppUpdateStatus()
@@ -81,6 +67,17 @@ namespace FluentStore.Helpers
                 return AppUpdateStatus.Downgraded;
 
             return AppUpdateStatus.None;
+        }
+
+        private static string GetPackageHandlerEnabledKey(string typeName) => $"{KEY_PackageHandlerEnabled}_{typeName}";
+
+        private static SystemIOFolderData GetSettingsFolder()
+        {
+            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            SystemIOFolderData dir = new(Path.Combine(localAppData, "FluentStoreBeta", "Settings"));
+
+            dir.EnsureExists();
+            return dir;
         }
     }
 }

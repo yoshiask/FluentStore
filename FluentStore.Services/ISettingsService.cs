@@ -4,16 +4,12 @@ namespace FluentStore.Services
 {
     public interface ISettingsService
     {
-        [DefaultSettingValue(Value = @"(?i)(guide|manual|tutorial)(?-i)")]
         public string ExclusionFilter { get; set; }
 
-        [DefaultSettingValue(Value = true)]
         public bool UseExclusionFilter { get; set; }
 
-        [DefaultSettingValue(Value = null)]
         public string PluginDirectory { get; set; }
 
-        [DefaultSettingValue(Value = null)]
         public Version LastLaunchedVersion { get; set; }
 
         /// <summary>
@@ -32,19 +28,24 @@ namespace FluentStore.Services
         public AppUpdateStatus GetAppUpdateStatus();
     }
 
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public sealed class DefaultSettingValueAttribute : Attribute
+    public class DefaultSettingValues
     {
-        public DefaultSettingValueAttribute()
+        public DefaultSettingValues() { }
+
+        public virtual string ExclusionFilter() => @"(?i)(guide|manual|tutorial)(?-i)";
+
+        public virtual bool UseExclusionFilter() => true;
+
+        public virtual string PluginDirectory()
         {
+            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            System.IO.DirectoryInfo dir = new(System.IO.Path.Combine(localAppData, "FluentStoreBeta", "Plugins"));
+            if (!dir.Exists)
+                dir.Create();
+            return dir.FullName;
         }
 
-        public DefaultSettingValueAttribute(object value)
-        {
-            Value = value;
-        }
-
-        public object Value { get; set; }
+        public virtual Version LastLaunchedVersion() => null;
     }
 
     public enum AppUpdateStatus : byte
