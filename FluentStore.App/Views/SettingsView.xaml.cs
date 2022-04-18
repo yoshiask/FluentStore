@@ -79,5 +79,12 @@ namespace FluentStore.Views
 
 			Settings.SetPackageHandlerEnabledState(ts.DataContext.GetType().Name, ts.IsOn);
         }
+
+        private void OpenPluginDirButton_Click(object sender, RoutedEventArgs e)
+        {
+			// Add a trailing slash to ensure that Explorer opens the folder,
+			// and not a file that might have the same name
+			System.Diagnostics.Process.Start("explorer.exe", $"\"{Settings.PluginDirectory}\"{System.IO.Path.DirectorySeparatorChar}");
+        }
     }
 }

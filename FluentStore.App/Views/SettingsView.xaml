@@ -38,6 +38,9 @@
 
             <controls:SettingsBlockControl Title="Package sources" Icon="Shop"
                                            Description="View, enable, or disable available package handlers">
+                <controls:SettingsBlockControl.SettingsActionableElement>
+                    <Button Content="Open plugin folder" Click="OpenPluginDirButton_Click"/>
+                </controls:SettingsBlockControl.SettingsActionableElement>
                 <controls:SettingsBlockControl.ExpandableContent>
                     <ItemsControl ItemsSource="{x:Bind PackageService.PackageHandlers, Mode=OneWay}">
                         <ItemsControl.ItemsPanel>
