@@ -15,7 +15,8 @@ namespace FluentStoreAPI.Models
             {
                 var field = document.Fields[fieldName];
                 var version = Version.Parse(fieldName);
-                var plugins = ((IEnumerable<object>)document.TransformField(field)).OfType<string>();
+                var plugins = ((IEnumerable<object>)document.TransformField(field))?.OfType<string>()
+                    ?? Array.Empty<string>();
                 PluginLists.Add(version, plugins);
             }
         }
