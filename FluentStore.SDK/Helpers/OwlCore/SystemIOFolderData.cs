@@ -85,10 +85,35 @@ namespace OwlCore.AbstractStorage
         /// <inheritdoc/>
         public Task<IFileData> CreateFileAsync(string desiredName, CreationCollisionOption options)
         {
-            if (options != CreationCollisionOption.FailIfExists)
-                throw new NotImplementedException();
+            return Task.Run<IFileData>(delegate
+            {
+                string name = desiredName;
+                FileMode mode = FileMode.CreateNew;
 
-            return CreateFileAsync(desiredName);
+                if (options == CreationCollisionOption.OpenIfExists)
+                {
+                    mode = FileMode.OpenOrCreate;
+                }
+                else if (options == CreationCollisionOption.GenerateUniqueName)
+                {
+                    string nameNoExt = System.IO.Path.GetFileNameWithoutExtension(name);
+                    string ext = System.IO.Path.GetExtension(name);
+                    int i = 0;
+                    while (File.Exists(System.IO.Path.Combine(Path, name)))
+                    {
+                        name = $"{nameNoExt} ({++i}){ext}";
+                    }
+                }
+                else if (options == CreationCollisionOption.ReplaceExisting)
+                {
+                    mode = FileMode.Create;
+                }
+
+                SystemIOFileData file = new(System.IO.Path.Combine(Path, name));
+                file.File.Open(mode).Dispose();
+
+                return file;
+            });
         }
 
         /// <inheritdoc/>

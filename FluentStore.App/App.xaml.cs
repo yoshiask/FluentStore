@@ -90,7 +90,7 @@ namespace FluentStore
             log?.Log($"Is first launch?: {e.IsFirstLaunch}");
             log?.Log($"Single-instance launch args: {e.Arguments}");
 
-            var settings = Ioc.Default.GetRequiredService<ISettingsService>();
+            await Helpers.Settings.Default.LoadAsync();
 
             if (e.IsFirstLaunch)
             {
@@ -113,7 +113,7 @@ namespace FluentStore
                         // Download and install default plugins
                         var fsApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
                         var defaults = await fsApi.GetDefaultPlugins(appVersion);
-                        await PluginLoader.DownloadPlugins(settings, defaults);
+                        await PluginLoader.DownloadPlugins(Helpers.Settings.Default, defaults);
                         break;
                 }
 
@@ -122,7 +122,7 @@ namespace FluentStore
                 var pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
 
                 log?.Log($"Began loading plugins");
-                var pluginLoadResult = PluginLoader.LoadPlugins(settings, passwordVaultService);
+                var pluginLoadResult = PluginLoader.LoadPlugins(Helpers.Settings.Default, passwordVaultService);
                 pkgSvc.PackageHandlers = pluginLoadResult.PackageHandlers;
                 log?.Log($"Finished loading plugins");
 

@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:FluentStore.Controls"
     xmlns:sdk="using:FluentStore.SDK"
+    xmlns:helpers="using:FluentStore.Helpers"
     mc:Ignorable="d"
     x:DefaultBindMode="TwoWay"
     Background="{ThemeResource SystemControlAcrylicWindowBrush}">
@@ -20,10 +21,10 @@
                     <FontIcon Glyph="&#xF6FA;"/>
                 </controls:SettingsBlockControl.Icon>
                 <controls:SettingsBlockControl.ExpandableContent>
-                    <TextBox Text="{x:Bind Settings.ExclusionFilter}" Margin="16"
-                             IsEnabled="{x:Bind Settings.UseExclusionFilter, Mode=OneWay}"/>
+                    <TextBox Text="{x:Bind helpers:Settings.Default.ExclusionFilter}" Margin="16"
+                             IsEnabled="{x:Bind helpers:Settings.Default.UseExclusionFilter, Mode=OneWay}"/>
                 </controls:SettingsBlockControl.ExpandableContent>
-                <ToggleSwitch IsOn="{x:Bind Settings.UseExclusionFilter}" Style="{ThemeResource ToggleSwitchRightStyle}"/>
+                <ToggleSwitch IsOn="{x:Bind helpers:Settings.Default.UseExclusionFilter}" Style="{ThemeResource ToggleSwitchRightStyle}"/>
             </controls:SettingsBlockControl>
 
             <controls:SettingsBlockControl Title="Clear installer cache"
@@ -82,7 +83,7 @@
                             <Run Text="You can search all repositories at once, pick out an app, and install it without ever opening a browser or command prompt."/>
                             <Run Text="With a Fluent Store Social account, you can create collections of apps to install or share in one click."/>
                             <LineBreak/><LineBreak/>
-                            <Run Text="Version " FontWeight="Bold"/><Run Text="{x:Bind VersionString, Mode=OneTime}" FontWeight="Bold"/>
+                            <Run Text="Version " FontWeight="Bold"/><Run Text="{x:Bind helpers:Settings.Default.VersionString, Mode=OneTime}" FontWeight="Bold"/>
                     </TextBlock>
                 </controls:SettingsBlockControl.ExpandableContent>
             </controls:SettingsBlockControl>
@@ -109,7 +110,7 @@
             <!-- #if DEBUG -->
             <controls:SettingsBlockControl Title="DEBUG: Test error reporting"
                                            Description="Test the error reporting system by causing an unhandled exception."
-                                           Visibility="{x:Bind IsDebug, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneTime}">
+                                           Visibility="{x:Bind helpers:Settings.Default.IsDebug, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneTime}">
                 <controls:SettingsBlockControl.Icon>
                     <FontIcon Glyph="&#xEA39;"/>
                 </controls:SettingsBlockControl.Icon>

@@ -3,10 +3,11 @@ using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
-using Windows.ApplicationModel;
 using Microsoft.UI.Xaml.Controls;
 using FluentStore.SDK.Helpers;
 using Microsoft.UI.Xaml;
+using FluentStore.Helpers;
+using Microsoft.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -19,28 +20,6 @@ namespace FluentStore.Views
 	{
 		private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 		private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
-		private readonly ISettingsService Settings = Ioc.Default.GetRequiredService<ISettingsService>();
-
-		private bool IsDebug
-        {
-			get
-            {
-#if DEBUG
-				return true;
-#else
-				return false;
-#endif
-			}
-        }
-
-		private string VersionString
-        {
-            get
-            {
-				PackageVersion ver = Package.Current.Id.Version;
-				return $"{ver.Major}.{ver.Minor}.{ver.Build}";
-			}
-        }
 
 		public SettingsView()
 		{
@@ -49,7 +28,13 @@ namespace FluentStore.Views
 			WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Settings"));
 		}
 
-		private void ClearCacheButton_Click(object sender, RoutedEventArgs e)
+        protected override async void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        {
+			await Settings.Default.SaveAsync();
+            base.OnNavigatingFrom(e);
+        }
+
+        private void ClearCacheButton_Click(object sender, RoutedEventArgs e)
 		{
 			DownloadCache cache = new(createIfDoesNotExist: false);
 			cache.Clear();
@@ -77,14 +62,14 @@ namespace FluentStore.Views
         {
 			if (sender is not ToggleSwitch ts) return;
 
-			Settings.SetPackageHandlerEnabledState(ts.DataContext.GetType().Name, ts.IsOn);
+			Settings.Default.SetPackageHandlerEnabledState(ts.DataContext.GetType().Name, ts.IsOn);
         }
 
         private void OpenPluginDirButton_Click(object sender, RoutedEventArgs e)
         {
 			// Add a trailing slash to ensure that Explorer opens the folder,
 			// and not a file that might have the same name
-			System.Diagnostics.Process.Start("explorer.exe", $"\"{Settings.PluginDirectory}\"{System.IO.Path.DirectorySeparatorChar}");
+			System.Diagnostics.Process.Start("explorer.exe", $"\"{Settings.Default.PluginDirectory}\"{System.IO.Path.DirectorySeparatorChar}");
         }
     }
 }

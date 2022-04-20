@@ -4,6 +4,7 @@ using OwlCore.AbstractStorage;
 using OwlCore.Services;
 using System;
 using System.IO;
+using Windows.ApplicationModel;
 
 namespace FluentStore.Helpers
 {
@@ -41,6 +42,27 @@ namespace FluentStore.Helpers
         {
             get => GetSetting(defVals.LastLaunchedVersion);
             set => SetSetting(value);
+        }
+
+        public bool IsDebug
+        {
+            get
+            {
+#if DEBUG
+                return true;
+#else
+				return false;
+#endif
+            }
+        }
+
+        public string VersionString
+        {
+            get
+            {
+                PackageVersion ver = Package.Current.Id.Version;
+                return $"{ver.Major}.{ver.Minor}.{ver.Build}";
+            }
         }
 
         public bool GetPackageHandlerEnabledState(string typeName)
