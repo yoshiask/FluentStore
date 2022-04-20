@@ -9,9 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using OwlCore.Extensions;
-using OwlCore.Services;
 
-namespace FluentStore.Services
+namespace OwlCore.Services
 {
     /// <summary>
     /// An <see cref="IAsyncSerializer{TSerialized}"/> and implementation for serializing and deserializing streams using System.Text.Json.
