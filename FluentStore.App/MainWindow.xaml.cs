@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using PInvoke;
 using HRESULT = Vanara.PInvoke.HRESULT;
 using DwmApi = Vanara.PInvoke.DwmApi;
+using System.Collections.Generic;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -20,7 +21,7 @@ namespace FluentStore
         private IntPtr m_hwnd;
         private WinProc newWndProc = null;
         private IntPtr oldWndProc = IntPtr.Zero;
-        private MainPage MainContent;
+        private Stack<UIElement> m_navStack = new();
 
         public MainWindow()
         {
@@ -33,10 +34,29 @@ namespace FluentStore
             UpdateTitleBarTheme();
         }
 
-        public void StartApp()
+        public void SetAppContent(Type type)
         {
-            MainContent = new();
-            Content = MainContent;
+            var page = type.GetConstructor(Type.EmptyTypes).Invoke(null) as UIElement;
+            SetAppContent(page);
+        }
+
+        public void SetAppContent(UIElement newContent)
+        {
+            m_navStack.Push(Content);
+            Content = newContent;
+        }
+
+        public bool NavigateBack()
+        {
+            bool navigated = m_navStack.TryPop(out var oldContent);
+            Content = oldContent;
+            return navigated;
+        }
+
+        public bool TryGetAppContent(out IAppContent content)
+        {
+            content = Content as IAppContent;
+            return content != null;
         }
 
         [DllImport("user32")]
@@ -101,14 +121,20 @@ namespace FluentStore
 
         private unsafe HRESULT UpdateTitleBarTheme()
         {
-            BOOL isDark = ((FrameworkElement)Content).ActualTheme == ElementTheme.Dark ? BOOL.TRUE : BOOL.FALSE;
-            return DwmApi.DwmSetWindowAttribute(m_hwnd, (DwmApi.DWMWINDOWATTRIBUTE)20, new(&isDark), sizeof(BOOL));
+            bool isDark;
+            if (Content is FrameworkElement element)
+                isDark = element.ActualTheme == ElementTheme.Dark;
+            else
+                isDark = App.Current.RequestedTheme == ApplicationTheme.Dark;
+
+            BOOL winIsDark = isDark ? BOOL.TRUE : BOOL.FALSE;
+            return DwmApi.DwmSetWindowAttribute(m_hwnd, (DwmApi.DWMWINDOWATTRIBUTE)20, new(&winIsDark), sizeof(BOOL));
         }
 
         void IRecipient<SetPageHeaderMessage>.Receive(SetPageHeaderMessage m)
         {
             Title = App.AppName;
-            if (MainContent.IsCompact)
+            if (TryGetAppContent(out var content) && content.IsCompact)
                 Title += " - " + m.Value;
         }
     }

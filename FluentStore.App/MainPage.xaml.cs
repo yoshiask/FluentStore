@@ -19,7 +19,7 @@ namespace FluentStore
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class MainPage : UserControl
+    public sealed partial class MainPage : UserControl, IAppContent
     {
         private readonly NavigationService NavService = Ioc.Default.GetService<INavigationService>() as NavigationService;
         

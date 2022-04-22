@@ -29,6 +29,7 @@
     </PropertyGroup>
     <ItemGroup>
       <None Remove="Views\Auth\AccountsView.xaml" />
+      <None Remove="Views\SplashScreen.xaml" />
     </ItemGroup>
     
     <ItemGroup>
@@ -62,6 +63,12 @@
         <ProjectReference Include="..\FluentStore.ViewModels\FluentStore.ViewModels.csproj" />
         <ProjectReference Include="..\API\FluentStoreAPI\FluentStoreAPI.csproj" />
         <ProjectReference Include="..\OwlCore.WinUI\OwlCore.WinUI.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Page Update="Views\SplashScreen.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
     </ItemGroup>
 
     <ItemGroup>

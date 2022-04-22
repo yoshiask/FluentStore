@@ -102,6 +102,7 @@ namespace FluentStore
                 // Make sure to run on UI thread
                 Window.DispatcherQueue.TryEnqueue(() =>
                 {
+                    Window.SetAppContent(new Views.SplashScreen());
                     Window.Activate();
                 });
 
@@ -141,7 +142,7 @@ namespace FluentStore
                 // Make sure to run on UI thread
                 Current.Window.DispatcherQueue.TryEnqueue(() =>
                 {
-                    Window.StartApp();
+                    Window.SetAppContent(new MainPage());
                     navService.Navigate(result.Page, result.Parameter);
                 });
             }

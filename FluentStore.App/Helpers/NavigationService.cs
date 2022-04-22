@@ -55,8 +55,6 @@ namespace FluentStore.Services
         }
 
         public Frame CurrentFrame { get; set; }
-        public Frame AppFrame { get; set; }
-
 
         public override void Navigate(Type page)
         {
@@ -87,8 +85,7 @@ namespace FluentStore.Services
             if (parameter == null)
                 return;
             string paramName = parameter.GetType().Name;
-            string vmName = paramName.ReplaceLastOccurrence("ViewModel", "") + "View";
-            Type type = ResolveType(vmName);
+            Type type = ResolveType(paramName);
             Guard.IsNotNull(type, nameof(type));
             Navigate(type, parameter);
         }
@@ -108,12 +105,13 @@ namespace FluentStore.Services
 
         public override void AppNavigate(Type page)
         {
-            AppFrame.Navigate(page);
+            App.Current.Window.SetAppContent(page);
         }
 
         public override void AppNavigate(Type page, object parameter)
         {
-            AppFrame.Navigate(page, parameter);
+            // TODO: Implement parameters
+            AppNavigate(page);
         }
 
         public override void AppNavigate(string page)
@@ -133,22 +131,19 @@ namespace FluentStore.Services
         public override void AppNavigate(object parameter)
         {
             string paramName = parameter.GetType().Name;
-            string vmName = paramName.ReplaceLastOccurrence("Model", "");
-            Type type = ResolveType(vmName);
+            Type type = ResolveType(paramName);
             Guard.IsNotNull(type, nameof(type));
             AppNavigate(type, parameter);
         }
 
         public override void AppNavigateBack()
         {
-            if (AppFrame.CanGoBack)
-                AppFrame.GoBack();
+            App.Current.Window.NavigateBack();
         }
 
         public override void AppNavigateForward()
         {
-            if (AppFrame.CanGoForward)
-                AppFrame.GoForward();
+
         }
 
 
@@ -173,9 +168,10 @@ namespace FluentStore.Services
         }
 
 
-        public override Type ResolveType(string viewName)
+        public override Type ResolveType(string name)
         {
-            return Type.GetType("FluentStore.Views." + viewName);
+            name = name.ReplaceLastOccurrence("Model", "");
+            return Type.GetType("FluentStore.Views." + name);
         }
     }
 
