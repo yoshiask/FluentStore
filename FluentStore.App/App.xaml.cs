@@ -90,8 +90,6 @@ namespace FluentStore
             log?.Log($"Is first launch?: {e.IsFirstLaunch}");
             log?.Log($"Single-instance launch args: {e.Arguments}");
 
-            await Helpers.Settings.Default.LoadAsync();
-
             if (e.IsFirstLaunch)
             {
                 Window = new()
@@ -102,9 +100,11 @@ namespace FluentStore
                 // Make sure to run on UI thread
                 Window.DispatcherQueue.TryEnqueue(() =>
                 {
-                    Window.SetAppContent(new Views.SplashScreen());
+                    Window.Navigate(new Views.SplashScreen());
                     Window.Activate();
                 });
+
+                await Helpers.Settings.Default.LoadAsync();
 
                 // Check if app was updated
                 var appVersion = Windows.ApplicationModel.Package.Current.Id.Version.ToVersion();
@@ -142,7 +142,12 @@ namespace FluentStore
                 // Make sure to run on UI thread
                 Current.Window.DispatcherQueue.TryEnqueue(() =>
                 {
-                    Window.SetAppContent(new MainPage());
+                    Window.Navigate(new MainPage());
+
+                    // Make sure users can't navigate back to
+                    // a null page or the splash screen
+                    Window.ClearNavigationStack();
+
                     navService.Navigate(result.Page, result.Parameter);
                 });
             }

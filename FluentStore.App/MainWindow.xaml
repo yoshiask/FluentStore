@@ -7,5 +7,13 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <ContentControl x:Name="WindowContent"
+                    HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+        <ContentControl.ContentTransitions>
+            <TransitionCollection>
+                <NavigationThemeTransition/>
+            </TransitionCollection>
+        </ContentControl.ContentTransitions>
+    </ContentControl>
 
 </Window>

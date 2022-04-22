@@ -8,6 +8,7 @@ using FluentStore.ViewModels.Messages;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
+using System.Threading.Tasks;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -16,10 +17,12 @@ namespace FluentStore.Views
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class SettingsView : Page
+    public sealed partial class SettingsView : Page, IAppContent
     {
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
         private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
+
+        public bool IsCompact { get; private set; }
 
         public SettingsView()
         {
@@ -28,10 +31,11 @@ namespace FluentStore.Views
             WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Settings"));
         }
 
-        protected override async void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        public void OnNavigatedFrom() => Settings.Default.SaveAsync();
+
+        private void NavView_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
         {
-            await Settings.Default.SaveAsync();
-            base.OnNavigatingFrom(e);
+            NavigationService.AppNavigateBack();
         }
 
         private void ClearCacheButton_Click(object sender, RoutedEventArgs e)

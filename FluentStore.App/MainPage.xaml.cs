@@ -21,6 +21,7 @@ namespace FluentStore
     /// </summary>
     public sealed partial class MainPage : UserControl, IAppContent
     {
+        private object previousNavItem = null;
         private readonly NavigationService NavService = Ioc.Default.GetService<INavigationService>() as NavigationService;
         
         public ShellViewModel ViewModel
@@ -136,6 +137,8 @@ namespace FluentStore
             {
                 MainNav.SelectedItem = null;
             }
+
+            previousNavItem = MainNav.SelectedItem;
         }
 
         private void MainFrame_Navigated(object sender, NavigationEventArgs e) => UpdateNavViewSelected(e.SourcePageType);
@@ -146,8 +149,8 @@ namespace FluentStore
 
             if (args.IsSettingsSelected)
             {
-                page = typeof(Views.SettingsView);
-                goto navigate;
+                App.Current.Window.Navigate(new Views.SettingsView());
+                return;
             }
 
             if (args.SelectedItem is not NavigationViewItem navItem) goto navigate;

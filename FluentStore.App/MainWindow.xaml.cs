@@ -2,11 +2,11 @@
 using FluentStore.ViewModels.Messages;
 using Microsoft.UI.Xaml;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using PInvoke;
 using HRESULT = Vanara.PInvoke.HRESULT;
 using DwmApi = Vanara.PInvoke.DwmApi;
-using System.Collections.Generic;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -21,7 +21,7 @@ namespace FluentStore
         private IntPtr m_hwnd;
         private WinProc newWndProc = null;
         private IntPtr oldWndProc = IntPtr.Zero;
-        private Stack<UIElement> m_navStack = new();
+        private Stack<object> m_navStack = new();
 
         public MainWindow()
         {
@@ -34,30 +34,46 @@ namespace FluentStore
             UpdateTitleBarTheme();
         }
 
-        public void SetAppContent(Type type)
+        public void Navigate(Type type)
         {
             var page = type.GetConstructor(Type.EmptyTypes).Invoke(null) as UIElement;
-            SetAppContent(page);
+            Navigate(page);
         }
 
-        public void SetAppContent(UIElement newContent)
+        public void Navigate(UIElement newContent)
         {
-            m_navStack.Push(Content);
-            Content = newContent;
+            var oldContent = WindowContent.Content;
+            m_navStack.Push(oldContent);
+            if (TryGetAppContent(out var oldAppContent))
+                oldAppContent.OnNavigatedFrom();
+
+            WindowContent.Content = newContent;
+            if (TryGetAppContent(out var newAppContent))
+                newAppContent.OnNavigatedTo();
         }
 
         public bool NavigateBack()
         {
-            bool navigated = m_navStack.TryPop(out var oldContent);
-            Content = oldContent;
-            return navigated;
+            if (m_navStack.TryPop(out var oldContent))
+            {
+                if (TryGetAppContent(out var newAppContent))
+                    newAppContent.OnNavigatedFrom();
+
+                WindowContent.Content = oldContent;
+                if (TryGetAppContent(out var oldAppContent))
+                    oldAppContent.OnNavigatedTo();
+                return true;
+            }
+            return false;
         }
 
         public bool TryGetAppContent(out IAppContent content)
         {
-            content = Content as IAppContent;
+            content = WindowContent.Content as IAppContent;
             return content != null;
         }
+
+        public void ClearNavigationStack() => m_navStack.Clear();
 
         [DllImport("user32")]
         private static extern IntPtr SetWindowLongPtr(IntPtr hWnd, User32.WindowLongIndexFlags nIndex, WinProc newProc);

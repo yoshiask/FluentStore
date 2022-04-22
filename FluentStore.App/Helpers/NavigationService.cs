@@ -105,7 +105,7 @@ namespace FluentStore.Services
 
         public override void AppNavigate(Type page)
         {
-            App.Current.Window.SetAppContent(page);
+            App.Current.Window.Navigate(page);
         }
 
         public override void AppNavigate(Type page, object parameter)
