@@ -92,24 +92,17 @@ namespace FluentStore
             newWndProc = new WinProc(NewWindowProc);
             Kernel32.SetLastError(0);
             oldWndProc = SetWindowLongPtr(m_hwnd, User32.WindowLongIndexFlags.GWL_WNDPROC, newWndProc);
-            var hr = Kernel32.GetLastError();
-            new HRESULT(-(int)hr).ThrowIfFailed();
+            Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
         }
 
         private void LoadIcon(string iconName)
         {
             IntPtr hIcon = User32.LoadImage(IntPtr.Zero, iconName,
                 User32.ImageType.IMAGE_ICON, 16, 16, User32.LoadImageFlags.LR_LOADFROMFILE);
-
-            var hresult = Kernel32.GetLastError();
-            if (hresult != Win32ErrorCode.ERROR_SUCCESS)
-                throw new Win32Exception(hresult);
+            Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
 
             User32.SendMessage(m_hwnd, User32.WindowMessage.WM_SETICON, IntPtr.Zero, hIcon);
-
-            hresult = Kernel32.GetLastError();
-            if (hresult != Win32ErrorCode.ERROR_SUCCESS)
-                throw new Win32Exception(hresult);
+            Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
         }
 
         private unsafe IntPtr NewWindowProc(IntPtr hWnd, User32.WindowMessage Msg, IntPtr wParam, IntPtr lParam)
