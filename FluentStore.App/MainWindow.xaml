@@ -11,7 +11,7 @@
                     HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
         <ContentControl.ContentTransitions>
             <TransitionCollection>
-                <NavigationThemeTransition/>
+                <EntranceThemeTransition />
             </TransitionCollection>
         </ContentControl.ContentTransitions>
     </ContentControl>
