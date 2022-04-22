@@ -114,7 +114,7 @@ namespace FluentStore
             controlsSearchBox.Focus(FocusState.Programmatic);
         }
 
-        private void MainFrame_Navigated(object sender, NavigationEventArgs e)
+        private void UpdateNavViewSelected(Type sourcePageType)
         {
             MainNav.IsBackEnabled = MainFrame.CanGoBack;
             try
@@ -123,7 +123,7 @@ namespace FluentStore
                 // This is in a try-catch block so that I don't have to do a dozen
                 // null checks.
 
-                var page = NavService.Pages.Find((info) => info.PageType == e.SourcePageType);
+                var page = NavService.Pages.Find((info) => info.PageType == sourcePageType);
                 if (page == null)
                 {
                     MainNav.SelectedItem = null;
@@ -138,7 +138,9 @@ namespace FluentStore
             }
         }
 
-        private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        private void MainFrame_Navigated(object sender, NavigationEventArgs e) => UpdateNavViewSelected(e.SourcePageType);
+
+        private void NavigationView_SelectionChanged(object sender, NavigationViewSelectionChangedEventArgs args)
         {
             Type page = typeof(Views.HomeView);
 
