@@ -21,7 +21,6 @@ namespace FluentStore
     /// </summary>
     public sealed partial class MainPage : UserControl, IAppContent
     {
-        private object previousNavItem = null;
         private readonly NavigationService NavService = Ioc.Default.GetService<INavigationService>() as NavigationService;
         
         public ShellViewModel ViewModel
@@ -50,6 +49,8 @@ namespace FluentStore
             WeakReferenceMessenger.Default.Register<ErrorMessage>(this, ErrorMessage_Recieved);
             WeakReferenceMessenger.Default.Register<SuccessMessage>(this, SuccessMessage_Recieved);
         }
+
+        public void OnNavigatedTo() => UpdateNavViewSelected(MainFrame.CurrentSourcePageType);
 
         private void ErrorMessage_Recieved(object r, ErrorMessage m)
         {
@@ -137,8 +138,6 @@ namespace FluentStore
             {
                 MainNav.SelectedItem = null;
             }
-
-            previousNavItem = MainNav.SelectedItem;
         }
 
         private void MainFrame_Navigated(object sender, NavigationEventArgs e) => UpdateNavViewSelected(e.SourcePageType);
