@@ -75,16 +75,9 @@ namespace FluentStore
         {
             var log = Ioc.Default.GetService<LoggerService>();
             var navService = Ioc.Default.GetRequiredService<INavigationService>();
-            ProtocolResult result = new()
-            {
-                Page = typeof(Views.HomeView)
-            };
-            try
-            {
-                result = navService.ParseProtocol(e.Arguments, isFirstInstance: e.IsFirstInstance);
-                log?.Log($"Parse protocol result: {result}");
-            }
-            catch { }
+
+            ProtocolResult result = navService.ParseProtocol(e.Arguments, isFirstInstance: e.IsFirstInstance);
+            log?.Log($"Parse protocol result: {result}");
 
             log?.Log($"Is first instance?: {e.IsFirstInstance}");
             log?.Log($"Is first launch?: {e.IsFirstLaunch}");
