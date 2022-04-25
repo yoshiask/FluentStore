@@ -18,7 +18,8 @@
 
         <NavigationView x:Name="NavView" PaneDisplayMode="Top"
                         IsBackButtonVisible="Visible" IsSettingsVisible="False"
-                        IsBackEnabled="True" BackRequested="NavView_BackRequested">
+                        IsBackEnabled="True" BackRequested="NavView_BackRequested"
+                        SelectionChanged="NavView_SelectionChanged">
             <NavigationView.MenuItems>
                 <NavigationViewItem Content="General">
                     <NavigationViewItem.Icon>
@@ -35,9 +36,7 @@
         
         <ScrollViewer Padding="8,0,8,8" Grid.Row="1">
             <ContentControl x:Name="SettingsPresenter"
-                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-                <settingsPages:General/>
-            </ContentControl>
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
         </ScrollViewer>
     </Grid>
 </Page>
