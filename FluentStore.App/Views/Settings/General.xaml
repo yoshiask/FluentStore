@@ -1,0 +1,124 @@
+﻿<UserControl
+    x:Class="FluentStore.Views.Settings.General"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FluentStore.Views.Settings"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:FluentStore.Controls"
+    xmlns:helpers="using:FluentStore.Helpers"
+    xmlns:sdk="using:FluentStore.SDK"
+    mc:Ignorable="d">
+
+    <StackPanel Spacing="4">
+
+        <controls:SettingsBlockControl Title="Search exclusion filter"
+                                           Description="A regular expression used to filter out unwanted search suggestions and results">
+            <controls:SettingsBlockControl.Icon>
+                <FontIcon Glyph="&#xF6FA;"/>
+            </controls:SettingsBlockControl.Icon>
+            <controls:SettingsBlockControl.ExpandableContent>
+                <TextBox Text="{x:Bind helpers:Settings.Default.ExclusionFilter}" Margin="16"
+                             IsEnabled="{x:Bind helpers:Settings.Default.UseExclusionFilter, Mode=OneWay}"/>
+            </controls:SettingsBlockControl.ExpandableContent>
+            <ToggleSwitch IsOn="{x:Bind helpers:Settings.Default.UseExclusionFilter}" Style="{ThemeResource ToggleSwitchRightStyle}"/>
+        </controls:SettingsBlockControl>
+
+        <controls:SettingsBlockControl Title="Clear installer cache"
+                                           Description="Removes all cached app installers">
+            <controls:SettingsBlockControl.Icon>
+                <FontIcon Glyph="&#xE74D;"/>
+            </controls:SettingsBlockControl.Icon>
+            <controls:SettingsBlockControl.SettingsActionableElement>
+                <Button Content="Clear" Click="ClearCacheButton_Click"/>
+            </controls:SettingsBlockControl.SettingsActionableElement>
+        </controls:SettingsBlockControl>
+
+        <controls:SettingsBlockControl Title="Package sources" Icon="Shop"
+                                           Description="View, enable, or disable available package handlers">
+            <controls:SettingsBlockControl.SettingsActionableElement>
+                <Button Content="Open plugin folder" Click="OpenPluginDirButton_Click"/>
+            </controls:SettingsBlockControl.SettingsActionableElement>
+            <controls:SettingsBlockControl.ExpandableContent>
+                <ItemsControl ItemsSource="{x:Bind PackageService.PackageHandlers, Mode=OneWay}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="8"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="sdk:PackageHandlerBase">
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="48" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <ContentControl Content="{x:Bind Image, Mode=OneWay}"
+                                                    ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
+                                <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}"
+                                               Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                <ToggleSwitch IsOn="{x:Bind IsEnabled}" Grid.Column="2" Margin="0,0,8,0"
+                                                  Style="{ThemeResource ToggleSwitchRightStyle}"
+                                                  Toggled="PackageHandlerEnable_Toggled"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </controls:SettingsBlockControl.ExpandableContent>
+        </controls:SettingsBlockControl>
+
+        <controls:SettingsBlockControl Title="About"
+                                           Description="Information about Fluent Store">
+            <controls:SettingsBlockControl.Icon>
+                <FontIcon Glyph="&#xE946;"/>
+            </controls:SettingsBlockControl.Icon>
+            <controls:SettingsBlockControl.ExpandableContent>
+                <TextBlock Margin="16" TextWrapping="WrapWholeWords" IsTextSelectionEnabled="True">
+                            <Run Text="Fluent Store is a unifying frontend for Windows app stores and package managers."/>
+                            <Run Text="You can search all repositories at once, pick out an app, and install it without ever opening a browser or command prompt."/>
+                            <Run Text="With a Fluent Store Social account, you can create collections of apps to install or share in one click."/>
+                            <LineBreak/><LineBreak/>
+                            <Run Text="Version " FontWeight="Bold"/><Run Text="{x:Bind helpers:Settings.Default.VersionString, Mode=OneTime}" FontWeight="Bold"/>
+                </TextBlock>
+            </controls:SettingsBlockControl.ExpandableContent>
+        </controls:SettingsBlockControl>
+
+        <controls:SettingsBlockControl Title="Report an issue">
+            <controls:SettingsBlockControl.Icon>
+                <FontIcon Glyph="&#xEBE8;"/>
+            </controls:SettingsBlockControl.Icon>
+            <controls:SettingsBlockControl.SettingsActionableElement>
+                <Button Content="Open in browser" Click="BugReportButton_Click"/>
+            </controls:SettingsBlockControl.SettingsActionableElement>
+        </controls:SettingsBlockControl>
+
+        <controls:SettingsBlockControl Title="Support the developer"
+                                           Description="Support development of this and other projects">
+            <controls:SettingsBlockControl.Icon>
+                <FontIcon Glyph="&#xEB51;"/>
+            </controls:SettingsBlockControl.Icon>
+            <controls:SettingsBlockControl.SettingsActionableElement>
+                <Button Content="Donate" Click="DonateButton_Click"/>
+            </controls:SettingsBlockControl.SettingsActionableElement>
+        </controls:SettingsBlockControl>
+
+        <!-- #if DEBUG -->
+        <controls:SettingsBlockControl Title="DEBUG: Test error reporting"
+                                           Description="Test the error reporting system by causing an unhandled exception."
+                                           Visibility="{x:Bind helpers:Settings.Default.IsDebug, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneTime}">
+            <controls:SettingsBlockControl.Icon>
+                <FontIcon Glyph="&#xEA39;"/>
+            </controls:SettingsBlockControl.Icon>
+            <controls:SettingsBlockControl.SettingsActionableElement>
+                <Button Content="Crash" Click="CrashButton_Click"
+                            Background="{ThemeResource SystemControlErrorTextForegroundBrush}"
+                            Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
+            </controls:SettingsBlockControl.SettingsActionableElement>
+        </controls:SettingsBlockControl>
+        <!-- #endif -->
+
+    </StackPanel>
+
+</UserControl>

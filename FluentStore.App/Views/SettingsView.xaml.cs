@@ -19,7 +19,6 @@ namespace FluentStore.Views
     /// </summary>
     public sealed partial class SettingsView : Page, IAppContent
     {
-        private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
         private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
 
         public bool IsCompact { get; private set; }
@@ -31,49 +30,11 @@ namespace FluentStore.Views
             WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Settings"));
         }
 
-        public void OnNavigatedFrom() => Settings.Default.SaveAsync();
+        public void OnNavigatedFrom() => Helpers.Settings.Default.SaveAsync();
 
         private void NavView_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
         {
             NavigationService.AppNavigateBack();
-        }
-
-        private void ClearCacheButton_Click(object sender, RoutedEventArgs e)
-        {
-            DownloadCache cache = new(createIfDoesNotExist: false);
-            cache.Clear();
-        }
-
-        private async void BugReportButton_Click(object sender, RoutedEventArgs e)
-        {
-            await NavigationService.OpenInBrowser("https://github.com/yoshiask/FluentStore/issues/new");
-        }
-
-        private async void DonateButton_Click(object sender, RoutedEventArgs e)
-        {
-            await NavigationService.OpenInBrowser("http://josh.askharoun.com/donate");
-        }
-
-        private void CrashButton_Click(object sender, RoutedEventArgs e)
-        {
-#if DEBUG
-            throw new System.Exception("An unhandled exception was thrown. The app should have crashed and pushed a notification " +
-                "that allows the user to view and report the error.");
-#endif
-        }
-
-        private void PackageHandlerEnable_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (sender is not ToggleSwitch ts) return;
-
-            Settings.Default.SetPackageHandlerEnabledState(ts.DataContext.GetType().Name, ts.IsOn);
-        }
-
-        private void OpenPluginDirButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Add a trailing slash to ensure that Explorer opens the folder,
-            // and not a file that might have the same name
-            System.Diagnostics.Process.Start("explorer.exe", $"\"{Settings.Default.PluginDirectory}\"{System.IO.Path.DirectorySeparatorChar}");
         }
     }
 }

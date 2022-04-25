@@ -29,6 +29,7 @@
     </PropertyGroup>
     <ItemGroup>
       <None Remove="Views\Auth\AccountsView.xaml" />
+      <None Remove="Views\Settings\General.xaml" />
       <None Remove="Views\SplashScreen.xaml" />
     </ItemGroup>
     
@@ -73,6 +74,12 @@
 
     <ItemGroup>
       <Page Update="Views\Auth\AccountsView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Page Update="Views\Settings\General.xaml">
         <Generator>MSBuild:Compile</Generator>
       </Page>
     </ItemGroup>
