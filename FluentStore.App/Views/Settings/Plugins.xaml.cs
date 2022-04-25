@@ -40,7 +40,7 @@ namespace FluentStore.Views.Settings
         {
             // Add a trailing slash to ensure that Explorer opens the folder,
             // and not a file that might have the same name
-            System.Diagnostics.Process.Start("explorer.exe", $"\"{Helpers.Settings.Default.PluginDirectory}\"{Path.DirectorySeparatorChar}");
+            System.Diagnostics.Process.Start("explorer.exe", $"\"{Helpers.Settings.Default.PluginDirectory}{Path.DirectorySeparatorChar}\"");
         }
 
         private void ResetPluginDirButton_Click(object sender, RoutedEventArgs e)
