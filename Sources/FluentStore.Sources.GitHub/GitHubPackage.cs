@@ -94,15 +94,15 @@ namespace FluentStore.Sources.GitHub
                 Releases ??= await GitHubHandler.GetReleases(Model);
 
                 // Find suitable release asset
+                // Some assets may be architecture-specific
+                var arch = Win32Helper.GetSystemArchitecture();
                 foreach (Release rel in Releases)
                 {
                     if (rel.Assets.Count == 0) continue;
 
                     // Pick proper asset for architecture
-                    IList<ReleaseAsset> assets = rel.Assets.ToList();
+                    IEnumerable<ReleaseAsset> assets = rel.Assets.ToList();
 
-                    // Some assets may be architecture-specific
-                    var arch = Win32Helper.GetSystemArchitecture();
                     // Exclude mismatched architectures, but keep assets that don't specify an architecture
                     assets = assets.Where(a =>
                     {
@@ -122,16 +122,18 @@ namespace FluentStore.Sources.GitHub
 
                         // Check if neutral
                         return !architecture_strings.Any(e => a.Name.Contains(StringComparison.InvariantCultureIgnoreCase, e.Value));
-                    }).ToList();
+                    });
 
-                    if (assets.Count == 0) continue;
-                    else if (assets.Count != 1)
+                    if (!assets.Any()) continue;
+
+                    asset = assets.SingleOrDefault();
+                    if (asset == null)
                     {
                         // Rank assets by file type
                         assets = assets.OrderBy(a => RankAsset(a.Name)).ToList();
                     }
                     
-                    asset = assets[0];
+                    asset = assets.First();
                     release = rel;
                     break;
                 }
