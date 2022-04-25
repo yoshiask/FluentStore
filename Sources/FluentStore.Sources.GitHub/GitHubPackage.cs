@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace FluentStore.Sources.GitHub
@@ -110,7 +111,7 @@ namespace FluentStore.Sources.GitHub
                         if (x86Idx != -1)
                         {
                             // Contains x86
-                            bool isNextPart64 = parts[x86Idx + 1] == "64";
+                            bool isNextPart64 = Regex.IsMatch(parts[x86Idx + 1], "x?64");
                             return (arch == Architecture.x86 && !isNextPart64)
                                 || (arch == Architecture.x64 && isNextPart64);
                         }
