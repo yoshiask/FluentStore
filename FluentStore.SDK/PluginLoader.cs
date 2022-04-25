@@ -68,20 +68,15 @@ namespace FluentStore.SDK
             return result;
         }
 
-        public static async Task DownloadPlugins(ISettingsService settings, IEnumerable<string> pluginUrls)
+        public static async Task InstallDefaultPlugins(ISettingsService settings, IEnumerable<string> pluginUrls)
         {
             System.Net.Http.HttpClient client = new();
             foreach (string url in pluginUrls)
             {
-                string dir = Path.Combine(settings.PluginDirectory, Path.GetFileNameWithoutExtension(url));
-                if (Directory.Exists(dir))
-                    continue;
-
                 try
                 {
                     var response = await client.GetStreamAsync(url);
-                    using ZipArchive archive = new(response);
-                    archive.ExtractToDirectory(dir);
+                    await InstallPlugin(settings, response, Path.GetFileNameWithoutExtension(url));
                 }
                 catch (Exception ex)
                 {
@@ -90,6 +85,45 @@ namespace FluentStore.SDK
 #endif
                 }
             }
+        }
+
+        /// <summary>
+        /// Installs the provided plugin using the plugin ID.
+        /// </summary>
+        /// <param name="settings">
+        /// The current application's settings.
+        /// </param>
+        /// <param name="plugin">
+        /// The plugin the install.
+        /// </param>
+        /// <param name="pluginId">
+        /// The ID of the plugin, used to determine if it's already installed.
+        /// </param>
+        /// <param name="overwrite">
+        /// Whether to force install, even if a plugin with the same ID
+        /// is already installed.
+        /// </param>
+        /// <returns>
+        /// Whether the plugin was installed. <see langword="false"/> if the plugin
+        /// was already installed.
+        /// </returns>
+        public static Task<bool> InstallPlugin(ISettingsService settings, Stream plugin, string pluginId, bool overwrite = false)
+        {
+            return Task.Run(delegate
+            {
+                string dir = Path.Combine(settings.PluginDirectory, pluginId);
+                if (Directory.Exists(dir))
+                {
+                    if (overwrite)
+                        Directory.Delete(dir, true);
+                    else
+                        return false;
+                }
+
+                using ZipArchive archive = new(plugin);
+                archive.ExtractToDirectory(pluginId);
+                return true;
+            });
         }
 
         private static Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)

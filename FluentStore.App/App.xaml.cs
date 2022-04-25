@@ -107,7 +107,7 @@ namespace FluentStore
                         // Download and install default plugins
                         var fsApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
                         var defaults = await fsApi.GetDefaultPlugins(appVersion);
-                        await PluginLoader.DownloadPlugins(Helpers.Settings.Default, defaults);
+                        await PluginLoader.InstallDefaultPlugins(Helpers.Settings.Default, defaults);
                         break;
                 }
 
