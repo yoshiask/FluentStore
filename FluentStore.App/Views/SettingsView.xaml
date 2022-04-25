@@ -36,7 +36,13 @@
         
         <ScrollViewer Padding="8,0,8,8" Grid.Row="1">
             <ContentControl x:Name="SettingsPresenter"
-                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                <ContentControl.ContentTransitions>
+                    <TransitionCollection>
+                        <EntranceThemeTransition />
+                    </TransitionCollection>
+                </ContentControl.ContentTransitions>
+            </ContentControl>
         </ScrollViewer>
     </Grid>
 </Page>
