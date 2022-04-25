@@ -24,7 +24,6 @@ namespace FluentStore.Views.Settings
 {
     public sealed partial class General : UserControl
     {
-        private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
         private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
 
         public General()
@@ -54,20 +53,6 @@ namespace FluentStore.Views.Settings
             throw new System.Exception("An unhandled exception was thrown. The app should have crashed and pushed a notification " +
                 "that allows the user to view and report the error.");
 #endif
-        }
-
-        private void PackageHandlerEnable_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (sender is not ToggleSwitch ts) return;
-
-            Helpers.Settings.Default.SetPackageHandlerEnabledState(ts.DataContext.GetType().Name, ts.IsOn);
-        }
-
-        private void OpenPluginDirButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Add a trailing slash to ensure that Explorer opens the folder,
-            // and not a file that might have the same name
-            System.Diagnostics.Process.Start("explorer.exe", $"\"{Helpers.Settings.Default.PluginDirectory}\"{System.IO.Path.DirectorySeparatorChar}");
         }
     }
 }

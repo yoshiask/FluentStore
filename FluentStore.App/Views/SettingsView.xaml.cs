@@ -27,7 +27,7 @@ namespace FluentStore.Views
         private readonly Dictionary<Type, object> _pages = new()
         {
             { typeof(Settings.General), null },
-            //{ typeof(Settings.Plugins), null },
+            { typeof(Settings.Plugins), null },
         };
 
         public bool IsCompact { get; private set; }

@@ -1,0 +1,51 @@
+﻿<UserControl
+    x:Class="FluentStore.Views.Settings.Plugins"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FluentStore.Views.Settings"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:FluentStore.Controls"
+    xmlns:sdk="using:FluentStore.SDK"
+    mc:Ignorable="d">
+
+    <StackPanel Spacing="4">
+
+        <controls:SettingsBlockControl Title="Package sources" Icon="Shop"
+                                           Description="View, enable, or disable available package handlers">
+            <controls:SettingsBlockControl.SettingsActionableElement>
+                <Button Content="Open plugin folder" Click="OpenPluginDirButton_Click"/>
+            </controls:SettingsBlockControl.SettingsActionableElement>
+            <controls:SettingsBlockControl.ExpandableContent>
+                <ItemsControl ItemsSource="{x:Bind PackageService.PackageHandlers, Mode=OneWay}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="8"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="sdk:PackageHandlerBase">
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="48" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <ContentControl Content="{x:Bind Image, Mode=OneWay}"
+                                                    ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
+                                <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}"
+                                               Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                <ToggleSwitch IsOn="{x:Bind IsEnabled}" Grid.Column="2" Margin="0,0,8,0"
+                                                  Style="{ThemeResource ToggleSwitchRightStyle}"
+                                                  Toggled="PackageHandlerEnable_Toggled"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </controls:SettingsBlockControl.ExpandableContent>
+        </controls:SettingsBlockControl>
+
+    </StackPanel>
+
+</UserControl>
