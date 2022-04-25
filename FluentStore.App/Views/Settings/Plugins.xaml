@@ -36,6 +36,13 @@
             </controls:SettingsBlockControl.ExpandableContent>
         </controls:SettingsBlockControl>
 
+        <controls:SettingsBlockControl Title="Install a plugin" Icon="Add"
+                                       Description="Choose a ZIP archive to install as a plugin">
+            <controls:SettingsBlockControl.SettingsActionableElement>
+                <Button Content="Pick file..." Click="InstallPluginButton_Click"/>
+            </controls:SettingsBlockControl.SettingsActionableElement>
+        </controls:SettingsBlockControl>
+
         <controls:SettingsBlockControl Title="Package sources" Icon="Shop"
                                        Description="View, enable, or disable available package handlers">
             <controls:SettingsBlockControl.ExpandableContent>

@@ -47,5 +47,26 @@ namespace FluentStore.Views.Settings
         {
             Helpers.Settings.Default.PluginDirectory = null;
         }
+
+        private async void InstallPluginButton_Click(object sender, RoutedEventArgs e)
+        {
+            Windows.Storage.Pickers.FileOpenPicker openPicker = new()
+            {
+                SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Downloads
+            };
+
+            // Initialize save picker for Win32
+            WinRT.Interop.InitializeWithWindow.Initialize(openPicker, App.Current.Window.Handle);
+
+            openPicker.FileTypeFilter.Add(".zip");
+
+            var pluginFile = await openPicker.PickSingleFileAsync();
+            if (pluginFile != null)
+            {
+                var plugin = await pluginFile.OpenReadAsync();
+                string pluginId = Path.GetFileNameWithoutExtension(pluginFile.Name);
+                await PluginLoader.InstallPlugin(Helpers.Settings.Default, plugin.AsStream(), pluginId, true);
+            }
+        }
     }
 }
