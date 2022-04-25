@@ -9,7 +9,7 @@
     <Identity
       Name="52374YoshiAskharoun.FluentStore"
       Publisher="CN=Joshua Askharoun, O=Joshua Askharoun, S=Texas, C=US"
-      Version="0.3.0.0" />
+      Version="0.2.2.0" />
 
     <Properties>
         <DisplayName>Fluent Store</DisplayName>
@@ -31,7 +31,7 @@
           Executable="$targetnametoken$.exe"
           EntryPoint="$targetentrypoint$">
             <uap:VisualElements
-              DisplayName="Fluent Store (Beta)"
+              DisplayName="Fluent Store (Alpha)"
               Description="A unifying frontend for Windows app stores and package managers."
               BackgroundColor="transparent"
               Square150x150Logo="Assets\Packaging\Square150x150Logo.png"
