@@ -121,7 +121,7 @@ namespace FluentStore.SDK
                 }
 
                 using ZipArchive archive = new(plugin);
-                archive.ExtractToDirectory(pluginId);
+                archive.ExtractToDirectory(dir);
                 return true;
             });
         }
