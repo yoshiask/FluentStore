@@ -7,15 +7,37 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:FluentStore.Controls"
     xmlns:sdk="using:FluentStore.SDK"
+    xmlns:helpers="using:FluentStore.Helpers"
     mc:Ignorable="d">
 
     <StackPanel Spacing="4">
 
-        <controls:SettingsBlockControl Title="Package sources" Icon="Shop"
-                                           Description="View, enable, or disable available package handlers">
+        <controls:SettingsBlockControl Title="Plugin directory"
+                                       Description="Choose where plugins are located on your computer">
+            <controls:SettingsBlockControl.Icon>
+                <FontIcon Glyph="&#xF12B;" />
+            </controls:SettingsBlockControl.Icon>
             <controls:SettingsBlockControl.SettingsActionableElement>
                 <Button Content="Open plugin folder" Click="OpenPluginDirButton_Click"/>
             </controls:SettingsBlockControl.SettingsActionableElement>
+            <controls:SettingsBlockControl.ExpandableContent>
+                <Grid Padding="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{x:Bind helpers:Settings.Default.PluginDirectory, Mode=TwoWay}"
+                             CornerRadius="4,0,0,4"/>
+                    <Button Click="ResetPluginDirButton_Click" CornerRadius="0,4,4,0"
+                            VerticalAlignment="Stretch" Grid.Column="1">
+                        <FontIcon Glyph="&#xE7A7;" FontSize="14"/>
+                    </Button>
+                </Grid>
+            </controls:SettingsBlockControl.ExpandableContent>
+        </controls:SettingsBlockControl>
+
+        <controls:SettingsBlockControl Title="Package sources" Icon="Shop"
+                                       Description="View, enable, or disable available package handlers">
             <controls:SettingsBlockControl.ExpandableContent>
                 <ItemsControl ItemsSource="{x:Bind PackageService.PackageHandlers, Mode=OneWay}">
                     <ItemsControl.ItemsPanel>
@@ -33,12 +55,12 @@
                                 </Grid.ColumnDefinitions>
 
                                 <ContentControl Content="{x:Bind Image, Mode=OneWay}"
-                                                    ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
+                                                ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
                                 <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}"
-                                               Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                                           Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                                 <ToggleSwitch IsOn="{x:Bind IsEnabled}" Grid.Column="2" Margin="0,0,8,0"
-                                                  Style="{ThemeResource ToggleSwitchRightStyle}"
-                                                  Toggled="PackageHandlerEnable_Toggled"/>
+                                              Style="{ThemeResource ToggleSwitchRightStyle}"
+                                              Toggled="PackageHandlerEnable_Toggled"/>
                             </Grid>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

@@ -42,5 +42,10 @@ namespace FluentStore.Views.Settings
             // and not a file that might have the same name
             System.Diagnostics.Process.Start("explorer.exe", $"\"{Helpers.Settings.Default.PluginDirectory}\"{Path.DirectorySeparatorChar}");
         }
+
+        private void ResetPluginDirButton_Click(object sender, RoutedEventArgs e)
+        {
+            Helpers.Settings.Default.PluginDirectory = null;
+        }
     }
 }
