@@ -229,19 +229,18 @@ namespace FluentStore.Views
                 {
                     PackageBase p = ViewModel.Package;
                     FileInfo file = (FileInfo)p.DownloadItem;
-                    Windows.Storage.Pickers.FileSavePicker savePicker = new()
+                    Windows.Storage.Pickers.FileSavePicker openPicker = new()
                     {
                         SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Downloads
                     };
 
                     // Initialize save picker for Win32
-                    var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(App.Current.Window);
-                    WinRT.Interop.InitializeWithWindow.Initialize(savePicker, hwnd);
+                    WinRT.Interop.InitializeWithWindow.Initialize(openPicker, App.Current.Window.Handle);
 
-                    savePicker.FileTypeChoices.Add(p.Type.GetExtensionDescription(), new string[] { file.Extension });
-                    savePicker.SuggestedFileName = file.Name;
+                    openPicker.FileTypeChoices.Add(p.Type.GetExtensionDescription(), new string[] { file.Extension });
+                    openPicker.SuggestedFileName = file.Name;
 
-                    var userFile = await savePicker.PickSaveFileAsync();
+                    var userFile = await openPicker.PickSaveFileAsync();
                     if (userFile != null)
                     {
                         await Task.Run(() => file.MoveTo(userFile.Path, true));

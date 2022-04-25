@@ -34,6 +34,8 @@ namespace FluentStore
             UpdateTitleBarTheme();
         }
 
+        public IntPtr Handle => m_hwnd;
+
         public void Navigate(Type type)
         {
             var page = type.GetConstructor(Type.EmptyTypes).Invoke(null) as UIElement;
