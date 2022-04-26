@@ -3,7 +3,7 @@
     <Import Project="..\Directory.Build.props"/>
 
     <UsingTask TaskName="CopyPluginToOutput.InstallPluginTask"
-               AssemblyFile="..\CopyPluginToOutput\bin\$(Configuration)\netstandard2.0\CopyPluginToOutput.dll"/>
+               AssemblyFile="..\CopyPluginToOutput\bin\Debug\netstandard2.0\CopyPluginToOutput.dll"/>
 
     <PropertyGroup>
         <!-- Ensure that all dependencies get copied to the plugin directory -->
