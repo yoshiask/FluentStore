@@ -128,7 +128,8 @@ namespace FluentStore.SDK
 
         private static Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)
         {
-            string folderPath = Path.GetDirectoryName(args.RequestingAssembly.Location);
+            var currentAssembly = args.RequestingAssembly ?? Assembly.GetExecutingAssembly();
+            string folderPath = Path.GetDirectoryName(currentAssembly.Location);
             string assemblyFile = new AssemblyName(args.Name).Name + ".dll";
             string assemblyPath = Path.Combine(folderPath, assemblyFile);
             if (!File.Exists(assemblyPath)) return null;
