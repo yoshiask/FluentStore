@@ -49,12 +49,13 @@
             </controls:SettingsBlockControl.ExpandableContent>
         </controls:SettingsBlockControl>
 
-        <controls:SettingsBlockControl Title="Report an issue">
+        <controls:SettingsBlockControl Title="Send feedback"
+                                       Description="Submit bug reports and feature requests to the developer">
             <controls:SettingsBlockControl.Icon>
-                <FontIcon Glyph="&#xEBE8;"/>
+                <FontIcon Glyph="&#xED15;"/>
             </controls:SettingsBlockControl.Icon>
             <controls:SettingsBlockControl.SettingsActionableElement>
-                <Button Content="Open in browser" Click="BugReportButton_Click"/>
+                <Button Content="Open in browser" Click="SendFeedbackButton_Click"/>
             </controls:SettingsBlockControl.SettingsActionableElement>
         </controls:SettingsBlockControl>
 

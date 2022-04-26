@@ -37,9 +37,9 @@ namespace FluentStore.Views.Settings
             cache.Clear();
         }
 
-        private async void BugReportButton_Click(object sender, RoutedEventArgs e)
+        private async void SendFeedbackButton_Click(object sender, RoutedEventArgs e)
         {
-            await NavigationService.OpenInBrowser("https://github.com/yoshiask/FluentStore/issues/new");
+            await NavigationService.OpenInBrowser("https://github.com/yoshiask/FluentStore/issues/new/choose");
         }
 
         private async void DonateButton_Click(object sender, RoutedEventArgs e)
