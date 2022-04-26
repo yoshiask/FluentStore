@@ -47,7 +47,7 @@ namespace FluentStore.Sources.UwpCommunity
             List<PackageBase> packages = new(projects.Count);
             foreach (dynamic project in projects)
             {
-                UwpCommunityPackage package = new(project)
+                UwpCommunityPackage package = new(this, project)
                 {
                     Status = PackageStatus.BasicDetails
                 };
@@ -77,11 +77,11 @@ namespace FluentStore.Sources.UwpCommunity
             dynamic project = projects.FirstOrDefault(p => p.id == projectId);
             if (project == null)
             {
-                var NavService = Ioc.Default.GetRequiredService<Services.INavigationService>();
+                var NavService = Ioc.Default.GetRequiredService<INavigationService>();
                 throw SDK.Models.WebException.Create(404, $"No project with ID {projectId} is registered with the UWP Community.", request.ToString());
             }
 
-            UwpCommunityPackage package = new(project);
+            UwpCommunityPackage package = new(this, project);
             package.Status = PackageStatus.BasicDetails;
 
             if (status.IsAtLeast(PackageStatus.Details))
