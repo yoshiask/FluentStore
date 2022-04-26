@@ -8,6 +8,7 @@
     xmlns:controls="using:FluentStore.Controls"
     xmlns:sdk="using:FluentStore.SDK"
     xmlns:helpers="using:FluentStore.Helpers"
+    x:DefaultBindMode="TwoWay"
     mc:Ignorable="d">
 
     <StackPanel Spacing="4">
