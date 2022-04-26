@@ -4,6 +4,7 @@ using OwlCore.AbstractStorage;
 using OwlCore.Services;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Windows.ApplicationModel;
 
 namespace FluentStore.Helpers
@@ -89,6 +90,17 @@ namespace FluentStore.Helpers
                 return AppUpdateStatus.Downgraded;
 
             return AppUpdateStatus.None;
+        }
+
+        public async Task ClearSettings()
+        {
+            DirectoryInfo dir;
+            if (Folder is SystemIOFolderData folder)
+                dir = folder.Directory;
+            else
+                dir = new(Folder.Path);
+
+            await Task.Run(dir.RecursiveDelete);
         }
 
         private static string GetPackageHandlerEnabledKey(string typeName) => $"{KEY_PackageHandlerEnabled}_{typeName}";
