@@ -34,6 +34,16 @@
             </controls:SettingsBlockControl.SettingsActionableElement>
         </controls:SettingsBlockControl>
 
+        <controls:SettingsBlockControl Title="Reset settings"
+                                        Description="Set all options to their default value">
+            <controls:SettingsBlockControl.Icon>
+                <FontIcon Glyph="&#xE7A7;"/>
+            </controls:SettingsBlockControl.Icon>
+            <controls:SettingsBlockControl.SettingsActionableElement>
+                <Button Content="Reset" Click="ResetButton_Click"/>
+            </controls:SettingsBlockControl.SettingsActionableElement>
+        </controls:SettingsBlockControl>
+
         <controls:SettingsBlockControl Title="About"
                                            Description="Information about Fluent Store">
             <controls:SettingsBlockControl.Icon>
