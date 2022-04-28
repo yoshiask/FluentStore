@@ -18,11 +18,11 @@
         <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
         <GenerateTemporaryStoreCertificate>False</GenerateTemporaryStoreCertificate>
         <GenerateAppInstallerFile>True</GenerateAppInstallerFile>
-        <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
+        <AppxPackageSigningTimestampDigestAlgorithm>SHA384</AppxPackageSigningTimestampDigestAlgorithm>
         <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
         <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
         <GenerateTestArtifacts>False</GenerateTestArtifacts>
-        <AppxBundle>Always</AppxBundle>
+        <AppxBundle>Never</AppxBundle>
         <AppxBundlePlatforms>x86|x64|arm64</AppxBundlePlatforms>
         <HoursBetweenUpdateChecks>48</HoursBetweenUpdateChecks>
         <AppInstallerUri>http://josh.askharoun.com/FluentStore/FluentStoreBeta.appinstaller</AppInstallerUri>
