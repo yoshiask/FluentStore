@@ -339,4 +339,6 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
 **/Secrets.cs
+/BuildPackage.ps1
