@@ -17,7 +17,7 @@
         <PackageCertificateThumbprint>CA050EFFDAB5866005A7649E1493764E2205F3DB</PackageCertificateThumbprint>
         <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
         <GenerateTemporaryStoreCertificate>False</GenerateTemporaryStoreCertificate>
-        <GenerateAppInstallerFile>True</GenerateAppInstallerFile>
+        <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
         <AppxPackageSigningTimestampDigestAlgorithm>SHA384</AppxPackageSigningTimestampDigestAlgorithm>
         <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
         <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
