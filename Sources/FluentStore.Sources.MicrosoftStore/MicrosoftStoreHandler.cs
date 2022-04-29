@@ -121,20 +121,18 @@ namespace FluentStore.Sources.MicrosoftStore
 
         public override async Task<PackageBase> GetPackageFromUrl(Url url)
         {
-            Regex rx = new(@"^https?:\/\/(?:www\.)?microsoft\.com\/(?:(?<locale>[a-z]{2}-[a-z]{2})\/)?(?:store\/(?:apps|productId)|(?:p|store\/r)(?:\/.+)?)\/(?<id>\w{12})",
+            Regex rx = new(@"^https?:\/\/(?:(?:www\.)?microsoft\.com\/(?:(?<locale>[a-z]{2}-[a-z]{2})\/)?(?:store\/(?:apps|productId)|(?:p|store\/r)(?:\/.+)?)|apps\.microsoft\.com\/store\/detail(?:\/[\w-]+)?)\/(?<id>\w{12})",
                 RegexOptions.IgnoreCase | RegexOptions.Singleline);
             Match m = rx.Match(url.ToString());
             if (!m.Success)
                 return null;
 
-            return await GetPackage(Urn.Parse($"urn:{NAMESPACE_MSSTORE}:{m.Groups["id"]}"));
+            return await GetPackageFromPage(m.Groups["id"].Value, CatalogIdType.ProductId);
         }
 
         public override Url GetUrlFromPackage(PackageBase package)
         {
-            if (package is not MicrosoftStorePackage msPackage)
-                throw new System.ArgumentException("Must be a " + nameof(MicrosoftStorePackage), nameof(package));
-            return "https://www.microsoft.com/store/apps/" + msPackage.StoreId;
+            return "https://apps.microsoft.com/store/detail/" + package.Urn.GetContent<NamespaceSpecificString>().UnEscapedValue;
         }
 
         private RequestOptions GetSystemOptions()
