@@ -126,8 +126,7 @@ namespace FluentStore.Sources.GitHub
 
                     if (!assets.Any()) continue;
 
-                    asset = assets.SingleOrDefault();
-                    if (asset == null)
+                    if (assets.Count() > 1)
                     {
                         // Rank assets by file type
                         assets = assets.OrderBy(a => RankAsset(a.Name)).ToList();
