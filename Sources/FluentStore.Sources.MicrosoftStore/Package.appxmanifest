@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap uap3 rescap">
+
+    <Identity
+      Name="52374YoshiAskharoun.FluentStoreMicrosoftStore"
+      Publisher="CN=Joshua Askharoun, O=Joshua Askharoun, S=Texas, C=US"
+      Version="0.3.0.0" />
+
+    <Properties>
+        <DisplayName>Microsoft Store plugin for Fluent Store</DisplayName>
+        <PublisherDisplayName>Joshua Askharoun</PublisherDisplayName>
+        <Logo>Assets\StoreLogo.png</Logo>
+    </Properties>
+
+    <Dependencies>
+        <uap3:MainPackageDependency Name="52374YoshiAskharoun.FluentStore" />
+        <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
+        <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
+    </Dependencies>
+
+    <Resources>
+        <Resource Language="x-generate"/>
+    </Resources>
+
+    <Applications>
+        <Application Id="op">
+            <uap:VisualElements
+              DisplayName="Microsoft Store [Fluent Store]"
+              Description="Provides Microsoft Store and Microsoft Account support for Fluent Store (Beta)."
+              BackgroundColor="transparent"
+              Square150x150Logo="Assets\StoreMedTile.png"
+              Square44x44Logo="Assets\StoreAppList.png"
+              AppListEntry="none">
+                <uap:DefaultTile ShortName="Microsoft Store [FS]"
+                                 Wide310x150Logo="Assets\StoreWideTile.png"  
+                                 Square71x71Logo="Assets\StoreSmallTile.png"
+                                 Square310x310Logo="Assets\StoreLargeTile.png"/>
+                <uap:SplashScreen Image="Assets\StoreSplashScreen.png" />
+            </uap:VisualElements>
+        </Application>
+    </Applications>
+</Package>

@@ -5,6 +5,10 @@
         <InstallPluginTask OutputDir="$(MSBuildProjectDirectory)\$(OutDir)"
                            PluginDll="$(MSBuildProjectName).dll"
                            PluginAssemblyName="$(MSBuildProjectName)"/>
+
+        <Copy
+            SourceFiles="$(MSBuildProjectDirectory)\$(OutDir)$(MSBuildProjectName).dll"
+            DestinationFiles="$(MSBuildProjectDirectory)\$(OutDir)$(MSBuildProjectName).exe"/>
     </Target>
 
 </Project>
