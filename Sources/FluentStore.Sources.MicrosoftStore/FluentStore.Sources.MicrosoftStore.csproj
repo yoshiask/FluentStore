@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Identity.Client" Version="4.43.1" />
-        <PackageReference Include="Microsoft.Graph" Version="4.25.0" />
+        <PackageReference Include="Microsoft.Identity.Client" Version="4.44.0" />
+        <PackageReference Include="Microsoft.Graph" Version="4.29.0" />
 
         <ProjectReference Include="..\..\API\MSStore\StoreDownloader\StoreDownloader.csproj" />
         <ProjectReference Include="..\..\API\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />

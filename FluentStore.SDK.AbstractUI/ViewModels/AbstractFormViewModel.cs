@@ -1,5 +1,5 @@
 ﻿using FluentStore.SDK.AbstractUI.Models;
-using Microsoft.Toolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Input;
 using OwlCore.AbstractUI.ViewModels;
 using System;
 

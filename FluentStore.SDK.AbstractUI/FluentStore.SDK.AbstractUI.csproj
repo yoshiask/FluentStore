@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="OwlCore" Version="0.0.58" />
+        <PackageReference Include="OwlCore" Version="0.0.68" />
     </ItemGroup>
 
     <ItemGroup>

@@ -26,10 +26,6 @@ namespace FluentStore.SDK.Users.Browsers
         {
             var wabOptions = WebAuthenticationOptions.None;
 
-            if (options.ResponseMode == OidcClientOptions.AuthorizeResponseMode.FormPost)
-            {
-                wabOptions |= WebAuthenticationOptions.UseHttpPost;
-            }
             if (_enableWindowsAuthentication)
             {
                 wabOptions |= WebAuthenticationOptions.UseCorporateNetwork;

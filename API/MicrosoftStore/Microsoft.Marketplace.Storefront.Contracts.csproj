@@ -7,6 +7,6 @@
 		<Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Flurl.Http" Version="3.2.0" />
+		<PackageReference Include="Flurl.Http" Version="3.2.4" />
 	</ItemGroup>
 </Project>
