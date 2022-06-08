@@ -22,13 +22,27 @@
         {
             return new(package.Title + " just got installed.", package, SuccessType.PackageInstallCompleted);
         }
+
+        public static SuccessMessage CreateForPluginDownloadCompleted(string pluginId)
+        {
+            return new($"Downloaded {pluginId} plugin", pluginId, SuccessType.PluginDownloadCompleted);
+        }
+
+        public static SuccessMessage CreateForPluginInstallCompleted(string pluginId)
+        {
+            return new($"Installed {pluginId} plugin", pluginId, SuccessType.PluginInstallCompleted);
+        }
     }
 
     public enum SuccessType
     {
         None,
+
         PackageFetchCompleted,
         PackageDownloadCompleted,
         PackageInstallCompleted,
+
+        PluginDownloadCompleted,
+        PluginInstallCompleted,
     }
 }

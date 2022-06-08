@@ -103,6 +103,15 @@ namespace FluentStore.Helpers
             await Task.Run(dir.RecursiveDelete);
         }
 
+        public async Task InstallDefaultPlugins(bool install = true, bool overwrite = false)
+        {
+            var appVersion = Package.Current.Id.Version.ToVersion();
+            var fsApi = CommunityToolkit.Mvvm.DependencyInjection.Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
+            
+            var defaults = await fsApi.GetDefaultPlugins(appVersion);
+            await SDK.PluginLoader.InstallDefaultPlugins(this, defaults, install, overwrite);
+        }
+
         private static string GetPackageHandlerEnabledKey(string typeName) => $"{KEY_PackageHandlerEnabled}_{typeName}";
 
         private static SystemIOFolderData GetSettingsFolder()

@@ -1,4 +1,5 @@
-﻿using FluentStore.Services;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,6 +7,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Windows.Storage.Streams;
 
 namespace FluentStore.SDK
 {
@@ -68,21 +70,69 @@ namespace FluentStore.SDK
             return result;
         }
 
-        public static async Task InstallDefaultPlugins(ISettingsService settings, IEnumerable<string> pluginUrls)
+        /// <summary>
+        /// Downloads and installs each plugin from the list of URLS.
+        /// </summary>
+        /// <param name="settings">
+        /// The current application's settings.
+        /// </param>
+        /// <param name="pluginUrls">
+        /// Download links to the plugins to install.
+        /// </param>
+        /// <param name="overwrite">
+        /// Whether to force download or install, even if a plugin with the same ID
+        /// is already installed.
+        /// </param>
+        /// <param name="install">
+        /// Whether to install the downloaded plugins. Only use this option at the
+        /// start of app initialization, when no plugins are loaded yet.
+        /// </param>
+        public static async Task InstallDefaultPlugins(ISettingsService settings, IEnumerable<string> pluginUrls,
+            bool install = true, bool overwrite = false)
         {
-            System.Net.Http.HttpClient client = new();
+#if WINDOWS
+            Windows.Web.Http.HttpClient
+#else
+            System.Net.Http.HttpClient
+#endif
+                client = new();
             foreach (string url in pluginUrls)
             {
                 try
                 {
-                    var response = await client.GetStreamAsync(url);
-                    await InstallPlugin(settings, response, Path.GetFileNameWithoutExtension(url));
+                    // This seems funky, but this is because Firebase encodes the slashes
+                    // in the bucket path. This ensures we always get the last segment.
+                    Flurl.Url pluginUrl = new(Flurl.Url.Decode(url, false));
+                    string pluginId = Path.GetFileNameWithoutExtension(pluginUrl.PathSegments.Last());
+
+#if WINDOWS
+                    var get = client.GetAsync(new(url), Windows.Web.Http.HttpCompletionOption.ResponseContentRead);
+                    get.Progress = (op, prog) =>
+                    {
+                        WeakReferenceMessenger.Default.Send(new Messages.PluginDownloadProgressMessage(
+                            pluginId, prog.BytesReceived, prog.TotalBytesToReceive));
+                    };
+                    var response = await get;
+
+                    string pluginDownloadPath = Path.Combine(settings.PluginDirectory, pluginId) + ".zip";
+                    FileStream pluginStream = new(pluginDownloadPath, FileMode.Create, FileAccess.Write);
+                    using IRandomAccessStream outputStream = pluginStream.AsRandomAccessStream();
+                    await response.Content.WriteToStreamAsync(outputStream);
+                    await pluginStream.FlushAsync();
+#else
+                    var pluginStream = await client.GetStreamAsync(url);
+#endif
+
+                    if (install)
+                        await InstallPlugin(settings, pluginStream, pluginId, overwrite);
                 }
                 catch (Exception ex)
                 {
 #if DEBUG
                     System.Diagnostics.Debug.WriteLine(ex);
 #endif
+                    WeakReferenceMessenger.Default.Send(new Messages.ErrorMessage(
+                        ex, url, Messages.ErrorType.PluginDownloadFailed));
                 }
             }
         }
@@ -111,19 +161,53 @@ namespace FluentStore.SDK
         {
             return Task.Run(delegate
             {
-                string dir = Path.Combine(settings.PluginDirectory, pluginId);
-                if (Directory.Exists(dir))
+                try
                 {
-                    if (overwrite)
-                        Directory.Delete(dir, true);
-                    else
-                        return false;
-                }
+                    WeakReferenceMessenger.Default.Send(
+                        new Messages.PluginInstallStartedMessage(pluginId));
 
-                using ZipArchive archive = new(plugin);
-                archive.ExtractToDirectory(dir);
-                return true;
+                    string dir = Path.Combine(settings.PluginDirectory, pluginId);
+                    if (Directory.Exists(dir))
+                    {
+                        if (overwrite)
+                            Directory.Delete(dir, true);
+                        else
+                            return false;
+                    }
+
+                    using ZipArchive archive = new(plugin);
+                    archive.ExtractToDirectory(dir);
+
+                    WeakReferenceMessenger.Default.Send(
+                        Messages.SuccessMessage.CreateForPluginInstallCompleted(pluginId));
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    WeakReferenceMessenger.Default.Send(new Messages.ErrorMessage(
+                        ex, pluginId, Messages.ErrorType.PluginInstallFailed));
+                    return false;
+                }
             });
+        }
+
+        /// <summary>
+        /// Installs any zipped plugins in the plugin directory.
+        /// </summary>
+        /// <param name="settings">
+        /// The current application's settings.
+        /// </param>
+        public static async Task InstallPendingPlugins(ISettingsService settings)
+        {
+            foreach (string pluginPath in Directory.GetFiles(settings.PluginDirectory, "*.zip"))
+            {
+                string pluginId = Path.GetFileNameWithoutExtension(pluginPath);
+                using FileStream plugin = new(pluginPath, FileMode.Open);
+
+                bool installed = await InstallPlugin(settings, plugin, pluginId);
+                if (installed)
+                    File.Delete(pluginPath);
+            }
         }
 
         private static Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)

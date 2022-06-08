@@ -37,6 +37,39 @@
             </controls:SettingsBlockControl.ExpandableContent>
         </controls:SettingsBlockControl>
 
+        <controls:SettingsBlockControl x:Name="DefaultPluginsSetting" Title="Default plugins"
+                                       Description="Download and install default plugins">
+            <controls:SettingsBlockControl.Icon>
+                <FontIcon Glyph="&#xECAA;" />
+            </controls:SettingsBlockControl.Icon>
+            <controls:SettingsBlockControl.SettingsActionableElement>
+                <Button x:Name="ReinstallDefaultPluginsButton"
+                        Content="Reinstall..." Click="ReinstallDefaultPluginsButton_Click"/>
+            </controls:SettingsBlockControl.SettingsActionableElement>
+            <controls:SettingsBlockControl.ExpandableContent>
+                <StackPanel Margin="8">
+                    <TextBlock x:Name="DefaultPluginStatusBlock" HorizontalTextAlignment="Center">
+                        <Run Text="When you click 'Reinstall', progress will be shown here."/><LineBreak/>
+                        <Run Text="Use this option if the Home tab is blank, or a default plugin is not working correctly."/>
+                    </TextBlock>
+                    <ProgressBar x:Name="DefaultPluginProgressIndicator" Margin="0,12,0,0"
+                                 IsIndeterminate="True" Visibility="Collapsed"/>
+                    <ItemsControl x:Name="DefaultPluginsLog" Margin="0,12,0,0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="8"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <TextBlock Text="{x:Bind}" IsTextSelectionEnabled="True"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </controls:SettingsBlockControl.ExpandableContent>
+        </controls:SettingsBlockControl>
+
         <controls:SettingsBlockControl Title="Install a plugin" Icon="Add"
                                        Description="Choose a ZIP archive to install as a plugin">
             <controls:SettingsBlockControl.SettingsActionableElement>

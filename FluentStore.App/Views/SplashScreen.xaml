@@ -10,7 +10,9 @@
     <StackPanel Spacing="8" VerticalAlignment="Center" HorizontalAlignment="Stretch"
                 MaxWidth="400">
         <Image Source="/Assets/SplashScreen.png" MaxHeight="300"/>
-        <ProgressBar IsIndeterminate="True"/>
+        <ProgressBar x:Name="ProgressIndicator" IsIndeterminate="True"/>
+        <TextBlock x:Name="StatusBlock" HorizontalTextAlignment="Center"
+                   Text="Starting Fluent Store..."/>
     </StackPanel>
 
 </UserControl>

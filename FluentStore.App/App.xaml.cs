@@ -105,9 +105,16 @@ namespace FluentStore
                 {
                     case AppUpdateStatus.NewlyInstalled:
                         // Download and install default plugins
-                        var fsApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
-                        var defaults = await fsApi.GetDefaultPlugins(appVersion);
-                        await PluginLoader.InstallDefaultPlugins(Helpers.Settings.Default, defaults);
+                        log?.Log($"Began installing default plugins");
+                        await Helpers.Settings.Default.InstallDefaultPlugins();
+                        log?.Log($"Finished installing plugins");
+                        break;
+
+                    default:
+                        // Always install pending plugins
+                        log?.Log($"Began installing pending plugins");
+                        await PluginLoader.InstallPendingPlugins(Helpers.Settings.Default);
+                        log?.Log($"Finished install pending plugins");
                         break;
                 }
 

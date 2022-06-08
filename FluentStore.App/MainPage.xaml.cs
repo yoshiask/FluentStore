@@ -54,10 +54,13 @@ namespace FluentStore
 
         private void ErrorMessage_Recieved(object r, ErrorMessage m)
         {
-            MainInfoBar.Title = m.Exception.Message;
-            MainInfoBar.Message = m.Exception.StackTrace;
-            MainInfoBar.Severity = InfoBarSeverity.Error;
-            MainInfoBar.IsOpen = true;
+            _ = DispatcherQueue.TryEnqueue(delegate
+            {
+                MainInfoBar.Title = m.Exception.Message;
+                MainInfoBar.Message = m.Exception.StackTrace;
+                MainInfoBar.Severity = InfoBarSeverity.Error;
+                MainInfoBar.IsOpen = true;
+            });
         }
 
         private void SuccessMessage_Recieved(object r, SuccessMessage m)
@@ -65,9 +68,12 @@ namespace FluentStore
             // Don't show package fetched messages
             if (m.Type == SuccessType.PackageFetchCompleted) return;
 
-            MainInfoBar.Title = m.Message;
-            MainInfoBar.Severity = InfoBarSeverity.Success;
-            MainInfoBar.IsOpen = true;
+            _ = DispatcherQueue.TryEnqueue(delegate
+            {
+                MainInfoBar.Title = m.Message;
+                MainInfoBar.Severity = InfoBarSeverity.Success;
+                MainInfoBar.IsOpen = true;
+            });
         }
 
         private void MainPage_PointerPressed(object sender, PointerRoutedEventArgs e)

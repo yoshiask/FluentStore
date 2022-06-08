@@ -65,6 +65,14 @@ namespace FluentStore.Controls
         public static readonly DependencyProperty IsClickableProperty = DependencyProperty.Register(
               nameof(IsClickable), typeof(bool), typeof(SettingsBlockControl), new PropertyMetadata(false));
 
+        public bool IsExpanded
+        {
+            get => (bool)GetValue(IsExpandedProperty);
+            set => SetValue(IsExpandedProperty, value);
+        }
+        public static readonly DependencyProperty IsExpandedProperty =
+            DependencyProperty.Register(nameof(IsExpanded), typeof(bool), typeof(SettingsBlockControl), new(false));
+
         /// <summary>
         /// Occurs when a button control is clicked.
         /// </summary>

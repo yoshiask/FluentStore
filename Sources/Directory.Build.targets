@@ -6,9 +6,9 @@
                            PluginDll="$(MSBuildProjectName).dll"
                            PluginAssemblyName="$(MSBuildProjectName)"/>
 
-        <Copy
+        <!--<Copy
             SourceFiles="$(MSBuildProjectDirectory)\$(OutDir)$(MSBuildProjectName).dll"
-            DestinationFiles="$(MSBuildProjectDirectory)\$(OutDir)$(MSBuildProjectName).exe"/>
+            DestinationFiles="$(MSBuildProjectDirectory)\$(OutDir)$(MSBuildProjectName).exe"/>-->
     </Target>
 
 </Project>

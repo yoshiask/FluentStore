@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK;
+using FluentStore.SDK.Messages;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -68,5 +70,82 @@ namespace FluentStore.Views.Settings
                 await PluginLoader.InstallPlugin(Helpers.Settings.Default, plugin.AsStream(), pluginId, true);
             }
         }
+
+        #region Reinstall default plugins
+        private async void ReinstallDefaultPluginsButton_Click(object sender, RoutedEventArgs e)
+        {
+            ReinstallDefaultPluginsButton.IsEnabled = false;
+            DefaultPluginsLog.Items.Clear();
+            WeakReferenceMessenger.Default.Register<ErrorMessage>(this, DefaultPluginErrorMessage_Recieved);
+            WeakReferenceMessenger.Default.Register<SuccessMessage>(this, DefaultPluginSuccessMessage_Recieved);
+            WeakReferenceMessenger.Default.Register<PluginDownloadProgressMessage>(this, DefaultPluginProgressMessage_Recieved);
+            DefaultPluginProgressIndicator.Visibility = Visibility.Visible;
+            DefaultPluginsSetting.IsExpanded = true;
+
+            await Helpers.Settings.Default.InstallDefaultPlugins(false, true);
+
+            WeakReferenceMessenger.Default.Unregister<ErrorMessage>(this);
+            WeakReferenceMessenger.Default.Unregister<SuccessMessage>(this);
+            WeakReferenceMessenger.Default.Unregister<PluginDownloadProgressMessage>(this);
+            DefaultPluginProgressIndicator.Visibility = Visibility.Collapsed;
+            DefaultPluginStatusBlock.Text = "Downloaded default plugins. Please restart Fluent Store.";
+            ReinstallDefaultPluginsButton.IsEnabled = true;
+        }
+
+        private void DefaultPluginErrorMessage_Recieved(object recipient, ErrorMessage message)
+        {
+            string logMessage;
+            switch (message.Type)
+            {
+                case ErrorType.PluginDownloadFailed:
+                    logMessage = "Error downloading ";
+                    break;
+                case ErrorType.PluginInstallFailed:
+                    logMessage = "Error installing ";
+                    break;
+                default:
+                    return;
+            }
+
+            logMessage += $"{message.Context}:\r\n{message.Exception}";
+
+            _ = DispatcherQueue.TryEnqueue(delegate
+            {
+                DefaultPluginsLog.Items.Add(logMessage);
+            });
+        }
+
+        private void DefaultPluginSuccessMessage_Recieved(object recipient, SuccessMessage message)
+        {
+            if (message.Type != SuccessType.PluginDownloadCompleted || message.Type != SuccessType.PluginInstallCompleted)
+                return;
+
+            _ = DispatcherQueue.TryEnqueue(delegate
+            {
+                DefaultPluginProgressIndicator.ShowError = false;
+                DefaultPluginProgressIndicator.IsIndeterminate = true;
+                DefaultPluginsLog.Items.Add(message.Message);
+            });
+        }
+
+        private void DefaultPluginProgressMessage_Recieved(object recipient, PluginDownloadProgressMessage message)
+        {
+            _ = DispatcherQueue.TryEnqueue(delegate
+            {
+                DefaultPluginProgressIndicator.ShowError = false;
+                if (message.Total is null || message.Total == 0)
+                {
+                    DefaultPluginProgressIndicator.IsIndeterminate = true;
+                }
+                else
+                {
+                    DefaultPluginProgressIndicator.IsIndeterminate = false;
+                    DefaultPluginProgressIndicator.Value = message.Downloaded / (double)message.Total;
+                }
+
+                DefaultPluginStatusBlock.Text = $"Downloading {message.PluginId} plugin...";
+            });
+        }
+        #endregion
     }
 }
