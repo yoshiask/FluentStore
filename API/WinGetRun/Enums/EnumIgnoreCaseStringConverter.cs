@@ -8,7 +8,7 @@ namespace WinGetRun.Enums
     public class EnumIgnoreCaseStringConverter<TEnum> : JsonConverter where TEnum : struct
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="InstallerArchitectureStringConverter"/> class.
+        /// Initializes a new instance of the <see cref="EnumIgnoreCaseStringConverter{TEnum}"/> class.
         /// </summary>
         public EnumIgnoreCaseStringConverter()
         {
@@ -57,7 +57,10 @@ namespace WinGetRun.Enums
                 switch (reader.TokenType)
                 {
                     case JsonToken.String:
-                        return Parse(reader.Value?.ToString());
+                        string? name = reader.Value?.ToString();
+                        if (name is null)
+                            goto default;
+                        return Parse(name);
 
                     case JsonToken.Integer:
                         return (TEnum)reader.Value;

@@ -20,5 +20,5 @@ public class AppVersion
     /// <summary>
     /// The type of installer.
     /// </summary>
-    public string InstallerType { get; set; }
+    public Enums.InstallerType InstallerType { get; set; }
 }
