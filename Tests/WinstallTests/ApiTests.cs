@@ -54,4 +54,24 @@ public class ApiTests
         Assert.Contains("eartrumpet.app", result.App.HomepageUrl);
         Assert.False(string.IsNullOrEmpty(result.App.Description));
     }
+
+    [Fact]
+    public async Task SearchAndGetLatestInstaller()
+    {
+        var results = await _api.SearchAppsAsync("Visual studio");
+
+        Assert.NotNull(results);
+        Assert.NotEmpty(results);
+
+        var app = results.First();
+        Assert.NotNull(app);
+        Assert.NotNull(app.Id);
+        Assert.NotNull(app.LatestVersion);
+
+        var installerManifest = await CommunityRepo.GetInstallerAsync(app.Id, app.LatestVersion);
+        Assert.Equal(app.Id, installerManifest.PackageIdentifier);
+        Assert.Equal(app.LatestVersion, installerManifest.PackageVersion);
+        Assert.NotNull(installerManifest.Installers);
+        Assert.NotEmpty(installerManifest.Installers);
+    }
 }

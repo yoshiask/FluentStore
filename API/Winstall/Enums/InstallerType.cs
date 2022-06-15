@@ -1,20 +1,42 @@
 ﻿using Newtonsoft.Json;
+using System.Runtime.Serialization;
 
 namespace Winstall.Enums;
 
 [JsonConverter(typeof(EnumIgnoreCaseStringConverter<InstallerType>))]
 public enum InstallerType
 {
-    Unknown     = -1,
+    [EnumMember(Value = "unknown")]
+    Unknown = -1,
 
-    Msix        = 0,
-    Msi         = 1,
-    Appx        = 2,
-    Exe         = 3,
-    Zip         = 4,
-    Inno        = 5,
-    Nullsoft    = 6,
-    Wix         = 7,
-    Burn        = 8,
-    Pwa         = 9,
+
+    [EnumMember(Value = "msix")]
+    Msix = 0,
+
+    [EnumMember(Value = "msi")]
+    Msi = 1,
+
+    [EnumMember(Value = "appx")]
+    Appx = 2,
+
+    [EnumMember(Value = "exe")]
+    Exe = 3,
+
+    [EnumMember(Value = "zip")]
+    Zip = 4,
+
+    [EnumMember(Value = "inno")]
+    Inno = 5,
+
+    [EnumMember(Value = "nullsoft")]
+    Nullsoft = 6,
+
+    [EnumMember(Value = "wix")]
+    Wix = 7,
+
+    [EnumMember(Value = "burn")]
+    Burn = 8,
+
+    [EnumMember(Value = "pwa")]
+    Pwa = 9,
 }
