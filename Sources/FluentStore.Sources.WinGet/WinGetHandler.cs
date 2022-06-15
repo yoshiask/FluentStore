@@ -9,6 +9,7 @@ using FluentStore.SDK;
 using FluentStore.Services;
 using Winstall;
 using Winstall.Models;
+using FluentStore.SDK.Helpers;
 
 namespace FluentStore.Sources.WinGet
 {
@@ -47,11 +48,21 @@ namespace FluentStore.Sources.WinGet
         {
             Guard.IsEqualTo(packageUrn.NamespaceIdentifier, NAMESPACE_WINGET, nameof(packageUrn));
 
-            var result = await _api.GetAppAsync(packageUrn.GetContent<NamespaceSpecificString>().UnEscapedValue);
-            return new WinGetPackage(this, result.App)
+            string packageId = packageUrn.GetContent<NamespaceSpecificString>().UnEscapedValue;
+            var result = await _api.GetAppAsync(packageId);
+            WinGetPackage package = new(this, result.App)
             {
                 Status = PackageStatus.Details
             };
+
+            if (status.IsAtLeast(PackageStatus.Details))
+            {
+                var locale = await CommunityRepo.GetDefaultLocaleAsync(packageId, result.App.LatestVersion);
+                package.Update(locale);
+                package.Status = PackageStatus.Details;
+            }
+
+            return package;
         }
 
         public override Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
@@ -81,12 +92,12 @@ namespace FluentStore.Sources.WinGet
         public override async Task<PackageBase> GetPackageFromUrl(Url url)
         {
             string id = null;
-            Regex rx = new(@"^https:\/\/((www\.)?github|raw\.githubusercontent)\.com\/microsoft\/winget-pkgs(\/(blob|tree))?\/master\/manifests\/[0-9a-z]\/(?<publisherId>[^\/\s]+)\/(?<packageId>[^\/\s]+)",
+            Regex rx = new(@"^https:\/\/((www\.)?github|raw\.githubusercontent)\.com\/microsoft\/winget-pkgs(\/(blob|tree))?\/master\/manifests\/[0-9a-z]\/(?<packageId>[^\/\s]+)()",
                 RegexOptions.IgnoreCase);
             Match m = rx.Match(url);
             if (m.Success)
             {
-                id = $"{m.Groups["publisherId"]}.{m.Groups["packageId"]}";
+                id = m.Groups["packageId"].Value;
                 goto success;
             }
 

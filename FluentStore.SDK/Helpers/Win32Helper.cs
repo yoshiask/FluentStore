@@ -11,6 +11,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK.Messages;
 using Windows.System;
 using FluentStore.SDK.Models;
+using System.Collections.Generic;
 
 namespace FluentStore.SDK.Helpers
 {
@@ -31,7 +32,9 @@ namespace FluentStore.SDK.Helpers
         }
 
         /// <inheritdoc cref="PackageBase.InstallAsync"/>
-        public static async Task<bool> Install(PackageBase package, string args = null)
+        public static async Task<bool> Install(PackageBase package, string args = null,
+            IEnumerable<long> successCodes = null, IEnumerable<long> errorCodes = null,
+            Func<long, string> getErrorMessage = null)
         {
             try
             {
@@ -47,12 +50,23 @@ namespace FluentStore.SDK.Helpers
                 var installProc = Process.Start(startInfo);
                 await installProc.WaitForExitAsync();
 
-                bool success = installProc.ExitCode == 0;
+                successCodes ??= new long[] { 0 };
+                errorCodes ??= Array.Empty<long>();
+                long exitCode = installProc.ExitCode;
+                bool success = successCodes.Contains(exitCode) && !errorCodes.Contains(exitCode);
+
                 if (success)
+                {
                     WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageInstallCompleted(package));
+                }
                 else
+                {
+                    getErrorMessage ??= GetInstallErrorMessage;
                     WeakReferenceMessenger.Default.Send(new ErrorMessage(
-                        new Exception(installProc.ExitCode.ToString()), package, ErrorType.PackageInstallFailed));
+                        new Exception(getErrorMessage(exitCode)),
+                        package, ErrorType.PackageInstallFailed));
+                }
+                
                 return success;
             }
             catch (Exception ex)
@@ -87,5 +101,8 @@ namespace FluentStore.SDK.Helpers
                 return null;
             }
         }
+
+        private static string GetInstallErrorMessage(long exitCode)
+            => $"Installer exited with code {exitCode}.";
     }
 }

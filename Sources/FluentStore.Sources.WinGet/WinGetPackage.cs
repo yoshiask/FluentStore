@@ -14,6 +14,9 @@ using Winstall.Models;
 using System.IO;
 using FluentStore.SDK;
 using FluentStore.SDK.Models;
+using Winstall.Models.Manifest;
+using Winstall.Models.Manifest.Enums;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace FluentStore.Sources.WinGet
 {
@@ -51,8 +54,7 @@ namespace FluentStore.Sources.WinGet
             Website = Link.Create(pack.HomepageUrl, ShortTitle + " website");
 
             // Set WinGet package properties
-            PackageId = pack.GetPublisherAndPackageIds().PackageId;
-            _appIcon = pack.GetImagePng();
+            _appIcon ??= pack.GetImagePng();
         }
 
         public void Update(PopularApp popApp)
@@ -65,37 +67,37 @@ namespace FluentStore.Sources.WinGet
             Title = popApp.Name;
 
             // Set WinGet package properties
-            _appIcon = popApp.GetImagePng();
+            _appIcon ??= popApp.GetImagePng();
         }
 
-        public void Update(WinGetRun.Models.Manifest manifest)
+        public void Update(Locale locale)
         {
-            Guard.IsNotNull(manifest, nameof(manifest));
-            Manifest = manifest;
-            var installer = Manifest.Installers[0];
+            Guard.IsNotNull(locale, nameof(locale));
 
-            PackageUri = new Uri(installer.Url);
-            Website = Link.Create(Manifest.Homepage, ShortTitle + " website");
+            // Set base properties
+            WinGetId ??= locale.PackageIdentifier;
+            Urn ??= Urn.Parse($"urn:{WinGetHandler.NAMESPACE_WINGET}:{WinGetId}");
+            Title = locale.PackageName;
+            PublisherId = locale.PackageIdentifier.Split(new[] { '.' }, 2)[0];
+            DeveloperName = locale.Publisher;
+            Description = locale.Description;
+            Version = locale.PackageVersion;
+            Website = Link.Create(locale.PackageUrl, ShortTitle + " website");
+            PrivacyUri = Link.Create(locale.PrivacyUrl, ShortTitle + " privacy policy");
 
-            if (installer.InstallerType.HasValue)
-            {
-                Type = installer.InstallerType.Value.ToSDKInstallerType();
-            }
-            else if (manifest.InstallerType.HasValue)
-            {
-                Type = manifest.InstallerType.Value.ToSDKInstallerType();
-            }
-            else if (Enum.TryParse<InstallerType>(Path.GetExtension(PackageUri.ToString())[1..], true, out var type))
-            {
-                Type = type;
-            }
+            // Set WinGet properties
+            SupportUrl = Link.Create(locale.PublisherSupportUrl, DeveloperName + " support");
         }
 
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
+            if (!Status.IsAtLeast(PackageStatus.BasicDetails))
+                return null;
+
             // Find the package URI
-            PackageUri = Model.Versions.First(av => av.Version == Model.LatestVersion).Installers[0].ToUri();
-            Status = PackageStatus.DownloadReady;
+            await PopulatePackageUri();
+            if (!Status.IsAtLeast(PackageStatus.DownloadReady))
+                return null;
 
             // Download package
             await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
@@ -106,7 +108,6 @@ namespace FluentStore.Sources.WinGet
             DownloadItem = ((FileInfo)DownloadItem).CopyRename(Path.GetFileName(PackageUri.ToString()));
 
             WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageDownloadCompleted(this));
-            Status = PackageStatus.Downloaded;
             return DownloadItem;
         }
 
@@ -141,31 +142,23 @@ namespace FluentStore.Sources.WinGet
             Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
             bool isSuccess = false;
 
-            // Get installer for current architecture
-            var sysArch = Win32Helper.GetSystemArchitecture();
-            Installer = Manifest.Installers.Find(i => sysArch == i.Arch.ToSDKArch());
-            if (Installer == null)
-                Installer = Manifest.Installers.Find(i => i.Arch == WinGetRun.Enums.InstallerArchitecture.X86
-                    || i.Arch == WinGetRun.Enums.InstallerArchitecture.Neutral);
-            if (Installer == null)
-            {
-                string archStr = string.Join(", ", Manifest.Installers.Select(i => i.Arch));
-                throw new PlatformNotSupportedException($"Your computer's architecture is {sysArch}, which is not supported by this package. " +
-                    $"This package supports {archStr}.");
-            }
-
             switch (Type.Reduce())
             {
                 case InstallerType.Msix:
                     isSuccess = await PackagedInstallerHelper.Install(this);
                     var file = (FileInfo)DownloadItem;
-                    PackagedInstallerType = PackagedInstallerHelper.GetInstallerType(file);
-                    PackageFamilyName = PackagedInstallerHelper.GetPackageFamilyName(file, PackagedInstallerType.Value.HasFlag(InstallerType.Bundle));
+                    Type = PackagedInstallerHelper.GetInstallerType(file);
+                    PackageFamilyName = PackagedInstallerHelper.GetPackageFamilyName(file, Type.HasFlag(InstallerType.Bundle));
                     break;
 
                 default:
-                    var args = Installer.Switches?.Silent ?? Manifest.Switches?.Silent;
-                    isSuccess = await Win32Helper.Install(this, args);
+                    var args = Installer.InstallerSwitches?.Silent ?? Manifest.InstallerSwitches?.Silent;
+                    var successCodes = Installer.InstallerSuccessCodes ?? Manifest.InstallerSuccessCodes;
+                    var errorCodes = Installer.ExpectedReturnCodes ?? Manifest.ExpectedReturnCodes;
+
+                    isSuccess = await Win32Helper.Install(this, args,
+                        successCodes, errorCodes?.Select(ec => ec.InstallerReturnCode),
+                        GetInstallerErrorMessage);
                     break;
             }
 
@@ -184,14 +177,68 @@ namespace FluentStore.Sources.WinGet
 
         public override async Task LaunchAsync()
         {
-            switch (Installer.InstallerType ?? Manifest.InstallerType)
+            switch (Type.Reduce())
             {
-                case WinGetRun.Enums.InstallerType.Appx:
-                case WinGetRun.Enums.InstallerType.Msix:
+                case InstallerType.Msix:
                     Guard.IsTrue(HasPackageFamilyName, nameof(HasPackageFamilyName));
                     await PackagedInstallerHelper.Launch(PackageFamilyName);
                     break;
             }
+        }
+
+        private async Task PopulatePackageUri()
+        {
+            Manifest = await CommunityRepo.GetInstallerAsync(WinGetId, Version);
+
+            // Get installer for current architecture
+            var sysArch = Win32Helper.GetSystemArchitecture();
+            Installer = Manifest.Installers.Find(i => sysArch == i.Architecture.ToSDKArch());
+            if (Installer == null)
+                Installer = Manifest.Installers.Find(i => i.Architecture == InstallerArchitecture.X86
+                    || i.Architecture == InstallerArchitecture.Neutral);
+            if (Installer == null)
+            {
+                string archStr = string.Join(", ", Manifest.Installers.Select(i => i.Architecture));
+                throw new PlatformNotSupportedException($"Your computer's architecture is {sysArch}, which is not supported by this package. " +
+                    $"This package supports {archStr}.");
+            }
+
+            Type = Installer.InstallerType?.ToSDKInstallerType()
+                ?? Manifest.InstallerType?.ToSDKInstallerType()
+                ?? InstallerType.Unknown;
+
+            PackageUri = new(Installer.InstallerUrl);
+
+            Status = PackageStatus.DownloadReady;
+        }
+
+        private string GetInstallerErrorMessage(long code)
+        {
+            var errorCodes = Installer.ExpectedReturnCodes ?? Manifest.ExpectedReturnCodes;
+            var expectedReturnCode = errorCodes?.Find(erc => erc.InstallerReturnCode == code);
+            if (expectedReturnCode == null)
+                return $"Installer exited with code {code}.";
+
+            return expectedReturnCode.ReturnResponse switch
+            {
+                ExpectedReturnCodeReturnResponse.PackageInUse => "The package is currently in use.",
+                ExpectedReturnCodeReturnResponse.InstallInProgress => "Another install in already in progress.",
+                ExpectedReturnCodeReturnResponse.FileInUse => "Attempted to access a file being used by another program.",
+                ExpectedReturnCodeReturnResponse.MissingDependency => "A required dependency was missing.",
+                ExpectedReturnCodeReturnResponse.DiskFull => "The target drive is out of storage space.",
+                ExpectedReturnCodeReturnResponse.InsufficientMemory => "Your system is out of memory.",
+                ExpectedReturnCodeReturnResponse.NoNetwork => "An internet connection is required.",
+                ExpectedReturnCodeReturnResponse.ContactSupport => SupportUrl == null ? "Please contact support." : $"Please contact support at {SupportUrl.Uri}.",
+                ExpectedReturnCodeReturnResponse.RebootRequiredToFinish or
+                ExpectedReturnCodeReturnResponse.RebootRequiredForInstall => "Your computer needs to restart to complete installation.",
+                ExpectedReturnCodeReturnResponse.RebootInitiated => "Your computer is restarting.",
+                ExpectedReturnCodeReturnResponse.CancelledByUser => "Installation was cancelled.",
+                ExpectedReturnCodeReturnResponse.AlreadyInstalled => $"{Title} is already installed.",
+                ExpectedReturnCodeReturnResponse.Downgrade => $"A newer version of {Title} is already installed.",
+                ExpectedReturnCodeReturnResponse.BlockedByPolicy => $"Installation of {Title} was blocked by an adminitrator policy.",
+
+                _ => $"An unknown error occurred: {expectedReturnCode.ReturnResponse}."
+            };
         }
 
         private string _WinGetId;
@@ -209,33 +256,25 @@ namespace FluentStore.Sources.WinGet
         }
         public bool HasPackageFamilyName => PackageFamilyName != null;
 
-        private InstallerType? _PackagedInstallerType;
-        public InstallerType? PackagedInstallerType
-        {
-            get => _PackagedInstallerType;
-            set => SetProperty(ref _PackagedInstallerType, value);
-        }
-        public bool HasPackagedInstallerType => PackagedInstallerType == null;
-
-        private string _PackageId;
-        public string PackageId
-        {
-            get => _PackageId;
-            set => SetProperty(ref _PackageId, value);
-        }
-
-        private WinGetRun.Models.Manifest _Manifest;
-        public WinGetRun.Models.Manifest Manifest
+        private InstallerManifest _Manifest;
+        public InstallerManifest Manifest
         {
             get => _Manifest;
             set => SetProperty(ref _Manifest, value);
         }
 
-        private WinGetRun.Models.Installer _Installer;
-        public WinGetRun.Models.Installer Installer
+        private Installer _Installer;
+        public Installer Installer
         {
             get => _Installer;
             set => SetProperty(ref _Installer, value);
+        }
+
+        private Link _SupportUrl;
+        public Link SupportUrl
+        {
+            get => _SupportUrl;
+            set => SetProperty(ref _SupportUrl, value);
         }
     }
 }

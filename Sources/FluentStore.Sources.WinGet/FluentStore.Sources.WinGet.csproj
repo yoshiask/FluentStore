@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <ProjectReference Include="..\..\API\WinGetRun\WinGetRun.csproj" />
         <ProjectReference Include="..\..\API\Winstall\Winstall.csproj" />
         <ProjectReference Include="..\..\FluentStore.SDK\FluentStore.SDK.csproj" />
     </ItemGroup>

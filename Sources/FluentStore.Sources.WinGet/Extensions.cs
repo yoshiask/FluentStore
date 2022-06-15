@@ -1,39 +1,42 @@
 ﻿using FluentStore.SDK.Models;
 
+using WinstallerArchitecture = Winstall.Models.Manifest.Enums.InstallerArchitecture;
+using WinstallerType = Winstall.Enums.InstallerType;
+
 namespace FluentStore.Sources.WinGet
 {
     public static class Extensions
     {
-        public static Architecture ToSDKArch(this WinGetRun.Enums.InstallerArchitecture wgArch)
+        public static Architecture ToSDKArch(this WinstallerArchitecture wgArch)
         {
             return wgArch switch
             {
-                WinGetRun.Enums.InstallerArchitecture.Neutral => Architecture.Neutral,
-                WinGetRun.Enums.InstallerArchitecture.X86 => Architecture.x86,
-                WinGetRun.Enums.InstallerArchitecture.X64 => Architecture.x64,
-                WinGetRun.Enums.InstallerArchitecture.Arm => Architecture.Arm32,
-                WinGetRun.Enums.InstallerArchitecture.Arm64 => Architecture.Arm64,
+                WinstallerArchitecture.Neutral => Architecture.Neutral,
+                WinstallerArchitecture.X86 => Architecture.x86,
+                WinstallerArchitecture.X64 => Architecture.x64,
+                WinstallerArchitecture.Arm => Architecture.Arm32,
+                WinstallerArchitecture.Arm64 => Architecture.Arm64,
 
                 _ => Architecture.Unknown,
             };
         }
 
-        public static InstallerType ToSDKInstallerType(this WinGetRun.Enums.InstallerType type)
+        public static InstallerType ToSDKInstallerType(this WinstallerType type)
         {
             return type switch
             {
-                WinGetRun.Enums.InstallerType.Msix => InstallerType.Msix,
-                WinGetRun.Enums.InstallerType.Msi => InstallerType.Msi,
-                WinGetRun.Enums.InstallerType.Appx => InstallerType.AppX,
-                WinGetRun.Enums.InstallerType.Exe => InstallerType.Exe,
-                WinGetRun.Enums.InstallerType.Zip => InstallerType.Zip,
-                WinGetRun.Enums.InstallerType.Inno => InstallerType.Inno,
-                WinGetRun.Enums.InstallerType.Nullsoft => InstallerType.Nullsoft,
-                WinGetRun.Enums.InstallerType.Wix => InstallerType.Wix,
-                WinGetRun.Enums.InstallerType.Burn => InstallerType.Burn,
+                WinstallerType.Msix => InstallerType.Msix,
+                WinstallerType.Msi => InstallerType.Msi,
+                WinstallerType.Appx => InstallerType.AppX,
+                WinstallerType.Exe => InstallerType.Exe,
+                WinstallerType.Zip => InstallerType.Zip,
+                WinstallerType.Inno => InstallerType.Inno,
+                WinstallerType.Nullsoft => InstallerType.Nullsoft,
+                WinstallerType.Wix => InstallerType.Wix,
+                WinstallerType.Burn => InstallerType.Burn,
 
                 // we don't do that here
-                WinGetRun.Enums.InstallerType.Pwa => InstallerType.Unknown,
+                WinstallerType.Pwa => InstallerType.Unknown,
                 _ => InstallerType.Unknown,
             };
         }
