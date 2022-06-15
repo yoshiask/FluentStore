@@ -100,7 +100,8 @@ namespace FluentStore.SDK
             return (lhs is null && rhs is null) || lhs.Equals(rhs);
         }
 
-        public static bool operator !=(PackageBase lhs, PackageBase rhs) => !(lhs == rhs);
+        public static bool operator !=(PackageBase lhs, PackageBase rhs)
+            => (lhs is null ^ rhs is null) && !lhs.Equals(rhs);
 
         public override int GetHashCode() => Urn.GetHashCode();
 
