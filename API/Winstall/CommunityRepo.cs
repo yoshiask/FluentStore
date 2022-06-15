@@ -24,14 +24,21 @@ public static class CommunityRepo
         return GetAndDeserializeAsync<InstallerManifest>(id, version, "installer", cancellationToken);
     }
 
-    public static Task<InstallerManifest> GetLocaleAsync(string id, string version, string locale, CancellationToken cancellationToken = default)
+    public static Task<Locale> GetLocaleAsync(string id, string version, string locale, CancellationToken cancellationToken = default)
     {
-        return GetAndDeserializeAsync<InstallerManifest>(id, version, $"locale.{locale}", cancellationToken);
+        return GetAndDeserializeAsync<Locale>(id, version, $"locale.{locale}", cancellationToken);
     }
 
-    public static Task<InstallerManifest> GetLocaleAsync(string id, string version, CultureInfo culture, CancellationToken cancellationToken = default)
+    public static Task<Locale> GetLocaleAsync(string id, string version, CultureInfo culture, CancellationToken cancellationToken = default)
     {
         return GetLocaleAsync(id, version, culture.ToString(), cancellationToken);
+    }
+
+    public static async Task<DefaultLocale> GetDefaultLocaleAsync(string id, string version, CancellationToken cancellationToken = default)
+    {
+        var manifest = await GetManifestAsync(id, version, cancellationToken);
+        return await GetAndDeserializeAsync<DefaultLocale>(id, version,
+            $"locale.{manifest.DefaultLocale}", cancellationToken);
     }
 
     private static async Task<TManifest> GetAndDeserializeAsync<TManifest>(string id, string version, string manifestType = null, CancellationToken cancellationToken = default)
