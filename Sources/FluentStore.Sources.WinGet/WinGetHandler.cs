@@ -5,16 +5,16 @@ using CommunityToolkit.Diagnostics;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using WinGetRun;
-using WinGetRun.Models;
 using FluentStore.SDK;
 using FluentStore.Services;
+using Winstall;
+using Winstall.Models;
 
 namespace FluentStore.Sources.WinGet
 {
     public class WinGetHandler : PackageHandlerBase
     {
-        private readonly WinGetApi WinGetApi = new();
+        private readonly WinstallApi _api = new();
 
         public const string NAMESPACE_WINGET = "winget";
 
@@ -33,9 +33,12 @@ namespace FluentStore.Sources.WinGet
         public override async Task<List<PackageBase>> GetFeaturedPackagesAsync()
         {
             var packages = new List<PackageBase>();
-            var featured = await WinGetApi.GetFeatured();
-            foreach (Package wgPackage in featured)
-                packages.Add(new WinGetPackage(this, wgPackage));
+            var index = await _api.GetIndexAsync();
+            foreach (PopularApp wgApp in index.Popular)
+                packages.Add(new WinGetPackage(this, popApp: wgApp)
+                {
+                    Status = PackageStatus.BasicDetails
+                });
 
             return packages;
         }
@@ -44,61 +47,61 @@ namespace FluentStore.Sources.WinGet
         {
             Guard.IsEqualTo(packageUrn.NamespaceIdentifier, NAMESPACE_WINGET, nameof(packageUrn));
 
-            var package = await WinGetApi.GetPackage(packageUrn.GetContent<NamespaceSpecificString>().UnEscapedValue);
-            return new WinGetPackage(this, package);
+            var result = await _api.GetAppAsync(packageUrn.GetContent<NamespaceSpecificString>().UnEscapedValue);
+            return new WinGetPackage(this, result.App)
+            {
+                Status = PackageStatus.Details
+            };
         }
 
-        public override async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
+        public override Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
         {
-            var packages = new List<PackageBase>();
-            var pageOptions = new PaginationOptions
-            {
-                Take = 3
-            };
-            var firstPage = await WinGetApi.SearchPackages(query: query, pageOptions: pageOptions);
-            foreach (Package wgPackage in firstPage.Packages)
-                packages.Add(new WinGetPackage(this, wgPackage));
-
-            return packages;
+            return SearchAsync(query);
         }
 
         public override async Task<List<PackageBase>> SearchAsync(string query)
         {
             var packages = new List<PackageBase>();
-            var pageOptions = new PaginationOptions
-            {
-                Page = 0
-            };
 
-            for (int p = 0; p < 3; p++)
-            {
-                pageOptions.Page = p;
-                var page = await WinGetApi.SearchPackages(query: query, pageOptions: pageOptions);
-                foreach (Package wgPackage in page.Packages)
-                    packages.Add(new WinGetPackage(this, wgPackage));
-            }
+            var results = await _api.SearchAppsAsync(query);
+            foreach (App wgApp in results)
+                packages.Add(new WinGetPackage(this, wgApp));
 
             return packages;
         }
 
         public override ImageBase GetImage()
         {
-            return new TextImage
+            return new FileImage
             {
-                Text = "\uE756",
-                FontFamily = "Segoe MDL2 Assets"
+                Url = Constants.WINSTALL_HOST.AppendPathSegments("favicon.ico")
             };
         }
 
         public override async Task<PackageBase> GetPackageFromUrl(Url url)
         {
+            string id = null;
             Regex rx = new(@"^https:\/\/((www\.)?github|raw\.githubusercontent)\.com\/microsoft\/winget-pkgs(\/(blob|tree))?\/master\/manifests\/[0-9a-z]\/(?<publisherId>[^\/\s]+)\/(?<packageId>[^\/\s]+)",
                 RegexOptions.IgnoreCase);
-            Match m = rx.Match(url.ToString());
-            if (!m.Success)
-                return null;
+            Match m = rx.Match(url);
+            if (m.Success)
+            {
+                id = $"{m.Groups["publisherId"]}.{m.Groups["packageId"]}";
+                goto success;
+            }
 
-            return await GetPackage(Urn.Parse($"urn:{NAMESPACE_WINGET}:{m.Groups["publisherId"]}.{m.Groups["packageId"]}"));
+            rx = new(@"^https?://(www\.)?winstall\.app/apps/(?<id>[^/\s]+)\??", RegexOptions.IgnoreCase);
+            m = rx.Match(url);
+            if (m.Success)
+            {
+                id = m.Groups["id"].Value;
+                goto success;
+            }
+
+            if (id == null) return null;
+
+        success:
+            return await GetPackage(new Urn(NAMESPACE_WINGET, new RawNamespaceSpecificString(id)));
         }
 
         public override Url GetUrlFromPackage(PackageBase package)
@@ -106,13 +109,11 @@ namespace FluentStore.Sources.WinGet
             if (package is not WinGetPackage wgPackage)
                 throw new System.ArgumentException();
 
-            char sortChar = wgPackage.PublisherId[0];
-            string url = $"https://github.com/microsoft/winget-pkgs/tree/master/manifests/{sortChar}/{wgPackage.PublisherId}/{wgPackage.PublisherId}";
-
-            if (wgPackage.Version != null)
-                url += "/" + wgPackage.Version;
+            Url url = Constants.WINSTALL_HOST.AppendPathSegments("apps", wgPackage.WinGetId);
 
             return url;
         }
+
+        internal WinstallApi GetApiClient() => _api;
     }
 }

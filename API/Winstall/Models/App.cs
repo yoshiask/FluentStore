@@ -61,6 +61,12 @@ public class App : IFuseable
     [JsonProperty("homepage")]
     public string? HomepageUrl { get; set; }
 
+    public (string PublisherId, string PackageId) GetPublisherAndPackageIds()
+    {
+        string[] parts = Id.Split(new[] { '.' }, 2);
+        return (parts[0], parts[1]);
+    }
+
     /// <summary>
     /// The minumum Windows version required to run this app.
     /// </summary>

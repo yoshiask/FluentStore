@@ -9,44 +9,66 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WinGetRun;
-using WinGetRun.Models;
+using Winstall;
+using Winstall.Models;
 using System.IO;
 using FluentStore.SDK;
 using FluentStore.SDK.Models;
 
 namespace FluentStore.Sources.WinGet
 {
-    public class WinGetPackage : PackageBase<Package>
+    public class WinGetPackage : PackageBase<App>
     {
-        private readonly WinGetApi WinGetApi = Ioc.Default.GetService<WinGetApi>();
+        private readonly WinstallApi _api;
+        private string _appIcon;
 
-        public WinGetPackage(PackageHandlerBase packageHandler, Package pack = null) : base(packageHandler)
+        public WinGetPackage(PackageHandlerBase packageHandler, App pack = null, PopularApp popApp = null) : base(packageHandler)
         {
+            if (packageHandler is not WinGetHandler winGetHandler)
+                throw new ArgumentException($"Source handler must have an instance of {typeof(WinstallApi)}", nameof(packageHandler));
+            _api = winGetHandler.GetApiClient();
+
+            if (popApp != null)
+                Update(popApp);
             if (pack != null)
                 Update(pack);
         }
 
-        public void Update(Package pack)
+        public void Update(App pack)
         {
             Guard.IsNotNull(pack, nameof(pack));
             Model = pack;
 
             // Set base properties
-            Urn = Urn.Parse($"urn:{WinGetHandler.NAMESPACE_WINGET}:{Model.Id}");
-            Title = pack.Latest.Name;
+            WinGetId = Model.Id;
+            Urn = Urn.Parse($"urn:{WinGetHandler.NAMESPACE_WINGET}:{WinGetId}");
+            Title = pack.Name;
             PublisherId = pack.GetPublisherAndPackageIds().PublisherId;
-            DeveloperName = pack.Latest.Publisher;
-            ReleaseDate = pack.CreatedAt;
-            Description = pack.Latest.Description;
-            Version = pack.Versions[^1];
-            Website = Link.Create(pack.Latest.Homepage, ShortTitle + " website");
+            DeveloperName = pack.Publisher;
+            ReleaseDate = pack.UpdatedAt;
+            Description = pack.Description;
+            Version = pack.LatestVersion;
+            Website = Link.Create(pack.HomepageUrl, ShortTitle + " website");
 
             // Set WinGet package properties
             PackageId = pack.GetPublisherAndPackageIds().PackageId;
+            _appIcon = pack.GetImagePng();
         }
 
-        public void Update(Manifest manifest)
+        public void Update(PopularApp popApp)
+        {
+            Guard.IsNotNull(popApp, nameof(popApp));
+
+            // Set base properties
+            Urn = Urn.Parse($"urn:{WinGetHandler.NAMESPACE_WINGET}:{popApp.Id}");
+            WinGetId = popApp.Id;
+            Title = popApp.Name;
+
+            // Set WinGet package properties
+            _appIcon = popApp.GetImagePng();
+        }
+
+        public void Update(WinGetRun.Models.Manifest manifest)
         {
             Guard.IsNotNull(manifest, nameof(manifest));
             Manifest = manifest;
@@ -72,9 +94,8 @@ namespace FluentStore.Sources.WinGet
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
             // Find the package URI
-            await PopulatePackageUri();
-            if (!Status.IsAtLeast(PackageStatus.DownloadReady))
-                return null;
+            PackageUri = Model.Versions.First(av => av.Version == Model.LatestVersion).Installers[0].ToUri();
+            Status = PackageStatus.DownloadReady;
 
             // Download package
             await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
@@ -89,36 +110,19 @@ namespace FluentStore.Sources.WinGet
             return DownloadItem;
         }
 
-        private async Task PopulatePackageUri()
-        {
-            WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
-            try
-            {
-                if (PackageUri == null)
-                    Update(await WinGetApi.GetManifest(Urn.GetContent<NamespaceSpecificString>().UnEscapedValue, Version));
-
-                WeakReferenceMessenger.Default.Send(new SuccessMessage(null, this, SuccessType.PackageFetchCompleted));
-                Status = PackageStatus.DownloadReady;
-            }
-            catch (Exception ex)
-            {
-                WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, this, ErrorType.PackageFetchFailed));
-            }
-        }
-
         public override async Task<ImageBase> CacheAppIcon()
         {
             ImageBase icon = null;
-            if (Model?.IconUrl != null)
+            if (_appIcon != null)
             {
                 icon = new FileImage
                 {
-                    Url = Model.IconUrl,
+                    Url = _appIcon,
                     ImageType = ImageType.Logo
                 };
             }
 
-            return icon ?? TextImage.CreateFromName(Model?.Latest?.Name ?? Title);
+            return icon ?? TextImage.CreateFromName(Title);
         }
 
         public override async Task<ImageBase> CacheHeroImage()
@@ -190,6 +194,13 @@ namespace FluentStore.Sources.WinGet
             }
         }
 
+        private string _WinGetId;
+        public string WinGetId
+        {
+            get => _WinGetId;
+            set => SetProperty(ref _WinGetId, value);
+        }
+
         private string _PackageFamilyName;
         public string PackageFamilyName
         {
@@ -213,15 +224,15 @@ namespace FluentStore.Sources.WinGet
             set => SetProperty(ref _PackageId, value);
         }
 
-        private Manifest _Manifest;
-        public Manifest Manifest
+        private WinGetRun.Models.Manifest _Manifest;
+        public WinGetRun.Models.Manifest Manifest
         {
             get => _Manifest;
             set => SetProperty(ref _Manifest, value);
         }
 
-        private Installer _Installer;
-        public Installer Installer
+        private WinGetRun.Models.Installer _Installer;
+        public WinGetRun.Models.Installer Installer
         {
             get => _Installer;
             set => SetProperty(ref _Installer, value);
