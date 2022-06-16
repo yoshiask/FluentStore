@@ -17,7 +17,7 @@ namespace FluentStoreAPI.Models
 
                 var listInfo = fieldName.Split('-');
                 var version = Version.Parse(listInfo[0]);
-                string arch = listInfo[1];
+                string arch = listInfo.Length > 1 ? listInfo[1] : null;
 
                 var plugins = ((IEnumerable<object>)document.TransformField(field))?.OfType<string>()
                     ?? Array.Empty<string>();
