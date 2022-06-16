@@ -10,12 +10,8 @@
     Background="Transparent">
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
 
-        <NavigationView x:Name="MainNav" PaneDisplayMode="Top" Grid.Row="1" IsTitleBarAutoPaddingEnabled="False"
+        <NavigationView x:Name="MainNav" PaneDisplayMode="Top" IsTitleBarAutoPaddingEnabled="False"
                         SelectionChanged="NavigationView_SelectionChanged">
 
             <Grid>
