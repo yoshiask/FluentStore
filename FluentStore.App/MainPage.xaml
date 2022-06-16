@@ -50,12 +50,6 @@
                     <VisualState.Setters>
                         <Setter Target="MainNav.PaneDisplayMode" Value="LeftCompact"/>
                         <Setter Target="MainNav.IsTitleBarAutoPaddingEnabled" Value="False"/>
-                        <Setter Target="SignInButton.CornerRadius" Value="0"/>
-                        <Setter Target="SignInButtonContent.Spacing" Value="12"/>
-                        <Setter Target="SignInButtonSymbol.Margin" Value="4,0,0,0"/>
-                        <Setter Target="UserButton.CornerRadius" Value="0"/>
-                        <Setter Target="UserButtonSymbol.Margin" Value="4,0,0,0"/>
-                        <Setter Target="UserButtonDisplayName.Visibility" Value="Visible"/>
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
