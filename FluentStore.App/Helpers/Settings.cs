@@ -106,9 +106,10 @@ namespace FluentStore.Helpers
         public async Task InstallDefaultPlugins(bool install = true, bool overwrite = false)
         {
             var appVersion = Package.Current.Id.Version.ToVersion();
+            var arch = Win32Helper.GetSystemArchitecture().ToString();
             var fsApi = CommunityToolkit.Mvvm.DependencyInjection.Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
             
-            var defaults = await fsApi.GetDefaultPlugins(appVersion);
+            var defaults = await fsApi.GetDefaultPlugins(appVersion, arch);
             await SDK.PluginLoader.InstallDefaultPlugins(this, defaults, install, overwrite);
         }
 

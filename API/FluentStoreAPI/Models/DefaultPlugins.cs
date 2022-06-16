@@ -7,34 +7,37 @@ namespace FluentStoreAPI.Models
 {
     public class DefaultPlugins
     {
-        public DefaultPlugins(Document document)
+        internal DefaultPlugins(Document document)
         {
             PluginLists = new(document.Fields.Count);
 
             foreach (var fieldName in document.Fields.Keys)
             {
                 var field = document.Fields[fieldName];
-                var version = Version.Parse(fieldName);
+
+                var listInfo = fieldName.Split('-');
+                var version = Version.Parse(listInfo[0]);
+                string arch = listInfo[1];
+
                 var plugins = ((IEnumerable<object>)document.TransformField(field))?.OfType<string>()
                     ?? Array.Empty<string>();
-                PluginLists.Add(version, plugins);
+                PluginLists.Add((version, arch, plugins));
             }
         }
 
-        Dictionary<Version, IEnumerable<string>> PluginLists { get; }
+        List<(Version Version, string Arch, IEnumerable<string> Urls)> PluginLists { get; }
 
-        public IEnumerable<string> GetDefaultPluginsForVersion(Version appVersion)
+        public IEnumerable<string> GetDefaultPluginsForVersion(Version appVersion, string arch)
         {
-            var curList = PluginLists.First();
-            foreach (var list in PluginLists)
+            var curEntry = PluginLists.First();
+            foreach (var entry in PluginLists)
             {
-                if (list.Key > appVersion)
-                    continue;
-
-                if (list.Key > curList.Key)
-                    curList = list;
+                if (entry.Arch == arch
+                    && entry.Version <= appVersion
+                    && entry.Version > curEntry.Version)
+                    curEntry = entry;
             }
-            return curList.Value;
+            return curEntry.Urls;
         }
     }
 }
