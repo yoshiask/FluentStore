@@ -18,70 +18,73 @@ namespace FluentStore.ViewModels
     {
         public HomeViewModel()
         {
-            LoadFeaturedCommand = new AsyncRelayCommand(LoadFeaturedAsync);
+            LoadAllFeaturedCommand = new AsyncRelayCommand(LoadAllFeaturedAsync);
         }
 
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
+        private readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
 
         private void CarouselItems_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             ShowCarousel = CarouselItems.Count > 0;
         }
 
-        public async Task LoadFeaturedAsync()
+        public async Task LoadAllFeaturedAsync()
         {
+            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+
             try
             {
-                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+                await Task.WhenAll(LoadCarouselAsync(), LoadFeaturedAsync());
 
-                var featured = await FSApi.GetHomePageFeaturedAsync(Windows.ApplicationModel.Package.Current.Id.Version.ToVersion());
-                CarouselItems.CollectionChanged += CarouselItems_CollectionChanged;
-                CarouselItems.Clear();
-
-                for (int i = 0; i < featured.Carousel.Count; i++)
-                {
-                    try
-                    {
-                        Urn packageUrn = Urn.Parse(featured.Carousel[i]);
-                        var package = await PackageService.GetPackageAsync(packageUrn);
-                        CarouselItems.Add(new PackageViewModel(package));
-                        if (i == 0)
-                            SelectedCarouselItemIndex = i;
-                    }
-                    catch (System.Exception ex)
-                    {
-                        var logger = Ioc.Default.GetRequiredService<LoggerService>();
-                        logger.Warn(ex, ex.Message);
-                    }
-                }
-                CarouselItems.CollectionChanged -= CarouselItems_CollectionChanged;
-
-                // Load featured packages from other sources
-                FeaturedPackages = new ObservableCollection<HandlerPackageListPair>();
-                await foreach (HandlerPackageListPair pair in PackageService.GetFeaturedPackagesAsync())
-                    FeaturedPackages.Add(pair);
-            }
-            catch (Flurl.Http.FlurlHttpException ex)
-            {
-                NavService.ShowHttpErrorPage(ex);
+                WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
             }
             catch (System.Exception ex)
             {
                 var logger = Ioc.Default.GetRequiredService<LoggerService>();
-                logger.Warn(ex, ex.Message);
+                logger.UnhandledException(ex, ex.Message);
             }
-
-            WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
         }
 
-        private readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
-
-        private IAsyncRelayCommand _LoadFeaturedCommand;
-        public IAsyncRelayCommand LoadFeaturedCommand
+        public async Task LoadFeaturedAsync()
         {
-            get => _LoadFeaturedCommand;
-            set => SetProperty(ref _LoadFeaturedCommand, value);
+            // Load featured packages from other sources
+            FeaturedPackages = new ObservableCollection<HandlerPackageListPair>();
+            await foreach (HandlerPackageListPair pair in PackageService.GetFeaturedPackagesAsync())
+                FeaturedPackages.Add(pair);
+        }
+
+        public async Task LoadCarouselAsync()
+        {
+            var featured = await FSApi.GetHomePageFeaturedAsync(Windows.ApplicationModel.Package.Current.Id.Version.ToVersion());
+            CarouselItems.CollectionChanged += CarouselItems_CollectionChanged;
+            CarouselItems.Clear();
+
+            for (int i = 0; i < featured.Carousel.Count; i++)
+            {
+                try
+                {
+                    Urn packageUrn = Urn.Parse(featured.Carousel[i]);
+                    var package = await PackageService.GetPackageAsync(packageUrn);
+                    CarouselItems.Add(new PackageViewModel(package));
+                    if (i == 0)
+                        SelectedCarouselItemIndex = i;
+                }
+                catch (System.Exception ex)
+                {
+                    var logger = Ioc.Default.GetRequiredService<LoggerService>();
+                    logger.Warn(ex, ex.Message);
+                }
+            }
+            CarouselItems.CollectionChanged -= CarouselItems_CollectionChanged;
+        }
+
+        private IAsyncRelayCommand _LoadAllFeaturedCommand;
+        public IAsyncRelayCommand LoadAllFeaturedCommand
+        {
+            get => _LoadAllFeaturedCommand;
+            set => SetProperty(ref _LoadAllFeaturedCommand, value);
         }
 
         private bool _ShowCarousel = true;

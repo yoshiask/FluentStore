@@ -17,7 +17,7 @@
 
     <interactivity:Interaction.Behaviors>
         <core:EventTriggerBehavior EventName="Loading">
-            <core:InvokeCommandAction Command="{x:Bind ViewModel.LoadFeaturedCommand}"/>
+            <core:InvokeCommandAction Command="{x:Bind ViewModel.LoadAllFeaturedCommand}"/>
         </core:EventTriggerBehavior>
     </interactivity:Interaction.Behaviors>
     
