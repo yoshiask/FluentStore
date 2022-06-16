@@ -14,7 +14,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
-		<ProjectReference Include="..\WinGetRun\WinGetRun.csproj" />
+		<ProjectReference Include="..\Winstall\Winstall.csproj" />
 	</ItemGroup>
 
 </Project>

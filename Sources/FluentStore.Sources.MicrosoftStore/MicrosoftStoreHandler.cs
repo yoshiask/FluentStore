@@ -11,12 +11,14 @@ using FluentStore.SDK;
 using FluentStore.SDK.Models;
 using FluentStore.SDK.Helpers;
 using FluentStore.Services;
+using Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic;
 
 namespace FluentStore.Sources.MicrosoftStore
 {
     public class MicrosoftStoreHandler : PackageHandlerBase<Users.MicrosoftAccountHandler>
     {
-        private readonly StorefrontApi StorefrontApi = new();
+        internal readonly StorefrontApi StorefrontApi = new();
+        internal readonly StoreEdgeFDApi StoreEdgeFDApi = new();
 
         public const string NAMESPACE_MSSTORE = "microsoft-store";
         public const string NAMESPACE_COLLECTION = "microsoft-store-collection";
@@ -53,28 +55,39 @@ namespace FluentStore.Sources.MicrosoftStore
             var packages = new List<PackageBase>();
 
             var page = (await StorefrontApi.Search(query, "apps", GetSystemOptions())).Payload;
-            packages.AddRange(
-                page.SearchResults.Select(card => new MicrosoftStorePackage(this, card) { Status = PackageStatus.BasicDetails })
-            );
+            AddToResults();
 
             for (int p = 1; p < 3 && page.NextUri != null; p++)
             {
                 page = (await StorefrontApi.NextSearchPage(page)).Payload;
-                packages.AddRange(
-                    page.SearchResults.Select(card => new MicrosoftStorePackage(this, card) { Status = PackageStatus.BasicDetails })
-                );
+                AddToResults();
             }
 
             return packages;
+
+            void AddToResults()
+            {
+                foreach (var card in page.SearchResults)
+                {
+                    var package = MicrosoftStorePackageBase.Create(this, card.ProductId, card);
+                    package.Status = PackageStatus.BasicDetails;
+
+                    packages.Add(package);
+                }
+            }
         }
 
         public override async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
         {
             var suggs = await StorefrontApi.GetSearchSuggestions(query, GetSystemOptions());
             var packages = new List<PackageBase>();
-            packages.AddRange(
-                suggs.Payload.AssetSuggestions.Select(summ => new MicrosoftStorePackage(this, summary: summ) { Status = PackageStatus.BasicDetails })
-            );
+            foreach (var summ in suggs.Payload.AssetSuggestions)
+            {
+                var package = MicrosoftStorePackageBase.Create(this, summ.ProductId, summary: summ);
+                package.Status = PackageStatus.BasicDetails;
+
+                packages.Add(package);
+            }
 
             return packages;
         }
@@ -163,7 +176,7 @@ namespace FluentStore.Sources.MicrosoftStore
             return options;
         }
 
-        private async Task<MicrosoftStorePackage> GetPackageFromPage(string catalogId, CatalogIdType idType)
+        private async Task<MicrosoftStorePackageBase> GetPackageFromPage(string catalogId, CatalogIdType idType)
         {
             var page = await StorefrontApi.GetPage(catalogId, idType, GetSystemOptions());
 
@@ -178,7 +191,7 @@ namespace FluentStore.Sources.MicrosoftStore
                 return null;
             }
 
-            var package = new MicrosoftStorePackage(this, product: details);
+            MicrosoftStorePackageBase package = MicrosoftStorePackageBase.Create(this, catalogId, product: details);
             if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.RatingSummary>(out var ratingSummary))
             {
                 package.Update(ratingSummary);

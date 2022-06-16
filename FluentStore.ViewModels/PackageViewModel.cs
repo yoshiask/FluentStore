@@ -24,10 +24,13 @@ namespace FluentStore.ViewModels
         public PackageViewModel(PackageBase package) : this()
         {
             Package = package;
+
+            UpdateImages();
         }
 
         private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
         public readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
+        private readonly LoggerService Logger = Ioc.Default.GetService<LoggerService>();
 
         private PackageBase _Package;
         public PackageBase Package
@@ -38,10 +41,11 @@ namespace FluentStore.ViewModels
                 SetProperty(ref _Package, value);
 
                 // Reset cached properties
-                AppIcon = null;
-                HeroImage = null;
-                Screenshots = null;
-                DisplayProperties = null;
+                //AppIcon = null;
+                //HeroImage = null;
+                //Screenshots = null;
+                //DisplayProperties = null;
+                UpdateImages();
                 DisplayAdditionalInformationProperties = null;
 
                 // Update derived properties
@@ -110,48 +114,21 @@ namespace FluentStore.ViewModels
         private ImageBase _AppIcon;
         public ImageBase AppIcon
         {
-            get
-            {
-                if (_AppIcon == null && Package != null)
-                {
-                    // Yes, this will block the UI thread. Hopefully it's not for too long.
-                    AppIcon = Package?.GetAppIcon()?.Result;
-                }
-
-                return _AppIcon;
-            }
+            get => _AppIcon;
             set => SetProperty(ref _AppIcon, value);
         }
 
         private ImageBase _HeroImage;
         public ImageBase HeroImage
         {
-            get
-            {
-                if (_HeroImage == null)
-                {
-                    // Yes, this will block the UI thread. Hopefully it's not for too long.
-                    HeroImage = Package?.GetHeroImage()?.Result;
-                }
-
-                return _HeroImage;
-            }
+            get => _HeroImage;
             set => SetProperty(ref _HeroImage, value);
         }
 
         private List<ImageBase> _Screenshots;
         public List<ImageBase> Screenshots
         {
-            get
-            {
-                if (_Screenshots == null)
-                {
-                    // Yes, this will block the UI thread. Hopefully it's not for too long.
-                    Screenshots = Package?.GetScreenshots()?.Result;
-                }
-
-                return _Screenshots;
-            }
+            get => _Screenshots;
             set => SetProperty(ref _Screenshots, value);
         }
 
@@ -300,5 +277,34 @@ namespace FluentStore.ViewModels
         public static implicit operator PackageViewModel(PackageBase pb) => new(pb);
 
         public override string ToString() => Package.ToString();
+
+        private void HandleFaultedTask(Task task)
+        {
+            if (!task.IsFaulted) return;
+            Logger?.UnhandledException(task.Exception, string.Empty);
+        }
+
+        private void UpdateImages()
+        {
+            // Cache images in the background
+            var context = System.Threading.SynchronizationContext.Current;
+            Package.GetAppIcon().ContinueWith(task =>
+            {
+                HandleFaultedTask(task);
+                context.Post(img => AppIcon = (ImageBase)img, task.Result);
+            });
+
+            Package.GetHeroImage().ContinueWith(task =>
+            {
+                HandleFaultedTask(task);
+                context.Post(img => HeroImage = (ImageBase)img, task.Result);
+            });
+
+            Package.GetScreenshots().ContinueWith(task =>
+            {
+                HandleFaultedTask(task);
+                context.Post(img => Screenshots = (List<ImageBase>)img, task.Result);
+            });
+        }
     }
 }

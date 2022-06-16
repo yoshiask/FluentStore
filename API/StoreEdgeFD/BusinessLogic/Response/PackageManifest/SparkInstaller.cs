@@ -1,5 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System;
+using Winstall.Enums;
+using Winstall.Models.Manifest;
+using Winstall.Models.Manifest.Enums;
 
 namespace Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.PackageManifest
 {
@@ -9,9 +12,9 @@ namespace Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.Pa
         public string InstallerUrl { get; set; }
         public string InstallerLocale { get; set; }
         public string MinimumOSVersion { get; set; }
-        public Switches? InstallerSwitches { get; set; }
-        public WinGetRun.Enums.InstallerArchitecture Architecture { get; set; }
-        public WinGetRun.Enums.InstallerType InstallerType { get; set; }
+        public InstallerSwitches? InstallerSwitches { get; set; }
+        public InstallerArchitecture Architecture { get; set; }
+        public InstallerType InstallerType { get; set; }
         public Markets Markets { get; set; }
 
         [JsonIgnore]
@@ -30,20 +33,18 @@ namespace Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.Pa
             }
         }
 
-        public WinGetRun.Models.Installer ToWinGetRunInstaller()
+        public Installer ToWinstaller()
         {
             return new()
             {
-                Arch = Architecture,
+                Architecture = Architecture,
                 InstallerType = InstallerType,
-                Language = InstallerLocale,
-                Sha256 = InstallerSha256,
+                InstallerLocale = InstallerLocale,
+                InstallerSha256 = InstallerSha256,
                 SignatureSha256 = InstallerSha256,
-                Switches = InstallerSwitches,
-                Url = InstallerUrl,
+                InstallerSwitches = InstallerSwitches,
+                InstallerUrl = InstallerUrl,
             };
         }
     }
-
-    public class Switches : WinGetRun.Models.Switches { }
 }

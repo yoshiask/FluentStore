@@ -192,12 +192,12 @@ namespace FluentStore
 
             formattedException += "---------------------------------------";
 
+            Logger?.UnhandledException(ex, ex.Message);
+
 #if DEBUG
             System.Diagnostics.Debugger.Launch();
             System.Diagnostics.Debugger.Break(); // Please check "Output Window" for exception details (View -> Output Window) (CTRL + ALT + O)
 #endif
-
-            Logger?.UnhandledException(ex, ex.Message);
 
             if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
                 return;

@@ -16,21 +16,16 @@ using FluentStore.SDK;
 using FluentStore.SDK.Models;
 using Winstall.Models.Manifest;
 using Winstall.Models.Manifest.Enums;
-using CommunityToolkit.Mvvm.ComponentModel;
+using Flurl.Http;
 
 namespace FluentStore.Sources.WinGet
 {
     public class WinGetPackage : PackageBase<App>
     {
-        private readonly WinstallApi _api;
         private string _appIcon;
 
         public WinGetPackage(PackageHandlerBase packageHandler, App pack = null, PopularApp popApp = null) : base(packageHandler)
         {
-            if (packageHandler is not WinGetHandler winGetHandler)
-                throw new ArgumentException($"Source handler must have an instance of {typeof(WinstallApi)}", nameof(packageHandler));
-            _api = winGetHandler.GetApiClient();
-
             if (popApp != null)
                 Update(popApp);
             if (pack != null)
@@ -52,9 +47,6 @@ namespace FluentStore.Sources.WinGet
             Description = pack.Description;
             Version = pack.LatestVersion;
             Website = Link.Create(pack.HomepageUrl, ShortTitle + " website");
-
-            // Set WinGet package properties
-            _appIcon ??= pack.GetImagePng();
         }
 
         public void Update(PopularApp popApp)
@@ -116,6 +108,17 @@ namespace FluentStore.Sources.WinGet
             ImageBase icon = null;
             if (_appIcon != null)
             {
+                try
+                {
+                    var response = await _appIcon.HeadAsync();
+                    if (!response.ResponseMessage.IsSuccessStatusCode)
+                        goto done;
+                }
+                catch
+                {
+                    goto done;
+                }
+
                 icon = new FileImage
                 {
                     Url = _appIcon,
@@ -123,6 +126,7 @@ namespace FluentStore.Sources.WinGet
                 };
             }
 
+            done:
             return icon ?? TextImage.CreateFromName(Title);
         }
 
@@ -152,9 +156,9 @@ namespace FluentStore.Sources.WinGet
                     break;
 
                 default:
-                    var args = Installer.InstallerSwitches?.Silent ?? Manifest.InstallerSwitches?.Silent;
-                    var successCodes = Installer.InstallerSuccessCodes ?? Manifest.InstallerSuccessCodes;
-                    var errorCodes = Installer.ExpectedReturnCodes ?? Manifest.ExpectedReturnCodes;
+                    var args = Installer.InstallerSwitches?.Silent ?? Manifest?.InstallerSwitches?.Silent;
+                    var successCodes = Installer.InstallerSuccessCodes ?? Manifest?.InstallerSuccessCodes;
+                    var errorCodes = Installer.ExpectedReturnCodes ?? Manifest?.ExpectedReturnCodes;
 
                     isSuccess = await Win32Helper.Install(this, args,
                         successCodes, errorCodes?.Select(ec => ec.InstallerReturnCode),
@@ -188,23 +192,31 @@ namespace FluentStore.Sources.WinGet
 
         private async Task PopulatePackageUri()
         {
-            Manifest = await CommunityRepo.GetInstallerAsync(WinGetId, Version);
-
-            // Get installer for current architecture
-            var sysArch = Win32Helper.GetSystemArchitecture();
-            Installer = Manifest.Installers.Find(i => sysArch == i.Architecture.ToSDKArch());
-            if (Installer == null)
-                Installer = Manifest.Installers.Find(i => i.Architecture == InstallerArchitecture.X86
-                    || i.Architecture == InstallerArchitecture.Neutral);
             if (Installer == null)
             {
-                string archStr = string.Join(", ", Manifest.Installers.Select(i => i.Architecture));
-                throw new PlatformNotSupportedException($"Your computer's architecture is {sysArch}, which is not supported by this package. " +
-                    $"This package supports {archStr}.");
+                Manifest = await CommunityRepo.GetInstallerAsync(WinGetId, Version);
+
+                // Get installer for current architecture
+                var sysArch = Win32Helper.GetSystemArchitecture();
+                Installer = Manifest.Installers.Find(i => sysArch == i.Architecture.ToSDKArch());
+                if (Installer == null)
+                {
+                    // Use x86 or Neutral as a fallback
+                    Installer = Manifest.Installers.Find(i => i.Architecture == InstallerArchitecture.X86
+                        || i.Architecture == InstallerArchitecture.Neutral);
+
+                    if (Installer == null)
+                    {
+                        // Nothing more we can do
+                        string archStr = string.Join(", ", Manifest.Installers.Select(i => i.Architecture));
+                        throw new PlatformNotSupportedException($"Your computer's architecture is {sysArch}, which is not supported by this package. " +
+                            $"This package supports {archStr}.");
+                    }
+                }
             }
 
             Type = Installer.InstallerType?.ToSDKInstallerType()
-                ?? Manifest.InstallerType?.ToSDKInstallerType()
+                ?? Manifest?.InstallerType?.ToSDKInstallerType()
                 ?? InstallerType.Unknown;
 
             PackageUri = new(Installer.InstallerUrl);
