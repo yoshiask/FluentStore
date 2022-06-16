@@ -1,7 +1,6 @@
 ﻿using FluentStore.SDK.Models;
 using Flurl;
-using FuzzySharp;
-using FuzzySharp.SimilarityRatio;
+using FuseSharp;
 using Garfoot.Utilities.FluentUrn;
 using System;
 using System.Collections.Generic;
@@ -12,6 +11,8 @@ namespace FluentStore.SDK
 {
     public class PackageService
     {
+        private Fuse _fuse = new(tokenize: true);
+
         private IReadOnlySet<PackageHandlerBase> _PackageHandlers;
         /// <summary>
         /// A cache of all valid package handlers.
@@ -93,9 +94,7 @@ namespace FluentStore.SDK
             }
 
             // Fuzzy search to resort by relevance
-            var scorer = ScorerCache.Get<FuzzySharp.SimilarityRatio.Scorer.StrategySensitive.TokenDifferenceScorer>();
-            return Process.ExtractSorted(query, packages.Select(p => p.Title + " - " + p.DeveloperName), scorer: scorer)
-                .Select(r => packages.ElementAt(r.Index)).ToList();
+            return SortPackages(query, packages).ToList();
         }
 
         /// <summary>
@@ -119,9 +118,7 @@ namespace FluentStore.SDK
             }
 
             // Fuzzy search to resort by relevance
-            var scorer = ScorerCache.Get<FuzzySharp.SimilarityRatio.Scorer.StrategySensitive.TokenDifferenceScorer>();
-            return Process.ExtractSorted(query, packages.Select(p => p.Title + " - " + p.DeveloperName), scorer: scorer)
-                .Select(r => packages.ElementAt(r.Index)).ToList();
+            return SortPackages(query, packages).ToList();
         }
 
         /// <summary>
@@ -250,6 +247,11 @@ namespace FluentStore.SDK
         /// </summary>
         public string GetHandlerDisplayName(string ns) => GetHandlerForNamespace(ns).DisplayName;
 
+        private IEnumerable<PackageBase> SortPackages(string query, IList<PackageBase> packages)
+        {
+            return _fuse.Search(query, packages.Select(p => p.Title + " - " + p.DeveloperName))
+                .Select(r => packages[r.Index]);
+        }
 
         #region Account handling
 

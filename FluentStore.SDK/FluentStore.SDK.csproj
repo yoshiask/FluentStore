@@ -11,9 +11,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FuzzySharp" Version="2.0.2" />
         <PackageReference Include="Garfoot.Utilities.FluentUrn" Version="1.2.1" />
         <PackageReference Include="OwlCore" Version="0.0.68" />
+        <PackageReference Include="FuseSharp" Version="1.4.0" />
 
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.1" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.197" />
