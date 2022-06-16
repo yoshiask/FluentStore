@@ -11,7 +11,7 @@ namespace FluentStore.SDK
 {
     public class PackageService
     {
-        private Fuse _fuse = new(tokenize: true);
+        private readonly Fuse _fuse = new(threshold: 1.0, tokenize: true);
 
         private IReadOnlySet<PackageHandlerBase> _PackageHandlers;
         /// <summary>
