@@ -15,7 +15,7 @@
         <PackageReference Include="Garfoot.Utilities.FluentUrn" Version="1.2.1" />
         <PackageReference Include="OwlCore" Version="0.0.68" />
 
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.0" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.1" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.197" />
         <PackageReference Include="System.Management" Version="6.0.0" />
         <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
