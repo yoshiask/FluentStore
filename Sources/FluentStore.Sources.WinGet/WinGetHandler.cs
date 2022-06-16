@@ -1,7 +1,6 @@
 ﻿using FluentStore.SDK.Images;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
-using CommunityToolkit.Diagnostics;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -10,6 +9,7 @@ using FluentStore.Services;
 using Winstall;
 using Winstall.Models;
 using FluentStore.SDK.Helpers;
+using System.Linq;
 
 namespace FluentStore.Sources.WinGet
 {
@@ -18,6 +18,7 @@ namespace FluentStore.Sources.WinGet
         private readonly WinstallApi _api = new();
 
         public const string NAMESPACE_WINGET = "winget";
+        public const string NAMESPACE_WINSTALL_PACK = "winstall-pack";
 
         public WinGetHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
         {
@@ -26,43 +27,73 @@ namespace FluentStore.Sources.WinGet
 
         public override HashSet<string> HandledNamespaces => new()
         {
-            NAMESPACE_WINGET
+            NAMESPACE_WINGET,
+            NAMESPACE_WINSTALL_PACK,
         };
 
-        public override string DisplayName => "WinGet";
+        public override string DisplayName => "Winstall";
 
         public override async Task<List<PackageBase>> GetFeaturedPackagesAsync()
         {
             var packages = new List<PackageBase>();
             var index = await _api.GetIndexAsync();
+
             foreach (PopularApp wgApp in index.Popular)
                 packages.Add(new WinGetPackage(this, popApp: wgApp)
                 {
                     Status = PackageStatus.BasicDetails
                 });
 
+            foreach (Pack wgPack in index.Recommended)
+                packages.Add(new WinstallPack(this, wgPack)
+                {
+                    Status = PackageStatus.Details
+                });
+
             return packages;
         }
 
-        public override async Task<PackageBase> GetPackage(Urn packageUrn, PackageStatus status = PackageStatus.Details)
+        public override Task<PackageBase> GetPackage(Urn packageUrn, PackageStatus status = PackageStatus.Details)
         {
-            Guard.IsEqualTo(packageUrn.NamespaceIdentifier, NAMESPACE_WINGET, nameof(packageUrn));
+            string ns = packageUrn.NamespaceIdentifier;
+            string id = packageUrn.GetContent();
 
-            string packageId = packageUrn.GetContent<NamespaceSpecificString>().UnEscapedValue;
-            var result = await _api.GetAppAsync(packageId);
-            WinGetPackage package = new(this, result.App)
-            {
-                Status = PackageStatus.Details
-            };
+            return GetPackage(ns, id, status);
+        }
 
-            if (status.IsAtLeast(PackageStatus.Details))
+        public async Task<PackageBase> GetPackage(string ns, string id, PackageStatus status = PackageStatus.Details)
+        {
+            if (ns == NAMESPACE_WINGET)
             {
-                var locale = await CommunityRepo.GetDefaultLocaleAsync(packageId, result.App.LatestVersion);
-                package.Update(locale);
-                package.Status = PackageStatus.Details;
+                // WinGet package in the WPM Community Repo
+                var result = await _api.GetAppAsync(id);
+                WinGetPackage package = new(this, result.App)
+                {
+                    Status = PackageStatus.Details
+                };
+
+                if (status.IsAtLeast(PackageStatus.Details))
+                {
+                    var locale = await CommunityRepo.GetDefaultLocaleAsync(id, result.App.LatestVersion);
+                    package.Update(locale);
+                    package.Status = PackageStatus.Details;
+                }
+
+                return package;
+            }
+            else if (ns == NAMESPACE_WINSTALL_PACK)
+            {
+                // Winstall Pack: https://winstall.app/packs
+                var result = await _api.GetPackAsync(id);
+                WinstallPack collection = new(this, result.Pack, result.Creator)
+                {
+                    Status = PackageStatus.Details
+                };
+
+                return collection;
             }
 
-            return package;
+            return null;
         }
 
         public override Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
@@ -81,6 +112,15 @@ namespace FluentStore.Sources.WinGet
             return packages;
         }
 
+        public override async Task<List<PackageBase>> GetCollectionsAsync()
+        {
+            var result = await _api.GetPacksAsync();
+            return result.Packs.Take(10).Select<Pack, PackageBase>(p => new WinstallPack(this, p)
+            {
+                Status = PackageStatus.Details
+            }).ToList();
+        }
+
         public override ImageBase GetImage()
         {
             return new FileImage
@@ -91,7 +131,9 @@ namespace FluentStore.Sources.WinGet
 
         public override async Task<PackageBase> GetPackageFromUrl(Url url)
         {
+            string ns = NAMESPACE_WINGET;
             string id = null;
+
             Regex rx = new(@"^https:\/\/((www\.)?github|raw\.githubusercontent)\.com\/microsoft\/winget-pkgs(\/(blob|tree))?\/master\/manifests\/[0-9a-z]\/(?<packageId>[^\/\s]+)()",
                 RegexOptions.IgnoreCase);
             Match m = rx.Match(url);
@@ -101,30 +143,35 @@ namespace FluentStore.Sources.WinGet
                 goto success;
             }
 
-            rx = new(@"^https?://(www\.)?winstall\.app/apps/(?<id>[^/\s]+)\??", RegexOptions.IgnoreCase);
+            rx = new(@"^https?://(www\.)?winstall\.app/(?<type>apps|packs)/(?<id>[^/\s]+)\??", RegexOptions.IgnoreCase);
             m = rx.Match(url);
             if (m.Success)
             {
                 id = m.Groups["id"].Value;
+
+                if (m.Groups["type"].Value.ToUpperInvariant() == "PACKS")
+                    ns = NAMESPACE_WINSTALL_PACK;
+
                 goto success;
             }
 
             if (id == null) return null;
 
         success:
-            return await GetPackage(new Urn(NAMESPACE_WINGET, new RawNamespaceSpecificString(id)));
+            return await GetPackage(new Urn(ns, new RawNamespaceSpecificString(id)));
         }
 
         public override Url GetUrlFromPackage(PackageBase package)
         {
-            if (package is not WinGetPackage wgPackage)
-                throw new System.ArgumentException();
+            string path = package.Urn.NamespaceIdentifier switch
+            {
+                NAMESPACE_WINGET => "apps",
+                NAMESPACE_WINSTALL_PACK => "packs",
+                _ => throw new System.ArgumentException()
+            };
 
-            Url url = Constants.WINSTALL_HOST.AppendPathSegments("apps", wgPackage.WinGetId);
-
+            Url url = Constants.WINSTALL_HOST.AppendPathSegments(path, package.Urn.GetContent());
             return url;
         }
-
-        internal WinstallApi GetApiClient() => _api;
     }
 }

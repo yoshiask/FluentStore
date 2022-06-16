@@ -24,12 +24,12 @@ namespace FluentStore.Sources.WinGet
     {
         private string _appIcon;
 
-        public WinGetPackage(PackageHandlerBase packageHandler, App pack = null, PopularApp popApp = null) : base(packageHandler)
+        public WinGetPackage(PackageHandlerBase packageHandler, App app = null, PopularApp popApp = null) : base(packageHandler)
         {
             if (popApp != null)
                 Update(popApp);
-            if (pack != null)
-                Update(pack);
+            if (app != null)
+                Update(app);
         }
 
         public void Update(App pack)

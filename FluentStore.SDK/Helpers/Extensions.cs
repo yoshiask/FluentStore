@@ -90,6 +90,11 @@ namespace FluentStore.SDK.Helpers
             }
         }
 
+        public static string GetContent(this Urn urn)
+        {
+            return urn.GetContent<NamespaceSpecificString>().UnEscapedValue;
+        }
+
         public static WindowsPlatform ParseWindowsPlatform(string str)
         {
             int dotIdx = str.LastIndexOf('.');
