@@ -21,12 +21,12 @@ Several sources are currently supported, with several more planned for the futur
 
 | Source Name       | Search | Download | Install | Collections
 ---                 | :---:  | :---:    | :---:   | :---:
-| Microsoft Store   | ✅     | ✅      | ✅      | ☑
+| Microsoft Store   | ✅     | ✅      | ✅      | ✅
 | WinGet            | ✅     | ✅      | ✅      | ❌
-| GitHub Releases   | ❌     | ☑       | ☑       | ❌
+| GitHub Releases   | ❌     | ✅      | ✅      | ❌
 | Chocolatey        | ❌     | ❌      | ❌      | ❌
-| UWP Community     | ❌     | ✅¹     | ✅¹     | ☑
-| Fluent Store      | ❌     | ✅²     | ✅²     | ☑
+| UWP Community     | ❌     | ✅¹     | ✅¹     | ✅
+| Fluent Store      | ❌     | ✅²     | ✅²     | ✅
 
 1.  UWP Community projects have 'download' links, but they do not go directly to an installer.
     Fluent Store will attempt to follow the link and download/install it if recognized. If not, the link is opened in the default browser.
