@@ -28,6 +28,7 @@ using FluentStore.SDK.Users;
 using FluentStore.SDK.Models;
 using System.Linq;
 using OwlCore.WinUI.AbstractUI.Controls;
+using System.Collections.Generic;
 
 namespace FluentStore.Views
 {
@@ -129,8 +130,11 @@ namespace FluentStore.Views
             {
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
 
-                var collections = (await PackageService.GetCollectionsAsync())
-                    .Where(p => p.PackageHandler.CanEditCollection(p)).ToList();
+                List<PackageBase> collections = new();
+                await foreach (var c in PackageService.GetCollectionsAsync())
+                    if (c.PackageHandler.CanEditCollection(c))
+                        collections.Add(c);
+
                 if (collections.Count > 0)
                 {
                     var flyout = new MenuFlyout

@@ -192,9 +192,8 @@ namespace FluentStore.SDK
         /// Typically, this method will return a list of <see cref="Packages.GenericPackageCollection{TModel}"/>,
         /// but this is not a requirement and technically any package is allowed.
         /// </remarks>
-        public async Task<List<PackageBase>> GetCollectionsAsync()
+        public async IAsyncEnumerable<PackageBase> GetCollectionsAsync()
         {
-            var packages = new List<PackageBase>();
             foreach (var handler in PackageHandlers)
             {
                 if (!handler.IsEnabled) continue;
@@ -206,10 +205,9 @@ namespace FluentStore.SDK
                 }
                 catch { continue; }
 
-                packages.AddRange(results);
+                foreach (var result in results)
+                    yield return result;
             }
-
-            return packages;
         }
 
         /// <summary>

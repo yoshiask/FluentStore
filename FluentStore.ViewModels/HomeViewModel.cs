@@ -11,6 +11,7 @@ using FluentStore.SDK;
 using FluentStore.Services;
 using FluentStore.SDK.Models;
 using FluentStore.SDK.Helpers;
+using OwlCore.Extensions;
 
 namespace FluentStore.ViewModels
 {
@@ -22,12 +23,14 @@ namespace FluentStore.ViewModels
         }
 
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
-        private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
         private readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
 
         private void CarouselItems_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             ShowCarousel = CarouselItems.Count > 0;
+
+            if (ShowCarousel && SelectedCarouselItemIndex < 0)
+                SelectedCarouselItemIndex = 0;
         }
 
         public async Task LoadAllFeaturedAsync()
@@ -61,21 +64,26 @@ namespace FluentStore.ViewModels
             CarouselItems.CollectionChanged += CarouselItems_CollectionChanged;
             CarouselItems.Clear();
 
-            for (int i = 0; i < featured.Carousel.Count; i++)
+            await featured.Carousel.InParallel(async id =>
             {
                 try
                 {
-                    Urn packageUrn = Urn.Parse(featured.Carousel[i]);
+                    Urn packageUrn = Urn.Parse(id);
                     var package = await PackageService.GetPackageAsync(packageUrn);
                     CarouselItems.Add(new PackageViewModel(package));
-                    if (i == 0)
-                        SelectedCarouselItemIndex = i;
+                    //if (i == 0)
+                    //    SelectedCarouselItemIndex = i;
                 }
                 catch (System.Exception ex)
                 {
                     var logger = Ioc.Default.GetRequiredService<LoggerService>();
                     logger.Warn(ex, ex.Message);
                 }
+            });
+
+            for (int i = 0; i < featured.Carousel.Count; i++)
+            {
+                
             }
             CarouselItems.CollectionChanged -= CarouselItems_CollectionChanged;
         }

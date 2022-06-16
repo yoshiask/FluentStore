@@ -108,11 +108,8 @@ namespace FluentStore.ViewModels
             Collections.Clear();
             try
             {
-                var collections = await PackageService.GetCollectionsAsync();
-                foreach (PackageBase collection in collections)
-                {
+                await foreach (PackageBase collection in PackageService.GetCollectionsAsync())
                     Collections.Add(new PackageViewModel(collection));
-                }
             }
             catch (Exception ex)
             {
