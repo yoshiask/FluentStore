@@ -9,7 +9,7 @@
     mc:Ignorable="d">
 
     <winex:WindowEx.Backdrop>
-        <winex:MicaSystemBackdrop DarkLuminosityOpacity=".50" DarkTintOpacity=".75" DarkTintColor="Black" 
+        <winex:MicaSystemBackdrop DarkLuminosityOpacity=".70" DarkTintOpacity=".80" DarkTintColor="Black" DarkFallbackColor="Black"
                                   LightLuminosityOpacity=".50" LightTintOpacity=".25" LightTintColor="White" />
     </winex:WindowEx.Backdrop>
 

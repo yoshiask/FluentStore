@@ -41,12 +41,9 @@ namespace FluentStore.ViewModels
                 SetProperty(ref _Package, value);
 
                 // Reset cached properties
-                //AppIcon = null;
-                //HeroImage = null;
-                //Screenshots = null;
-                //DisplayProperties = null;
-                UpdateImages();
+                DisplayProperties = null;
                 DisplayAdditionalInformationProperties = null;
+                UpdateImages();
 
                 // Update derived properties
                 IsCollection = Package != null && Package.GetType().IsAssignableTo(typeof(SDK.Packages.IPackageCollection));
@@ -286,6 +283,10 @@ namespace FluentStore.ViewModels
 
         private void UpdateImages()
         {
+            AppIcon = null;
+            HeroImage = null;
+            Screenshots = null;
+
             // Cache images in the background
             var context = System.Threading.SynchronizationContext.Current;
             Package.GetAppIcon().ContinueWith(task =>
