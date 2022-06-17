@@ -13,6 +13,8 @@ namespace FluentStore.Services
 
         public Version LastLaunchedVersion { get; set; }
 
+        public event EventHandler<PackageHandlerEnabledStateChangedEventArgs> PackageHandlerEnabledStateChanged;
+
         /// <summary>
         /// Gets the enabled state of the specified package handler. Defaults to <c>true</c>.
         /// </summary>
@@ -76,5 +78,17 @@ namespace FluentStore.Services
         /// A previous version of the app has been installed.
         /// </summary>
         Downgraded,
+    }
+
+    public class PackageHandlerEnabledStateChangedEventArgs : EventArgs
+    {
+        public string TypeName { get; }
+        public bool NewState { get; }
+
+        public PackageHandlerEnabledStateChangedEventArgs(string typeName, bool newState)
+        {
+            TypeName = typeName;
+            NewState = newState;
+        }
     }
 }

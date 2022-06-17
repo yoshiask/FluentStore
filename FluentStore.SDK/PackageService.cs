@@ -247,6 +247,12 @@ namespace FluentStore.SDK
         /// </summary>
         public string GetHandlerDisplayName(string ns) => GetHandlerForNamespace(ns).DisplayName;
 
+        public void UpdatePackageHandlerEnabledStates(object _, Services.PackageHandlerEnabledStateChangedEventArgs args)
+        {
+            foreach (var handler in PackageHandlers.Where(ph => ph.GetType().Name == args.TypeName))
+                handler.IsEnabled = args.NewState;
+        }
+
         private IEnumerable<PackageBase> SortPackages(string query, IList<PackageBase> packages)
         {
             return _fuse.Search(query, packages.Select(p => p.Title + " - " + p.DeveloperName))

@@ -1,4 +1,6 @@
-﻿using FluentStore.SDK.Helpers;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using FluentStore.SDK;
+using FluentStore.SDK.Helpers;
 using FluentStore.Services;
 using OwlCore.AbstractStorage;
 using OwlCore.Services;
@@ -12,10 +14,10 @@ namespace FluentStore.Helpers
     public class Settings : SettingsBase, ISettingsService
     {
         private const string KEY_PackageHandlerEnabled = "PackageHandlerEnabled";
-        private static readonly Settings settings = new();
-        private static readonly DefaultSettingValues defVals = new();
+        private static readonly Settings s_settings = new();
+        private static readonly DefaultSettingValues s_defVals = new();
 
-        public static Settings Default => settings;
+        public static Settings Default => s_settings;
 
         public Settings() : base(GetSettingsFolder(), new NewtonsoftStreamSerializer())
         {
@@ -23,25 +25,25 @@ namespace FluentStore.Helpers
 
         public string ExclusionFilter
         {
-            get => GetSetting(defVals.ExclusionFilter);
+            get => GetSetting(s_defVals.ExclusionFilter);
             set => SetSetting(value);
         }
 
         public bool UseExclusionFilter
         {
-            get => GetSetting(defVals.UseExclusionFilter);
+            get => GetSetting(s_defVals.UseExclusionFilter);
             set => SetSetting(value);
         }
 
         public string PluginDirectory
         {
-            get => GetSetting(defVals.PluginDirectory);
+            get => GetSetting(s_defVals.PluginDirectory);
             set => SetSetting(value);
         }
 
         public Version LastLaunchedVersion
         {
-            get => GetSetting(defVals.LastLaunchedVersion);
+            get => GetSetting(s_defVals.LastLaunchedVersion);
             set => SetSetting(value);
         }
 
@@ -66,6 +68,8 @@ namespace FluentStore.Helpers
             }
         }
 
+        public event EventHandler<PackageHandlerEnabledStateChangedEventArgs> PackageHandlerEnabledStateChanged;
+
         public bool GetPackageHandlerEnabledState(string typeName)
         {
             return GetSetting(() => true, GetPackageHandlerEnabledKey(typeName));
@@ -74,6 +78,8 @@ namespace FluentStore.Helpers
         public void SetPackageHandlerEnabledState(string typeName, bool enabled)
         {
             SetSetting(enabled, GetPackageHandlerEnabledKey(typeName));
+
+            PackageHandlerEnabledStateChanged?.Invoke(this, new(typeName, enabled));
         }
 
         public AppUpdateStatus GetAppUpdateStatus()
@@ -81,7 +87,7 @@ namespace FluentStore.Helpers
             if (LastLaunchedVersion == null)
                 return AppUpdateStatus.NewlyInstalled;
 
-            Version cur = Windows.ApplicationModel.Package.Current.Id.Version.ToVersion();
+            Version cur = Package.Current.Id.Version.ToVersion();
             if (LastLaunchedVersion == cur)
                 return AppUpdateStatus.None;
             else if (LastLaunchedVersion < cur)
@@ -107,10 +113,10 @@ namespace FluentStore.Helpers
         {
             var appVersion = Package.Current.Id.Version.ToVersion();
             var arch = Win32Helper.GetSystemArchitecture().ToString();
-            var fsApi = CommunityToolkit.Mvvm.DependencyInjection.Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
+            var fsApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
             
             var defaults = await fsApi.GetDefaultPlugins(appVersion, arch);
-            await SDK.PluginLoader.InstallDefaultPlugins(this, defaults, install, overwrite);
+            await PluginLoader.InstallDefaultPlugins(this, defaults, install, overwrite);
         }
 
         private static string GetPackageHandlerEnabledKey(string typeName) => $"{KEY_PackageHandlerEnabled}_{typeName}";

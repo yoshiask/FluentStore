@@ -121,6 +121,7 @@ namespace FluentStore
                 // Load plugins and initialize package and account services
                 var passwordVaultService = Ioc.Default.GetRequiredService<IPasswordVaultService>();
                 var pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
+                Helpers.Settings.Default.PackageHandlerEnabledStateChanged += pkgSvc.UpdatePackageHandlerEnabledStates;
 
                 log?.Log($"Began loading plugins");
                 var pluginLoadResult = PluginLoader.LoadPlugins(Helpers.Settings.Default, passwordVaultService);
