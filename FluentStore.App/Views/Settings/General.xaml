@@ -13,19 +13,19 @@
     <StackPanel Spacing="4">
 
         <controls:SettingsBlockControl Title="Search exclusion filter"
-                                           Description="A regular expression used to filter out unwanted search suggestions and results">
+                                       Description="A regular expression used to filter out unwanted search suggestions and results">
             <controls:SettingsBlockControl.Icon>
                 <FontIcon Glyph="&#xF6FA;"/>
             </controls:SettingsBlockControl.Icon>
             <controls:SettingsBlockControl.ExpandableContent>
                 <TextBox Text="{x:Bind helpers:Settings.Default.ExclusionFilter}" Margin="16"
-                             IsEnabled="{x:Bind helpers:Settings.Default.UseExclusionFilter, Mode=OneWay}"/>
+                         IsEnabled="{x:Bind helpers:Settings.Default.UseExclusionFilter, Mode=OneWay}"/>
             </controls:SettingsBlockControl.ExpandableContent>
             <ToggleSwitch IsOn="{x:Bind helpers:Settings.Default.UseExclusionFilter}" Style="{ThemeResource ToggleSwitchRightStyle}"/>
         </controls:SettingsBlockControl>
 
         <controls:SettingsBlockControl Title="Clear installer cache"
-                                           Description="Removes all cached app installers">
+                                       Description="Removes all cached app installers">
             <controls:SettingsBlockControl.Icon>
                 <FontIcon Glyph="&#xE74D;"/>
             </controls:SettingsBlockControl.Icon>
@@ -45,17 +45,17 @@
         </controls:SettingsBlockControl>
 
         <controls:SettingsBlockControl Title="About"
-                                           Description="Information about Fluent Store">
+                                       Description="Information about Fluent Store">
             <controls:SettingsBlockControl.Icon>
                 <FontIcon Glyph="&#xE946;"/>
             </controls:SettingsBlockControl.Icon>
             <controls:SettingsBlockControl.ExpandableContent>
                 <TextBlock Margin="16" TextWrapping="WrapWholeWords" IsTextSelectionEnabled="True">
-                            <Run Text="Fluent Store is a unifying frontend for Windows app stores and package managers."/>
-                            <Run Text="You can search all repositories at once, pick out an app, and install it without ever opening a browser or command prompt."/>
-                            <Run Text="With a Fluent Store Social account, you can create collections of apps to install or share in one click."/>
-                            <LineBreak/><LineBreak/>
-                            <Run Text="Version " FontWeight="Bold"/><Run Text="{x:Bind helpers:Settings.Default.VersionString, Mode=OneTime}" FontWeight="Bold"/>
+                    <Run Text="Fluent Store is a unifying frontend for Windows app stores and package managers."/>
+                    <Run Text="You can search all repositories at once, pick out an app, and install it without ever opening a browser or command prompt."/>
+                    <Run Text="With a Fluent Store Social account, you can create collections of apps to install or share in one click."/>
+                    <LineBreak/><LineBreak/>
+                    <Run Text="Version " FontWeight="Bold"/><Run Text="{x:Bind helpers:Settings.Default.VersionString, Mode=OneTime}" FontWeight="Bold"/>
                 </TextBlock>
             </controls:SettingsBlockControl.ExpandableContent>
         </controls:SettingsBlockControl>
@@ -71,7 +71,7 @@
         </controls:SettingsBlockControl>
 
         <controls:SettingsBlockControl Title="Support the developer"
-                                           Description="Support development of this and other projects">
+                                       Description="Support development of this and other projects">
             <controls:SettingsBlockControl.Icon>
                 <FontIcon Glyph="&#xEB51;"/>
             </controls:SettingsBlockControl.Icon>
@@ -82,15 +82,15 @@
 
         <!-- #if DEBUG -->
         <controls:SettingsBlockControl Title="DEBUG: Test error reporting"
-                                           Description="Test the error reporting system by causing an unhandled exception."
-                                           Visibility="{x:Bind helpers:Settings.Default.IsDebug, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneTime}">
+                                       Description="Test the error reporting system by causing an unhandled exception."
+                                       Visibility="{x:Bind helpers:Settings.Default.IsDebug, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneTime}">
             <controls:SettingsBlockControl.Icon>
                 <FontIcon Glyph="&#xEA39;"/>
             </controls:SettingsBlockControl.Icon>
             <controls:SettingsBlockControl.SettingsActionableElement>
                 <Button Content="Crash" Click="CrashButton_Click"
-                            Background="{ThemeResource SystemControlErrorTextForegroundBrush}"
-                            Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
+                        Background="{ThemeResource SystemControlErrorTextForegroundBrush}"
+                        Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
             </controls:SettingsBlockControl.SettingsActionableElement>
         </controls:SettingsBlockControl>
         <!-- #endif -->
