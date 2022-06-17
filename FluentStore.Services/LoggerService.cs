@@ -22,7 +22,7 @@ namespace FluentStore.Services
         /// </summary>
         public void Log(string message, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
         {
-            WriteLine($"{Path.GetFileName(filePath)}_{memberName}() [{lineNumber:D4}] : {message}");   
+            WriteLine($"{Path.GetFileName(filePath)}_L{lineNumber:D}_{memberName}() : {message}");   
         }
 
         /// <summary>
