@@ -67,6 +67,13 @@ namespace FluentStore.Sources.MicrosoftStore
 
             void AddToResults()
             {
+                foreach (var details in page.HighlightedResults)
+                {
+                    var package = MicrosoftStorePackageBase.Create(this, details.ProductId, product: details);
+                    package.Status = PackageStatus.Details;
+
+                    packages.Add(package);
+                }
                 foreach (var card in page.SearchResults)
                 {
                     var package = MicrosoftStorePackageBase.Create(this, card.ProductId, card);
