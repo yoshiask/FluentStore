@@ -47,11 +47,8 @@ namespace FluentStore.Services
 
         public virtual string PluginDirectory()
         {
-            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            System.IO.DirectoryInfo dir = new(System.IO.Path.Combine(localAppData, "FluentStoreBeta", "Plugins"));
-            if (!dir.Exists)
-                dir.Create();
-            return dir.FullName;
+            System.IO.Directory.CreateDirectory(CommonPaths.DefaultPluginDirectory);
+            return CommonPaths.DefaultPluginDirectory;
         }
 
         public virtual Version LastLaunchedVersion() => null;

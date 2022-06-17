@@ -121,12 +121,10 @@ namespace FluentStore.Helpers
 
         private static string GetPackageHandlerEnabledKey(string typeName) => $"{KEY_PackageHandlerEnabled}_{typeName}";
 
-        private static SystemIOFolderData GetSettingsFolder()
+        private static IFolderData GetSettingsFolder()
         {
-            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            SystemIOFolderData dir = new(Path.Combine(localAppData, "FluentStoreBeta", "Settings"));
-
-            dir.EnsureExists();
+            SystemIOFolderData dir = new(CommonPaths.DefaultSettingsDirectory);
+            Directory.CreateDirectory(dir.Path);
             return dir;
         }
     }

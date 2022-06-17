@@ -15,6 +15,7 @@
     <ItemGroup>
         <PackageReference Include="Flurl.Http" Version="3.2.4" />
         <PackageReference Include="Garfoot.Utilities.FluentUrn" Version="1.2.1" />
+        <PackageReference Include="OwlCore" Version="0.0.68" />
     </ItemGroup>
 
 </Project>

@@ -255,7 +255,10 @@ namespace FluentStore
         {
             var services = new ServiceCollection();
 
-            services.AddSingleton(typeof(LoggerService));
+            string logFileName = CommonPaths.GenerateLogFilePath();
+            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(logFileName));
+            services.AddSingleton(new LoggerService(System.IO.File.CreateText(logFileName)));
+
             services.AddSingleton(new Microsoft.Marketplace.Storefront.Contracts.StorefrontApi());
             services.AddSingleton<ISettingsService>(Helpers.Settings.Default);
             services.AddSingleton<INavigationService, NavigationService>();
