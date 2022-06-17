@@ -28,6 +28,7 @@ namespace FluentStore.Views
         {
             { typeof(Settings.General), null },
             { typeof(Settings.Plugins), null },
+            { typeof(Settings.Info), null },
         };
 
         public bool IsCompact { get; private set; }

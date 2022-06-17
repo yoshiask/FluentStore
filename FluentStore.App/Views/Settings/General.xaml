@@ -34,50 +34,46 @@
             </controls:SettingsBlockControl.SettingsActionableElement>
         </controls:SettingsBlockControl>
 
-        <controls:SettingsBlockControl Title="Reset settings"
-                                        Description="Set all options to their default value">
+        <controls:SettingsBlockControl Title="Manage settings">
             <controls:SettingsBlockControl.Icon>
-                <FontIcon Glyph="&#xE7A7;"/>
+                <FontIcon Glyph="&#xE90F;"/>
             </controls:SettingsBlockControl.Icon>
-            <controls:SettingsBlockControl.SettingsActionableElement>
-                <Button Content="Reset" Click="ResetButton_Click"/>
-            </controls:SettingsBlockControl.SettingsActionableElement>
-        </controls:SettingsBlockControl>
 
-        <controls:SettingsBlockControl Title="About"
-                                       Description="Information about Fluent Store">
-            <controls:SettingsBlockControl.Icon>
-                <FontIcon Glyph="&#xE946;"/>
-            </controls:SettingsBlockControl.Icon>
             <controls:SettingsBlockControl.ExpandableContent>
-                <TextBlock Margin="16" TextWrapping="WrapWholeWords" IsTextSelectionEnabled="True">
-                    <Run Text="Fluent Store is a unifying frontend for Windows app stores and package managers."/>
-                    <Run Text="You can search all repositories at once, pick out an app, and install it without ever opening a browser or command prompt."/>
-                    <Run Text="With a Fluent Store Social account, you can create collections of apps to install or share in one click."/>
-                    <LineBreak/><LineBreak/>
-                    <Run Text="Version " FontWeight="Bold"/><Run Text="{x:Bind helpers:Settings.Default.VersionString, Mode=OneTime}" FontWeight="Bold"/>
-                </TextBlock>
+                <StackPanel>
+                    
+                    <controls:SettingsDisplayControl Title="Reset to defaults" Margin="14"
+                                                     Description="Set all options to their default value">
+                        <controls:SettingsDisplayControl.Icon>
+                            <FontIcon Glyph="&#xE7A7;"/>
+                        </controls:SettingsDisplayControl.Icon>
+                        <controls:SettingsDisplayControl.SettingsActionableElement>
+                            <Button Content="Reset" Click="ResetButton_Click"/>
+                        </controls:SettingsDisplayControl.SettingsActionableElement>
+                    </controls:SettingsDisplayControl>
+                    
+                    <controls:SettingsDisplayControl Title="Export current settings" Margin="14"
+                                                     Description="Save your settings for later use">
+                        <controls:SettingsDisplayControl.Icon>
+                            <FontIcon Glyph="&#xEDE1;"/>
+                        </controls:SettingsDisplayControl.Icon>
+                        <controls:SettingsDisplayControl.SettingsActionableElement>
+                            <Button Content="Export..." Click="ExportButton_Click"/>
+                        </controls:SettingsDisplayControl.SettingsActionableElement>
+                    </controls:SettingsDisplayControl>
+                    
+                    <controls:SettingsDisplayControl Title="Import settings" Margin="14"
+                                                     Description="Load your previous settings">
+                        <controls:SettingsDisplayControl.Icon>
+                            <FontIcon Glyph="&#xE150;"/>
+                        </controls:SettingsDisplayControl.Icon>
+                        <controls:SettingsDisplayControl.SettingsActionableElement>
+                            <Button Content="Import..." Click="ImportButton_Click"/>
+                        </controls:SettingsDisplayControl.SettingsActionableElement>
+                    </controls:SettingsDisplayControl>
+
+                </StackPanel>
             </controls:SettingsBlockControl.ExpandableContent>
-        </controls:SettingsBlockControl>
-
-        <controls:SettingsBlockControl Title="Send feedback"
-                                       Description="Submit bug reports and feature requests to the developer">
-            <controls:SettingsBlockControl.Icon>
-                <FontIcon Glyph="&#xED15;"/>
-            </controls:SettingsBlockControl.Icon>
-            <controls:SettingsBlockControl.SettingsActionableElement>
-                <Button Content="Open in browser" Click="SendFeedbackButton_Click"/>
-            </controls:SettingsBlockControl.SettingsActionableElement>
-        </controls:SettingsBlockControl>
-
-        <controls:SettingsBlockControl Title="Support the developer"
-                                       Description="Support development of this and other projects">
-            <controls:SettingsBlockControl.Icon>
-                <FontIcon Glyph="&#xEB51;"/>
-            </controls:SettingsBlockControl.Icon>
-            <controls:SettingsBlockControl.SettingsActionableElement>
-                <Button Content="Donate" Click="DonateButton_Click"/>
-            </controls:SettingsBlockControl.SettingsActionableElement>
         </controls:SettingsBlockControl>
 
         <!-- #if DEBUG -->
