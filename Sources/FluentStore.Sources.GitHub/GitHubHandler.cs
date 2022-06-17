@@ -56,8 +56,8 @@ namespace FluentStore.Sources.GitHub
         {
             if (url.Host == "github.com" && url.PathSegments.Count >= 2)
             {
-                string owner = url.PathSegments[^2];
-                string name = url.PathSegments[^1];
+                string owner = url.PathSegments[0];
+                string name = url.PathSegments[1];
                 return await GetPackage(Urn.Parse($"urn:{NAMESPACE_REPO}:{owner}:{name}"));
             }
 
