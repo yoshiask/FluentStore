@@ -70,7 +70,7 @@ namespace FluentStore.Sources.MicrosoftStore
                 foreach (var details in page.HighlightedResults)
                 {
                     var package = MicrosoftStorePackageBase.Create(this, details.ProductId, product: details);
-                    package.Status = PackageStatus.Details;
+                    package.Status = PackageStatus.BasicDetails;
 
                     packages.Add(package);
                 }
