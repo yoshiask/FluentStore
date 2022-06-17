@@ -44,6 +44,8 @@ namespace FluentStore.Sources.UwpCommunity
             Title = project.appName;
             Description = project.description;
             ReleaseDate = project.createdAt;
+            Price = 0.0;
+            DisplayPrice = "View";
             if (project.externalLink != null)
                 Website = Link.Create(project.externalLink, ShortTitle + " website");
 

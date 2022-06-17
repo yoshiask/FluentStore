@@ -100,7 +100,7 @@ namespace FluentStore.Sources.UwpCommunity
 
                 package.Status = PackageStatus.DownloadReady;
             }
-            
+
             return package;
         }
 
@@ -115,6 +115,8 @@ namespace FluentStore.Sources.UwpCommunity
                 Description = "An annual event hosted by the UWP Community, where developers, beta testers, translators, and users work together to Launch their new and refreshed apps.",
                 DeveloperName = "UWP Community",
                 Website = new("https://uwpcommunity.com/launch", "UWP Community Launch page"),
+                Price = 0.0,
+                DisplayPrice = "View",
                 Images =
                 {
                     new FileImage
