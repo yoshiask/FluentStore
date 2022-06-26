@@ -12,7 +12,7 @@
       <SubType>Designer</SubType>
     </AppxManifest>
     <ProjectReference Include="..\FluentStore.App\FluentStore.App.csproj" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.197" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.1" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x86">

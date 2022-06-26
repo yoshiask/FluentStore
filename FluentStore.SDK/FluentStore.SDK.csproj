@@ -12,16 +12,16 @@
 
     <ItemGroup>
         <PackageReference Include="Garfoot.Utilities.FluentUrn" Version="1.2.1" />
-        <PackageReference Include="OwlCore" Version="0.0.68" />
+        <PackageReference Include="OwlCore" Version="0.0.71" />
         <PackageReference Include="FuseSharp" Version="1.4.0" />
 
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.1" />
-        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.197" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.1" />
         <PackageReference Include="System.Management" Version="6.0.0" />
         <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
         <PackageReference Include="PInvoke.User32" Version="0.7.104" />
-        <PackageReference Include="Vanara.PInvoke.Kernel32" Version="3.4.2" />
-        <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.2.4" />
+        <PackageReference Include="Vanara.PInvoke.Kernel32" Version="3.4.3" />
+        <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.2.5" />
         <PackageReference Include="IdentityModel.OidcClient" Version="5.0.0" />
     </ItemGroup>
 
