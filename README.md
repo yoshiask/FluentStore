@@ -22,7 +22,7 @@ Several sources are currently supported, with several more planned for the futur
 | Source Name       | Search | Download | Install | Collections
 ---                 | :---:  | :---:    | :---:   | :---:
 | Microsoft Store   | ✅     | ✅      | ✅      | ✅
-| WinGet            | ✅     | ✅      | ✅      | ❌
+| WinGet            | ✅     | ✅      | ✅      | ☑
 | GitHub Releases   | ❌     | ✅      | ✅      | ❌
 | Chocolatey        | ❌     | ❌      | ❌      | ❌
 | UWP Community     | ❌     | ✅¹     | ✅¹     | ✅
