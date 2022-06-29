@@ -25,6 +25,7 @@ Several sources are currently supported, with several more planned for the futur
 | WinGet            | ✅     | ✅      | ✅      | ☑
 | GitHub Releases   | ❌     | ✅      | ✅      | ❌
 | Chocolatey        | ❌     | ❌      | ❌      | ❌
+| Scoop             | ❌     | ❌      | ❌      | ❌
 | UWP Community     | ❌     | ✅¹     | ✅¹     | ✅
 | Fluent Store      | ❌     | ✅²     | ✅²     | ✅
 
