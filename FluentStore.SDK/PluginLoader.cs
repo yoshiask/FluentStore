@@ -24,6 +24,9 @@ namespace FluentStore.SDK
         {
             PluginLoadResult result = new();
 
+            if (!Directory.Exists(settings.PluginDirectory))
+                return result;
+
             // Make sure that the runtime looks for plugin dependencies
             // in the plugin's folder.
             AppDomain currentDomain = AppDomain.CurrentDomain;
@@ -114,7 +117,9 @@ namespace FluentStore.SDK
                     };
                     var response = await get;
 
+                    Directory.CreateDirectory(settings.PluginDirectory);
                     string pluginDownloadPath = Path.Combine(settings.PluginDirectory, pluginId) + ".zip";
+
                     FileStream pluginStream = new(pluginDownloadPath, FileMode.Create, FileAccess.Write);
                     using IRandomAccessStream outputStream = pluginStream.AsRandomAccessStream();
                     await response.Content.WriteToStreamAsync(outputStream);
@@ -166,6 +171,8 @@ namespace FluentStore.SDK
                     WeakReferenceMessenger.Default.Send(
                         new Messages.PluginInstallStartedMessage(pluginId));
 
+                    Directory.CreateDirectory(settings.PluginDirectory);
+
                     string dir = Path.Combine(settings.PluginDirectory, pluginId);
                     if (Directory.Exists(dir))
                     {
@@ -199,6 +206,9 @@ namespace FluentStore.SDK
         /// </param>
         public static async Task InstallPendingPlugins(ISettingsService settings)
         {
+            if (!Directory.Exists(settings.PluginDirectory))
+                return;
+
             foreach (string pluginPath in Directory.GetFiles(settings.PluginDirectory, "*.zip"))
             {
                 string pluginId = Path.GetFileNameWithoutExtension(pluginPath);
