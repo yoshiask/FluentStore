@@ -315,6 +315,18 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
+                        <!-- Source info -->
+                        <StackPanel Style="{ThemeResource DetailsPanelStyle}">
+                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Provided by"/>
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <ContentControl Content="{x:Bind ViewModel.Package.PackageHandler.Image}"
+                                                ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"
+                                                MaxHeight="28"/>
+                                <TextBlock Text="{x:Bind ViewModel.Package.PackageHandler.DisplayName}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
