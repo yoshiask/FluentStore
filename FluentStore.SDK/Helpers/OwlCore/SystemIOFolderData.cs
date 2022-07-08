@@ -147,8 +147,8 @@ namespace OwlCore.AbstractStorage
         {
             return Task.Run(delegate
             {
-                if (Directory.Exists) return;
-                Directory.Create();
+                System.IO.Directory.CreateDirectory(Path);
+                Directory.Refresh();
             });
         }
     }
