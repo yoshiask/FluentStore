@@ -4,6 +4,7 @@
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  xmlns:desktop6="http://schemas.microsoft.com/appx/manifest/desktop/windows10/6"
   IgnorableNamespaces="uap rescap">
 
     <Identity
@@ -15,6 +16,8 @@
         <DisplayName>Fluent Store</DisplayName>
         <PublisherDisplayName>Joshua Askharoun</PublisherDisplayName>
         <Logo>Assets\StoreLogo.png</Logo>
+
+        <desktop6:FileSystemWriteVirtualization>disabled</desktop6:FileSystemWriteVirtualization>
     </Properties>
 
     <Dependencies>
@@ -62,5 +65,6 @@
         <rescap:Capability Name="packageManagement" />
         <rescap:Capability Name="packageQuery"/>
         <rescap:Capability Name="runFullTrust" />
+        <rescap:Capability Name="unvirtualizedResources"/>
     </Capabilities>
 </Package>
