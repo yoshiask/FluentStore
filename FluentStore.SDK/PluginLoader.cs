@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.SDK.Models;
 using FluentStore.Services;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace FluentStore.SDK
     public static class PluginLoader
     {
         private static readonly Type[] _ctorTypeList = new[] { typeof(IPasswordVaultService) };
+        private static readonly Version _currentSdkVersion = typeof(PluginLoader).Assembly.GetName().Version;
 
         /// <summary>
         /// Attempts to load all plugins located in <see cref="ISettingsService.PluginDirectory"/>
@@ -32,41 +34,45 @@ namespace FluentStore.SDK
             AppDomain currentDomain = AppDomain.CurrentDomain;
             currentDomain.AssemblyResolve += LoadFromSameFolder;
 
-            foreach (string pluginInfoPath in Directory.EnumerateFiles(settings.PluginDirectory, "*.txt", SearchOption.AllDirectories))
+            foreach (string pluginMetadataPath in Directory.EnumerateFiles(settings.PluginDirectory, PluginMetadata.MetadataFileName, SearchOption.AllDirectories))
             {
-                // The plugin info file is a plain text file where each line is
-                // a relative path to the DLLs containing the actual implementation.
+                // The plugin metadata specifies a relative path to the DLL containing
+                // the actual plugin implementation.
                 // This is to avoid unnecessarily loading and searching for package
                 // handlers in DLLs that are only for dependencies (and also serves
                 // to prevent loading the same plugin twice, if one plugin depends
-                // on another.
-                string pluginPath = Path.GetDirectoryName(pluginInfoPath);
-                string[] dllRelativePaths = File.ReadAllLines(pluginInfoPath);
-                foreach (string dllRelativePath in dllRelativePaths)
+                // on another).
+
+                // Deserialize metadata.
+                var metadata = PluginMetadata.DeserializeFromFile(pluginMetadataPath);
+
+                // Ensure plugin is compatible with current Fluent Store SDK.
+                if (!metadata.PluginVersion.IsVersionCompatible(_currentSdkVersion))
+                    continue;
+
+                // Get path to primary DLL.
+                string assemblyPath = Path.Combine(Path.GetDirectoryName(pluginMetadataPath), metadata.PluginAssembly);
+                if (string.IsNullOrWhiteSpace(assemblyPath))
+                    continue;
+
+                try
                 {
-                    string assemblyPath = Path.Combine(pluginPath, dllRelativePath);
-                    if (string.IsNullOrWhiteSpace(assemblyPath))
-                        continue;
+                    // Load assembly and consider only types that inherit from PackageHandlerBase
+                    // and are public.
+                    var assembly = Assembly.LoadFile(assemblyPath);
 
-                    try
+                    foreach (PackageHandlerBase handler in InstantiateAllPackageHandlers(assembly, settings, passwordVaultService))
                     {
-                        // Load assembly and consider only types that inherit from PackageHandlerBase
-                        // and are public.
-                        var assembly = Assembly.LoadFile(assemblyPath);
-
-                        foreach (PackageHandlerBase handler in InstantiateAllPackageHandlers(assembly, settings, passwordVaultService))
-                        {
-                            // Register handler
-                            result.PackageHandlers.Add(handler);
-                        }
+                        // Register handler.
+                        result.PackageHandlers.Add(handler);
                     }
-                    catch (Exception ex)
-                    {
+                }
+                catch (Exception ex)
+                {
 #if DEBUG
-                        System.Diagnostics.Debug.WriteLine(ex);
+                    System.Diagnostics.Debug.WriteLine(ex);
 #endif
-                        continue;
-                    }
+                    continue;
                 }
             }
 
@@ -106,19 +112,19 @@ namespace FluentStore.SDK
                     // This seems funky, but this is because Firebase encodes the slashes
                     // in the bucket path. This ensures we always get the last segment.
                     Flurl.Url pluginUrl = new(Flurl.Url.Decode(url, false));
-                    string pluginId = Path.GetFileNameWithoutExtension(pluginUrl.PathSegments.Last());
+                    string tempPluginId = Path.GetFileNameWithoutExtension(pluginUrl.PathSegments.Last());
 
 #if WINDOWS
                     var get = client.GetAsync(new(url), Windows.Web.Http.HttpCompletionOption.ResponseContentRead);
                     get.Progress = (op, prog) =>
                     {
                         WeakReferenceMessenger.Default.Send(new Messages.PluginDownloadProgressMessage(
-                            pluginId, prog.BytesReceived, prog.TotalBytesToReceive));
+                            tempPluginId, prog.BytesReceived, prog.TotalBytesToReceive));
                     };
                     var response = await get;
 
                     Directory.CreateDirectory(settings.PluginDirectory);
-                    string pluginDownloadPath = Path.Combine(settings.PluginDirectory, pluginId) + ".zip";
+                    string pluginDownloadPath = Path.Combine(settings.PluginDirectory, tempPluginId) + ".zip";
 
                     FileStream pluginStream = new(pluginDownloadPath, FileMode.Create, FileAccess.ReadWrite);
                     using IRandomAccessStream outputStream = pluginStream.AsRandomAccessStream();
@@ -129,7 +135,7 @@ namespace FluentStore.SDK
 #endif
 
                     if (install)
-                        await InstallPlugin(settings, pluginStream, pluginId, overwrite);
+                        await InstallPlugin(settings, pluginStream, overwrite);
                 }
                 catch (Exception ex)
                 {
@@ -143,31 +149,44 @@ namespace FluentStore.SDK
         }
 
         /// <summary>
-        /// Installs the provided plugin using the plugin ID.
+        /// Installs the provided plugin.
         /// </summary>
         /// <param name="settings">
         /// The current application's settings.
         /// </param>
         /// <param name="plugin">
-        /// The plugin the install.
-        /// </param>
-        /// <param name="pluginId">
-        /// The ID of the plugin, used to determine if it's already installed.
+        /// A <see cref="Stream"/> containing a zip archive of the plugin to install.
         /// </param>
         /// <param name="overwrite">
         /// Whether to force install, even if a plugin with the same ID
-        /// is already installed.
+        /// and newer version is already installed.
         /// </param>
         /// <returns>
-        /// Whether the plugin was installed. <see langword="false"/> if the plugin
-        /// was already installed.
+        /// Whether the plugin was installed successfully. <see langword="false"/> if the plugin
+        /// was already installed and <paramref name="overwrite"/> was <see langword="false"/>.
         /// </returns>
-        public static Task<bool> InstallPlugin(ISettingsService settings, Stream plugin, string pluginId, bool overwrite = false)
+        public static Task<bool> InstallPlugin(ISettingsService settings, Stream plugin, bool overwrite = false)
         {
             return Task.Run(delegate
             {
+                string pluginId = "[UNKNOWN]";
+
                 try
                 {
+                    using ZipArchive archive = new(plugin);
+                    var metadataEntry = archive.Entries.FirstOrDefault(
+                        e => e.Name.Equals(PluginMetadata.MetadataFileName, StringComparison.OrdinalIgnoreCase));
+                    if (metadataEntry == null)
+                        return false;
+
+                    // Read metadata before extracting archive.
+                    PluginMetadata metadata;
+                    using (var metadataEntryStream = metadataEntry.Open())
+                    {
+                        metadata = PluginMetadata.DeserializeFromStream(metadataEntryStream);
+                        pluginId = metadata.Id;
+                    }
+
                     WeakReferenceMessenger.Default.Send(
                         new Messages.PluginInstallStartedMessage(pluginId));
 
@@ -176,13 +195,16 @@ namespace FluentStore.SDK
                     string dir = Path.Combine(settings.PluginDirectory, pluginId);
                     if (Directory.Exists(dir))
                     {
+                        // Check if this version is newer than the currently installed one.
+                        var oldMetadata = PluginMetadata.DeserializeFromFile(Path.Combine(dir, PluginMetadata.MetadataFileName));
+                        overwrite |= metadata.PluginVersion > oldMetadata.PluginVersion;
+
                         if (overwrite)
                             Directory.Delete(dir, true);
                         else
                             return false;
                     }
 
-                    using ZipArchive archive = new(plugin);
                     archive.ExtractToDirectory(dir);
 
                     WeakReferenceMessenger.Default.Send(
@@ -211,10 +233,9 @@ namespace FluentStore.SDK
 
             foreach (string pluginPath in Directory.GetFiles(settings.PluginDirectory, "*.zip"))
             {
-                string pluginId = Path.GetFileNameWithoutExtension(pluginPath);
                 using FileStream plugin = new(pluginPath, FileMode.Open);
 
-                bool installed = await InstallPlugin(settings, plugin, pluginId);
+                bool installed = await InstallPlugin(settings, plugin);
                 if (installed)
                     File.Delete(pluginPath);
             }
@@ -253,6 +274,28 @@ namespace FluentStore.SDK
                 // Register handler with the type name as its ID
                 yield return handler;
             }
+        }
+
+        /// <summary>
+        /// Determines if the specified version is compatible, loosely following
+        /// <see href="https://semver.org/">semantic versioning</see> rules.
+        /// </summary>
+        private static bool IsVersionCompatible(this Version curVer, Version newVer)
+        {
+            // Doesn't make sense to compare null versions.
+            if (curVer == null || newVer == null)
+                return false;
+
+            // Major version 0 is for development. These releases
+            // need to have the same major, minor, and build
+            // versions. Only the patch version can be different.
+            if (curVer.Major == 0 || newVer.Major == 0)
+                return curVer.Major == newVer.Major
+                    && curVer.Minor == newVer.Minor
+                    && curVer.Build == newVer.Build;
+
+            // Otherwise, only the major version needs to match.
+            return curVer.Major == newVer.Major;
         }
     }
 

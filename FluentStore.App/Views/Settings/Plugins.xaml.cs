@@ -66,8 +66,7 @@ namespace FluentStore.Views.Settings
             if (pluginFile != null)
             {
                 var plugin = await pluginFile.OpenReadAsync();
-                string pluginId = Path.GetFileNameWithoutExtension(pluginFile.Name);
-                await PluginLoader.InstallPlugin(Helpers.Settings.Default, plugin.AsStream(), pluginId, true);
+                await PluginLoader.InstallPlugin(Helpers.Settings.Default, plugin.AsStream(), true);
             }
         }
 

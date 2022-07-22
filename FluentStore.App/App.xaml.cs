@@ -133,6 +133,7 @@ namespace FluentStore
 
                 // Update last launched version
                 Helpers.Settings.Default.LastLaunchedVersion = appVersion;
+                await Helpers.Settings.Default.SaveAsync();
             }
             log?.Log($"Redirect activation?: {result.RedirectActivation}");
 
