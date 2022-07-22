@@ -120,7 +120,7 @@ namespace FluentStore.SDK
                     Directory.CreateDirectory(settings.PluginDirectory);
                     string pluginDownloadPath = Path.Combine(settings.PluginDirectory, pluginId) + ".zip";
 
-                    FileStream pluginStream = new(pluginDownloadPath, FileMode.Create, FileAccess.Write);
+                    FileStream pluginStream = new(pluginDownloadPath, FileMode.Create, FileAccess.ReadWrite);
                     using IRandomAccessStream outputStream = pluginStream.AsRandomAccessStream();
                     await response.Content.WriteToStreamAsync(outputStream);
                     await pluginStream.FlushAsync();
