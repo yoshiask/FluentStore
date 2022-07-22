@@ -1,0 +1,7 @@
+{
+    "Id": "FluentStore.Sources.GitHub",
+    "DisplayName": "GitHub",
+    "PluginVersion": "0.3.1.0",
+    "SdkVersion": "0.3.1.0",
+    "PluginAssembly": "FluentStore.Sources.GitHub.dll"
+}

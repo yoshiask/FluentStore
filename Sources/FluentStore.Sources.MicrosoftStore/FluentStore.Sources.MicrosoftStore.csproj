@@ -11,4 +11,10 @@
         <ProjectReference Include="..\FluentStore.Sources.WinGet\FluentStore.Sources.WinGet.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <None Update="metadata.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
 </Project>
