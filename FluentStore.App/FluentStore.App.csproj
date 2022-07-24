@@ -59,7 +59,7 @@
         <PackageReference Include="PInvoke.User32" Version="0.7.104" />
         <PackageReference Include="OwlCore" Version="0.0.71" />
         <PackageReference Include="Vanara.PInvoke.DwmApi" Version="3.4.3" />
-        <PackageReference Include="WinUIEx" Version="1.6.0" />
+        <PackageReference Include="WinUIEx" Version="1.8.0" />
         
         <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj" />
         <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
