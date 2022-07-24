@@ -214,6 +214,8 @@ namespace FluentStore.SDK.Helpers
                 using BinaryWriter cache = new(stream);
                 cache.Write(FILE_MAGIC);
             }
+
+            IsInitialized = true;
         }
     }
 }
