@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<FluentStoreVersion>0.3.1.0</FluentStoreVersion>
 		<MinWindowsVersion>10.0.17763.0</MinWindowsVersion>
-		<TargetWindowsVersion>10.0.22000.0</TargetWindowsVersion>
+		<TargetWindowsVersion>10.0.22621.0</TargetWindowsVersion>
 	</PropertyGroup>
 </Project>
 
