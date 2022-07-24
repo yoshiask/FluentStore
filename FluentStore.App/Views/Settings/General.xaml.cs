@@ -1,4 +1,6 @@
-﻿using FluentStore.SDK.Helpers;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using FluentStore.SDK.Helpers;
+using FluentStore.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -12,15 +14,20 @@ namespace FluentStore.Views.Settings
 {
     public sealed partial class General : UserControl
     {
+        private readonly ICommonPathManager pathManager = Ioc.Default.GetService<ICommonPathManager>();
+
         public General()
         {
             this.InitializeComponent();
         }
 
-        private void ClearCacheButton_Click(object sender, RoutedEventArgs e)
+        private async void ClearCacheButton_Click(object sender, RoutedEventArgs e)
         {
-            DownloadCache cache = new(createIfDoesNotExist: false);
-            cache.Clear();
+            if (pathManager == null) return;
+
+            var cacheDir = await pathManager.GetTempDirectoryAsync();
+            DownloadCache cache = new(cacheDir, createIfDoesNotExist: false);
+            await cache.Clear();
         }
 
         private async void ResetButton_Click(object sender, RoutedEventArgs e)

@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.WinUI.Notifications;
+using FluentStore.Helpers;
 using FluentStore.SDK;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Users;
@@ -38,7 +39,7 @@ namespace FluentStore
         /// <summary>
         /// Gets the <see cref="IServiceProvider"/> instance to resolve application services.
         /// </summary>
-        public IServiceProvider Services { get; }
+        public IServiceProvider Services { get; private set; }
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -53,9 +54,6 @@ namespace FluentStore
             TaskScheduler.UnobservedTaskException += (sender, e) => OnUnhandledException(e.Exception);
             AppDomain.CurrentDomain.UnhandledException += (sender, e)
               => OnUnhandledException(e.ExceptionObject as Exception ?? new Exception());
-
-            Services = ConfigureServices();
-            Ioc.Default.ConfigureServices(Services);
 
             _singleInstanceApp = new SingleInstanceDesktopApp("FluentStoreBeta");
             _singleInstanceApp.Launched += OnSingleInstanceLaunched;
@@ -73,6 +71,10 @@ namespace FluentStore
 
         private async void OnSingleInstanceLaunched(object? sender, SingleInstanceLaunchEventArgs e)
         {
+            // Set up IoC services
+            Services = await ConfigureServices();
+            Ioc.Default.ConfigureServices(Services);
+
             var log = Ioc.Default.GetService<LoggerService>();
             var navService = Ioc.Default.GetRequiredService<INavigationService>();
 
@@ -97,23 +99,23 @@ namespace FluentStore
                     Window.Activate();
                 });
 
-                await Helpers.Settings.Default.LoadAsync();
+                await Settings.Default.LoadAsync();
 
                 // Check if app was updated
                 var appVersion = Windows.ApplicationModel.Package.Current.Id.Version.ToVersion();
-                switch (Helpers.Settings.Default.GetAppUpdateStatus())
+                switch (Settings.Default.GetAppUpdateStatus())
                 {
                     case AppUpdateStatus.NewlyInstalled:
                         // Download and install default plugins
                         log?.Log($"Began installing default plugins");
-                        await Helpers.Settings.Default.InstallDefaultPlugins();
+                        await Settings.Default.InstallDefaultPlugins();
                         log?.Log($"Finished installing plugins");
                         break;
 
                     default:
                         // Always install pending plugins
                         log?.Log($"Began installing pending plugins");
-                        await PluginLoader.InstallPendingPlugins(Helpers.Settings.Default);
+                        await PluginLoader.InstallPendingPlugins(Settings.Default);
                         log?.Log($"Finished install pending plugins");
                         break;
                 }
@@ -121,10 +123,10 @@ namespace FluentStore
                 // Load plugins and initialize package and account services
                 var passwordVaultService = Ioc.Default.GetRequiredService<IPasswordVaultService>();
                 var pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
-                Helpers.Settings.Default.PackageHandlerEnabledStateChanged += pkgSvc.UpdatePackageHandlerEnabledStates;
+                Settings.Default.PackageHandlerEnabledStateChanged += pkgSvc.UpdatePackageHandlerEnabledStates;
 
                 log?.Log($"Began loading plugins");
-                var pluginLoadResult = PluginLoader.LoadPlugins(Helpers.Settings.Default, passwordVaultService);
+                var pluginLoadResult = PluginLoader.LoadPlugins(Settings.Default, passwordVaultService);
                 pkgSvc.PackageHandlers = pluginLoadResult.PackageHandlers;
                 log?.Log($"Finished loading plugins");
 
@@ -132,8 +134,8 @@ namespace FluentStore
                 await pkgSvc.TrySlientSignInAsync();
 
                 // Update last launched version
-                Helpers.Settings.Default.LastLaunchedVersion = appVersion;
-                await Helpers.Settings.Default.SaveAsync();
+                Settings.Default.LastLaunchedVersion = appVersion;
+                await Settings.Default.SaveAsync();
             }
             log?.Log($"Redirect activation?: {result.RedirectActivation}");
 
@@ -252,16 +254,19 @@ namespace FluentStore
         /// <summary>
         /// Configures the services for the application.
         /// </summary>
-        private static IServiceProvider ConfigureServices()
+        private static async Task<IServiceProvider> ConfigureServices()
         {
             var services = new ServiceCollection();
 
-            string logFileName = CommonPaths.GenerateLogFilePath();
-            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(logFileName));
-            services.AddSingleton(new LoggerService(System.IO.File.CreateText(logFileName)));
+            PackagedPathManager pathManager = new();
+            services.AddSingleton<ICommonPathManager>(pathManager);
+
+            var logFile = await pathManager.CreateLogFileAsync();
+            var logFileStream = await logFile.GetStreamAsync();
+            services.AddSingleton(new LoggerService(logFileStream));
 
             services.AddSingleton(new Microsoft.Marketplace.Storefront.Contracts.StorefrontApi());
-            services.AddSingleton<ISettingsService>(Helpers.Settings.Default);
+            services.AddSingleton<ISettingsService>(Settings.Default);
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
             services.AddSingleton(new FluentStoreAPI.FluentStoreAPI());

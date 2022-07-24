@@ -47,8 +47,8 @@ namespace FluentStore.Services
 
         public virtual string PluginDirectory()
         {
-            System.IO.Directory.CreateDirectory(CommonPaths.DefaultPluginDirectory);
-            return CommonPaths.DefaultPluginDirectory;
+            System.IO.Directory.CreateDirectory(CommonPaths.DefaultPluginDirectoryName);
+            return CommonPaths.DefaultPluginDirectoryName;
         }
 
         public virtual Version LastLaunchedVersion() => null;

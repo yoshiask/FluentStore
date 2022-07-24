@@ -11,11 +11,16 @@ using System.IO;
 using System.Linq;
 using Windows.Storage.Streams;
 using System.IO.Compression;
+using OwlCore.AbstractStorage;
+using FluentStore.Services;
+using CommunityToolkit.Mvvm.DependencyInjection;
 
 namespace FluentStore.SDK.Helpers
 {
     public static class StorageHelper
     {
+        private static readonly ICommonPathManager pathManager = Ioc.Default.GetRequiredService<ICommonPathManager>();
+
         private static HttpClient _HttpClient;
         private static HttpClient HttpClient
         {
@@ -27,102 +32,65 @@ namespace FluentStore.SDK.Helpers
             }
         }
 
-        public static DirectoryInfo GetTempDirectory()
-        {
-            DirectoryInfo tempDir = new(Path.Combine(Path.GetTempPath(), "FluentStoreBeta"));
-            if (!tempDir.Exists)
-                tempDir.Create();
-            return tempDir;
-        }
-
-        public static FileInfo GetPackageFile(Urn packageUrn, DirectoryInfo folder = null)
+        public static Task<IFileData> GetPackageFile(Urn packageUrn, IFolderData folder = null)
             => OpenPackageFile(packageUrn, folder, FileMode.Open);
 
-        public static FileInfo CreatePackageFile(Urn packageUrn, DirectoryInfo folder = null)
+        public static Task<IFileData> CreatePackageFile(Urn packageUrn, IFolderData folder = null)
             => OpenPackageFile(packageUrn, folder, FileMode.Create);
 
-        public static FileInfo OpenPackageFile(Urn packageUrn, DirectoryInfo folder = null, FileMode mode = FileMode.Create)
+        public static async Task<IFileData> OpenPackageFile(Urn packageUrn, IFolderData folder = null, FileMode mode = FileMode.Create)
         {
             Guard.IsNotNull(packageUrn, nameof(packageUrn));
             if (folder == null)
-                folder = GetTempDirectory();
+                folder = await pathManager.GetTempDirectoryAsync();
 
-            return new(Path.Combine(folder.FullName, PrepUrnForFile(packageUrn)));
+            return await folder.CreateFileAsync(PrepUrnForFile(packageUrn));
         }
 
-        public static DirectoryInfo CreatePackageDownloadFolder(Urn urn)
+        public static Task<IFolderData> CreatePackageDownloadFolder(Urn urn)
         {
             Guard.IsNotNull(urn, nameof(urn));
 
-            return CreateTempFolderAsync(PrepUrnForFile(urn));
+            return pathManager.CreateDirectoryTempAsync(PrepUrnForFile(urn));
         }
 
-        public static DirectoryInfo CreateTempFolderAsync(string relativePath)
-        {
-            return GetTempDirectory().EnsureExists(relativePath);
-        }
-
-        public static DirectoryInfo EnsureExists(this DirectoryInfo folder, string relativePath)
+        public static async Task<IFolderData> EnsureExists(this IFolderData folder, string relativePath)
         {
             Guard.IsNotNull(folder, nameof(folder));
 
-            DirectoryInfo prevFolder = folder;
-            foreach (string fragment in relativePath.Split('/', '\\'))
-            {
-                DirectoryInfo curFolder = prevFolder.EnumerateDirectories(fragment).FirstOrDefault();
-                if (curFolder == null)
-                    curFolder = prevFolder.CreateSubdirectory(fragment);
-                prevFolder = curFolder;
-            }
+            var dirSepChars = new[] { Path.DirectorySeparatorChar, '/', '\\' };
+            IFolderData prevFolder = folder;
+            foreach (string fragment in relativePath.Split(dirSepChars, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                prevFolder = await prevFolder.CreateFolderAsync(fragment);
 
             return prevFolder;
         }
 
-        public static void RecursiveDelete(this DirectoryInfo folder)
+        public static async Task RecursiveDelete(this IFolderData folder)
         {
-            if (!folder.Exists) return;
+            if (!Directory.Exists(folder.Path)) return;
 
-            foreach (var dir in folder.EnumerateDirectories())
-                dir.RecursiveDelete();
-            folder.Delete(true);
-        }
+            foreach (var dir in await folder.GetFoldersAsync())
+                await dir.RecursiveDelete();
 
-        public static void RecursiveDelete(this FileSystemInfo info)
-        {
-            if (info is DirectoryInfo subdir)
-                subdir.RecursiveDelete();
-            else
-                info.Delete();
-        }
-
-        public static void MoveRename(this FileInfo file, string newName, bool overwrite = true)
-        {
-            string newPath = Path.Combine(file.DirectoryName, newName);
-            file.MoveTo(newPath, overwrite);
-        }
-
-        public static FileInfo CopyRename(this FileInfo file, string newName, bool overwrite = true)
-        {
-            string newPath = Path.Combine(file.DirectoryName, newName);
-            return file.CopyTo(newPath, overwrite);
+            await folder.DeleteAsync();
         }
 
         public static string PrepUrnForFile(Urn urn)
         {
             string urnStr = urn.ToString()[4..];
             return urnStr.Replace(":", "_");
-            byte[] hashBytes = SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(urnStr));
-            return BitConverter.ToString(hashBytes).Replace("-", "");
         }
 
-        public static async Task BackgroundDownloadPackage(PackageBase package, Uri downloadUri, DirectoryInfo folder = null)
+        public static async Task BackgroundDownloadPackage(PackageBase package, Uri downloadUri, IFolderData folder = null)
         {
-            FileInfo info = null;
-            FileStream stream = null;
+            IFileData info = null;
+            Stream stream = null;
 
             // Use cached download if available
             DownloadCache cache = new(folder);
-            if (cache.TryGet(package.Urn, out var cacheEntry) && cacheEntry.HasValue && cacheEntry.Value.GetDownloadItem() is FileInfo cachedFile)
+            (bool isCached, var cacheEntry) = await cache.TryGet(package.Urn);
+            if (isCached && cacheEntry.HasValue && cacheEntry.Value.GetDownloadItem() is IFileData cachedFile)
             {
                 if (cacheEntry.Value.GetVersion() == package.Version)
                 {
@@ -133,8 +101,8 @@ namespace FluentStore.SDK.Helpers
             else
             {
                 // Create the location to download to
-                info = CreatePackageFile(package.Urn, folder);
-                stream = info.OpenWrite();
+                info = await CreatePackageFile(package.Urn, folder);
+                stream = await info.GetStreamAsync(FileAccessMode.ReadWrite);
                 cache.Add(package.Urn, package.Version, info);
             }
 
@@ -182,12 +150,16 @@ namespace FluentStore.SDK.Helpers
             package.Status = PackageStatus.Downloaded;
         }
 
-        public static DirectoryInfo ExtractArchiveToDirectory(FileInfo archiveFile, bool overwrite)
+        public static async Task<IFolderData> ExtractArchiveToDirectory(IFileData archiveFile, bool overwrite)
         {
-            using FileStream archiveStream = archiveFile.OpenRead();
+            var parentDir = await archiveFile.GetParentAsync();
+
+            using Stream archiveStream = await archiveFile.GetStreamAsync();
             using ZipArchive archive = new(archiveStream, ZipArchiveMode.Read);
-            var dir = new DirectoryInfo(archiveFile.FullName[..^archiveFile.Extension.Length]);
-            archive.ExtractToDirectory(dir.FullName, overwrite);
+
+            var dir = await parentDir.CreateFolderAsync(archiveFile.Name);
+            archive.ExtractToDirectory(dir.Path, overwrite);
+
             return dir;
         }
 

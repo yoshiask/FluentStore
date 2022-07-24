@@ -123,7 +123,7 @@ namespace FluentStore.Helpers
 
         private static IFolderData GetSettingsFolder()
         {
-            SystemIOFolderData dir = new(CommonPaths.DefaultSettingsDirectory);
+            SystemIOFolderData dir = new(CommonPaths.DefaultSettingsDirectoryName);
             Directory.CreateDirectory(dir.Path);
             return dir;
         }
