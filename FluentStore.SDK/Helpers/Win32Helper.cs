@@ -79,10 +79,9 @@ namespace FluentStore.SDK.Helpers
         }
 
         /// <inheritdoc cref="PackageBase.CacheAppIcon"/>
-        public static async Task<ImageBase> GetAppIcon(FileInfo file)
+        public static ImageBase GetAppIcon(Stream stream)
         {
             // Open package archive for reading
-            using FileStream stream = file.OpenRead();
             using ZipArchive archive = new(stream);
 
             // Get the app icon

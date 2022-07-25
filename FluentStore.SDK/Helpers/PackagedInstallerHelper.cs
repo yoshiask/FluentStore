@@ -17,18 +17,18 @@ using Windows.Management.Deployment;
 using Windows.System;
 using Windows.System.Profile;
 using Windows.Foundation;
+using OwlCore.AbstractStorage;
 
 namespace FluentStore.SDK.Helpers
 {
     public static class PackagedInstallerHelper
     {
         /// <inheritdoc cref="PackageBase.GetCannotBeInstalledReason"/>
-        public static string GetCannotBeInstalledReason(FileInfo installerFile, bool isBundle)
+        public static string GetCannotBeInstalledReason(Stream stream, bool isBundle)
         {
-            Guard.IsNotNull(installerFile, nameof(installerFile));
+            Guard.IsNotNull(stream, nameof(stream));
 
             // Open package archive for reading
-            using var stream = installerFile.OpenRead();
             using var archive = new ZipArchive(stream);
 
             // Extract metadata from manifest
@@ -42,7 +42,7 @@ namespace FluentStore.SDK.Helpers
                 do
                 {
                     var archNode = archNodes.Current;
-                    architectures.Add((ProcessorArchitecture)Enum.Parse(typeof(ProcessorArchitecture), archNode.Value, true));
+                    architectures.Add(Enum.Parse<ProcessorArchitecture>(archNode.Value, true));
                 } while (archNodes.MoveNext());
             }
             else
@@ -51,7 +51,7 @@ namespace FluentStore.SDK.Helpers
                 using var manifestStream = manifestEntry.Open();
                 XPathDocument manifest = new(manifestStream);
                 var archNode = manifest.CreateNavigator().SelectSingleNode("//Identity/@ProcessorArchitecture");
-                architectures.Add((ProcessorArchitecture)Enum.Parse(typeof(ProcessorArchitecture), archNode.Value, true));
+                architectures.Add(Enum.Parse<ProcessorArchitecture>(archNode.Value, true));
             }
 
             // Check Windows platform
@@ -106,14 +106,14 @@ namespace FluentStore.SDK.Helpers
                 if (package.Type == InstallerType.AppInstaller)
                 {
                     operation = pkgManager.AddPackageByAppInstallerFileAsync(
-                        new Uri(package.DownloadItem.FullName),
+                        new Uri(package.DownloadItem.Path),
                         AddPackageByAppInstallerOptions.ForceTargetAppShutdown,
                         pkgManager.GetDefaultPackageVolume());
                 }
                 else
                 {
                     operation = pkgManager.AddPackageAsync(
-                        new Uri(package.DownloadItem.FullName),
+                        new Uri(package.DownloadItem.Path),
                         null,
                         DeploymentOptions.ForceApplicationShutdown);
                 }
@@ -160,72 +160,70 @@ namespace FluentStore.SDK.Helpers
             }
         }
 
-        public static InstallerType GetInstallerType(FileInfo file)
+        public static InstallerType GetInstallerType(Stream stream)
         {
             InstallerType type = InstallerType.Unknown;
 
-            using (FileStream stream = file.OpenRead())
+            var bytes = new byte[4];
+            stream.Position = 0;
+            stream.Read(bytes, 0, 4);
+            uint magicNumber = (uint)((bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3]);
+
+            switch (magicNumber)
             {
-                var bytes = new byte[4];
-                stream.Read(bytes, 0, 4);
-                uint magicNumber = (uint)((bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3]);
-
-                switch (magicNumber)
-                {
-                    // ZIP
-                    /// Typical [not empty or spanned] ZIP archive
-                    case 0x504B0304:
-                        using (ZipArchive archive = new(stream))
+                // ZIP
+                /// Typical [not empty or spanned] ZIP archive
+                case 0x504B0304:
+                    using (ZipArchive archive = new(stream))
+                    {
+                        var entry = archive.GetEntry("[Content_Types].xml");
+                        var ctypesXml = XDocument.Load(entry.Open());
+                        var defaults = ctypesXml.Root.Elements().Where(e => e.Name.LocalName == "Default");
+                        if (defaults.Any(d => d.Attribute("Extension").Value == "msix"))
                         {
-                            var entry = archive.GetEntry("[Content_Types].xml");
-                            var ctypesXml = XDocument.Load(entry.Open());
-                            var defaults = ctypesXml.Root.Elements().Where(e => e.Name.LocalName == "Default");
-                            if (defaults.Any(d => d.Attribute("Extension").Value == "msix"))
-                            {
-                                // Package contains one or more MSIX packages
-                                type |= InstallerType.Msix;
-                            }
-                            else if (defaults.Any(d => d.Attribute("Extension").Value == "appx"))
-                            {
-                                // Package contains one or more APPX packages
-                                type |= InstallerType.AppX;
-                            }
-                            if (defaults.Any(d => d.Attribute("ContentType").Value == "application/vnd.ms-appx.bundlemanifest+xml"))
-                            {
-                                // Package is a bundle
-                                type |= InstallerType.Bundle;
-                            }
-
-                            if (type == InstallerType.Unknown)
-                            {
-                                // We're not sure exactly what kind of package it is, but it's definitely
-                                // a package archive. Even if it's not actually an appxbundle, it will
-                                // likely still work.
-                                type = InstallerType.AppXBundle;
-                            }
+                            // Package contains one or more MSIX packages
+                            type |= InstallerType.Msix;
                         }
-                        break;
+                        else if (defaults.Any(d => d.Attribute("Extension").Value == "appx"))
+                        {
+                            // Package contains one or more APPX packages
+                            type |= InstallerType.AppX;
+                        }
+                        if (defaults.Any(d => d.Attribute("ContentType").Value == "application/vnd.ms-appx.bundlemanifest+xml"))
+                        {
+                            // Package is a bundle
+                            type |= InstallerType.Bundle;
+                        }
 
-                    // EMSIX, EAAPX, EMSIXBUNDLE, EAPPXBUNDLE
-                    /// An encrypted installer [bundle]?
-                    case 0x45584248:
-                        // This means the downloaded file wasn't a zip archive.
-                        // Some inspection of a hex dump of the file leads me to believe that this means
-                        // the installer is encrypted. There's probably nothing that can be done about this,
-                        // but since it's a known case, let's leave this here.
-                        type = InstallerType.EAppXBundle;
-                        break;
-                }
+                        if (type == InstallerType.Unknown)
+                        {
+                            // We're not sure exactly what kind of package it is, but it's definitely
+                            // a package archive. Even if it's not actually an appxbundle, it will
+                            // likely still work.
+                            type = InstallerType.AppXBundle;
+                        }
+                    }
+                    break;
+
+                // EMSIX, EAAPX, EMSIXBUNDLE, EAPPXBUNDLE
+                /// An encrypted installer [bundle]?
+                case 0x45584248:
+                    // This means the downloaded file wasn't a zip archive.
+                    // Some inspection of a hex dump of the file leads me to believe that this means
+                    // the installer is encrypted. There's probably nothing that can be done about this,
+                    // but since it's a known case, let's leave this here.
+                    type = InstallerType.EAppXBundle;
+                    break;
             }
 
+            stream.Position = 0;
             return type;
         }
 
         /// <inheritdoc cref="PackageBase.CacheAppIcon"/>
-        public static ImageBase GetAppIcon(FileInfo file, bool isBundle)
+        public static ImageBase GetAppIcon(Stream stream, bool isBundle)
         {
             // Open package archive for reading
-            using var stream = file.OpenRead();
             using var archive = new ZipArchive(stream);
 
             // Extract icon from manifest
@@ -308,18 +306,17 @@ namespace FluentStore.SDK.Helpers
 
             return new StreamImage
             {
-                ImageType = Images.ImageType.Logo,
+                ImageType = ImageType.Logo,
                 BackgroundColor = "Transparent",
                 Stream = iconEntry.Open()
             };
         }
 
-        public static string GetPackageFamilyName(FileInfo installerFile, bool isBundle)
+        public static string GetPackageFamilyName(Stream stream, bool isBundle)
         {
-            Guard.IsNotNull(installerFile, nameof(installerFile));
+            Guard.IsNotNull(stream, nameof(stream));
 
             // Open package archive for reading
-            using var stream = installerFile.OpenRead();
             using var archive = new ZipArchive(stream);
 
             // Extract metadata from manifest
