@@ -29,7 +29,6 @@ using FluentStore.SDK.Models;
 using System.Linq;
 using OwlCore.WinUI.AbstractUI.Controls;
 using System.Collections.Generic;
-using OwlCore.AbstractStorage;
 
 namespace FluentStore.Views
 {
@@ -234,7 +233,7 @@ namespace FluentStore.Views
                 if (downloadItem != null)
                 {
                     PackageBase p = ViewModel.Package;
-                    var file = p.DownloadItem;
+                    FileInfo file = (FileInfo)p.DownloadItem;
                     Windows.Storage.Pickers.FileSavePicker openPicker = new()
                     {
                         SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Downloads
@@ -243,14 +242,13 @@ namespace FluentStore.Views
                     // Initialize save picker for Win32
                     WinRT.Interop.InitializeWithWindow.Initialize(openPicker, App.Current.Window.Handle);
 
-                    openPicker.FileTypeChoices.Add(p.Type.GetExtensionDescription(), new string[] { file.FileExtension });
+                    openPicker.FileTypeChoices.Add(p.Type.GetExtensionDescription(), new string[] { file.Extension });
                     openPicker.SuggestedFileName = file.Name;
 
                     var userFile = await openPicker.PickSaveFileAsync();
                     if (userFile != null)
                     {
-                        var dest = await userFile.GetParentAsync();
-                        await file.MoveAndRenameAsync(new StorageFolderData(dest), userFile.Name);
+                        await Task.Run(() => file.MoveTo(userFile.Path, true));
                     }
                 }
             }

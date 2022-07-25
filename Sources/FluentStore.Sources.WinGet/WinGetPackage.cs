@@ -17,7 +17,6 @@ using FluentStore.SDK.Models;
 using Winstall.Models.Manifest;
 using Winstall.Models.Manifest.Enums;
 using Flurl.Http;
-using OwlCore.AbstractStorage;
 
 namespace FluentStore.Sources.WinGet
 {
@@ -82,7 +81,7 @@ namespace FluentStore.Sources.WinGet
             SupportUrl = Link.Create(locale.PublisherSupportUrl, DeveloperName + " support");
         }
 
-        public override async Task<AbstractFileItemData> DownloadAsync(IFolderData folder = null)
+        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
             if (!Status.IsAtLeast(PackageStatus.BasicDetails))
                 return null;
@@ -98,7 +97,7 @@ namespace FluentStore.Sources.WinGet
                 return null;
 
             // Set the proper file name
-            DownloadItem = await DownloadItem.CopyAndRenameAsync(folder, Path.GetFileName(PackageUri.ToString()));
+            DownloadItem = ((FileInfo)DownloadItem).CopyRename(Path.GetFileName(PackageUri.ToString()));
 
             WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageDownloadCompleted(this));
             return DownloadItem;
@@ -151,11 +150,9 @@ namespace FluentStore.Sources.WinGet
             {
                 case InstallerType.Msix:
                     isSuccess = await PackagedInstallerHelper.Install(this);
-                    using (var stream = await DownloadItem.GetStreamAsync())
-                    {
-                        Type = PackagedInstallerHelper.GetInstallerType(stream);
-                        PackageFamilyName = PackagedInstallerHelper.GetPackageFamilyName(stream, Type.HasFlag(InstallerType.Bundle));
-                    }
+                    var file = (FileInfo)DownloadItem;
+                    Type = PackagedInstallerHelper.GetInstallerType(file);
+                    PackageFamilyName = PackagedInstallerHelper.GetPackageFamilyName(file, Type.HasFlag(InstallerType.Bundle));
                     break;
 
                 default:

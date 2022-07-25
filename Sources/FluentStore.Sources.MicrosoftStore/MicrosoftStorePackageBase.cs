@@ -23,7 +23,6 @@ using FluentStore.SDK;
 using FluentStore.SDK.Packages;
 using FluentStore.Sources.WinGet;
 using StoreWarningMessage = Microsoft.Marketplace.Storefront.Contracts.V3.WarningMessage;
-using OwlCore.AbstractStorage;
 
 namespace FluentStore.Sources.MicrosoftStore
 {
@@ -246,9 +245,9 @@ namespace FluentStore.Sources.MicrosoftStore
             return null;
         }
 
-        public override async Task<AbstractFileItemData> DownloadAsync(IFolderData folder = null)
+        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
-            DownloadItem = new(await InternalDownloadAsync(folder));
+            DownloadItem = await InternalDownloadAsync(folder);
             if (Status.IsLessThan(PackageStatus.Downloaded))
                 return null;
 
@@ -259,7 +258,7 @@ namespace FluentStore.Sources.MicrosoftStore
         protected abstract void PopulateInternalPackage(CardModel card);
         protected abstract void PopulateInternalPackage(ProductDetails product);
 
-        protected abstract Task<AbstractFileItemData> InternalDownloadAsync(IFolderData folder);
+        protected abstract Task<FileInfo> InternalDownloadAsync(DirectoryInfo folder);
 
         public override async Task<ImageBase> CacheAppIcon()
         {

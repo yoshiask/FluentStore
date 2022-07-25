@@ -8,7 +8,6 @@ using FluentStore.SDK.Messages;
 using FluentStore.SDK.Models;
 using Garfoot.Utilities.FluentUrn;
 using Octokit;
-using OwlCore.AbstractStorage;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -85,7 +84,7 @@ namespace FluentStore.Sources.GitHub
 
         public override Task<bool> CanLaunchAsync() => Task.FromResult(false);
 
-        public override async Task<AbstractFileItemData> DownloadAsync(IFolderData folder = null)
+        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
             ReleaseAsset asset = null;
             Release release = null;
@@ -159,8 +158,8 @@ namespace FluentStore.Sources.GitHub
                 if (Status.IsLessThan(PackageStatus.Downloaded))
                     return null;
 
-                if (PackageUri != null && DownloadItem is IMutableFileData file)
-                    DownloadItem = await DownloadItem.CopyAndRenameAsync(folder, Path.GetFileName(PackageUri.AbsolutePath));
+                if (PackageUri != null && DownloadItem is FileInfo file)
+                    DownloadItem = file.CopyRename(Path.GetFileName(PackageUri.AbsolutePath));
             }
             catch (Exception ex)
             {
@@ -168,7 +167,7 @@ namespace FluentStore.Sources.GitHub
                 return null;
             }
 
-            Type = InstallerTypes.FromExtension(DownloadItem.FileExtension[1..]);
+            Type = InstallerTypes.FromExtension(DownloadItem.Extension[1..]);
             Status = PackageStatus.Downloaded;
             return DownloadItem;
         }
@@ -181,10 +180,10 @@ namespace FluentStore.Sources.GitHub
 
             try
             {
-                if (Type == InstallerType.Zip && DownloadItem is IFileData archiveFile)
+                if (Type == InstallerType.Zip && DownloadItem is FileInfo archiveFile)
                 {
                     // ZIP is a special type, because it itself is not an installer.
-                    using Stream archiveStream = await archiveFile.GetStreamAsync();
+                    using FileStream archiveStream = archiveFile.OpenRead();
                     using ZipArchive archive = new(archiveStream, ZipArchiveMode.Read);
 
                     // Pick file that is most likely an installer
@@ -206,9 +205,9 @@ namespace FluentStore.Sources.GitHub
 
                     // Extract everything, but keep track of installer
                     ZipArchiveEntry selectedAsset = assets.First();
-                    var dir = archiveFile.Path[..^archiveFile.FileExtension.Length];
-                    archive.ExtractToDirectory(dir, true);
-                    DownloadItem = new(Path.Combine(dir, selectedAsset.FullName));
+                    var dir = new DirectoryInfo(archiveFile.FullName[..^archiveFile.Extension.Length]);
+                    archive.ExtractToDirectory(dir.FullName, true);
+                    DownloadItem = new FileInfo(Path.Combine(dir.FullName, selectedAsset.FullName));
                     Type = InstallerTypes.FromExtension(Path.GetExtension(selectedAsset.Name)[1..]);
                 }
 

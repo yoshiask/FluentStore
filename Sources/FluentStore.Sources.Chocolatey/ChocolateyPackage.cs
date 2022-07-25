@@ -7,7 +7,6 @@ using FluentStore.SDK.Images;
 using FluentStore.SDK.Messages;
 using FluentStore.SDK.Models;
 using Garfoot.Utilities.FluentUrn;
-using OwlCore.AbstractStorage;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -54,7 +53,7 @@ namespace FluentStore.Sources.Chocolatey
             };
         }
 
-        public override async Task<AbstractFileItemData> DownloadAsync(IFolderData folder = null)
+        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
             // Find the package URI
             await PopulatePackageUri();
@@ -67,7 +66,7 @@ namespace FluentStore.Sources.Chocolatey
                 return null;
 
             // Set the proper file name
-            DownloadItem = await DownloadItem.CopyAndRenameAsync(folder, $"{Model.Id}.{Model.Version}.nupkg");
+            DownloadItem = ((FileInfo)DownloadItem).CopyRename($"{Model.Id}.{Model.Version}.nupkg");
 
             WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageDownloadCompleted(this));
             Status = SDK.PackageStatus.Downloaded;
@@ -125,15 +124,16 @@ namespace FluentStore.Sources.Chocolatey
             try
             {
                 // Extract nupkg and locate PowerShell install script
-                var dir = await StorageHelper.ExtractArchiveToDirectory(DownloadItem, true);
-                SystemIOFileData installer = new(Path.Combine(dir.Path, "tools", "chocolateyInstall.ps1"));
-                DownloadItem = new(installer);
+                var dir = StorageHelper.ExtractArchiveToDirectory((FileInfo)DownloadItem, true);
+                FileInfo installer = new(Path.Combine(dir.FullName, "tools", "chocolateyInstall.ps1"));
+                DownloadItem = installer;
 
                 // Run install script
                 // Cannot find a provider with the name '$ErrorActionPreference = 'Stop';
                 using PowerShell ps = PowerShell.Create();
-                var results = await ps.AddScript(File.ReadAllText(installer.Path))
+                var results = await ps.AddScript(File.ReadAllText(installer.FullName))
                                       .InvokeAsync();
+                
             }
             catch (Exception ex)
             {

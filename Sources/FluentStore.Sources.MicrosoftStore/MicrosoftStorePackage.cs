@@ -1,15 +1,12 @@
 ﻿using CommunityToolkit.Diagnostics;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Messages;
 using FluentStore.SDK.Models;
 using FluentStore.SDK.Packages;
-using FluentStore.Services;
 using Microsoft.Marketplace.Storefront.Contracts.V3;
 using Microsoft.Marketplace.Storefront.Contracts.V8.One;
-using OwlCore.AbstractStorage;
 using StoreDownloader;
 using System;
 using System.IO;
@@ -20,21 +17,19 @@ namespace FluentStore.Sources.MicrosoftStore
 {
     public class MicrosoftStorePackage : MicrosoftStorePackageBase
     {
-        public readonly ICommonPathManager _pathManager = Ioc.Default.GetRequiredService<ICommonPathManager>();
-
         public MicrosoftStorePackage(PackageHandlerBase packageHandler, CardModel card = null, ProductSummary summary = null, ProductDetails product = null) : base(packageHandler, card, summary, product)
         {
             Guard.IsFalse(IsWinGet);
         }
 
-        protected override async Task<AbstractFileItemData> InternalDownloadAsync(IFolderData folder)
+        protected override async Task<FileInfo> InternalDownloadAsync(DirectoryInfo folder)
         {
             try
             {
                 // Get system and package info
                 string[] categoryIds = new[] { Model.Skus[0].FulfillmentData.WuCategoryId };
                 var sysInfo = Handlers.MicrosoftStore.Win32Helper.GetSystemInfo();
-                folder ??= await _pathManager.GetTempDirectoryAsync();
+                folder ??= StorageHelper.GetTempDirectory();
 
                 // Get update data
                 WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
@@ -57,12 +52,12 @@ namespace FluentStore.Sources.MicrosoftStore
 
                 // Start download
                 WeakReferenceMessenger.Default.Send(new PackageDownloadStartedMessage(this));
-                string[] files = await MSStoreDownloader.DownloadPackageAsync(updates, new(folder.Path), new DownloadProgress(DownloadProgress));
+                string[] files = await MSStoreDownloader.DownloadPackageAsync(updates, folder, new DownloadProgress(DownloadProgress));
                 if (files == null || files.Length == 0)
                     throw new Exception("Failed to download pacakges using WindowsUpdateLib");
                 Status = InternalPackage.Status = PackageStatus.Downloaded;
 
-                AbstractFileItemData downloadFile = new(new SystemIOFileData(Path.Combine(folder.Path, files[0])));
+                FileInfo downloadFile = new(Path.Combine(folder.FullName, files[0]));
                 InternalPackage.DownloadItem = downloadFile;
                 await ((ModernPackage<ProductDetails>)InternalPackage).GetInstallerType();
                 Type = InternalPackage.Type;
