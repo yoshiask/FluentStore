@@ -25,7 +25,7 @@ namespace FluentStore
     /// </summary>
     public partial class App : Application
     {
-        private SingleInstanceDesktopApp _singleInstanceApp;
+        private readonly SingleInstanceDesktopApp _singleInstanceApp;
 
         public const string AppName = "Fluent Store";
 
@@ -54,6 +54,9 @@ namespace FluentStore
             TaskScheduler.UnobservedTaskException += (sender, e) => OnUnhandledException(e.Exception);
             AppDomain.CurrentDomain.UnhandledException += (sender, e)
               => OnUnhandledException(e.ExceptionObject as Exception ?? new Exception());
+
+            _singleInstanceApp = new SingleInstanceDesktopApp("FluentStoreBeta");
+            _singleInstanceApp.Launched += OnSingleInstanceLaunched;
         }
 
         /// <summary>
@@ -61,22 +64,19 @@ namespace FluentStore
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="args">Details about the launch request and process.</param>
-        protected override async void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            Services = await ConfigureServices();
-            Ioc.Default.ConfigureServices(Services);
-
-            _singleInstanceApp = new SingleInstanceDesktopApp("FluentStoreBeta");
-            _singleInstanceApp.Launched += OnSingleInstanceLaunched;
-
             _singleInstanceApp.Launch(args.Arguments);
         }
 
         private async void OnSingleInstanceLaunched(object? sender, SingleInstanceLaunchEventArgs e)
         {
+            // Set up IoC services
+            Services = await ConfigureServices();
+            Ioc.Default.ConfigureServices(Services);
+
             var log = Ioc.Default.GetService<LoggerService>();
             var navService = Ioc.Default.GetRequiredService<INavigationService>();
-            var pathManager = Ioc.Default.GetRequiredService<ICommonPathManager>();
 
             ProtocolResult result = navService.ParseProtocol(e.Arguments, isFirstInstance: e.IsFirstInstance);
             log?.Log($"Parse protocol result: {result}");
@@ -258,17 +258,15 @@ namespace FluentStore
         {
             var services = new ServiceCollection();
 
-            PackagedPathManager pathManager = PackagedPathManager.Default;
+            PackagedPathManager pathManager = new();
             services.AddSingleton<ICommonPathManager>(pathManager);
 
             var logFile = await pathManager.CreateLogFileAsync();
-            var logFileStream = await logFile.GetStreamAsync(OwlCore.AbstractStorage.FileAccessMode.ReadWrite);
+            var logFileStream = await logFile.GetStreamAsync();
             services.AddSingleton(new LoggerService(logFileStream));
 
-            var settingsService = new Settings(await pathManager.GetDefaultSettingsDirectoryAsync(), await pathManager.GetDefaultPluginDirectoryAsync());
-            services.AddSingleton<ISettingsService>(settingsService);
-
             services.AddSingleton(new Microsoft.Marketplace.Storefront.Contracts.StorefrontApi());
+            services.AddSingleton<ISettingsService>(Settings.Default);
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
             services.AddSingleton(new FluentStoreAPI.FluentStoreAPI());

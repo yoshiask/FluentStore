@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Diagnostics;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
-using OwlCore.AbstractStorage;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,20 +24,14 @@ namespace FluentStore.SDK.Packages
 
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
-            SystemIOFolderData dir = new(folder);
-            await StorageHelper.BackgroundDownloadPackage(this, PackageUri, dir);
+            await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
 
             // Check for success
             if (Status.IsLessThan(PackageStatus.Downloaded))
                 return null;
 
-            if (PackageUri != null && DownloadItem is IMutableFileData file)
-            {
-                var finalFile = await file.CopyAndRenameAsync(dir, Path.GetFileName(PackageUri.AbsolutePath));
-                DownloadItem = finalFile is SystemIOFileData sysIoFinal
-                    ? sysIoFinal.File
-                    : new FileInfo(finalFile.Path);
-            }
+            if (PackageUri != null && DownloadItem is FileInfo file)
+                DownloadItem = file.CopyRename(Path.GetFileName(PackageUri.AbsolutePath));
 
             return DownloadItem;
         }
