@@ -103,7 +103,7 @@ namespace FluentStore.SDK.Helpers
                 // Create the location to download to
                 info = await CreatePackageFile(package.Urn, folder);
                 stream = await info.GetStreamAsync(FileAccessMode.ReadWrite);
-                await cache.Add(package.Urn, package.Version, info);
+                cache.Add(package.Urn, package.Version, info);
             }
 
             try
@@ -141,12 +141,12 @@ namespace FluentStore.SDK.Helpers
                 WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, package, ErrorType.PackageDownloadFailed));
                 package.Status = PackageStatus.DownloadReady;
                 stream?.Dispose();  // Make sure file is closed, or it will fail to remove from the cache
-                await cache.Remove(package.Urn);
+                cache.Remove(package.Urn);
                 return;
             }
 
         downloaded:
-            package.DownloadItem = new FileInfo(info.Path);
+            package.DownloadItem = info;
             package.Status = PackageStatus.Downloaded;
         }
 
