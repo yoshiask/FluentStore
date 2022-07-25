@@ -39,4 +39,7 @@ public enum InstallerType
 
     [EnumMember(Value = "pwa")]
     Pwa = 9,
+
+    [EnumMember(Value = "portable")]
+    Portable = 10,
 }
