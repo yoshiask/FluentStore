@@ -211,10 +211,7 @@ namespace OwlCore.AbstractStorage
         public async Task<AbstractFileItemData> CopyAsync(IFolderData destination)
         {
             if (_abstractData is IMutableFileData file)
-            {
-                _abstractData = await file.CopyAsync(destination);
-                return this;
-            }
+                return new(await file.CopyAsync(destination));
             throw new NotSupportedException();
         }
 
@@ -231,10 +228,7 @@ namespace OwlCore.AbstractStorage
         public async Task<AbstractFileItemData> CopyAndRenameAsync(IFolderData destination, string newName)
         {
             if (_abstractData is IMutableFileData file)
-            {
-                _abstractData = await file.CopyAndRenameAsync(destination, newName);
-                return this;
-            }
+                return new(await file.CopyAndRenameAsync(destination, newName));
             throw new NotSupportedException();
         }
 

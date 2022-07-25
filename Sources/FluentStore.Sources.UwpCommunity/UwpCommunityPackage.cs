@@ -14,6 +14,7 @@ using FluentStore.SDK.Models;
 using FluentStore.SDK.Attributes;
 using FluentStore.SDK;
 using Flurl.Util;
+using OwlCore.AbstractStorage;
 
 namespace FluentStore.Sources.UwpCommunity
 {
@@ -115,7 +116,7 @@ namespace FluentStore.Sources.UwpCommunity
                 return false;
         }
 
-        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
+        public override async Task<AbstractFileItemData> DownloadAsync(IFolderData folder = null)
         {
             if (PackageUri == null)
             {

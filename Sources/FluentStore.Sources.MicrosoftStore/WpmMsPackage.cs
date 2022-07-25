@@ -8,6 +8,7 @@ using FluentStore.Sources.WinGet;
 using Microsoft.Marketplace.Storefront.Contracts.V3;
 using Microsoft.Marketplace.Storefront.Contracts.V8.One;
 using Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.PackageManifest;
+using OwlCore.AbstractStorage;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -40,7 +41,7 @@ namespace FluentStore.Sources.MicrosoftStore
             InternalPackage = internalPackage;
         }
 
-        protected override async Task<FileInfo> InternalDownloadAsync(DirectoryInfo folder)
+        protected override async Task<AbstractFileItemData> InternalDownloadAsync(IFolderData folder)
         {
             // Find the package URI
             await PopulatePackageUri();
@@ -48,12 +49,12 @@ namespace FluentStore.Sources.MicrosoftStore
                 return null;
 
             // Download package
-            FileInfo downloadFile = (FileInfo)await InternalPackage.DownloadAsync(folder);
+            var downloadFile = await InternalPackage.DownloadAsync(folder);
             Status = InternalPackage.Status;
 
             // Set the proper file type and extension
             string filename = Path.GetFileName(PackageUri.ToString());
-            downloadFile.MoveRename(filename);
+            await downloadFile.MoveAndRenameAsync(folder, filename);
             return downloadFile;
         }
 
