@@ -11,6 +11,13 @@ namespace FluentStore.Helpers
     /// </summary>
     public sealed class PackagedPathManager : ICommonPathManager
     {
+        private PackagedPathManager()
+        {
+
+        }
+
+        public static readonly PackagedPathManager Default = new();
+
         public async Task<IFolderData> CreateDirectoryTempAsync(string relativePath)
         {
             var tempDir = await GetTempDirectoryAsync();

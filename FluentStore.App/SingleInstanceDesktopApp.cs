@@ -29,7 +29,7 @@ namespace FluentStore
         private readonly string _mutexName = "";
         private readonly string _pipeName = "";
         private readonly object _namedPiperServerThreadLock = new();
-        private readonly LoggerService _log = Ioc.Default.GetService<LoggerService>();
+        private readonly LoggerService _log;
 
         private bool _isDisposed = false;
         private bool _isFirstInstance;
@@ -39,10 +39,12 @@ namespace FluentStore
 
         public event EventHandler<SingleInstanceLaunchEventArgs>? Launched;
 
-        public SingleInstanceDesktopApp(string appId)
+        public SingleInstanceDesktopApp(string appId, LoggerService log = null)
         {
             _mutexName = "MUTEX_" + appId;
             _pipeName = "PIPE_" + appId;
+
+            _log = log;
         }
 
         public void Launch(string arguments)

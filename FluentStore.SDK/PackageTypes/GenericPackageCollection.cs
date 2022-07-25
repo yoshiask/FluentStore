@@ -38,8 +38,9 @@ namespace FluentStore.SDK.Packages
 
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
-            if (folder == null)
-                folder = StorageHelper.CreatePackageDownloadFolder(Urn);
+            var dir = await StorageHelper.CreatePackageDownloadFolder(Urn);
+            folder ??= dir is OwlCore.AbstractStorage.SystemIOFolderData sysIoFolder
+                ? sysIoFolder.Directory : new(dir.Path);
             DownloadItem = folder;
 
             bool success = true;

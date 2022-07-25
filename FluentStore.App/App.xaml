@@ -19,9 +19,7 @@
                 <ResourceDictionary Source="/Themes/TrimmedTextBlock.xaml"/>
 
                 <ResourceDictionary>
-
-                    <helpers:Settings x:Key="settings" />
-
+                    
                     <x:Double x:Key="CompactModeMinWidth">641</x:Double>
 
                     <DataTemplate x:Key="DefaultPackageCardTemplate">

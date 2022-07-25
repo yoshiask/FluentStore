@@ -14,13 +14,17 @@ namespace FluentStore.Helpers
     public class Settings : SettingsBase, ISettingsService
     {
         private const string KEY_PackageHandlerEnabled = "PackageHandlerEnabled";
-        private static readonly Settings s_settings = new();
+        private static Settings s_settings;
         private static readonly DefaultSettingValues s_defVals = new();
+        private readonly string m_defaultPluginDirectory;
 
         public static Settings Default => s_settings;
 
-        public Settings() : base(GetSettingsFolder(), new NewtonsoftStreamSerializer())
+        public Settings(IFolderData settingsDirectory, IFolderData pluginDirectory)
+            : base(settingsDirectory, new NewtonsoftStreamSerializer())
         {
+            m_defaultPluginDirectory = pluginDirectory.Path;
+            s_settings = this;
         }
 
         public string ExclusionFilter
@@ -37,7 +41,7 @@ namespace FluentStore.Helpers
 
         public string PluginDirectory
         {
-            get => GetSetting(s_defVals.PluginDirectory);
+            get => GetSetting(GetDefaultPluginDirectory);
             set => SetSetting(value);
         }
 
@@ -98,16 +102,7 @@ namespace FluentStore.Helpers
             return AppUpdateStatus.None;
         }
 
-        public async Task ClearSettings()
-        {
-            DirectoryInfo dir;
-            if (Folder is SystemIOFolderData folder)
-                dir = folder.Directory;
-            else
-                dir = new(Folder.Path);
-
-            await Task.Run(dir.RecursiveDelete);
-        }
+        public Task ClearSettings() => Folder.RecursiveDelete();
 
         public async Task InstallDefaultPlugins(bool install = true, bool overwrite = false)
         {
@@ -121,11 +116,6 @@ namespace FluentStore.Helpers
 
         private static string GetPackageHandlerEnabledKey(string typeName) => $"{KEY_PackageHandlerEnabled}_{typeName}";
 
-        private static IFolderData GetSettingsFolder()
-        {
-            SystemIOFolderData dir = new(CommonPaths.DefaultSettingsDirectoryName);
-            Directory.CreateDirectory(dir.Path);
-            return dir;
-        }
+        private string GetDefaultPluginDirectory() => m_defaultPluginDirectory;
     }
 }
