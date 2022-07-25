@@ -146,7 +146,7 @@ namespace FluentStore.SDK.Helpers
             }
 
         downloaded:
-            package.DownloadItem = new FileInfo(info.Path);
+            package.DownloadItem = new(info);
             package.Status = PackageStatus.Downloaded;
         }
 

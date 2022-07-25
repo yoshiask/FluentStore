@@ -23,21 +23,17 @@ namespace FluentStore.SDK.Packages
 
         public override Task<bool> CanLaunchAsync() => Task.FromResult(false);
 
-        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
+        public override async Task<AbstractFileItemData> DownloadAsync(IFolderData folder = null)
         {
-            SystemIOFolderData dir = new(folder);
-            await StorageHelper.BackgroundDownloadPackage(this, PackageUri, dir);
+            await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
 
             // Check for success
             if (Status.IsLessThan(PackageStatus.Downloaded))
                 return null;
 
-            if (PackageUri != null && DownloadItem is IMutableFileData file)
+            if (PackageUri != null && DownloadItem is IMutableFileData)
             {
-                var finalFile = await file.CopyAndRenameAsync(dir, Path.GetFileName(PackageUri.AbsolutePath));
-                DownloadItem = finalFile is SystemIOFileData sysIoFinal
-                    ? sysIoFinal.File
-                    : new FileInfo(finalFile.Path);
+                DownloadItem = await DownloadItem.CopyAndRenameAsync(folder, Path.GetFileName(PackageUri.AbsolutePath));
             }
 
             return DownloadItem;

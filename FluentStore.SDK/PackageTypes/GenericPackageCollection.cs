@@ -1,6 +1,7 @@
 ﻿using FluentStore.SDK.Attributes;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
+using OwlCore.AbstractStorage;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -36,18 +37,16 @@ namespace FluentStore.SDK.Packages
             return Task.FromResult(Images.Where(i => i.ImageType == ImageType.Screenshot).ToList());
         }
 
-        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
+        public override async Task<AbstractFileItemData> DownloadAsync(IFolderData folder = null)
         {
-            var dir = await StorageHelper.CreatePackageDownloadFolder(Urn);
-            folder ??= dir is OwlCore.AbstractStorage.SystemIOFolderData sysIoFolder
-                ? sysIoFolder.Directory : new(dir.Path);
-            DownloadItem = folder;
+            folder ??= await StorageHelper.CreatePackageDownloadFolder(Urn);
+            DownloadItem = new(folder);
 
             bool success = true;
             foreach (PackageBase package in Items)
                 success &= await package.DownloadAsync(folder) != null;
 
-            return success ? folder : null;
+            return success ? DownloadItem : null;
         }
 
         public override async Task<bool> InstallAsync()
