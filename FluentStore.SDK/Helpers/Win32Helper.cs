@@ -43,7 +43,7 @@ namespace FluentStore.SDK.Helpers
                 // Create and run new process for installer
                 ProcessStartInfo startInfo = new()
                 {
-                    FileName = package.DownloadItem.Path,
+                    FileName = package.DownloadItem.FullName,
                     Arguments = args,
                     UseShellExecute = true,
                 };

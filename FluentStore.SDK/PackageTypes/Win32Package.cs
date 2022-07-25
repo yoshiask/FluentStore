@@ -4,7 +4,7 @@ using CommunityToolkit.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using OwlCore.AbstractStorage;
+using System.IO;
 
 namespace FluentStore.SDK.Packages
 {
@@ -21,7 +21,7 @@ namespace FluentStore.SDK.Packages
             return false;
         }
 
-        public override async Task<AbstractFileItemData> DownloadAsync(IFolderData folder = null)
+        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
             throw new NotImplementedException();
         }

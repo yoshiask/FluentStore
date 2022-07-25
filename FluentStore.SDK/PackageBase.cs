@@ -1,12 +1,13 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using FluentStore.SDK.Attributes;
-using FluentStore.SDK.Images;
+﻿using FluentStore.SDK.Images;
 using FluentStore.SDK.Models;
 using Garfoot.Utilities.FluentUrn;
-using OwlCore.AbstractStorage;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.IO;
+using FluentStore.SDK.Attributes;
+using FluentStore.SDK.Helpers;
 
 namespace FluentStore.SDK
 {
@@ -82,7 +83,7 @@ namespace FluentStore.SDK
 
         public abstract Task<bool> InstallAsync();
 
-        public abstract Task<AbstractFileItemData> DownloadAsync(IFolderData folder = null);
+        public abstract Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null);
 
         public abstract Task<bool> CanLaunchAsync();
 
@@ -123,8 +124,8 @@ namespace FluentStore.SDK
             set => SetProperty(ref _Status, value);
         }
 
-        private AbstractFileItemData _DownloadItem;
-        public AbstractFileItemData DownloadItem
+        private FileSystemInfo _DownloadItem;
+        public FileSystemInfo DownloadItem
         {
             get => _DownloadItem;
             set => SetProperty(ref _DownloadItem, value);
