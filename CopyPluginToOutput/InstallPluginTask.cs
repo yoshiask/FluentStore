@@ -19,7 +19,8 @@ namespace CopyPluginToOutput
             }
 
             string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            DirectoryInfo dir = new DirectoryInfo(Path.Combine(localAppData, "FluentStoreBeta", "Plugins", PluginAssemblyName));
+            DirectoryInfo dir = new DirectoryInfo(Path.Combine(localAppData, "Packages", "52374YoshiAskharoun.FluentStore_7sdtne7r32rbe",
+                "LocalState", "Plugins", PluginAssemblyName));
             if (dir.Exists)
                 dir.Delete(true);
             dir.Create();
