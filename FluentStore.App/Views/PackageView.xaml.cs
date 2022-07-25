@@ -45,6 +45,7 @@ namespace FluentStore.Views
 
         INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
         PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
+        ICommonPathManager PathManager = Ioc.Default.GetRequiredService<ICommonPathManager>();
 
         public PackageViewModel ViewModel
         {
@@ -197,7 +198,7 @@ namespace FluentStore.Views
                 VisualStateManager.GoToState(this, "Progress", true);
 
                 if (ViewModel.Package.Status.IsLessThan(PackageStatus.Downloaded))
-                    await ViewModel.Package.DownloadAsync();
+                    await ViewModel.Package.DownloadAsync(await PathManager.GetTempDirectoryAsync());
 
                 if (ViewModel.Package.Status.IsAtLeast(PackageStatus.Downloaded))
                 {
@@ -228,7 +229,7 @@ namespace FluentStore.Views
             try
             {
                 VisualStateManager.GoToState(this, "Progress", true);
-                var downloadItem = await ViewModel.Package.DownloadAsync();
+                var downloadItem = await ViewModel.Package.DownloadAsync(await PathManager.GetTempDirectoryAsync());
 
                 if (downloadItem != null)
                 {
