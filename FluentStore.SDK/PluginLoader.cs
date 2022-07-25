@@ -287,12 +287,11 @@ namespace FluentStore.SDK
                 return false;
 
             // Major version 0 is for development. These releases
-            // need to have the same major, minor, and build
-            // versions. Only the patch version can be different.
+            // need to have the same minor versions. Only the
+            // patch version can be different.
             if (curVer.Major == 0 || newVer.Major == 0)
                 return curVer.Major == newVer.Major
-                    && curVer.Minor == newVer.Minor
-                    && curVer.Build == newVer.Build;
+                    && curVer.Minor == newVer.Minor;
 
             // Otherwise, only the major version needs to match.
             return curVer.Major == newVer.Major;
