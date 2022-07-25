@@ -55,6 +55,10 @@ namespace FluentStore
             AppDomain.CurrentDomain.UnhandledException += (sender, e)
               => OnUnhandledException(e.ExceptionObject as Exception ?? new Exception());
 
+            // Set up IoC services
+            Services = ConfigureServices();
+            Ioc.Default.ConfigureServices(Services);
+
             _singleInstanceApp = new SingleInstanceDesktopApp("FluentStoreBeta");
             _singleInstanceApp.Launched += OnSingleInstanceLaunched;
         }
@@ -71,10 +75,6 @@ namespace FluentStore
 
         private async void OnSingleInstanceLaunched(object? sender, SingleInstanceLaunchEventArgs e)
         {
-            // Set up IoC services
-            Services = await ConfigureServices();
-            Ioc.Default.ConfigureServices(Services);
-
             var log = Ioc.Default.GetService<LoggerService>();
             var navService = Ioc.Default.GetRequiredService<INavigationService>();
 
@@ -254,19 +254,19 @@ namespace FluentStore
         /// <summary>
         /// Configures the services for the application.
         /// </summary>
-        private static async Task<IServiceProvider> ConfigureServices()
+        private static IServiceProvider ConfigureServices()
         {
             var services = new ServiceCollection();
 
             PackagedPathManager pathManager = new();
             services.AddSingleton<ICommonPathManager>(pathManager);
 
-            var logFile = await pathManager.CreateLogFileAsync();
-            var logFileStream = await logFile.GetStreamAsync();
+            var logFile = pathManager.CreateLogFile();
+            var logFileStream = logFile.Open(System.IO.FileMode.Create);
             services.AddSingleton(new LoggerService(logFileStream));
 
             services.AddSingleton(new Microsoft.Marketplace.Storefront.Contracts.StorefrontApi());
-            services.AddSingleton<ISettingsService>(Settings.Default);
+            services.AddSingleton<ISettingsService>(new Settings(pathManager));
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
             services.AddSingleton(new FluentStoreAPI.FluentStoreAPI());

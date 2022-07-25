@@ -21,13 +21,13 @@ namespace FluentStore.Views.Settings
             this.InitializeComponent();
         }
 
-        private async void ClearCacheButton_Click(object sender, RoutedEventArgs e)
+        private void ClearCacheButton_Click(object sender, RoutedEventArgs e)
         {
             if (pathManager == null) return;
 
-            var cacheDir = await pathManager.GetTempDirectoryAsync();
+            var cacheDir = pathManager.GetTempDirectory();
             DownloadCache cache = new(cacheDir, createIfDoesNotExist: false);
-            await cache.Clear();
+            cache.Clear();
         }
 
         private async void ResetButton_Click(object sender, RoutedEventArgs e)

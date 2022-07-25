@@ -197,7 +197,7 @@ namespace FluentStore.Views
                 VisualStateManager.GoToState(this, "Progress", true);
 
                 if (ViewModel.Package.Status.IsLessThan(PackageStatus.Downloaded))
-                    await ViewModel.Package.DownloadAsync(await PathManager.GetTempDirectoryAsync());
+                    await ViewModel.Package.DownloadAsync(PathManager.GetTempDirectory());
 
                 if (ViewModel.Package.Status.IsAtLeast(PackageStatus.Downloaded))
                 {
@@ -228,7 +228,7 @@ namespace FluentStore.Views
             try
             {
                 VisualStateManager.GoToState(this, "Progress", true);
-                var downloadItem = await ViewModel.Package.DownloadAsync(await PathManager.GetTempDirectoryAsync());
+                var downloadItem = await ViewModel.Package.DownloadAsync(PathManager.GetTempDirectory());
 
                 if (downloadItem != null)
                 {

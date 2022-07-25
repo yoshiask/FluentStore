@@ -1,5 +1,6 @@
 ﻿using OwlCore.AbstractStorage;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace FluentStore.Services
@@ -12,27 +13,27 @@ namespace FluentStore.Services
         /// <summary>
         /// Gets the app data folder for the current package and user.
         /// </summary>
-        public Task<IFolderData> GetAppDataDirectoryAsync();
+        public DirectoryInfo GetAppDataDirectory();
 
         /// <summary>
         /// Gets the default plugin directory.
         /// </summary>
-        public Task<IFolderData> GetDefaultPluginDirectoryAsync();
+        public DirectoryInfo GetDefaultPluginDirectory();
 
         /// <summary>
         /// Gets the default settings directory.
         /// </summary>
-        public Task<IFolderData> GetDefaultSettingsDirectoryAsync();
+        public DirectoryInfo GetDefaultSettingsDirectory();
 
         /// <summary>
         /// Gets the default logs directory.
         /// </summary>
-        public Task<IFolderData> GetDefaultLogDirectoryAsync();
+        public DirectoryInfo GetDefaultLogDirectory();
 
         /// <summary>
         /// Gets the temporary directory.
         /// </summary>
-        public Task<IFolderData> GetTempDirectoryAsync();
+        public DirectoryInfo GetTempDirectory();
 
         /// <summary>
         /// Creates a folder the temporary directory using the relative path.
@@ -40,7 +41,7 @@ namespace FluentStore.Services
         /// <param name="relativePath">
         /// The folder structure to create inside the temporary directory.
         /// </param>
-        public Task<IFolderData> CreateDirectoryTempAsync(string relativePath);
+        public DirectoryInfo CreateDirectoryTemp(string relativePath);
 
         /// <summary>
         /// Creates a new log file for the current session.
@@ -48,6 +49,6 @@ namespace FluentStore.Services
         /// <param name="timestamp">
         /// The time the session was started. Defaults to <see cref="DateTimeOffset.UtcNow"/>.
         /// </param>
-        public Task<IFileData> CreateLogFileAsync(DateTimeOffset? timestamp = null);
+        public FileInfo CreateLogFile(DateTimeOffset? timestamp = null);
     }
 }

@@ -1,34 +1,29 @@
-﻿using CommunityToolkit.Diagnostics;
-using Garfoot.Utilities.FluentUrn;
-using OwlCore.AbstractStorage;
-using OwlCore.Provisos;
+﻿using Garfoot.Utilities.FluentUrn;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Helpers
 {
-    public class DownloadCache : IAsyncInit
+    public class DownloadCache
     {
-        public DownloadCache(IFolderData directory, bool createIfDoesNotExist = true)
+        public DownloadCache(DirectoryInfo directory = null, bool createIfDoesNotExist = true)
         {
-            Guard.IsNotNull(directory, nameof(directory));
+            directory ??= StorageHelper.GetTempDirectory();
 
-            CacheDirectory = directory;
-            CreateIfDoesNotExist = createIfDoesNotExist;
+            CacheDatabase = new(Path.Combine(directory.FullName, CACHE_FILENAME));
+            if (!CacheDatabase.Exists && createIfDoesNotExist)
+            {
+                using BinaryWriter cache = new(CacheDatabase.Open(FileMode.CreateNew));
+                cache.Write(FILE_MAGIC);
+            }
         }
 
         private static readonly byte[] FILE_MAGIC = new byte[] { 0x46, 0x6C, 0x53, 0x74 };
         private const string CACHE_FILENAME = "cache.dat";
-        private IFileData CacheDatabase = null;
-
-        private readonly IFolderData CacheDirectory = null;
-        private readonly bool CreateIfDoesNotExist;
-
-        public bool IsInitialized { get; private set; }
+        private FileInfo CacheDatabase = null;
 
         public struct CacheEntry
         {
@@ -88,42 +83,45 @@ namespace FluentStore.SDK.Helpers
             }
         }
 
-        private bool DoesCacheExist() => CacheDatabase != null;
-
-        public Task Clear()
+        private bool DoesCacheExist()
         {
-            if (!DoesCacheExist())
-                return Task.CompletedTask;
-
-            return CacheDirectory.RecursiveDelete();
+            if (CacheDatabase == null) return false;
+            CacheDatabase.Refresh();
+            return CacheDatabase.Exists;
         }
 
-        public async Task Add(Urn urn, string version, IFileData downloadItem)
+        public void Clear()
         {
-            (bool success, var cachedEntry) = await TryGet(urn);
-            if (success && version != cachedEntry.Value.GetVersion())
+            if (!DoesCacheExist()) return;
+
+            CacheDatabase.Directory.RecursiveDelete();
+            CacheDatabase.Refresh();
+        }
+
+        public void Add(Urn urn, string version, FileSystemInfo downloadItem)
+        {
+            if (TryGet(urn, out var cachedEntry) && version != cachedEntry.Value.GetVersion())
             {
-                await Remove(urn);
+                Remove(urn);
             }
 
             CacheEntry entry = new()
             {
                 urnBytes = Encoding.Default.GetBytes(urn.ToString()),
                 versionBytes = Encoding.Default.GetBytes(version.ToString()),
-                downloadItemBytes = Encoding.Default.GetBytes(downloadItem.Path),
+                downloadItemBytes = Encoding.Default.GetBytes(downloadItem.FullName),
             };
 
             // Write lengths, then data
-            using Stream stream = await CacheDatabase.GetStreamAsync(FileAccessMode.ReadWrite);
-            using BinaryWriter file = new(stream);
+            using BinaryWriter file = new(CacheDatabase.Open(FileMode.Append));
             entry.WriteToStream(file);
         }
 
-        public async Task Remove(Urn urn)
+        public void Remove(Urn urn)
         {
             if (!DoesCacheExist()) return;
 
-            using Stream cache = await CacheDatabase.GetStreamAsync(FileAccessMode.ReadWrite);
+            using FileStream cache = CacheDatabase.Open(FileMode.Open);
             using BinaryReader reader = new(cache);
             using BinaryWriter writer = new(cache);
             // Skip file header
@@ -145,12 +143,7 @@ namespace FluentStore.SDK.Helpers
                     // Delete cached file, if it exists
                     var downloadItem = entry.GetDownloadItem();
                     if (downloadItem.Exists)
-                    {
-                        if (downloadItem is DirectoryInfo dir)
-                            dir.Delete(true);
-                        else
-                            downloadItem.Delete();
-                    }
+                        downloadItem.RecursiveDelete();
 
                     // Zero out entry, acts like a NOP slide
                     writer.BaseStream.Seek(entryPos, SeekOrigin.Begin);
@@ -162,11 +155,11 @@ namespace FluentStore.SDK.Helpers
             }
         }
 
-        public async Task<CacheEntry?> Get(Urn urn)
+        public CacheEntry? Get(Urn urn)
         {
             if (!DoesCacheExist()) return null;
 
-            using Stream cache = await CacheDatabase.GetStreamAsync(FileAccessMode.ReadWrite);
+            using FileStream cache = CacheDatabase.Open(FileMode.Open);
             using BinaryReader reader = new(cache);
             using BinaryWriter writer = new(cache);
             // Skip file header
@@ -190,30 +183,16 @@ namespace FluentStore.SDK.Helpers
             return null;
         }
 
-        public async Task<(bool success, CacheEntry? entry)> TryGet(Urn urn)
+        public bool TryGet(Urn urn, [NotNullWhen(true)] out CacheEntry? entry)
         {
-            CacheEntry? entry = null;
+            entry = null;
             try
             {
-                entry = await Get(urn);
+                entry = Get(urn);
             }
             catch { }
 
-            return (entry != null, entry);
-        }
-
-        public async Task InitAsync(CancellationToken cancellationToken = default)
-        {
-            CacheDatabase = await CacheDirectory.GetFileAsync(CACHE_FILENAME);
-
-            if (CacheDatabase == null && CreateIfDoesNotExist)
-            {
-                CacheDatabase = await CacheDirectory.CreateFileAsync(CACHE_FILENAME);
-
-                using Stream stream = await CacheDatabase.GetStreamAsync(FileAccessMode.ReadWrite);
-                using BinaryWriter cache = new(stream);
-                cache.Write(FILE_MAGIC);
-            }
+            return entry != null;
         }
     }
 }

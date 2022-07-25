@@ -126,7 +126,7 @@ namespace FluentStore.Sources.WinGet
                 };
             }
 
-            done:
+        done:
             return icon ?? TextImage.CreateFromName(Title);
         }
 
@@ -150,9 +150,11 @@ namespace FluentStore.Sources.WinGet
             {
                 case InstallerType.Msix:
                     isSuccess = await PackagedInstallerHelper.Install(this);
-                    var file = (FileInfo)DownloadItem;
-                    Type = PackagedInstallerHelper.GetInstallerType(file);
-                    PackageFamilyName = PackagedInstallerHelper.GetPackageFamilyName(file, Type.HasFlag(InstallerType.Bundle));
+                    using (var stream = ((FileInfo)DownloadItem).OpenRead())
+                    {
+                        Type = PackagedInstallerHelper.GetInstallerType(stream);
+                        PackageFamilyName = PackagedInstallerHelper.GetPackageFamilyName(stream, Type.HasFlag(InstallerType.Bundle));
+                    }
                     break;
 
                 default:

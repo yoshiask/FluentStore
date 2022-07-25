@@ -14,13 +14,16 @@ namespace FluentStore.Helpers
     public class Settings : SettingsBase, ISettingsService
     {
         private const string KEY_PackageHandlerEnabled = "PackageHandlerEnabled";
-        private static readonly Settings s_settings = new();
+        private static Settings s_settings;
         private static readonly DefaultSettingValues s_defVals = new();
+        private readonly ICommonPathManager m_pathManager;
 
         public static Settings Default => s_settings;
 
-        public Settings() : base(GetSettingsFolder(), new NewtonsoftStreamSerializer())
+        public Settings(ICommonPathManager pathManager) : base(GetSettingsFolder(pathManager), new NewtonsoftStreamSerializer())
         {
+            m_pathManager = pathManager;
+            s_settings = this;
         }
 
         public string ExclusionFilter
@@ -37,7 +40,7 @@ namespace FluentStore.Helpers
 
         public string PluginDirectory
         {
-            get => GetSetting(s_defVals.PluginDirectory);
+            get => GetSetting(GetPluginDirectory);
             set => SetSetting(value);
         }
 
@@ -121,11 +124,13 @@ namespace FluentStore.Helpers
 
         private static string GetPackageHandlerEnabledKey(string typeName) => $"{KEY_PackageHandlerEnabled}_{typeName}";
 
-        private static IFolderData GetSettingsFolder()
+        private static IFolderData GetSettingsFolder(ICommonPathManager pathManager)
         {
-            SystemIOFolderData dir = new(CommonPaths.DefaultSettingsDirectoryName);
+            SystemIOFolderData dir = new(pathManager.GetDefaultSettingsDirectory());
             Directory.CreateDirectory(dir.Path);
             return dir;
         }
+
+        private string GetPluginDirectory() => m_pathManager.GetDefaultPluginDirectory().FullName;
     }
 }

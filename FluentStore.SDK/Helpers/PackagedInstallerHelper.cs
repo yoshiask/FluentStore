@@ -106,14 +106,14 @@ namespace FluentStore.SDK.Helpers
                 if (package.Type == InstallerType.AppInstaller)
                 {
                     operation = pkgManager.AddPackageByAppInstallerFileAsync(
-                        new Uri(package.DownloadItem.Path),
+                        new Uri(package.DownloadItem.FullName),
                         AddPackageByAppInstallerOptions.ForceTargetAppShutdown,
                         pkgManager.GetDefaultPackageVolume());
                 }
                 else
                 {
                     operation = pkgManager.AddPackageAsync(
-                        new Uri(package.DownloadItem.Path),
+                        new Uri(package.DownloadItem.FullName),
                         null,
                         DeploymentOptions.ForceApplicationShutdown);
                 }

@@ -33,8 +33,8 @@ namespace FluentStore.SDK.Packages
         public override async Task<string> GetCannotBeInstalledReason()
         {
             Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
-            return PackagedInstallerHelper.GetCannotBeInstalledReason(
-                (FileInfo)DownloadItem, Type.HasFlag(InstallerType.Bundle));
+            using var stream = ((FileInfo)DownloadItem).OpenRead();
+            return PackagedInstallerHelper.GetCannotBeInstalledReason(stream, Type.HasFlag(InstallerType.Bundle));
         }
 
         public override async Task<bool> CanLaunchAsync()
@@ -74,7 +74,10 @@ namespace FluentStore.SDK.Packages
             Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
 
             if (Type == InstallerType.Unknown)
-                Type = PackagedInstallerHelper.GetInstallerType((FileInfo)DownloadItem);
+            {
+                using var stream = ((FileInfo)DownloadItem).OpenRead();
+                Type = PackagedInstallerHelper.GetInstallerType(stream);
+            }
             return Type.GetExtension();
         }
 
@@ -83,8 +86,8 @@ namespace FluentStore.SDK.Packages
             try
             {
                 Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
-                return PackagedInstallerHelper.GetAppIcon(
-                    (FileInfo)DownloadItem, Type.HasFlag(InstallerType.Bundle));
+                using var stream = ((FileInfo)DownloadItem).OpenRead();
+                return PackagedInstallerHelper.GetAppIcon(stream, Type.HasFlag(InstallerType.Bundle));
             }
             catch
             {

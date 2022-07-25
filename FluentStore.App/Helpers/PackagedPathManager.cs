@@ -1,7 +1,6 @@
 ﻿using FluentStore.Services;
-using OwlCore.AbstractStorage;
 using System;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace FluentStore.Helpers
 {
@@ -11,62 +10,62 @@ namespace FluentStore.Helpers
     /// </summary>
     public sealed class PackagedPathManager : ICommonPathManager
     {
-        public async Task<IFolderData> CreateDirectoryTempAsync(string relativePath)
+        public DirectoryInfo CreateDirectoryTemp(string relativePath)
         {
-            var tempDir = await GetTempDirectoryAsync();
+            var tempDir = GetTempDirectory();
 
-            foreach (string folder in relativePath.Split(System.IO.Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-                tempDir = await tempDir.CreateFolderAsync(folder);
+            foreach (string folder in relativePath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                tempDir = tempDir.CreateSubdirectory(folder);
 
             return tempDir;
         }
 
-        public async Task<IFileData> CreateLogFileAsync(DateTimeOffset? timestamp = null)
+        public FileInfo CreateLogFile(DateTimeOffset? timestamp = null)
         {
             timestamp ??= DateTimeOffset.UtcNow;
 
             string logFileName = $"Log_{timestamp:yyyy-MM-dd_HH-mm-ss-fff}.log";
 
-            var logDir = await GetDefaultLogDirectoryAsync();
-            return await logDir.CreateFileAsync(logFileName, CreationCollisionOption.GenerateUniqueName);
+            var logDir = GetDefaultLogDirectory();
+            return new(Path.Combine(logDir.FullName, logFileName));
         }
 
-        public Task<IFolderData> GetAppDataDirectoryAsync()
+        public DirectoryInfo GetAppDataDirectory()
         {
-            StorageFolderData appDataDir = new(Windows.Storage.ApplicationData.Current.LocalFolder);
+            DirectoryInfo appDataDir = new(Windows.Storage.ApplicationData.Current.LocalFolder.Path);
 
             // Ensure the directory exists.
-            System.IO.Directory.CreateDirectory(appDataDir.Path);
+            Directory.CreateDirectory(appDataDir.FullName);
 
-            return Task.FromResult<IFolderData>(appDataDir);
+            return appDataDir;
         }
 
-        public async Task<IFolderData> GetDefaultLogDirectoryAsync()
+        public DirectoryInfo GetDefaultLogDirectory()
         {
-            var appDataDir = await GetAppDataDirectoryAsync();
-            return await appDataDir.CreateFolderAsync(CommonPaths.DefaultLogsDirectoryName, CreationCollisionOption.OpenIfExists);
+            var appDataDir = GetAppDataDirectory();
+            return appDataDir.CreateSubdirectory(CommonPaths.DefaultLogsDirectoryName);
         }
 
-        public async Task<IFolderData> GetDefaultPluginDirectoryAsync()
+        public DirectoryInfo GetDefaultPluginDirectory()
         {
-            var appDataDir = await GetAppDataDirectoryAsync();
-            return await appDataDir.CreateFolderAsync(CommonPaths.DefaultPluginDirectoryName, CreationCollisionOption.OpenIfExists);
+            var appDataDir = GetAppDataDirectory();
+            return appDataDir.CreateSubdirectory(CommonPaths.DefaultPluginDirectoryName);
         }
 
-        public async Task<IFolderData> GetDefaultSettingsDirectoryAsync()
+        public DirectoryInfo GetDefaultSettingsDirectory()
         {
-            var appDataDir = await GetAppDataDirectoryAsync();
-            return await appDataDir.CreateFolderAsync(CommonPaths.DefaultSettingsDirectoryName, CreationCollisionOption.OpenIfExists);
+            var appDataDir = GetAppDataDirectory();
+            return appDataDir.CreateSubdirectory(CommonPaths.DefaultSettingsDirectoryName);
         }
 
-        public Task<IFolderData> GetTempDirectoryAsync()
+        public DirectoryInfo GetTempDirectory()
         {
-            StorageFolderData cacheDir = new(Windows.Storage.ApplicationData.Current.LocalCacheFolder);
+            DirectoryInfo cacheDir = new(Windows.Storage.ApplicationData.Current.LocalCacheFolder.Path);
 
             // Ensure directory exists.
-            System.IO.Directory.CreateDirectory(cacheDir.Path);
+            Directory.CreateDirectory(cacheDir.FullName);
 
-            return Task.FromResult<IFolderData>(cacheDir);
+            return cacheDir;
         }
     }
 }
