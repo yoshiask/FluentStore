@@ -216,7 +216,6 @@ namespace FluentStore.SDK.Helpers
                     break;
             }
 
-            stream.Position = 0;
             return type;
         }
 
