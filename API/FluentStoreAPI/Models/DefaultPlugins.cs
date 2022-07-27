@@ -34,7 +34,7 @@ namespace FluentStoreAPI.Models
             {
                 if (entry.Arch == arch
                     && entry.Version <= appVersion
-                    && entry.Version > curEntry.Version)
+                    && entry.Version >= curEntry.Version)
                     curEntry = entry;
             }
             return curEntry.Urls;
