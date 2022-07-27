@@ -7,10 +7,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel Spacing="8" VerticalAlignment="Center" HorizontalAlignment="Stretch"
-                MaxWidth="400">
+    <StackPanel Spacing="8" VerticalAlignment="Center" HorizontalAlignment="Stretch">
         <Image Source="/Assets/SplashScreen.png" MaxHeight="300"/>
-        <ProgressBar x:Name="ProgressIndicator" IsIndeterminate="True"/>
+        <ProgressBar x:Name="ProgressIndicator" IsIndeterminate="True" MaxWidth="400"/>
         <TextBlock x:Name="StatusBlock" HorizontalTextAlignment="Center"
                    Text="Starting Fluent Store..."/>
     </StackPanel>
