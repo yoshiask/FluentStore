@@ -1,7 +1,7 @@
 {
     "Id": "FluentStore.Sources.FluentStore",
     "DisplayName": "Fluent Store Social",
-    "PluginVersion": "0.3.1.0",
-    "SdkVersion": "0.3.1.0",
+    "PluginVersion": "0.3.2.0",
+    "SdkVersion": "0.3.2.0",
     "PluginAssembly": "FluentStore.Sources.FluentStore.dll"
 }
