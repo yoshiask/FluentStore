@@ -139,7 +139,7 @@ namespace FluentStore.Views.Settings
                 else
                 {
                     DefaultPluginProgressIndicator.IsIndeterminate = false;
-                    DefaultPluginProgressIndicator.Value = message.Downloaded / (double)message.Total;
+                    DefaultPluginProgressIndicator.Value = 100 * message.Downloaded / (double)message.Total;
                 }
 
                 DefaultPluginStatusBlock.Text = $"Downloading {message.PluginId} plugin...";
