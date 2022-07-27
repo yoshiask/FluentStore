@@ -18,9 +18,9 @@ namespace CopyPluginToOutput
                 return false;
             }
 
-            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            DirectoryInfo dir = new DirectoryInfo(Path.Combine(localAppData, "Packages", "52374YoshiAskharoun.FluentStore_7sdtne7r32rbe",
-                "LocalState", "Plugins", PluginAssemblyName));
+            var mainDrive = Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles));
+            DirectoryInfo dir = new DirectoryInfo(Path.Combine(mainDrive.FullName, "ProgramData", "FluentStoreBeta",
+                "Plugins", PluginAssemblyName));
             if (dir.Exists)
                 dir.Delete(true);
             dir.Create();

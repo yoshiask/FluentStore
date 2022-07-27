@@ -32,7 +32,8 @@ namespace FluentStore.Helpers
 
         public DirectoryInfo GetAppDataDirectory()
         {
-            DirectoryInfo appDataDir = new(Windows.Storage.ApplicationData.Current.LocalFolder.Path);
+            var mainDrive = Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles));
+            DirectoryInfo appDataDir = new(Path.Combine(mainDrive.FullName, "ProgramData", "FluentStoreBeta"));
 
             // Ensure the directory exists.
             Directory.CreateDirectory(appDataDir.FullName);
@@ -60,7 +61,7 @@ namespace FluentStore.Helpers
 
         public DirectoryInfo GetTempDirectory()
         {
-            DirectoryInfo cacheDir = new(Windows.Storage.ApplicationData.Current.LocalCacheFolder.Path);
+            DirectoryInfo cacheDir = new(Path.Combine(GetAppDataDirectory().FullName, "Cache"));
 
             // Ensure directory exists.
             Directory.CreateDirectory(cacheDir.FullName);
