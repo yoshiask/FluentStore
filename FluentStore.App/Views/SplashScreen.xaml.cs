@@ -42,7 +42,7 @@ namespace FluentStore.Views
                 else
                 {
                     ProgressIndicator.IsIndeterminate = false;
-                    ProgressIndicator.Value = message.Downloaded / (double)message.Total;
+                    ProgressIndicator.Value = 100 * message.Downloaded / (double)message.Total;
                 }
 
                 StatusBlock.Text = $"Downloading {message.PluginId} plugin...";
