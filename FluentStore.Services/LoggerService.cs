@@ -50,7 +50,7 @@ namespace FluentStore.Services
         private void WriteLine(string line)
         {
 #if DEBUG
-            System.Diagnostics.Debug.Write(line);
+            System.Diagnostics.Debug.WriteLine(line);
 #endif
 
             m_logWriter?.WriteLine(line);
