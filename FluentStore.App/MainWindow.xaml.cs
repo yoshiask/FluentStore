@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using HRESULT = Vanara.PInvoke.HRESULT;
 using DwmApi = Vanara.PInvoke.DwmApi;
 using WinUIEx;
+using Microsoft.UI.Windowing;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -31,12 +32,24 @@ namespace FluentStore
             WeakReferenceMessenger.Default.Register(this);
 
             var titleBar = AppWindow?.TitleBar;
-            if (titleBar != null)
+            if (titleBar != null && AppWindowTitleBar.IsCustomizationSupported())
             {
                 titleBar.ExtendsContentIntoTitleBar = true;
                 titleBar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
                 titleBar.ButtonInactiveBackgroundColor = Microsoft.UI.ColorHelper.FromArgb(10, 0, 0, 0);
                 SetTitleBar(CustomTitleBar);
+            }
+            else
+            {
+                CustomTitleBar.Visibility = Visibility.Collapsed;
+                UnloadObject(CustomTitleBar);
+
+                // Enable theme-aware title bar
+                unsafe
+                {
+                    BOOL enableImmersiveDarkMode = BOOL.TRUE;
+                    DwmApi.DwmSetWindowAttribute(m_hwnd, (DwmApi.DWMWINDOWATTRIBUTE)20, (IntPtr)(&enableImmersiveDarkMode), sizeof(BOOL));
+                }
             }
         }
 
