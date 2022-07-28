@@ -5,7 +5,7 @@ namespace FluentStore.SDK.AbstractUI.Models
 {
     public class EmailPasswordForm : AbstractForm
     {
-        public EmailPasswordForm(string id, EventHandler? onSubmit = null) : base(id, submitText: "Sign in", onSubmit: onSubmit)
+        public EmailPasswordForm(string id, string submitText, EventHandler? onSubmit = null) : base(id, submitText: submitText, onSubmit: onSubmit)
         {
             // Create email and password boxes
             EmailBox = new(id + "_EmailBox", string.Empty, "Email");

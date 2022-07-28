@@ -1,7 +1,11 @@
-﻿using FluentStore.SDK.AbstractUI.Models;
+﻿using FluentStore.SDK.AbstractUI;
+using FluentStore.SDK.AbstractUI.Models;
 using FluentStore.SDK.Users;
 using FluentStore.Services;
+using FluentStoreAPI;
+using FluentStoreAPI.Models.Firebase;
 using Flurl;
+using OwlCore.AbstractUI.Models;
 using System;
 using System.Threading.Tasks;
 
@@ -87,18 +91,29 @@ namespace FluentStore.Sources.FluentStore.Users
 
         public override AbstractForm CreateSignInForm()
         {
-            EmailPasswordForm form = new("SignInForm", OnSignInFormSubmitted);
-            return form;
+            return new EmailPasswordForm($"{Id}_SignInForm", "Sign in", OnSignInFormSubmitted);
         }
 
         public override AbstractForm CreateSignUpForm()
         {
-            throw new NotImplementedException();
+            EmailPasswordForm form = new($"{Id}_SignUpForm", "Sign up", OnSignUpFormSubmitted);
+
+            // Add display name box
+            AbstractTextBox displayNameBox = new($"{form.Id}_DisplayName", null, "Display name");
+            form.Add(displayNameBox);
+
+            return form;
         }
 
         public override AbstractForm CreateManageAccountForm()
         {
-            throw new NotImplementedException();
+            AbstractForm form = new($"{Id}_ManageForm", onSubmit: OnManageAccountFormSubmitted);
+
+            // Add display name box
+            AbstractTextBox displayNameBox = new($"{form.Id}_DisplayName", null, "Display name");
+            form.Add(displayNameBox);
+
+            return form;
         }
 
         protected override async Task<Account> UpdateCurrentUser()
@@ -117,8 +132,66 @@ namespace FluentStore.Sources.FluentStore.Users
             string email = epForm.GetEmail();
             string password = epForm.GetPassword();
 
-            var response = await FSApi.SignInAsync(email, password);
+            try
+            {
+                var response = await FSApi.SignInAsync(email, password);
+                await SignInAsync(response);
+            }
+            catch (Flurl.Http.FlurlHttpException ex)
+            {
+                if (ex.StatusCode == 400)
+                {
+                    var errorResponse = await ex.GetErrorResponse();
+                    string errorMessage = UserSignInResponse.CommonErrors.GetMessage(errorResponse.Message);
+
+                    AbstractTextBox? errorMessageBox = epForm.GetChildById<AbstractTextBox>("ErrorMessageBox");
+                    if (errorMessageBox == null)
+                    {
+                        errorMessageBox = new("ErrorMessageBox", errorMessage);
+                        epForm.Add(errorMessageBox);
+                    }
+                    else
+                    {
+                        errorMessageBox.Value = errorMessage;
+                    }
+                }
+            }
+        }
+
+        private async void OnSignUpFormSubmitted(object sender, EventArgs e)
+        {
+            if (sender is not EmailPasswordForm epForm)
+                return;
+
+            string email = epForm.GetEmail();
+            string password = epForm.GetPassword();
+            string displayName = epForm.GetChildById<AbstractTextBox>($"{epForm.Id}_DisplayName")?.Value;
+
+            FluentStoreAPI.Models.Profile profile = new()
+            {
+                DisplayName = displayName
+            };
+
+            var response = await FSApi.SignUpAndCreateProfileAsync(email, password, profile);
             await SignInAsync(response);
+        }
+
+        private async void OnManageAccountFormSubmitted(object sender, EventArgs e)
+        {
+            if (sender is not AbstractForm form)
+                return;
+
+            string displayName = form.GetChildById<AbstractTextBox>($"{form.Id}_DisplayName")?.Value;
+
+            FluentStoreAPI.Models.Profile profile = new()
+            {
+                DisplayName = displayName
+            };
+
+            if (await FSApi.UpdateUserProfileAsync(CurrentUser.Id, profile))
+            {
+                await UpdateCurrentUser();
+            }
         }
     }
 }
