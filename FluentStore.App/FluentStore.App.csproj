@@ -27,14 +27,8 @@
         <HoursBetweenUpdateChecks>48</HoursBetweenUpdateChecks>
         <AppInstallerUri>http://josh.askharoun.com/FluentStore/FluentStoreBeta.appinstaller</AppInstallerUri>
     </PropertyGroup>
-    <ItemGroup>
-      <None Remove="Views\Auth\AccountsView.xaml" />
-      <None Remove="Views\Settings\General.xaml" />
-      <None Remove="Views\Settings\Info.xaml" />
-      <None Remove="Views\Settings\Plugins.xaml" />
-      <None Remove="Views\SplashScreen.xaml" />
-    </ItemGroup>
-    
+
+    <!-- General items -->
     <ItemGroup>
         <AppxManifest Include="Package.appxmanifest">
             <SubType>Designer</SubType>
@@ -46,6 +40,7 @@
         </Content>
     </ItemGroup>
 
+    <!-- References -->
     <ItemGroup>
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.3" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.1" />
@@ -60,7 +55,7 @@
         <PackageReference Include="OwlCore" Version="0.0.71" />
         <PackageReference Include="Vanara.PInvoke.DwmApi" Version="3.4.5" />
         <PackageReference Include="WinUIEx" Version="1.8.0" />
-        
+
         <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj" />
         <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
         <ProjectReference Include="..\FluentStore.ViewModels\FluentStore.ViewModels.csproj" />
@@ -68,34 +63,42 @@
         <ProjectReference Include="..\OwlCore.WinUI\OwlCore.WinUI.csproj" />
     </ItemGroup>
 
+    <!-- XAML pages -->
     <ItemGroup>
-      <Page Update="Views\Settings\Info.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
+        <None Remove="Views\Auth\AccountsView.xaml" />
+        <None Remove="Views\Settings\General.xaml" />
+        <None Remove="Views\Settings\Info.xaml" />
+        <None Remove="Views\Settings\Plugins.xaml" />
+        <None Remove="Views\SplashScreen.xaml" />
+
+        <Page Update="Views\Settings\Info.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Views\Settings\Plugins.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Views\SplashScreen.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Views\Auth\AccountsView.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Views\Settings\General.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
     </ItemGroup>
 
+    <!-- Build plugins without referencing them -->
     <ItemGroup>
-      <Page Update="Views\Settings\Plugins.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
+        <ProjectToBuild Include="../Sources/FluentStore.Sources.Chocolatey/FluentStore.Sources.Chocolatey.csproj"/>
+        <ProjectToBuild Include="../Sources/FluentStore.Sources.FluentStore/FluentStore.Sources.FluentStore.csproj" />
+        <ProjectToBuild Include="../Sources/FluentStore.Sources.GitHub/FluentStore.Sources.GitHub.csproj" />
+        <ProjectToBuild Include="../Sources/FluentStore.Sources.MicrosoftStore/FluentStore.Sources.MicrosoftStore.csproj" />
+        <ProjectToBuild Include="../Sources/FluentStore.Sources.UwpCommunity/FluentStore.Sources.UwpCommunity.csproj" />
+        <ProjectToBuild Include="../Sources/FluentStore.Sources.WinGet/FluentStore.Sources.WinGet.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Page Update="Views\SplashScreen.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Page Update="Views\Auth\AccountsView.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Page Update="Views\Settings\General.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
-    </ItemGroup>
+    <Target Name="BuildPlugins" AfterTargets="Build">
+        <MSBuild Projects="@(ProjectToBuild)" Properties="Configuration=$(Configuration)" />
+    </Target>
 
 </Project>
