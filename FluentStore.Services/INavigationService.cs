@@ -124,6 +124,10 @@ namespace FluentStore.Services
 
             return result;
         }
+
+        public abstract IntPtr GetMainWindowHandle();
+
+        public abstract void SetMainWindowHandle(IntPtr hwnd);
     }
 
     public class PageInfo

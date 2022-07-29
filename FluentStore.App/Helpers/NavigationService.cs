@@ -11,6 +11,8 @@ namespace FluentStore.Services
 {
     public class NavigationService : INavigationService
     {
+        private IntPtr m_hwnd;
+
         public NavigationService()
         {
             Pages = new()
@@ -173,6 +175,10 @@ namespace FluentStore.Services
             name = name.ReplaceLastOccurrence("Model", "");
             return Type.GetType("FluentStore.Views." + name);
         }
+
+        public override IntPtr GetMainWindowHandle() => m_hwnd;
+
+        public override void SetMainWindowHandle(IntPtr hwnd) => m_hwnd = hwnd;
     }
 
     public static class PageInfoEx

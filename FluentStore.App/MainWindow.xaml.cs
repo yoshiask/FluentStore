@@ -26,6 +26,10 @@ namespace FluentStore
             this.InitializeComponent();
 
             m_hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            
+            var navService = CommunityToolkit.Mvvm.DependencyInjection.Ioc.Default.GetService<Services.INavigationService>();
+            if (navService != null)
+                navService.SetMainWindowHandle(m_hwnd);
 
             TaskBarIcon = Icon.FromFile(@"Assets\AppIcon.ico");
 
