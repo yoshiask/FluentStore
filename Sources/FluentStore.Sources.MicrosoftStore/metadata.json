@@ -1,7 +1,7 @@
 {
     "Id": "FluentStore.Sources.MicrosoftStore",
     "DisplayName": "Microsoft Store",
-    "PluginVersion": "0.3.2.0",
+    "PluginVersion": "0.3.2.1",
     "SdkVersion": "0.3.2.0",
     "PluginAssembly": "FluentStore.Sources.MicrosoftStore.dll"
 }

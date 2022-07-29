@@ -40,7 +40,7 @@ namespace FluentStore.Sources.MicrosoftStore
 
             Items.Clear();
             foreach (var card in collectionDetail.Cards)
-                Items.Add(new MicrosoftStorePackage(PackageHandler, card));
+                Items.Add(MicrosoftStorePackageBase.Create(PackageHandler, card.ProductId, card));
 
             Status = PackageStatus.DownloadReady;
         }
