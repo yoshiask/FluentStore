@@ -50,6 +50,7 @@ namespace FluentStore.Views.Settings
             Helpers.Settings.Default.PluginDirectory = null;
         }
 
+        #region Install plugin
         private async void InstallPluginButton_Click(object sender, RoutedEventArgs e)
         {
             Windows.Storage.Pickers.FileOpenPicker openPicker = new()
@@ -65,10 +66,53 @@ namespace FluentStore.Views.Settings
             var pluginFile = await openPicker.PickSingleFileAsync();
             if (pluginFile != null)
             {
+                WeakReferenceMessenger.Default.Register<ErrorMessage>(this, InstallPluginErrorMessage_Recieved);
+                WeakReferenceMessenger.Default.Register<SuccessMessage>(this, InstallPluginSuccessMessage_Recieved);
+
                 var plugin = await pluginFile.OpenReadAsync();
-                await PluginLoader.InstallPlugin(Helpers.Settings.Default, plugin.AsStream(), true);
+                var installStatus = await PluginLoader.InstallPlugin(Helpers.Settings.Default, plugin.AsStream(), true);
+
+                WeakReferenceMessenger.Default.Unregister<ErrorMessage>(this);
+                WeakReferenceMessenger.Default.Unregister<SuccessMessage>(this);
             }
         }
+
+        private void InstallPluginErrorMessage_Recieved(object recipient, ErrorMessage message)
+        {
+            string logMessage;
+            switch (message.Type)
+            {
+                case ErrorType.PluginDownloadFailed:
+                    logMessage = "Error downloading ";
+                    break;
+                case ErrorType.PluginInstallFailed:
+                    logMessage = "Error installing ";
+                    break;
+                default:
+                    return;
+            }
+
+            logMessage += $"{message.Context}:\r\n{message.Exception}";
+
+            _ = DispatcherQueue.TryEnqueue(delegate
+            {
+                DefaultPluginsLog.Items.Add(logMessage);
+            });
+        }
+
+        private void InstallPluginSuccessMessage_Recieved(object recipient, SuccessMessage message)
+        {
+            if (message.Type != SuccessType.PluginDownloadCompleted || message.Type != SuccessType.PluginInstallCompleted)
+                return;
+
+            _ = DispatcherQueue.TryEnqueue(delegate
+            {
+                DefaultPluginProgressIndicator.ShowError = false;
+                DefaultPluginProgressIndicator.IsIndeterminate = true;
+                DefaultPluginsLog.Items.Add(message.Message);
+            });
+        }
+        #endregion
 
         #region Reinstall default plugins
         private async void ReinstallDefaultPluginsButton_Click(object sender, RoutedEventArgs e)

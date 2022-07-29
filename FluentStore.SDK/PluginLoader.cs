@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Models;
 using FluentStore.Services;
 using System;
@@ -165,11 +166,12 @@ namespace FluentStore.SDK
         /// Whether the plugin was installed successfully. <see langword="false"/> if the plugin
         /// was already installed and <paramref name="overwrite"/> was <see langword="false"/>.
         /// </returns>
-        public static Task<bool> InstallPlugin(ISettingsService settings, Stream plugin, bool overwrite = false)
+        public static Task<PluginInstallStatus> InstallPlugin(ISettingsService settings, Stream plugin, bool overwrite = false)
         {
             return Task.Run(delegate
             {
                 string pluginId = "[UNKNOWN]";
+                PluginInstallStatus status = PluginInstallStatus.Failed;
 
                 try
                 {
@@ -177,7 +179,7 @@ namespace FluentStore.SDK
                     var metadataEntry = archive.Entries.FirstOrDefault(
                         e => e.Name.Equals(PluginMetadata.MetadataFileName, StringComparison.OrdinalIgnoreCase));
                     if (metadataEntry == null)
-                        return false;
+                        return PluginInstallStatus.Failed;
 
                     // Read metadata before extracting archive.
                     PluginMetadata metadata;
@@ -195,27 +197,61 @@ namespace FluentStore.SDK
                     string dir = Path.Combine(settings.PluginDirectory, pluginId);
                     if (Directory.Exists(dir))
                     {
-                        // Check if this version is newer than the currently installed one.
-                        var oldMetadata = PluginMetadata.DeserializeFromFile(Path.Combine(dir, PluginMetadata.MetadataFileName));
-                        overwrite |= metadata.PluginVersion > oldMetadata.PluginVersion;
+                        string oldMetadataPath = Path.Combine(dir, PluginMetadata.MetadataFileName);
+                        if (File.Exists(oldMetadataPath))
+                        {
+                            // Check if this version is newer than the currently installed one.
+                            var oldMetadata = PluginMetadata.DeserializeFromFile(Path.Combine(dir, PluginMetadata.MetadataFileName));
+                            overwrite |= metadata.PluginVersion > oldMetadata.PluginVersion;
+                        }
+                        else
+                        {
+                            // If it's missing metadata, it's an invalid install anyway.
+                            overwrite = true;
+                        }
 
                         if (overwrite)
-                            Directory.Delete(dir, true);
+                        {
+                            try
+                            {
+                                Directory.Delete(dir, true);
+                            }
+                            catch
+                            {
+                                status = PluginInstallStatus.AppRestartRequired;
+                            }
+                        }
                         else
-                            return false;
+                        {
+                            return PluginInstallStatus.NoAction;
+                        }
                     }
 
-                    archive.ExtractToDirectory(dir);
+                    if (status != PluginInstallStatus.AppRestartRequired)
+                    {
+                        // App won't need to restart, we can finish the install now
+                        archive.ExtractToDirectory(dir);
+                    }
+                    else
+                    {
+                        // App will need to restart, make sure the ZIP file is
+                        // in the plugin folder so the call to InstallPendingPlugins
+                        // picks it up and finishes the install.
+                        string pluginFileName = $"{metadata.Id}_{metadata.PluginVersion}.zip";
+                        using Stream stream = File.Open(Path.Combine(settings.PluginDirectory, pluginFileName), FileMode.Create);
+                        plugin.Position = 0;
+                        plugin.CopyTo(stream);
+                    }
 
                     WeakReferenceMessenger.Default.Send(
                         Messages.SuccessMessage.CreateForPluginInstallCompleted(pluginId));
-                    return true;
+                    return status;
                 }
                 catch (Exception ex)
                 {
                     WeakReferenceMessenger.Default.Send(new Messages.ErrorMessage(
                         ex, pluginId, Messages.ErrorType.PluginInstallFailed));
-                    return false;
+                    return PluginInstallStatus.Failed;
                 }
             });
         }
@@ -235,8 +271,8 @@ namespace FluentStore.SDK
             {
                 using FileStream plugin = new(pluginPath, FileMode.Open);
 
-                bool installed = await InstallPlugin(settings, plugin);
-                if (installed)
+                var installStatus = await InstallPlugin(settings, plugin, true);
+                if (installStatus.IsAtLeast(PluginInstallStatus.AppRestartRequired))
                     File.Delete(pluginPath);
             }
         }
@@ -308,5 +344,33 @@ namespace FluentStore.SDK
         }
 
         public HashSet<PackageHandlerBase> PackageHandlers { get; }
+    }
+
+    public enum PluginInstallStatus : byte
+    {
+        /// <summary>
+        /// The plugin failed to install.
+        /// </summary>
+        Failed,
+
+        /// <summary>
+        /// The plugin was not installed because a newer version was already installed.
+        /// </summary>
+        NoAction,
+
+        /// <summary>
+        /// The plugin was installed but requires the app to restart.
+        /// </summary>
+        AppRestartRequired,
+
+        /// <summary>
+        /// The plugin was installed but requires the system to restart.
+        /// </summary>
+        SystemRestartRequired,
+
+        /// <summary>
+        /// The plugin has been completely installed and is ready to be loaded.
+        /// </summary>
+        Completed
     }
 }
