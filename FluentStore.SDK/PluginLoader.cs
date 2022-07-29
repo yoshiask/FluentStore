@@ -231,6 +231,7 @@ namespace FluentStore.SDK
                     {
                         // App won't need to restart, we can finish the install now
                         archive.ExtractToDirectory(dir);
+                        status = PluginInstallStatus.Completed;
                     }
                     else
                     {
