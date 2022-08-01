@@ -7,8 +7,10 @@ using FluentStore.SDK.Models;
 using FluentStore.SDK.Packages;
 using Microsoft.Marketplace.Storefront.Contracts.V3;
 using Microsoft.Marketplace.Storefront.Contracts.V8.One;
+using OwlCore.AbstractUI.Models;
 using StoreDownloader;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,14 +24,14 @@ namespace FluentStore.Sources.MicrosoftStore
             Guard.IsFalse(IsWinGet);
         }
 
-        protected override async Task<FileInfo> InternalDownloadAsync(DirectoryInfo folder)
+        protected async Task<FileSystemInfo> InternalDownloadAsync(DirectoryInfo folder, bool downloadEverything)
         {
             try
             {
                 // Get system and package info
                 string[] categoryIds = new[] { Model.Skus[0].FulfillmentData.WuCategoryId };
                 var sysInfo = Handlers.MicrosoftStore.Win32Helper.GetSystemInfo();
-                folder ??= StorageHelper.GetTempDirectory();
+                folder ??= StorageHelper.GetTempDirectory().CreateSubdirectory(StorageHelper.PrepUrnForFile(Urn));
 
                 // Get update data
                 WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
@@ -52,17 +54,27 @@ namespace FluentStore.Sources.MicrosoftStore
 
                 // Start download
                 WeakReferenceMessenger.Default.Send(new PackageDownloadStartedMessage(this));
-                string[] files = await MSStoreDownloader.DownloadPackageAsync(updates, folder, new DownloadProgress(DownloadProgress));
+                string[] files = await MSStoreDownloader.DownloadPackageAsync(updates, folder, new DownloadProgress(DownloadProgress),
+                    downloadAll: downloadEverything);
                 if (files == null || files.Length == 0)
                     throw new Exception("Failed to download pacakges using WindowsUpdateLib");
                 Status = InternalPackage.Status = PackageStatus.Downloaded;
 
-                FileInfo downloadFile = new(Path.Combine(folder.FullName, files[0]));
-                InternalPackage.DownloadItem = downloadFile;
-                await ((ModernPackage<ProductDetails>)InternalPackage).GetInstallerType();
-                Type = InternalPackage.Type;
+                if (downloadEverything)
+                {
+                    InternalPackage.DownloadItem = DownloadItem = folder;
+                    Type = InstallerType.Unknown;
+                }
+                else
+                {
+                    InternalPackage.DownloadItem = DownloadItem
+                        = new FileInfo(Path.Combine(folder.FullName, files[0]));
 
-                return downloadFile;
+                    await ((ModernPackage<ProductDetails>)InternalPackage).GetInstallerType();
+                    Type = InternalPackage.Type;
+                }
+
+                return DownloadItem;
             }
             catch (Exception ex)
             {
@@ -70,6 +82,9 @@ namespace FluentStore.Sources.MicrosoftStore
                 return null;
             }
         }
+
+        protected override async Task<FileSystemInfo> InternalDownloadAsync(DirectoryInfo folder)
+            => await InternalDownloadAsync(folder, false);
 
         protected override void PopulateInternalPackage(CardModel card)
         {
@@ -84,6 +99,25 @@ namespace FluentStore.Sources.MicrosoftStore
             package.PackageFamilyName = product.PackageFamilyNames?[0];
             package.PublisherDisplayName = product.PublisherName;
             InternalPackage = package;
+        }
+
+        public override List<AbstractButton> GetAdditionalCommands()
+        {
+            AbstractButton downloadEverything = new($"{Urn}_DownloadEverythingButton", "Download everything", "\uEA53")
+            {
+                TooltipText = "Downloads all available versions and dependencies",
+            };
+            downloadEverything.Clicked += DownloadEverything_Clicked;
+
+            return new()
+            {
+                downloadEverything
+            };
+        }
+
+        private async void DownloadEverything_Clicked(object sender, EventArgs e)
+        {
+            await InternalDownloadAsync(null, true);
         }
     }
 }

@@ -258,7 +258,7 @@ namespace FluentStore.Sources.MicrosoftStore
         protected abstract void PopulateInternalPackage(CardModel card);
         protected abstract void PopulateInternalPackage(ProductDetails product);
 
-        protected abstract Task<FileInfo> InternalDownloadAsync(DirectoryInfo folder);
+        protected abstract Task<FileSystemInfo> InternalDownloadAsync(DirectoryInfo folder);
 
         public override async Task<ImageBase> CacheAppIcon()
         {

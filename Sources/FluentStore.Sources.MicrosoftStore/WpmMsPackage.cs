@@ -40,7 +40,7 @@ namespace FluentStore.Sources.MicrosoftStore
             InternalPackage = internalPackage;
         }
 
-        protected override async Task<FileInfo> InternalDownloadAsync(DirectoryInfo folder)
+        protected override async Task<FileSystemInfo> InternalDownloadAsync(DirectoryInfo folder)
         {
             // Find the package URI
             await PopulatePackageUri();
