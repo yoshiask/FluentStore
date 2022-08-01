@@ -12,23 +12,18 @@ using CommunityToolkit.Mvvm.Messaging;
 using System;
 using System.IO;
 using System.Numerics;
-using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
-using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Documents;
-using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Navigation;
 using Windows.UI.Notifications;
 using SplitButton = Microsoft.UI.Xaml.Controls.SplitButton;
 using SplitButtonClickEventArgs = Microsoft.UI.Xaml.Controls.SplitButtonClickEventArgs;
-using FluentStore.SDK.Users;
 using FluentStore.SDK.Models;
-using System.Linq;
 using OwlCore.WinUI.AbstractUI.Controls;
 using System.Collections.Generic;
+using CommunityToolkit.Mvvm.Input;
 
 namespace FluentStore.Views
 {
@@ -122,6 +117,26 @@ namespace FluentStore.Views
                 }
                 if (canLaunch)
                     UpdateInstallButtonToLaunch();
+
+                // Show additional commands
+                foreach (var button in ViewModel.GetAdditionalCommands())
+                {
+                    MenuFlyoutItem commandItem = new()
+                    {
+                        DataContext = button,
+                        Text = button.Text,
+                        Icon = new FontIcon
+                        {
+                            Glyph = button.IconCode,
+                        }
+                    };
+
+                    commandItem.Click += (_, _) => HandleAdditionalCommand(button.ClickCommand);
+
+                    ToolTipService.SetToolTip(commandItem, button.TooltipText);
+
+                    InstallMenu.Items.Add(commandItem);
+                }
             }
         }
 
@@ -192,9 +207,8 @@ namespace FluentStore.Views
         {
             try
             {
-                InstallButton.IsEnabled = false;
                 RegisterPackageServiceMessages();
-                VisualStateManager.GoToState(this, "Progress", true);
+                ViewModel.IsInstalling = true;
 
                 if (ViewModel.Package.Status.IsLessThan(PackageStatus.Downloaded))
                     await ViewModel.Package.DownloadAsync(PathManager.GetTempDirectory());
@@ -208,56 +222,41 @@ namespace FluentStore.Views
             }
             finally
             {
-                InstallButton.IsEnabled = true;
-                VisualStateManager.GoToState(this, "NoAction", true);
                 WeakReferenceMessenger.Default.UnregisterAll(this);
             }
         }
 
         private async void Download_Click(object sender, RoutedEventArgs e)
         {
-            InstallButton.IsEnabled = false;
-
-            var progressToast = RegisterPackageServiceMessages();
-            WeakReferenceMessenger.Default.Unregister<SuccessMessage>(this);
-            WeakReferenceMessenger.Default.Register<SuccessMessage>(this, (r, m) =>
-            {
-                _ = DispatcherQueue.TryEnqueue(() => PackageHelper.HandlePackageDownloadCompletedToast(m, progressToast));
-            });
-
             try
             {
-                VisualStateManager.GoToState(this, "Progress", true);
-                var downloadItem = await ViewModel.Package.DownloadAsync(PathManager.GetTempDirectory());
+                RegisterPackageServiceMessages();
+                ViewModel.IsInstalling = false;
 
-                if (downloadItem != null)
-                {
-                    PackageBase p = ViewModel.Package;
-                    FileInfo file = (FileInfo)p.DownloadItem;
-                    Windows.Storage.Pickers.FileSavePicker openPicker = new()
-                    {
-                        SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Downloads
-                    };
-
-                    // Initialize save picker for Win32
-                    WinRT.Interop.InitializeWithWindow.Initialize(openPicker, App.Current.Window.Handle);
-
-                    openPicker.FileTypeChoices.Add(p.Type.GetExtensionDescription(), new string[] { file.Extension });
-                    openPicker.SuggestedFileName = file.Name;
-
-                    var userFile = await openPicker.PickSaveFileAsync();
-                    if (userFile != null)
-                    {
-                        await Task.Run(() => file.MoveTo(userFile.Path, true));
-                    }
-                }
+                await ViewModel.Package.DownloadAsync(PathManager.GetTempDirectory());
             }
             finally
             {
-                InstallButton.IsEnabled = true;
-                VisualStateManager.GoToState(this, "NoAction", true);
                 WeakReferenceMessenger.Default.UnregisterAll(this);
             }
+        }
+
+        private void HandleAdditionalCommand(IRelayCommand command)
+        {
+            _ = DispatcherQueue.TryEnqueue(delegate
+            {
+                try
+                {
+                    RegisterPackageServiceMessages();
+                    ViewModel.IsInstalling = false;
+
+                    command.Execute(null);
+                }
+                finally
+                {
+                    WeakReferenceMessenger.Default.UnregisterAll(this);
+                }
+            });
         }
 
         private void ShareButton_Click(SplitButton sender, SplitButtonClickEventArgs args)
@@ -335,9 +334,25 @@ namespace FluentStore.Views
                 => await ViewModel.Package.LaunchAsync();
         }
 
-        public ToastNotification RegisterPackageServiceMessages()
+        private void SetProgressUI(bool isInProgress)
+        {
+            if (isInProgress)
+            {
+                InstallButton.IsEnabled = false;
+                VisualStateManager.GoToState(this, "Progress", true);
+            }
+            else
+            {
+                InstallButton.IsEnabled = true;
+                VisualStateManager.GoToState(this, "NoAction", true);
+            }
+        }
+
+        private ToastNotification RegisterPackageServiceMessages()
         {
             var progressToast = PackageHelper.GenerateProgressToast(ViewModel.Package);
+
+            WeakReferenceMessenger.Default.UnregisterAll(this);
 
             WeakReferenceMessenger.Default.Register<ErrorMessage>(this, (r, m) =>
             {
@@ -345,6 +360,8 @@ namespace FluentStore.Views
                 {
                     if (m.Context is PackageBase p)
                     {
+                        SetProgressUI(false);
+
                         switch (m.Type)
                         {
                             case ErrorType.PackageDownloadFailed:
@@ -362,6 +379,7 @@ namespace FluentStore.Views
             {
                 _ = DispatcherQueue.TryEnqueue(() =>
                 {
+                    SetProgressUI(true);
                     ProgressIndicator.IsIndeterminate = true;
                     ProgressLabel.Text = "Fetching packages...";
                 });
@@ -370,6 +388,7 @@ namespace FluentStore.Views
             {
                 _ = DispatcherQueue.TryEnqueue(() =>
                 {
+                    SetProgressUI(true);
                     ProgressLabel.Text = "Downloading package...";
 
                     PackageHelper.HandlePackageDownloadStartedToast(m, progressToast);
@@ -380,6 +399,8 @@ namespace FluentStore.Views
                 _ = DispatcherQueue.TryEnqueue(() =>
                 {
                     double prog = 100 * m.Downloaded / m.Total;
+
+                    SetProgressUI(true);
                     ProgressIndicator.IsIndeterminate = false;
                     ProgressIndicator.Value = prog;
                     ProgressText.Text = $"{prog:##0}%";
@@ -391,6 +412,7 @@ namespace FluentStore.Views
             {
                 _ = DispatcherQueue.TryEnqueue(() =>
                 {
+                    SetProgressUI(true);
                     ProgressIndicator.IsIndeterminate = true;
                     ProgressText.Text = string.Empty;
                     ProgressLabel.Text = "Installing package...";
@@ -402,23 +424,86 @@ namespace FluentStore.Views
             {
                 _ = DispatcherQueue.TryEnqueue(() =>
                 {
+                    double prog = 100 * m.Progress;
+
+                    SetProgressUI(true);
+
                     ProgressIndicator.IsIndeterminate = false;
-                    ProgressIndicator.Value = m.Progress;
-                    ProgressText.Text = $"{m.Progress * 100:##0}%";
+                    ProgressIndicator.Value = prog;
+                    ProgressText.Text = $"{prog:##0}%";
 
                     PackageHelper.HandlePackageInstallProgressToast(m, progressToast);
                 });
             });
             WeakReferenceMessenger.Default.Register<SuccessMessage>(this, (r, m) =>
             {
-                _ = DispatcherQueue.TryEnqueue(() =>
+                _ = DispatcherQueue.TryEnqueue(async delegate
                 {
                     if (m.Context is PackageBase p)
                     {
+                        SetProgressUI(false);
+
                         switch (m.Type)
                         {
                             case SuccessType.PackageInstallCompleted:
                                 PackageHelper.HandlePackageInstallCompletedToast(m, progressToast);
+                                break;
+
+                            case SuccessType.PackageDownloadCompleted:
+                                // Don't ask the user to save the downloaded item if they
+                                // asking to install it automatically.
+                                if (!ViewModel.IsInstalling)
+                                {
+                                    PackageHelper.HandlePackageDownloadCompletedToast(m, progressToast);
+
+                                    if (p.DownloadItem != null && p.Status.IsAtLeast(PackageStatus.Downloaded))
+                                    {
+                                        if (p.DownloadItem is FileInfo file)
+                                        {
+                                            // Use file save picker
+                                            Windows.Storage.Pickers.FileSavePicker savePicker = new()
+                                            {
+                                                SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Downloads
+                                            };
+
+                                            // Initialize save picker for Win32
+                                            WinRT.Interop.InitializeWithWindow.Initialize(savePicker, NavigationService.GetMainWindowHandle());
+
+                                            savePicker.FileTypeChoices.Add(p.Type.GetExtensionDescription(), new[] { file.Extension });
+                                            savePicker.SuggestedFileName = file.Name;
+
+                                            var userFile = await savePicker.PickSaveFileAsync();
+                                            if (userFile != null)
+                                            {
+                                                file.MoveTo(userFile.Path, true);
+                                            }
+                                        }
+                                        else if (p.DownloadItem is DirectoryInfo dir)
+                                        {
+                                            // Use folder save picker
+                                            Windows.Storage.Pickers.FolderPicker savePicker = new()
+                                            {
+                                                SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.Downloads
+                                            };
+
+                                            // Initialize save picker for Win32
+                                            WinRT.Interop.InitializeWithWindow.Initialize(savePicker, NavigationService.GetMainWindowHandle());
+
+                                            var userFolder = await savePicker.PickSingleFolderAsync();
+                                            if (userFolder != null)
+                                            {
+                                                // Don't move the directory, just its contents
+                                                foreach (FileSystemInfo item in dir.GetFileSystemInfos())
+                                                {
+                                                    if (item is FileInfo subFile)
+                                                        subFile.MoveTo(userFolder.Path, true);
+                                                    else if (item is DirectoryInfo subDir)
+                                                        subDir.MoveTo(userFolder.Path);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                                 break;
                         }
                     }

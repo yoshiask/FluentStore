@@ -11,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
+using OwlCore.AbstractUI.ViewModels;
+using OwlCore.AbstractUI.Models;
 
 namespace FluentStore.ViewModels
 {
@@ -151,6 +153,13 @@ namespace FluentStore.ViewModels
             ? Package.ReviewSummary.AverageRating.ToString("F1")
             : string.Empty;
 
+        private bool _IsInstalling;
+        public bool IsInstalling
+        {
+            get => _IsInstalling;
+            set => SetProperty(ref _IsInstalling, value);
+        }
+
         public async Task ViewPackage(object obj = null)
         {
             PackageViewModel pvm;
@@ -190,6 +199,12 @@ namespace FluentStore.ViewModels
                 NavigationService.ShowHttpErrorPage(ex.StatusCode, ex.Message);
             }
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+        }
+
+        public IEnumerable<AbstractButtonViewModel> GetAdditionalCommands()
+        {
+            foreach (AbstractButton buttonModel in Package.GetAdditionalCommands())
+                yield return new(buttonModel);
         }
 
         private List<DisplayInfo> _DisplayProperties;

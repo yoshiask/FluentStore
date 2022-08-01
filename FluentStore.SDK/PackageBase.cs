@@ -7,12 +7,14 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.IO;
 using FluentStore.SDK.Attributes;
-using FluentStore.SDK.Helpers;
+using OwlCore.AbstractUI.Models;
 
 namespace FluentStore.SDK
 {
     public abstract class PackageBase : ObservableObject, IEquatable<PackageBase>
     {
+        protected static readonly List<AbstractButton> _emptyCommandList = new(0);
+
         public PackageBase(PackageHandlerBase packageHandler)
         {
             PackageHandler = packageHandler;
@@ -88,6 +90,16 @@ namespace FluentStore.SDK
         public abstract Task<bool> CanLaunchAsync();
 
         public abstract Task LaunchAsync();
+
+        /// <summary>
+        /// Gets additional install/download commands.
+        /// </summary>
+        /// <remarks>
+        /// The official Fluent Store app shows these in the Install/Launch
+        /// split button drop down menu, below the "Download installer"
+        /// option.
+        /// </remarks>
+        public virtual List<AbstractButton> GetAdditionalCommands() => _emptyCommandList;
 
         public virtual bool Equals(PackageBase other) => this.Urn?.EscapedValue == other?.Urn?.EscapedValue
             && this.Status == other?.Status;

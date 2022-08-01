@@ -160,7 +160,7 @@ namespace FluentStore.SDK
 
         #endregion
 
-        #region Package deleting
+        #region Package deletion
 
         /// <summary>
         /// Determines whether the specified package can be deleted.
