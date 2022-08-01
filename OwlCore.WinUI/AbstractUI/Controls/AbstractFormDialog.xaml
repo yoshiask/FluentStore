@@ -12,7 +12,8 @@
     PrimaryButtonCommand="{x:Bind ViewModel.SubmitCommand}"
     SecondaryButtonText="{x:Bind ViewModel.CancelText}"
     SecondaryButtonCommand="{x:Bind ViewModel.CancelCommand}"
-    IsSecondaryButtonEnabled="{x:Bind ViewModel.CanCancel}">
+    IsSecondaryButtonEnabled="{x:Bind ViewModel.CanCancel}"
+    Style="{StaticResource DefaultContentDialogStyle}">
 
     <ContentDialog.Resources>
         <ResourceDictionary>
