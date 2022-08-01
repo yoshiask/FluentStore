@@ -29,10 +29,8 @@ namespace FluentStore.SDK.Helpers
 
         public static DirectoryInfo GetTempDirectory()
         {
-            DirectoryInfo tempDir = new(Path.Combine(Path.GetTempPath(), "FluentStoreBeta"));
-            if (!tempDir.Exists)
-                tempDir.Create();
-            return tempDir;
+            var pathManager = CommunityToolkit.Mvvm.DependencyInjection.Ioc.Default.GetRequiredService<Services.ICommonPathManager>();
+            return pathManager.GetTempDirectory();
         }
 
         public static FileInfo GetPackageFile(Urn packageUrn, DirectoryInfo folder = null)
