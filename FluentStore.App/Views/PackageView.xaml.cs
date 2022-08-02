@@ -322,7 +322,20 @@ namespace FluentStore.Views
 
             // Required amount of additional spacing to place the card at the bottom of the hero image,
             // or at the bottom of the page (whichever places the card higher up)
-            double offset = Math.Min(imageElem.ActualHeight - cardHeight, ActualHeight - cardHeight);
+            double offsetA = imageElem.ActualHeight - cardHeight;
+            double offsetB = ActualHeight - cardHeight;
+            double offset;
+
+            if (offsetA > offsetB)
+            {
+                offset = offsetB;
+                ScrollDetailsButton.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                offset = offsetA;
+                ScrollDetailsButton.Visibility = Visibility.Collapsed;
+            }
             HeroImageSpacer.Height = Math.Max(offset, 0);
         }
 
@@ -623,6 +636,11 @@ namespace FluentStore.Views
         private void ScreenshotViewCloseButton_Click(object sender, RoutedEventArgs e)
         {
             UnloadObject(ScreenshotView);
+        }
+
+        private void ScrollDetailsButton_Click(object sender, RoutedEventArgs e)
+        {
+            MainDetailsPanel.StartBringIntoView();
         }
     }
 }

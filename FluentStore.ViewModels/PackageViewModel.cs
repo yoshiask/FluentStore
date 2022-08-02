@@ -51,6 +51,7 @@ namespace FluentStore.ViewModels
                 IsCollection = Package != null && Package.GetType().IsAssignableTo(typeof(SDK.Packages.IPackageCollection));
                 CanEdit = Package?.PackageHandler?.CanEditPackage(Package) ?? false;
                 CanDelete = Package?.PackageHandler?.CanDeletePackage(Package) ?? false;
+                HasReviews = Package?.ReviewSummary?.HasReviews ?? false;
             }
         }
 
@@ -152,6 +153,13 @@ namespace FluentStore.ViewModels
         public string AverageRatingString => Package != null && Package.HasReviewSummary && Package.ReviewSummary.HasAverageRating
             ? Package.ReviewSummary.AverageRating.ToString("F1")
             : string.Empty;
+
+        private bool _HasReviews;
+        public bool HasReviews
+        {
+            get => _HasReviews;
+            set => SetProperty(ref _HasReviews, value);
+        }
 
         private bool _IsInstalling;
         public bool IsInstalling

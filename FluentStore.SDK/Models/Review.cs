@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Humanizer;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -90,5 +91,8 @@ namespace FluentStore.SDK.Models
             get => _UpdatedSinceResponse;
             set => SetProperty(ref _UpdatedSinceResponse, value);
         }
+
+        public string SubmittedDateTimeToHumanizedString()
+            => SubmittedDateTimeUtc.Humanize().ApplyCase(LetterCasing.Sentence);
     }
 }

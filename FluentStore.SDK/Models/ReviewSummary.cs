@@ -45,19 +45,10 @@ namespace FluentStore.SDK.Models
         public List<Review> Reviews
         {
             get => _Reviews;
-            set
-            {
-                HasReviews = Reviews != null && Reviews.Count > 0;
-                SetProperty(ref _Reviews, value);
-            }
+            set => SetProperty(ref _Reviews, value);
         }
 
-        private bool _HasReviews;
-        public bool HasReviews
-        {
-            get => _HasReviews;
-            set => SetProperty(ref _HasReviews, value);
-        }
+        public bool HasReviews => Reviews != null && Reviews.Count > 0;
 
         private int _Star1Count;
         public int Star1Count

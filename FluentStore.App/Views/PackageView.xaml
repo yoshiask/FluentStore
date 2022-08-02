@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:FluentStore.Controls"
     xmlns:attributes="using:FluentStore.SDK.Attributes"
+    xmlns:models="using:FluentStore.SDK.Models"
     xmlns:tkcontrols="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:animations="using:CommunityToolkit.WinUI.UI.Animations"
     x:DefaultBindMode="OneWay"
@@ -161,6 +162,16 @@
 
                         </CommandBar>
 
+                        <Button x:Name="ScrollDetailsButton" Background="Transparent"
+                                Margin="0,0,-20,-20" BorderThickness="0" CornerRadius="4,0,4,0"
+                                HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                Grid.Column="1" Grid.Row="3" Click="ScrollDetailsButton_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="More details" />
+                                <FontIcon Glyph="&#xE70D;" Margin="0,0,-4,0" />
+                            </StackPanel>
+                        </Button>
+
                         <Grid x:Name="ProgressGrid" Grid.Row="4" Grid.ColumnSpan="2" Margin="-20,0,-20,-20" Padding="20" Visibility="Collapsed"
                               RowSpacing="4" ColumnSpacing="4" Background="{ThemeResource SystemControlChromeLowAcrylicElementBrush}">
                             <Grid.RowDefinitions>
@@ -178,7 +189,8 @@
                         </Grid>
 
                     </Grid>
-                    <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="20">
+                    <StackPanel x:Name="MainDetailsPanel" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                                Padding="20">
                         <StackPanel.Resources>
                             <Style x:Key="DetailsPanelStyle" TargetType="StackPanel">
                                 <Setter Property="Spacing" Value="12"/>
@@ -222,7 +234,7 @@
                         <!-- Reviews -->
                         <StackPanel Visibility="{x:Bind ViewModel.Package.HasReviewSummary, Converter={StaticResource BoolToVisibilityConverter}}"
                                     Style="{ThemeResource DetailsPanelStyle}">
-                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Reviews"/>
+                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="Ratings and reviews"/>
                             <controls:RatingBarControl x:Name="ReviewsBar"
                                                        x:Load="{x:Bind ViewModel.Package.ReviewSummary.HasReviewCount}"
                                                        Star1Count="{x:Bind ViewModel.Package.ReviewSummary.Star1Count}"
@@ -231,6 +243,37 @@
                                                        Star4Count="{x:Bind ViewModel.Package.ReviewSummary.Star4Count}"
                                                        Star5Count="{x:Bind ViewModel.Package.ReviewSummary.Star5Count}"
                                                        HorizontalAlignment="Stretch"/>
+
+                            <Expander Header="See reviews" Visibility="{x:Bind ViewModel.HasReviews, Converter={StaticResource BoolToVisibilityConverter}}"
+                                      HorizontalAlignment="Stretch">
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.Package.ReviewSummary.Reviews}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="models:Review">
+                                            <StackPanel Spacing="4">
+                                                <TextBlock Text="{x:Bind Title}" Style="{ThemeResource SubtitleTextBlockStyle}" FontSize="18"/>
+                                                <Viewbox Width="70" Margin="0,-4" HorizontalAlignment="Left">
+                                                    <RatingControl Value="{x:Bind Rating}" IsReadOnly="True"/>
+                                                </Viewbox>
+                                                <TextBlock Text="{x:Bind ReviewText}" IsTextSelectionEnabled="True"/>
+                                                <TextBlock>
+                                                    <Run Text="{x:Bind ReviewerName}" FontWeight="SemiBold"/>
+                                                    <Run Text=" "/>
+                                                    <Run Text="{x:Bind SubmittedDateTimeToHumanizedString()}"
+                                                         Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"/>
+                                                </TextBlock>
+                                                <Border Height="1" HorizontalAlignment="Stretch"
+                                                        Background="{ThemeResource SystemControlForegroundChromeMediumBrush}"
+                                                        Margin="0,10,0,-12"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="24"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </Expander>
                         </StackPanel>
 
                         <!-- Source-specific details -->
