@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:FluentStore.Controls"
+    xmlns:helpers="using:FluentStore.Helpers"
     xmlns:attributes="using:FluentStore.SDK.Attributes"
     xmlns:models="using:FluentStore.SDK.Models"
     xmlns:tkcontrols="using:CommunityToolkit.WinUI.UI.Controls"
@@ -245,16 +246,20 @@
                                                        HorizontalAlignment="Stretch"/>
 
                             <Expander Header="See reviews" Visibility="{x:Bind ViewModel.HasReviews, Converter={StaticResource BoolToVisibilityConverter}}"
-                                      HorizontalAlignment="Stretch">
-                                <ItemsControl ItemsSource="{x:Bind ViewModel.Package.ReviewSummary.Reviews}">
+                                      HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.Package.ReviewSummary.Reviews}"
+                                              HorizontalAlignment="Stretch">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="models:Review">
                                             <StackPanel Spacing="4">
-                                                <TextBlock Text="{x:Bind Title}" Style="{ThemeResource SubtitleTextBlockStyle}" FontSize="18"/>
+                                                <TextBlock Text="{x:Bind Title}" Style="{ThemeResource SubtitleTextBlockStyle}"
+                                                           Visibility="{x:Bind helpers:Extensions.HideIfNull(Title)}"
+                                                           FontSize="18"/>
                                                 <Viewbox Width="70" Margin="0,-4" HorizontalAlignment="Left">
                                                     <RatingControl Value="{x:Bind Rating}" IsReadOnly="True"/>
                                                 </Viewbox>
-                                                <TextBlock Text="{x:Bind ReviewText}" IsTextSelectionEnabled="True"/>
+                                                <TextBlock Text="{x:Bind ReviewText}" TextWrapping="Wrap" IsTextSelectionEnabled="True"
+                                                           Visibility="{x:Bind helpers:Extensions.HideIfNull(ReviewText)}"/>
                                                 <TextBlock>
                                                     <Run Text="{x:Bind ReviewerName}" FontWeight="SemiBold"/>
                                                     <Run Text=" "/>

@@ -16,6 +16,8 @@ namespace FluentStore.Helpers
             return result;
         }
 
+        public static Visibility HideIfNull(this object obj) => obj is null ? Visibility.Collapsed : Visibility.Visible;
+
         // Yoinked from https://stackoverflow.com/a/58091583/6232957
         public static T FindControl<T>(this UIElement parent, string ControlName) where T : FrameworkElement
         {
