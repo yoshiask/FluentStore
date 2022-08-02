@@ -96,28 +96,13 @@ namespace Microsoft.Marketplace.Storefront.Contracts.V3
 
         [JsonIgnore]
         public Uri PrivacyUri
-        {
-            get
-            {
-                try
-                {
-                    return new Uri(PrivacyUrl);
-                }
-                catch { return null; }
-            }
-        }
+            => Uri.TryCreate(PrivacyUrl, UriKind.Absolute, out var uri)
+            ? uri : null;
+
         [JsonIgnore]
         public Uri AppWebsiteUri
-        {
-            get
-            {
-                try
-                {
-                    return new Uri(AppWebsiteUrl);
-                }
-                catch { return null; }
-            }
-        }
+            => Uri.TryCreate(AppWebsiteUrl, UriKind.Absolute, out var uri)
+            ? uri : null;
     }
 
     public class SystemRequirements

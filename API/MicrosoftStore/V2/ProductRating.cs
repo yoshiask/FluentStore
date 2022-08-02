@@ -25,27 +25,12 @@ namespace Microsoft.Marketplace.Storefront.Contracts.V2
 
         [JsonIgnore]
         public Uri RatingSystemUri
-        {
-            get
-            {
-                try
-                {
-                    return new Uri(RatingSystemUrl);
-                }
-                catch { return null; }
-            }
-        }
+            => Uri.TryCreate(RatingSystemUrl, UriKind.Absolute, out var uri)
+            ? uri : null;
+
         [JsonIgnore]
         public Uri RatingValueLogoUri
-        {
-            get
-            {
-                try
-                {
-                    return new Uri(RatingValueLogoUrl);
-                }
-                catch { return null; }
-            }
-        }
+            => Uri.TryCreate(RatingValueLogoUrl, UriKind.Absolute, out var uri)
+            ? uri : null;
     }
 }

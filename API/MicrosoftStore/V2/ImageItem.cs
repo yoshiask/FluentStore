@@ -17,15 +17,7 @@ namespace Microsoft.Marketplace.Storefront.Contracts.V2
 
         [JsonIgnore]
         public Uri Uri
-        {
-            get
-            {
-                try
-                {
-                    return new Uri(Url);
-                }
-                catch { return null; }
-            }
-        }
+            => Uri.TryCreate(Url, UriKind.Absolute, out var uri)
+            ? uri : null;
     }
 }
