@@ -27,11 +27,6 @@
             <GridView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:AppViewModel">
                     <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                        <interactivity:Interaction.Behaviors>
-                            <core:EventTriggerBehavior EventName="Loaded">
-                                <core:InvokeCommandAction Command="{x:Bind LoadIconSourceCommand}"/>
-                            </core:EventTriggerBehavior>
-                        </interactivity:Interaction.Behaviors>
 
                         <Border Background="{ThemeResource SystemControlHighlightListMediumRevealBackgroundBrush}"/>
                         <Image Source="{x:Bind IconSource}"/>
