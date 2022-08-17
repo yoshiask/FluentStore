@@ -5,6 +5,7 @@ using static Microsoft.Marketplace.Storefront.Contracts.Constants;
 using Newtonsoft.Json;
 using Microsoft.Marketplace.Storefront.Contracts.Enums;
 using Microsoft.Marketplace.Storefront.Contracts.V1;
+using System.Collections.Generic;
 
 namespace Microsoft.Marketplace.Storefront.Contracts
 {
@@ -29,6 +30,37 @@ namespace Microsoft.Marketplace.Storefront.Contracts
             return await GetStorefrontBase(options).AppendPathSegments("products", productId)
                 .SetQueryParam("idType", idType)
                 .GetJsonAsync<ResponseItem<V3.ProductDetails>>();
+        }
+
+        /// <summary>
+        /// Gets a subset of the list of reviews for a product.
+        /// </summary>
+        public async Task<ResponseItem<V3.ReviewList>> GetProductReviews(string productId, int pageSize = 15, int skipItems = 0, RequestOptions options = null)
+        {
+            return await GetStorefrontBase(options).AppendPathSegments("ratings", "product", productId)
+                .SetQueryParam("pageSize", pageSize).SetQueryParam("skipItems", skipItems)
+                .GetJsonAsync<ResponseItem<V3.ReviewList>>();
+        }
+
+        /// <summary>
+        /// Gets all product reviews by calling <see cref="GetProductReviews(string, int, int, RequestOptions)"/>
+        /// untill all results are returned.
+        /// </summary>
+        public async IAsyncEnumerable<V3.Review> GetAllProductReviews(string productId, int pageSize = 25, int startAt = 0, RequestOptions options = null)
+        {
+            int recievedItems = startAt;
+            int totalItems;
+            do
+            {
+                var response = await GetProductReviews(productId, pageSize, recievedItems, options);
+                var reviewList = response.Payload;
+
+                totalItems = reviewList.TotalItems;
+                recievedItems += reviewList.Reviews.Count;
+
+                foreach (var review in reviewList.Reviews)
+                    yield return review;
+            } while (recievedItems < totalItems);
         }
 
         /// <summary>

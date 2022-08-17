@@ -118,7 +118,7 @@ namespace FluentStore.Sources.MicrosoftStore
                     _ => throw new System.ArgumentException("URN not recognized", nameof(packageUrn))
                 };
 
-                return await GetPackageFromPage(catalogId, idType);
+                return await GetPackageFromPage(catalogId, idType, status);
             }
         }
 
@@ -147,7 +147,7 @@ namespace FluentStore.Sources.MicrosoftStore
             if (!m.Success)
                 return null;
 
-            return await GetPackageFromPage(m.Groups["id"].Value, CatalogIdType.ProductId);
+            return await GetPackageFromPage(m.Groups["id"].Value, CatalogIdType.ProductId, PackageStatus.Details);
         }
 
         public override Url GetUrlFromPackage(PackageBase package)
@@ -183,9 +183,10 @@ namespace FluentStore.Sources.MicrosoftStore
             return options;
         }
 
-        private async Task<MicrosoftStorePackageBase> GetPackageFromPage(string catalogId, CatalogIdType idType)
+        private async Task<MicrosoftStorePackageBase> GetPackageFromPage(string catalogId, CatalogIdType idType, PackageStatus status)
         {
-            var page = await StorefrontApi.GetPage(catalogId, idType, GetSystemOptions());
+            var options = GetSystemOptions();
+            var page = await StorefrontApi.GetPage(catalogId, idType, options);
 
             if (!page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ProductDetails>(out var details))
             {
@@ -202,13 +203,21 @@ namespace FluentStore.Sources.MicrosoftStore
             if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.RatingSummary>(out var ratingSummary))
             {
                 package.Update(ratingSummary);
+
                 if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ReviewList>(out var reviewList))
                 {
                     package.Update(reviewList);
+
+                    if (status.IsAtLeast(PackageStatus.Details))
+                    {
+                        // Get the rest of the reviews
+                        var allReviews = StorefrontApi.GetAllProductReviews(catalogId, startAt: reviewList.Reviews.Count, options: options);
+                        await package.Update(allReviews);
+                    }
                 }
             }
 
-            package.Status = PackageStatus.Details;
+            package.Status = status;
             return package;
         }
     }

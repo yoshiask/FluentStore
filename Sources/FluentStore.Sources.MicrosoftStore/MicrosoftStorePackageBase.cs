@@ -194,31 +194,26 @@ namespace FluentStore.Sources.MicrosoftStore
             };
         }
 
-        public void Update(ReviewList reviewList)
+        public void Update(ReviewList reviewList) => Update(reviewList.Reviews);
+
+        public void Update(IEnumerable<Microsoft.Marketplace.Storefront.Contracts.V3.Review> msReviews)
         {
-            Guard.IsNotNull(reviewList, nameof(reviewList));
+            Guard.IsNotNull(msReviews, nameof(msReviews));
             Guard.IsNotNull(ReviewSummary, nameof(ReviewSummary));
 
-            ReviewSummary.Reviews = new List<SDK.Models.Review>();
-            foreach (Microsoft.Marketplace.Storefront.Contracts.V3.Review msReview in reviewList.Reviews)
-            {
-                SDK.Models.Review review = new()
-                {
-                    Title = msReview.Title,
-                    ReviewId = msReview.ReviewId.ToString(),
-                    IsRevised = msReview.IsRevised,
-                    Rating = (int)msReview.Rating,
-                    ReviewerName = msReview.ReviewerName,
-                    ReviewText = msReview.ReviewText,
-                    Locale = msReview.Locale,
-                    Market = msReview.Market,
-                    HelpfulNegative = msReview.HelpfulNegative,
-                    HelpfulPositive = msReview.HelpfulPositive,
-                    SubmittedDateTimeUtc = msReview.SubmittedDateTimeUtc,
-                    UpdatedSinceResponse = msReview.UpdatedSinceResponse,
-                };
-                ReviewSummary.Reviews.Add(review);
-            }
+            ReviewSummary.Reviews ??= new List<SDK.Models.Review>();
+            foreach (Microsoft.Marketplace.Storefront.Contracts.V3.Review msReview in msReviews)
+                ReviewSummary.Reviews.Add(ToReview(msReview));
+        }
+
+        public async Task Update(IAsyncEnumerable<Microsoft.Marketplace.Storefront.Contracts.V3.Review> msReviews)
+        {
+            Guard.IsNotNull(msReviews, nameof(msReviews));
+            Guard.IsNotNull(ReviewSummary, nameof(ReviewSummary));
+
+            ReviewSummary.Reviews ??= new List<SDK.Models.Review>();
+            await foreach (Microsoft.Marketplace.Storefront.Contracts.V3.Review msReview in msReviews)
+                ReviewSummary.Reviews.Add(ToReview(msReview));
         }
 
         private void UpdateUrn()
@@ -345,6 +340,25 @@ namespace FluentStore.Sources.MicrosoftStore
         {
             if (InternalPackage != null)
                 await InternalPackage.LaunchAsync();
+        }
+
+        private static SDK.Models.Review ToReview(Microsoft.Marketplace.Storefront.Contracts.V3.Review msReview)
+        {
+            return new()
+            {
+                Title = msReview.Title,
+                ReviewId = msReview.ReviewId.ToString(),
+                IsRevised = msReview.IsRevised,
+                Rating = (int)msReview.Rating,
+                ReviewerName = msReview.ReviewerName,
+                ReviewText = msReview.ReviewText,
+                Locale = msReview.Locale,
+                Market = msReview.Market,
+                HelpfulNegative = msReview.HelpfulNegative,
+                HelpfulPositive = msReview.HelpfulPositive,
+                SubmittedDateTimeUtc = msReview.SubmittedDateTimeUtc,
+                UpdatedSinceResponse = msReview.UpdatedSinceResponse,
+            };
         }
 
         private List<string> _Notes = new();
