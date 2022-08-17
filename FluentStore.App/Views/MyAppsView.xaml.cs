@@ -1,12 +1,15 @@
-﻿using FluentStore.ViewModels;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.ViewModels;
 using FluentStore.ViewModels.Messages;
-using CommunityToolkit.Mvvm.Messaging;
-using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using Windows.Management.Deployment;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using Windows.ApplicationModel;
+using Windows.Foundation.Metadata;
+using Windows.Management.Deployment;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -35,22 +38,28 @@ namespace FluentStore.Views
         {
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
             ViewModel.Apps = new ObservableCollection<AppViewModelBase>();
-            PackageManager pkgManager = new PackageManager();
+            PackageManager pkgManager = new();
 
             var appsList = new ObservableCollection<AppViewModelBase>();
-            foreach (var pkg in pkgManager.FindPackagesForUser(string.Empty).OrderBy(p => p.DisplayName))
+            IEnumerable<Package> packages = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 19041)
+                && ApiInformation.IsMethodPresent(nameof(PackageManager), nameof(PackageManager.FindProvisionedPackages))
+                ? pkgManager.FindProvisionedPackages()
+                : pkgManager.FindPackagesForUser(string.Empty);
+
+            foreach (var pkg in packages.OrderBy(p => p.DisplayName))
             {
                 var entry = (await pkg.GetAppListEntriesAsync()).FirstOrDefault();
-                if (entry != null)
-                {
-                    var app = new AppViewModel(entry, pkg.Id.FamilyName);
-                    _ = DispatcherQueue.TryEnqueue(async () =>
-                    {
-                        await app.LoadIconSourceAsync();
 
-                        ViewModel.Apps.Add(app);
-                    });
-                }
+                AppViewModel app = entry != null
+                    ? new(pkg, entry, pkg.Id.FamilyName)
+                    : new(pkg);
+
+                _ = DispatcherQueue.TryEnqueue(async () =>
+                {
+                    await app.LoadIconSourceCommand.ExecuteAsync(null);
+
+                    ViewModel.Apps.Add(app);
+                });
             }
 
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
