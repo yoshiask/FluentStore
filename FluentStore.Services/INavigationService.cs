@@ -63,7 +63,7 @@ namespace FluentStore.Services
         {
             ProtocolResult result = new()
             {
-                Page = ResolveType("HomeView"),
+                Page = ResolveType("Home"),
                 Parameter = null,
             };
             ProtocolResult defaultResult = result;

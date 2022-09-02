@@ -37,16 +37,18 @@ namespace FluentStore.Views
         private async void Page_Loading(FrameworkElement sender, object args)
         {
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
-            ViewModel.Apps = new ObservableCollection<AppViewModelBase>();
+            FilterButton.IsEnabled = false;
+
             PackageManager pkgManager = new();
 
-            var appsList = new ObservableCollection<AppViewModelBase>();
             IEnumerable<Package> packages = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 19041)
                 && ApiInformation.IsMethodPresent(nameof(PackageManager), nameof(PackageManager.FindProvisionedPackages))
                 ? pkgManager.FindProvisionedPackages()
                 : pkgManager.FindPackagesForUser(string.Empty);
 
-            foreach (var pkg in packages.OrderBy(p => p.DisplayName))
+            List<AppViewModel> apps = new();
+
+            await System.Threading.Tasks.Parallel.ForEachAsync(packages, async (pkg, token) =>
             {
                 var entry = (await pkg.GetAppListEntriesAsync()).FirstOrDefault();
 
@@ -54,15 +56,32 @@ namespace FluentStore.Views
                     ? new(pkg, entry, pkg.Id.FamilyName)
                     : new(pkg);
 
+                apps.Add(app);
+
                 _ = DispatcherQueue.TryEnqueue(async () =>
                 {
                     await app.LoadIconSourceCommand.ExecuteAsync(null);
-
-                    ViewModel.Apps.Add(app);
                 });
-            }
+            });
 
+            ViewModel.InitAppsCollection(apps);
+
+            FilterButton.IsEnabled = true;
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
+        }
+
+        private void FilterItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not ToggleMenuFlyoutItem item || item.Tag is not int options)
+                return;
+
+            var currentFilter = ViewModel.CurrentFilter;
+            if (item.IsChecked)
+                currentFilter |= (MyAppsFilterOptions)options;
+            else
+                currentFilter &= (MyAppsFilterOptions)(options ^ byte.MaxValue);
+
+            ViewModel.ApplyFilter(currentFilter);
         }
     }
 }

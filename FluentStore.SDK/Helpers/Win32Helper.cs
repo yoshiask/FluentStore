@@ -17,6 +17,8 @@ namespace FluentStore.SDK.Helpers
 {
     public static class Win32Helper
     {
+        public static readonly bool IsWindows19041OrGreater = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 19041);
+
         public static Architecture GetSystemArchitecture()
         {
             PInvoke.Kernel32.GetNativeSystemInfo(out var sysInfo);

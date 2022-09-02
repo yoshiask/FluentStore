@@ -103,5 +103,23 @@ namespace FluentStore.ViewModels
             }
             catch { }
         }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Check is completed by IsWindows19041OrGreater.")]
+        public override bool ApplyFilter(MyAppsFilterOptions options)
+        {
+            if (options == MyAppsFilterOptions.None)
+                return false;
+
+            bool show = (Entry != null && options.HasFlag(MyAppsFilterOptions.ShowAppsListEntry))
+                || (Package.IsBundle && options.HasFlag(MyAppsFilterOptions.ShowBundles))
+                || (Package.IsDevelopmentMode && options.HasFlag(MyAppsFilterOptions.ShowDevMode))
+                || (Package.IsFramework && options.HasFlag(MyAppsFilterOptions.ShowFramework))
+                || (Package.IsOptional && options.HasFlag(MyAppsFilterOptions.ShowOptional))
+                || (Package.IsResourcePackage && options.HasFlag(MyAppsFilterOptions.ShowResource));
+            if (!show && SDK.Helpers.Win32Helper.IsWindows19041OrGreater)
+                show |= Package.IsStub && options.HasFlag(MyAppsFilterOptions.ShowStubs);
+
+            return show;
+        }
     }
 }

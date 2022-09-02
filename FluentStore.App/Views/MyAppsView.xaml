@@ -9,14 +9,67 @@
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:viewmodels="using:FluentStore.ViewModels"
     xmlns:controls="using:FluentStore.Controls"
+    xmlns:tkcontrols="using:CommunityToolkit.WinUI.UI.Controls"
     mc:Ignorable="d"
     Loading="Page_Loading"
     x:DefaultBindMode="OneWay">
 
     <Grid>
-        <GridView ItemsSource="{x:Bind ViewModel.Apps}"
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DropDownButton x:Name="FilterButton" HorizontalAlignment="Right">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+                <FontIcon Glyph="&#xE71C;"/>
+                <TextBlock Text="Filters"/>
+            </StackPanel>
+
+            <DropDownButton.Flyout>
+                <MenuFlyout>
+                    <ToggleMenuFlyoutItem Text="Show apps with Start menu entries" IsChecked="True" Click="FilterItem_Click">
+                        <ToggleMenuFlyoutItem.Tag>
+                            <viewmodels:MyAppsFilterOptions>ShowAppsListEntry</viewmodels:MyAppsFilterOptions>
+                        </ToggleMenuFlyoutItem.Tag>
+                    </ToggleMenuFlyoutItem>
+                    <ToggleMenuFlyoutItem Text="Show bundles" Click="FilterItem_Click">
+                        <ToggleMenuFlyoutItem.Tag>
+                            <viewmodels:MyAppsFilterOptions>ShowBundles</viewmodels:MyAppsFilterOptions>
+                        </ToggleMenuFlyoutItem.Tag>
+                    </ToggleMenuFlyoutItem>
+                    <ToggleMenuFlyoutItem Text="Show packages from Dev Mode" Click="FilterItem_Click">
+                        <ToggleMenuFlyoutItem.Tag>
+                            <viewmodels:MyAppsFilterOptions>ShowDevMode</viewmodels:MyAppsFilterOptions>
+                        </ToggleMenuFlyoutItem.Tag>
+                    </ToggleMenuFlyoutItem>
+                    <ToggleMenuFlyoutItem Text="Show framework packages" Click="FilterItem_Click">
+                        <ToggleMenuFlyoutItem.Tag>
+                            <viewmodels:MyAppsFilterOptions>ShowFramework</viewmodels:MyAppsFilterOptions>
+                        </ToggleMenuFlyoutItem.Tag>
+                    </ToggleMenuFlyoutItem>
+                    <ToggleMenuFlyoutItem Text="Show optional packages" Click="FilterItem_Click">
+                        <ToggleMenuFlyoutItem.Tag>
+                            <viewmodels:MyAppsFilterOptions>ShowOptional</viewmodels:MyAppsFilterOptions>
+                        </ToggleMenuFlyoutItem.Tag>
+                    </ToggleMenuFlyoutItem>
+                    <ToggleMenuFlyoutItem Text="Show resource packages" Click="FilterItem_Click">
+                        <ToggleMenuFlyoutItem.Tag>
+                            <viewmodels:MyAppsFilterOptions>ShowResource</viewmodels:MyAppsFilterOptions>
+                        </ToggleMenuFlyoutItem.Tag>
+                    </ToggleMenuFlyoutItem>
+                    <ToggleMenuFlyoutItem Text="Show stubs" Click="FilterItem_Click">
+                        <ToggleMenuFlyoutItem.Tag>
+                            <viewmodels:MyAppsFilterOptions>ShowStubs</viewmodels:MyAppsFilterOptions>
+                        </ToggleMenuFlyoutItem.Tag>
+                    </ToggleMenuFlyoutItem>
+                </MenuFlyout>
+            </DropDownButton.Flyout>
+        </DropDownButton>
+        
+        <GridView ItemsSource="{x:Bind ViewModel.Apps, Mode=OneWay}"
                   SelectedItem="{x:Bind ViewModel.SelectedApp, Mode=TwoWay}" SelectionMode="Single"
-                  HorizontalContentAlignment="Stretch" Padding="8"
+                  HorizontalContentAlignment="Stretch" Padding="8" Grid.Row="1"
                   controls:ListViewBehaviour.FillBeforeWrap="True" controls:ListViewBehaviour.MinItemWidth="115">
             <GridView.ItemContainerStyle>
                 <Style TargetType="GridViewItem">
@@ -26,13 +79,14 @@
             </GridView.ItemContainerStyle>
             <GridView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:AppViewModel">
-                    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-
-                        <Border Background="{ThemeResource SystemControlHighlightListMediumRevealBackgroundBrush}"/>
-                        <Image Source="{x:Bind IconSource}"/>
-                        <TextBlock Text="{x:Bind DisplayName}" FontSize="12" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
+                    <tkcontrols:ConstrainedBox AspectRatio="1">
+                        <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Border Background="{ThemeResource SystemControlHighlightListMediumRevealBackgroundBrush}"/>
+                            <Image Source="{x:Bind IconSource}"/>
+                            <TextBlock Text="{x:Bind DisplayName}" FontSize="12" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
                                    MaxLines="2" VerticalAlignment="Bottom" Padding="8"/>
-                    </Grid>
+                        </Grid>
+                    </tkcontrols:ConstrainedBox>
                 </DataTemplate>
             </GridView.ItemTemplate>
             <GridView.ItemContainerTransitions>

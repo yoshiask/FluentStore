@@ -13,6 +13,8 @@
         <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj" />
         <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
         <ProjectReference Include="..\API\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
+
+        <PackageReference Include="CommunityToolkit.WinUI.UI" Version="7.1.2" />
     </ItemGroup>
 
 </Project>

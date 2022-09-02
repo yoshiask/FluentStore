@@ -6,8 +6,11 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using System.Collections.ObjectModel;
+using CommunityToolkit.WinUI.UI;
 using System.Threading.Tasks;
+using System;
+using System.Linq;
+using System.Collections;
 
 namespace FluentStore.ViewModels
 {
@@ -23,8 +26,8 @@ namespace FluentStore.ViewModels
         private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
-        private ObservableCollection<AppViewModelBase> _Apps;
-        public ObservableCollection<AppViewModelBase> Apps
+        private AdvancedCollectionView _Apps;
+        public AdvancedCollectionView Apps
         {
             get => _Apps;
             set => SetProperty(ref _Apps, value);
@@ -44,11 +47,21 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _ViewAppCommand, value);
         }
 
-        private bool _IsLoadingMyApps;
-        public bool IsLoadingMyApps
+        private MyAppsFilterOptions _CurrentFilter;
+        public MyAppsFilterOptions CurrentFilter
         {
-            get => _IsLoadingMyApps;
-            set => SetProperty(ref _IsLoadingMyApps, value);
+            get => _CurrentFilter;
+            set => SetProperty(ref _CurrentFilter, value);
+        }
+
+        public void InitAppsCollection(IList apps)
+        {
+            Apps = new(apps)
+            {
+                Filter = obj =>
+                    obj is AppViewModelBase app && app.ApplyFilter(CurrentFilter)
+            };
+            ApplyFilter(MyAppsFilterOptions.ShowAppsListEntry);
         }
 
         public async Task ViewAppAsync()
@@ -67,7 +80,7 @@ namespace FluentStore.ViewModels
                     return;
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
                 WeakReferenceMessenger.Default.Send(new SDK.Messages.ErrorMessage(ex));
@@ -77,6 +90,12 @@ namespace FluentStore.ViewModels
             // No package was found for that package family name
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
             NavService.ShowHttpErrorPage(404, "That app could not be found. It may be private or not listed in the Microsoft Store.");
+        }
+
+        public void ApplyFilter(MyAppsFilterOptions options)
+        {
+            CurrentFilter = options;
+            Apps.RefreshFilter();
         }
     }
 
@@ -123,5 +142,22 @@ namespace FluentStore.ViewModels
         }
 
         public virtual async Task<bool> LaunchAsync() => false;
+
+        public virtual bool ApplyFilter(MyAppsFilterOptions _) => false;
+    }
+
+    [Flags]
+    public enum MyAppsFilterOptions : byte
+    {
+        None = 0,
+        All = byte.MaxValue,
+
+        ShowAppsListEntry = 1 << 1,
+        ShowBundles = 1 << 2,
+        ShowDevMode = 1 << 3,
+        ShowFramework = 1 << 4,
+        ShowOptional = 1 << 5,
+        ShowResource = 1 << 6,
+        ShowStubs = 1 << 7,
     }
 }
