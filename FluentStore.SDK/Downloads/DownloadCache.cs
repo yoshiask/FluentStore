@@ -1,11 +1,12 @@
-﻿using Garfoot.Utilities.FluentUrn;
+﻿using FluentStore.SDK.Helpers;
+using Garfoot.Utilities.FluentUrn;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace FluentStore.SDK.Helpers
+namespace FluentStore.SDK.Downloads
 {
     public class DownloadCache
     {

@@ -1,5 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using FluentStore.SDK.Helpers;
+using FluentStore.SDK.Downloads;
 using FluentStore.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;

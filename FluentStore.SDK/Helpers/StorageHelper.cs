@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using Windows.Storage.Streams;
 using System.IO.Compression;
+using FluentStore.SDK.Downloads;
 
 namespace FluentStore.SDK.Helpers
 {
