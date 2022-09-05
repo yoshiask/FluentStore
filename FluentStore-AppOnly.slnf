@@ -1,0 +1,14 @@
+{
+  "solution": {
+    "path": "FluentStore.sln",
+    "projects": [
+      "FluentStore.App\\FluentStore.App.csproj",
+      "FluentStore.Package\\FluentStore.Package.wapproj",
+      "FluentStore.SDK.AbstractUI\\FluentStore.SDK.AbstractUI.csproj",
+      "FluentStore.SDK\\FluentStore.SDK.csproj",
+      "FluentStore.Services\\FluentStore.Services.csproj",
+      "FluentStore.ViewModels\\FluentStore.ViewModels.csproj",
+      "OwlCore.WinUI\\OwlCore.WinUI.csproj"
+    ]
+  }
+}
