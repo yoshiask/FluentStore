@@ -1,7 +1,7 @@
 {
     "Id": "FluentStore.Sources.Chocolatey",
     "DisplayName": "Chocolatey",
-    "PluginVersion": "0.3.2.0",
-    "SdkVersion": "0.3.2.0",
+    "PluginVersion": "0.3.3.0",
+    "SdkVersion": "0.3.3.0",
     "PluginAssembly": "FluentStore.Sources.Chocolatey.dll"
 }
