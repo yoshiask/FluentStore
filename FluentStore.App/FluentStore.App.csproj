@@ -42,7 +42,7 @@
 
     <!-- References -->
     <ItemGroup>
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.3" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.4" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.1" />
         <PackageReference Include="Garfoot.Utilities.FluentUrn" Version="1.2.1" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
@@ -90,7 +90,7 @@
 
     <!-- Build plugins without referencing them -->
     <ItemGroup>
-        <ProjectToBuild Include="../Sources/FluentStore.Sources.Chocolatey/FluentStore.Sources.Chocolatey.csproj"/>
+        <ProjectToBuild Include="../Sources/FluentStore.Sources.Chocolatey/FluentStore.Sources.Chocolatey.csproj" />
         <ProjectToBuild Include="../Sources/FluentStore.Sources.FluentStore/FluentStore.Sources.FluentStore.csproj" />
         <ProjectToBuild Include="../Sources/FluentStore.Sources.GitHub/FluentStore.Sources.GitHub.csproj" />
         <ProjectToBuild Include="../Sources/FluentStore.Sources.MicrosoftStore/FluentStore.Sources.MicrosoftStore.csproj" />

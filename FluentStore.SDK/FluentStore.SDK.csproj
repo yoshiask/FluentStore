@@ -17,7 +17,7 @@
         <PackageReference Include="OwlCore.Storage" Version="0.3.0" />
         <PackageReference Include="FuseSharp" Version="1.4.0" />
 
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.3" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.4" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.1" />
         <PackageReference Include="System.Management" Version="6.0.0" />
         <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
