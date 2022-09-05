@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.SDK.Downloads;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Models;
 using FluentStore.Services;
+using OwlCore.Storage.SystemIO;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -100,12 +102,9 @@ namespace FluentStore.SDK
         public static async Task InstallDefaultPlugins(ISettingsService settings, IEnumerable<string> pluginUrls,
             bool install = true, bool overwrite = false)
         {
-#if WINDOWS
-            Windows.Web.Http.HttpClient
-#else
-            System.Net.Http.HttpClient
-#endif
-                client = new();
+            SystemFolder pluginDirectory = new(Directory.CreateDirectory(settings.PluginDirectory));
+
+            Windows.Web.Http.HttpClient client = new();
             foreach (string url in pluginUrls)
             {
                 try
@@ -115,28 +114,17 @@ namespace FluentStore.SDK
                     Flurl.Url pluginUrl = new(Flurl.Url.Decode(url, false));
                     string tempPluginId = Path.GetFileNameWithoutExtension(pluginUrl.PathSegments.Last());
 
-#if WINDOWS
-                    var get = client.GetAsync(new(url), Windows.Web.Http.HttpCompletionOption.ResponseContentRead);
-                    get.Progress = (op, prog) =>
+                    DataTransferProgress progress = new(prog =>
                     {
                         WeakReferenceMessenger.Default.Send(new Messages.PluginDownloadProgressMessage(
-                            tempPluginId, prog.BytesReceived, prog.TotalBytesToReceive));
-                    };
-                    var response = await get;
+                            tempPluginId, (ulong)prog.BytesDownloaded, (ulong)prog.TotalBytes));
+                    });
 
-                    Directory.CreateDirectory(settings.PluginDirectory);
-                    string pluginDownloadPath = Path.Combine(settings.PluginDirectory, tempPluginId) + ".zip";
-
-                    FileStream pluginStream = new(pluginDownloadPath, FileMode.Create, FileAccess.ReadWrite);
-                    using IRandomAccessStream outputStream = pluginStream.AsRandomAccessStream();
-                    await response.Content.WriteToStreamAsync(outputStream);
-                    await pluginStream.FlushAsync();
-#else
-                    var pluginStream = await client.GetStreamAsync(url);
-#endif
+                    var remotePluginFile = AbstractStorageHelper.GetFileFromUrl(pluginUrl, tempPluginId);
+                    var pluginFile = await remotePluginFile.SaveLocally(pluginDirectory, progress, overwrite);
 
                     if (install)
-                        await InstallPlugin(settings, pluginStream, overwrite);
+                        await InstallPlugin(settings, await pluginFile.OpenStreamAsync(), overwrite);
                 }
                 catch (Exception ex)
                 {

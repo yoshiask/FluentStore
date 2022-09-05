@@ -9,7 +9,7 @@ using Windows.Web.Http;
 
 namespace OwlCore.Storage.Http
 {
-    public class HttpFile : IAddressableFile
+    public class HttpFile : IFile
     {
         private readonly HttpClient _client;
 
@@ -38,10 +38,7 @@ namespace OwlCore.Storage.Http
 
         public string Id { get; }
 
-        public string Name { get; }
-
-        public Task<IAddressableFolder> GetParentAsync(CancellationToken cancellationToken = default)
-            => Task.FromResult<IAddressableFolder>(null);
+        public string Name { get; set; }
 
         public async Task<Stream> OpenStreamAsync(FileAccess accessMode = FileAccess.Read, CancellationToken cancellationToken = default)
         {

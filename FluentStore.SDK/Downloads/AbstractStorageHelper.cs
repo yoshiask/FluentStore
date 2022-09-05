@@ -10,16 +10,34 @@ namespace FluentStore.SDK.Downloads
 {
     public static class AbstractStorageHelper
     {
-        private static readonly Ipfs.Http.IpfsClient DefaultLocalIpfsClient = new("http://127.0.0.1:5001");
+        public static Ipfs.Http.IpfsClient DefaultIpfsClient { get; set; } = new("http://127.0.0.1:5001");
 
-        public static IFile GetFileFromUrl(Url url)
+        public static Windows.Web.Http.HttpClient DefaultHttpClient { get; set; } = new();
+
+        /// <summary>
+        /// Creates an <see cref="IFile"/> from the given <see cref="Url"/>.
+        /// </summary>
+        /// <param name="url">
+        /// The URL to use.
+        /// </param>
+        /// <param name="desiredFileName">
+        /// The desired filename, useful for situations where the URL
+        /// may not contain an appropriate name.
+        /// </param>
+        /// <returns>
+        /// An implementation of <see cref="IFile"/>.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// Thrown if the URL is not supported.
+        /// </exception>
+        public static IFile GetFileFromUrl(Url url, string desiredFileName = null)
         {
             return url.Scheme switch
             {
                 "ipfs" => GetIpfsFileFromUrl(url),
 
                 "http" or
-                "https" => new HttpFile(url),
+                "https" => new HttpFile(url, DefaultHttpClient),
 
                 "file" => new SystemFile(url.Path),
 
@@ -29,7 +47,7 @@ namespace FluentStore.SDK.Downloads
 
         public static IpfsFile GetIpfsFileFromUrl(Url url)
         {
-            IpfsFile file = new(url.PathSegments[0], DefaultLocalIpfsClient);
+            IpfsFile file = new(url.PathSegments[0], DefaultIpfsClient);
             return file;
         }
     }
