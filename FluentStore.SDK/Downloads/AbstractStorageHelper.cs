@@ -1,10 +1,12 @@
-﻿using Flurl;
+﻿using CommunityToolkit.Diagnostics;
+using Flurl;
 using OwlCore.Kubo;
 using OwlCore.Storage;
 using OwlCore.Storage.Http;
 using OwlCore.Storage.SystemIO;
 using System;
-using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Downloads
 {
@@ -15,7 +17,7 @@ namespace FluentStore.SDK.Downloads
         public static Windows.Web.Http.HttpClient DefaultHttpClient { get; set; } = new();
 
         /// <summary>
-        /// Creates an <see cref="IFile"/> from the given <see cref="Url"/>.
+        /// Creates an <see cref="IFile"/> from the given URL.
         /// </summary>
         /// <param name="url">
         /// The URL to use.
@@ -30,25 +32,47 @@ namespace FluentStore.SDK.Downloads
         /// <exception cref="ArgumentException">
         /// Thrown if the URL is not supported.
         /// </exception>
-        public static IFile GetFileFromUrl(Url url, string desiredFileName = null)
+        public static async Task<IFile> GetFileFromUrl(string url, CancellationToken cancellationToken = default)
         {
-            return url.Scheme switch
+            (string scheme, string path) = GetSchemeAndPath(url);
+
+            return scheme switch
             {
-                "ipfs" => GetIpfsFileFromUrl(url),
+                "ipfs" or
+                "ipns" => await GetIpfsFileFromUrl(url, cancellationToken),
 
                 "http" or
                 "https" => new HttpFile(url, DefaultHttpClient),
 
-                "file" => new SystemFile(url.Path),
+                "file" => new SystemFile(path),
 
-                _ => throw new ArgumentException($"The '{url.Scheme}' URL scheme is not supported.")
+                _ => throw new ArgumentException($"The '{scheme}' URL scheme is not supported.")
             };
         }
 
-        public static IpfsFile GetIpfsFileFromUrl(Url url)
+        public static async Task<IpfsFile> GetIpfsFileFromUrl(string url, CancellationToken cancellationToken = default)
         {
-            IpfsFile file = new(url.PathSegments[0], DefaultIpfsClient);
+            // See https://github.com/ipfs/in-web-browsers/blob/dc1ce8d7718140eb3ae17681b0effd2e815ef8a8/ADDRESSING.md
+            // for URI specification
+            (string scheme, string id) = GetSchemeAndPath(url);
+
+            if (scheme == "ipns")
+            {
+                string path = await DefaultIpfsClient.Name.ResolveAsync(id, recursive: true, cancel: cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                id = System.IO.Path.GetFileName(path);
+            }
+
+            Ipfs.Cid cid = id;
+            IpfsFile file = new(cid, DefaultIpfsClient);
             return file;
+        }
+
+        private static (string scheme, string path) GetSchemeAndPath(string url)
+        {
+            var parts = url.Split(':', 2);
+            return (parts[0], parts[1].TrimStart('/'));
         }
     }
 }

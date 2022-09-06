@@ -112,7 +112,7 @@ namespace FluentStore.SDK
                     // This seems funky, but this is because Firebase encodes the slashes
                     // in the bucket path. This ensures we always get the last segment.
                     Flurl.Url pluginUrl = new(Flurl.Url.Decode(url, false));
-                    string tempPluginId = Path.GetFileNameWithoutExtension(pluginUrl.PathSegments.Last());
+                    string tempPluginId = Path.GetFileNameWithoutExtension(pluginUrl);
 
                     DataTransferProgress progress = new(prog =>
                     {
@@ -120,8 +120,9 @@ namespace FluentStore.SDK
                             tempPluginId, (ulong)prog.BytesDownloaded, (ulong)prog.TotalBytes));
                     });
 
-                    var remotePluginFile = AbstractStorageHelper.GetFileFromUrl(pluginUrl, tempPluginId);
-                    var pluginFile = await remotePluginFile.SaveLocally(pluginDirectory, progress, overwrite);
+                    var remotePluginFile = await AbstractStorageHelper.GetFileFromUrl(pluginUrl);
+                    var pluginFile = (SystemFile)await pluginDirectory.CreateFileAsync(tempPluginId + ".zip", true);
+                    await remotePluginFile.SaveLocally(pluginFile, progress);
 
                     if (install)
                         await InstallPlugin(settings, await pluginFile.OpenStreamAsync(), overwrite);
