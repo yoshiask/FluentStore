@@ -71,6 +71,7 @@ namespace FluentStore
             _ = DispatcherQueue.TryEnqueue(delegate
             {
                 MainInfoBar.Title = m.Message;
+                MainInfoBar.Message = null;
                 MainInfoBar.Severity = InfoBarSeverity.Success;
                 MainInfoBar.IsOpen = true;
             });
