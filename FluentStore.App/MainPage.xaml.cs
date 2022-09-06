@@ -47,6 +47,7 @@ namespace FluentStore
             MainNav.SelectedItem = MainNav.MenuItems[0];
 
             WeakReferenceMessenger.Default.Register<ErrorMessage>(this, ErrorMessage_Recieved);
+            WeakReferenceMessenger.Default.Register<WarningMessage>(this, WarningMessage_Recieved);
             WeakReferenceMessenger.Default.Register<SuccessMessage>(this, SuccessMessage_Recieved);
         }
 
@@ -59,6 +60,17 @@ namespace FluentStore
                 MainInfoBar.Title = m.Exception.Message;
                 MainInfoBar.Message = m.Exception.StackTrace;
                 MainInfoBar.Severity = InfoBarSeverity.Error;
+                MainInfoBar.IsOpen = true;
+            });
+        }
+
+        private void WarningMessage_Recieved(object r, WarningMessage m)
+        {
+            _ = DispatcherQueue.TryEnqueue(delegate
+            {
+                MainInfoBar.Title = m.Message;
+                MainInfoBar.Message = null;
+                MainInfoBar.Severity = InfoBarSeverity.Warning;
                 MainInfoBar.IsOpen = true;
             });
         }
