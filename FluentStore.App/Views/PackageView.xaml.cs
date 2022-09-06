@@ -287,21 +287,27 @@ namespace FluentStore.Views
             NavigationService.OpenInBrowser(appUrl);
         }
 
-        private void ShareDataRequested(DataTransferManager sender, DataRequestedEventArgs args, Flurl.Url appUrl)
+        private async void ShareDataRequested(DataTransferManager sender, DataRequestedEventArgs args, Flurl.Url appUrl)
         {
             var appUri = appUrl.ToUri();
-            DataPackage linkPackage = new DataPackage();
+            DataPackage linkPackage = new();
             linkPackage.SetApplicationLink(appUri);
 
             DataRequest request = args.Request;
+            var def = request.GetDeferral();
+
             request.Data.SetWebLink(appUri);
             request.Data.Properties.Title = "Share App";
             request.Data.Properties.Description = ViewModel.Package.ShortTitle;
             request.Data.Properties.ContentSourceApplicationLink = appUri;
-            if (typeof(SDK.Images.StreamImage).IsAssignableFrom(ViewModel.AppIcon.GetType()))
+            if (ViewModel.AppIcon is SDK.Images.StreamImage img)
             {
-                var img = (SDK.Images.StreamImage)ViewModel.AppIcon;
+                var stream = await img.GetImageStreamAsync();
+                var raStream = stream.AsRandomAccessStream();
+                request.Data.Properties.Thumbnail = Windows.Storage.Streams.RandomAccessStreamReference.CreateFromStream(raStream);
             }
+
+            def.Complete();
         }
 
         private void HeroImage_SizeChanged(object sender, RoutedEventArgs e)
