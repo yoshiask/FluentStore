@@ -102,7 +102,6 @@ namespace FluentStore
                 await Settings.Default.LoadAsync();
 
                 // Check if app was updated
-                var appVersion = Windows.ApplicationModel.Package.Current.Id.Version.ToVersion();
                 switch (Settings.Default.GetAppUpdateStatus())
                 {
                     case AppUpdateStatus.NewlyInstalled:
@@ -134,6 +133,7 @@ namespace FluentStore
                 await pkgSvc.TrySlientSignInAsync();
 
                 // Update last launched version
+                var appVersion = Windows.ApplicationModel.Package.Current.Id.Version.ToVersion();
                 Settings.Default.LastLaunchedVersion = appVersion;
                 await Settings.Default.SaveAsync();
             }

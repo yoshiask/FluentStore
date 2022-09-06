@@ -7,6 +7,8 @@ namespace FluentStore.SDK.Images
 {
     public class FileImage : StreamImage
     {
+        static readonly HttpClient _client = new();
+
         private string _Url;
         public string Url
         {
@@ -57,8 +59,8 @@ namespace FluentStore.SDK.Images
                 }
                 else
                 {
-                    var client = new HttpClient();
-                    var response = await client.GetAsync(Url);
+                    
+                    var response = await _client.GetAsync(Url);
                     if (!response.IsSuccessStatusCode)
                         Stream = null;
 

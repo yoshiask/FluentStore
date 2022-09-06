@@ -9,7 +9,7 @@ namespace FluentStore.Converters
     {
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            if (!(value is Stream stream))
+            if (value is not Stream stream)
                 throw new ArgumentException($"{nameof(value)} must be of type {nameof(Stream)}");
 
             var bitmap = new BitmapImage();
