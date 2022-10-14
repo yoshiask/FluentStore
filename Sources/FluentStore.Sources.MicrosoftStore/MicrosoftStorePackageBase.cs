@@ -203,7 +203,7 @@ namespace FluentStore.Sources.MicrosoftStore
 
             ReviewSummary.Reviews ??= new List<SDK.Models.Review>();
             foreach (Microsoft.Marketplace.Storefront.Contracts.V3.Review msReview in msReviews)
-                ReviewSummary.Reviews.Add(ToReview(msReview));
+                ReviewSummary.Reviews.Append(ToReview(msReview));
         }
 
         public async Task Update(IAsyncEnumerable<Microsoft.Marketplace.Storefront.Contracts.V3.Review> msReviews)
@@ -213,7 +213,7 @@ namespace FluentStore.Sources.MicrosoftStore
 
             ReviewSummary.Reviews ??= new List<SDK.Models.Review>();
             await foreach (Microsoft.Marketplace.Storefront.Contracts.V3.Review msReview in msReviews)
-                ReviewSummary.Reviews.Add(ToReview(msReview));
+                ReviewSummary.Reviews.Append(ToReview(msReview));
         }
 
         private void UpdateUrn()

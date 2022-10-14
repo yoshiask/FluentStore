@@ -155,6 +155,19 @@ namespace FluentStore.Sources.MicrosoftStore
             return "https://apps.microsoft.com/store/detail/" + package.Urn.GetContent<NamespaceSpecificString>().UnEscapedValue;
         }
 
+        public override async Task<ReviewSummary> GetReviewsAsync(PackageBase package)
+        {
+            if (package is not MicrosoftStorePackageBase msPkg)
+                throw new System.ArgumentException($"{nameof(package)} must be of type {nameof(MicrosoftStorePackageBase)}.");
+
+            // Get the rest of the reviews
+            var options = GetSystemOptions();
+            var allReviews = StorefrontApi.GetAllProductReviews(msPkg.StoreId, startAt: msPkg.ReviewSummary?.Reviews.Count ?? 0, options: options);
+            await msPkg.Update(allReviews);
+
+            return msPkg.ReviewSummary;
+        }
+
         private RequestOptions GetSystemOptions()
         {
             RequestOptions options = new();
@@ -207,13 +220,6 @@ namespace FluentStore.Sources.MicrosoftStore
                 if (page.TryGetPayload<Microsoft.Marketplace.Storefront.Contracts.V3.ReviewList>(out var reviewList))
                 {
                     package.Update(reviewList);
-
-                    if (status.IsAtLeast(PackageStatus.Details))
-                    {
-                        // Get the rest of the reviews
-                        var allReviews = StorefrontApi.GetAllProductReviews(catalogId, startAt: reviewList.Reviews.Count, options: options);
-                        await package.Update(allReviews);
-                    }
                 }
             }
 

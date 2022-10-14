@@ -1,5 +1,6 @@
 ﻿using FluentStore.SDK.AbstractUI.Models;
 using FluentStore.SDK.Images;
+using FluentStore.SDK.Models;
 using FluentStore.SDK.Users;
 using FluentStore.Services;
 using Flurl;
@@ -117,6 +118,11 @@ namespace FluentStore.SDK
         /// such as <see cref="Packages.GenericPackageCollection{TModel}"/>.
         /// </remarks>
         public virtual Task<List<PackageBase>> GetCollectionsAsync() => Task.FromResult(_emptyPackageList);
+
+        /// <summary>
+        /// Gets the review summary for the specified package.
+        /// </summary>
+        public virtual Task<ReviewSummary> GetReviewsAsync(PackageBase package) => Task.FromResult<ReviewSummary>(null);
 
         public bool Equals(PackageHandlerBase x, PackageHandlerBase y) => x.GetType() == y.GetType();
 

@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FluentStore.SDK.Models
 {
@@ -41,14 +42,14 @@ namespace FluentStore.SDK.Models
             set => SetProperty(ref _HasReviewCount, value);
         }
         
-        private List<Review> _Reviews;
-        public List<Review> Reviews
+        private IEnumerable<Review> _Reviews;
+        public IEnumerable<Review> Reviews
         {
             get => _Reviews;
             set => SetProperty(ref _Reviews, value);
         }
 
-        public bool HasReviews => Reviews != null && Reviews.Count > 0;
+        public bool HasReviews => Reviews != null && Reviews.Any();
 
         private int _Star1Count;
         public int Star1Count
