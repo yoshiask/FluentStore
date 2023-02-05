@@ -44,7 +44,7 @@ namespace OwlCore.Storage.WinRT
         public string FileExtension => StorageFile.FileType;
 
         /// <inheritdoc/>
-        public async Task<IAddressableFolder> GetParentAsync(CancellationToken cancellationToken = default)
+        public async Task<IFolder?> GetParentAsync(CancellationToken cancellationToken = default)
         {
             var storageFile = await StorageFile.GetParentAsync();
 

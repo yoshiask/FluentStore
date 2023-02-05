@@ -3,6 +3,7 @@ using FluentStore.SDK.Downloads;
 using FluentStore.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using OwlCore.Storage;
 using System;
 using System.IO.Compression;
 using WinUIEx;
@@ -50,7 +51,7 @@ namespace FluentStore.Views.Settings
             var settingsFile = await openPicker.PickSingleFileAsync();
             if (settingsFile != null)
             {
-                ZipFile.ExtractToDirectory(settingsFile.Path, Helpers.Settings.Default.Folder.Path, true);
+                ZipFile.ExtractToDirectory(settingsFile.Path, ((IAddressableFolder)Helpers.Settings.Default.Folder).Path, true);
 
                 await Helpers.Settings.Default.LoadAsync();
             }
@@ -77,7 +78,7 @@ namespace FluentStore.Views.Settings
 
                 await settingsFile.DeleteAsync();
 
-                ZipFile.CreateFromDirectory(Helpers.Settings.Default.Folder.Path,
+                ZipFile.CreateFromDirectory(((IAddressableFolder)Helpers.Settings.Default.Folder).Path,
                     settingsFile.Path, CompressionLevel.Optimal, false);
 
                 var dialog = App.Current.Window.CreateMessageDialog($"Successfully exported settings to '{settingsFile.Path}'.");

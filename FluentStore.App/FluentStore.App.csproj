@@ -52,7 +52,7 @@
         <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Layout" Version="7.1.2" />
         <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="2.0.8" />
         <PackageReference Include="PInvoke.User32" Version="0.7.124" />
-        <PackageReference Include="OwlCore" Version="0.0.71" />
+        <PackageReference Include="OwlCore" Version="0.1.0" />
         <PackageReference Include="Vanara.PInvoke.DwmApi" Version="3.4.5" />
         <PackageReference Include="WinUIEx" Version="1.8.0" />
 
@@ -90,12 +90,12 @@
 
     <!-- Build plugins without referencing them -->
     <ItemGroup>
-        <ProjectToBuild Include="../Sources/FluentStore.Sources.Chocolatey/FluentStore.Sources.Chocolatey.csproj" />
+        <!--<ProjectToBuild Include="../Sources/FluentStore.Sources.Chocolatey/FluentStore.Sources.Chocolatey.csproj" />
         <ProjectToBuild Include="../Sources/FluentStore.Sources.FluentStore/FluentStore.Sources.FluentStore.csproj" />
-        <ProjectToBuild Include="../Sources/FluentStore.Sources.GitHub/FluentStore.Sources.GitHub.csproj" />
+        <ProjectToBuild Include="../Sources/FluentStore.Sources.GitHub/FluentStore.Sources.GitHub.csproj" />-->
         <ProjectToBuild Include="../Sources/FluentStore.Sources.MicrosoftStore/FluentStore.Sources.MicrosoftStore.csproj" />
-        <ProjectToBuild Include="../Sources/FluentStore.Sources.UwpCommunity/FluentStore.Sources.UwpCommunity.csproj" />
-        <ProjectToBuild Include="../Sources/FluentStore.Sources.WinGet/FluentStore.Sources.WinGet.csproj" />
+        <!--<ProjectToBuild Include="../Sources/FluentStore.Sources.UwpCommunity/FluentStore.Sources.UwpCommunity.csproj" />
+        <ProjectToBuild Include="../Sources/FluentStore.Sources.WinGet/FluentStore.Sources.WinGet.csproj" />-->
     </ItemGroup>
     <Target Name="BuildPlugins" AfterTargets="Build">
         <MSBuild Projects="@(ProjectToBuild)" Properties="Configuration=$(Configuration)" />

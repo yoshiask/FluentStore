@@ -2,8 +2,10 @@
 using FluentStore.SDK;
 using FluentStore.SDK.Helpers;
 using FluentStore.Services;
-using OwlCore.AbstractStorage;
+using OwlCore.ComponentModel;
 using OwlCore.Services;
+using OwlCore.Storage;
+using OwlCore.Storage.SystemIO;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -101,16 +103,7 @@ namespace FluentStore.Helpers
             return AppUpdateStatus.None;
         }
 
-        public async Task ClearSettings()
-        {
-            DirectoryInfo dir;
-            if (Folder is SystemIOFolderData folder)
-                dir = folder.Directory;
-            else
-                dir = new(Folder.Path);
-
-            await Task.Run(dir.RecursiveDelete);
-        }
+        public Task ClearSettings() => Folder.RecursiveDelete();
 
         public async Task InstallDefaultPlugins(bool install = true, bool overwrite = false)
         {
@@ -124,9 +117,9 @@ namespace FluentStore.Helpers
 
         private static string GetPackageHandlerEnabledKey(string typeName) => $"{KEY_PackageHandlerEnabled}_{typeName}";
 
-        private static IFolderData GetSettingsFolder(ICommonPathManager pathManager)
+        private static IModifiableFolder GetSettingsFolder(ICommonPathManager pathManager)
         {
-            SystemIOFolderData dir = new(pathManager.GetDefaultSettingsDirectory());
+            SystemFolder dir = new(pathManager.GetDefaultSettingsDirectory());
             Directory.CreateDirectory(dir.Path);
             return dir;
         }

@@ -37,7 +37,7 @@ namespace OwlCore.Storage.WinRT
         public string? Id { get; set; }
 
         /// <inheritdoc/>
-        public async IAsyncEnumerable<IStorable> GetItemsAsync(StorableType type, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<IAddressableStorable> GetItemsAsync(StorableType type, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             if (type == StorableType.File)
             {
@@ -66,11 +66,13 @@ namespace OwlCore.Storage.WinRT
         }
 
         /// <inheritdoc/>
-        public async Task<IAddressableFolder> GetParentAsync(CancellationToken cancellationToken = default)
+        public async Task<IFolder?> GetParentAsync(CancellationToken cancellationToken = default)
         {
             var storageFolder = await StorageFolder.GetParentAsync();
 
-            return new StorageFolderData(storageFolder);
+            return storageFolder != null
+                ? new StorageFolderData(storageFolder)
+                : null;
         }
     }
 }

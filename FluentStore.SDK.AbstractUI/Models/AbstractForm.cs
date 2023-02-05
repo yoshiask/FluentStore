@@ -1,5 +1,4 @@
 ﻿using OwlCore.AbstractUI.Models;
-using OwlCore.Remoting;
 using System;
 
 namespace FluentStore.SDK.AbstractUI.Models
@@ -53,13 +52,11 @@ namespace FluentStore.SDK.AbstractUI.Models
         /// <summary>
         /// Simulates the user submitting the form.
         /// </summary>
-        [RemoteMethod]
         public void Submit() => Submitted?.Invoke(this, EventArgs.Empty);
 
         /// <summary>
         /// Simulates the user cancelling the form.
         /// </summary>
-        [RemoteMethod]
         public void Cancel() => Cancelled?.Invoke(this, EventArgs.Empty);
     }
 }

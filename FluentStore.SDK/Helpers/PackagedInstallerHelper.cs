@@ -17,7 +17,7 @@ using Windows.Management.Deployment;
 using Windows.System;
 using Windows.System.Profile;
 using Windows.Foundation;
-using OwlCore.AbstractStorage;
+using OwlCore.Storage;
 
 namespace FluentStore.SDK.Helpers
 {

@@ -12,6 +12,7 @@ using System.Linq;
 using Windows.Storage.Streams;
 using System.IO.Compression;
 using FluentStore.SDK.Downloads;
+using OwlCore.Storage;
 
 namespace FluentStore.SDK.Helpers
 {
@@ -92,6 +93,16 @@ namespace FluentStore.SDK.Helpers
                 subdir.RecursiveDelete();
             else
                 info.Delete();
+        }
+
+        public static async Task RecursiveDelete(this IStorable storable)
+        {
+            if (storable is IAddressableStorable addressableStorable)
+            {
+                var parent = await addressableStorable.GetParentAsync();
+                if (parent is IModifiableFolder mutParent)
+                    await mutParent.DeleteAsync(addressableStorable);
+            }
         }
 
         public static void MoveRename(this FileInfo file, string newName, bool overwrite = true)
