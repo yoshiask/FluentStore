@@ -1,18 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
+	<PropertyGroup>
 		<TargetFrameworks>$(AppTargetFramework)</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
-        <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
-    </PropertyGroup>
+		<Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
+	</PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="OwlCore" Version="0.1.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
-    </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="OwlCore" Version="0.1.0" />
+		<ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
+	</ItemGroup>
 
 </Project>

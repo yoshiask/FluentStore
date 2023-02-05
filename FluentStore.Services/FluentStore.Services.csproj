@@ -8,7 +8,7 @@
 		<FileVersion>$(AssemblyVersion)</FileVersion>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" $(TargetFramework.StartsWith('net6.0-windows')) ">
+    <PropertyGroup Condition=" $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows' ">
         <TargetPlatformMinVersion>$(MinWindowsVersion)</TargetPlatformMinVersion>
     </PropertyGroup>
 

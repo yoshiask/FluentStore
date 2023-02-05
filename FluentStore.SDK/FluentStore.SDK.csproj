@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.SDK">
 
     <PropertyGroup>
-        <TargetFrameworks>$(AppTargetFramework)</TargetFrameworks>
+        <TargetFramework>$(AppTargetFramework)</TargetFramework>
         <TargetPlatformMinVersion>$(MinWindowsVersion)</TargetPlatformMinVersion>
         <LangVersion>latest</LangVersion>
         <Platforms>AnyCPU;x64;x86;ARM64</Platforms>
