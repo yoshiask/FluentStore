@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0-windows$(TargetWindowsVersion)</TargetFramework>
+        <TargetFramework>$(AppTargetFramework)</TargetFramework>
         <TargetPlatformMinVersion>$(MinWindowsVersion)</TargetPlatformMinVersion>
         <Platforms>AnyCPU;x64;x86;ARM64</Platforms>
         <AssemblyVersion>$(FluentStoreVersion)</AssemblyVersion>

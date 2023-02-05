@@ -4,6 +4,8 @@
 		<FluentStoreVersion>0.3.3.0</FluentStoreVersion>
 		<MinWindowsVersion>10.0.17763.0</MinWindowsVersion>
 		<TargetWindowsVersion>10.0.22000.0</TargetWindowsVersion>
+		<AppTargetFramework>net6.0-windows$(TargetWindowsVersion)</AppTargetFramework>
+		<SdkTargetFrameworks>$(AppTargetFramework);netstandard2.0</SdkTargetFrameworks>
 	</PropertyGroup>
 </Project>
 
