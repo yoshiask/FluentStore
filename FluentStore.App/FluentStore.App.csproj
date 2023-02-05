@@ -42,8 +42,8 @@
 
     <!-- References -->
     <ItemGroup>
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.4" />
-        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.1" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.230118.102" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.755" />
         <PackageReference Include="Garfoot.Utilities.FluentUrn" Version="1.2.1" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
         <PackageReference Include="CommunityToolkit.WinUI.Notifications" Version="7.1.2" />
@@ -54,7 +54,7 @@
         <PackageReference Include="PInvoke.User32" Version="0.7.124" />
         <PackageReference Include="OwlCore" Version="0.1.0" />
         <PackageReference Include="Vanara.PInvoke.DwmApi" Version="3.4.5" />
-        <PackageReference Include="WinUIEx" Version="1.8.0" />
+        <PackageReference Include="WinUIEx" Version="2.1.0" />
 
         <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj" />
         <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
