@@ -7,23 +7,21 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.Web.Http;
 
-namespace OwlCore.Storage.Http
+namespace OwlCore.Storage
 {
-    public class HttpFile : IFile
+    public class WindowsHttpFile : IFile
     {
         private readonly HttpClient _client;
 
-        public HttpFile(string url, HttpClient client = null) : this(new Uri(url), client)
+        public WindowsHttpFile(string url, HttpClient client = null) : this(new Uri(url), client)
         {
-
         }
 
-        public HttpFile(Url url, HttpClient client = null) : this(url.ToUri(), client)
+        public WindowsHttpFile(Url url, HttpClient client = null) : this(url.ToUri(), client)
         {
-
         }
 
-        public HttpFile(Uri uri, HttpClient client = null)
+        public WindowsHttpFile(Uri uri, HttpClient client = null)
         {
             _client = client ?? new();
 

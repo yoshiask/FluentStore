@@ -1,8 +1,6 @@
-﻿using CommunityToolkit.Diagnostics;
-using Flurl;
+﻿using Flurl;
 using OwlCore.Kubo;
 using OwlCore.Storage;
-using OwlCore.Storage.Http;
 using OwlCore.Storage.SystemIO;
 using System;
 using System.Threading;
@@ -12,9 +10,13 @@ namespace FluentStore.SDK.Downloads
 {
     public static class AbstractStorageHelper
     {
-        public static Ipfs.Http.IpfsClient DefaultIpfsClient { get; set; } = new("http://127.0.0.1:5001");
+        static Ipfs.Http.IpfsClient _ipfsClient;
 
-        public static Windows.Web.Http.HttpClient DefaultHttpClient { get; set; } = new();
+        public static Ipfs.Http.IpfsClient IpfsClient
+        {
+            get => _ipfsClient ??= new();
+            set => _ipfsClient = value;
+        }
 
         /// <summary>
         /// Creates an <see cref="IFile"/> from the given URL.
@@ -42,7 +44,7 @@ namespace FluentStore.SDK.Downloads
                 "ipns" => await GetIpfsFileFromUrl(url, cancellationToken),
 
                 "http" or
-                "https" => new HttpFile(url, DefaultHttpClient),
+                "https" => new HttpFile(new Uri(url)),
 
                 "file" => new SystemFile(path),
 
@@ -58,14 +60,14 @@ namespace FluentStore.SDK.Downloads
 
             if (scheme == "ipns")
             {
-                string path = await DefaultIpfsClient.Name.ResolveAsync(id, recursive: true, cancel: cancellationToken);
+                string path = await IpfsClient.Name.ResolveAsync(id, recursive: true, cancel: cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
 
                 id = System.IO.Path.GetFileName(path);
             }
 
             Ipfs.Cid cid = id;
-            IpfsFile file = new(cid, DefaultIpfsClient);
+            IpfsFile file = new(cid, IpfsClient);
             return file;
         }
 

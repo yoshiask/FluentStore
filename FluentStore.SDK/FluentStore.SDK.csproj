@@ -13,8 +13,8 @@
     <ItemGroup>
         <PackageReference Include="Garfoot.Utilities.FluentUrn" Version="1.2.1" />
         <PackageReference Include="OwlCore" Version="0.1.0" />
-        <PackageReference Include="OwlCore.Kubo" Version="0.9.2" />
-        <PackageReference Include="OwlCore.Storage" Version="0.5.0" />
+        <PackageReference Include="OwlCore.Kubo" Version="0.9.7" />
+        <PackageReference Include="OwlCore.Storage" Version="0.7.0" />
         <PackageReference Include="FuseSharp" Version="1.4.0" />
 
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.230118.102" />
