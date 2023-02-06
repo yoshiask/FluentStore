@@ -87,10 +87,10 @@ namespace FluentStore.Services
                 CurrentFrame.NavigateForward();
         }
 
-        public override void AppNavigate(Type page, object parameter)
+        public override void AppNavigate(Type page, object parameter = null)
         {
             Guard.IsNotNull(page, nameof(page));
-            AppNavigate(page, parameter);
+            AppFrame.Navigate(page, parameter);
         }
 
         public override void AppNavigate(object parameter)

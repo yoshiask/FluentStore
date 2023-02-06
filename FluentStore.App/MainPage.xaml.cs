@@ -167,7 +167,7 @@ namespace FluentStore
 
             if (args.IsSettingsSelected)
             {
-                NavService.AppNavigate(typeof(Views.SettingsView));
+                NavService.AppNavigate(typeof(Views.SettingsView), null);
                 return;
             }
 
