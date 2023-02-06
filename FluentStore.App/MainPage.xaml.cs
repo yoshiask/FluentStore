@@ -51,7 +51,7 @@ namespace FluentStore
             WeakReferenceMessenger.Default.Register<SuccessMessage>(this, SuccessMessage_Recieved);
         }
 
-        public void OnNavigatedTo() => UpdateNavViewSelected(MainFrame.CurrentSourcePageType);
+        public void OnNavigatedTo(object parameter) => UpdateNavViewSelected(MainFrame.CurrentPageType);
 
         private void ErrorMessage_Recieved(object r, ErrorMessage m)
         {
@@ -144,7 +144,7 @@ namespace FluentStore
                 // This is in a try-catch block so that I don't have to do a dozen
                 // null checks.
 
-                var page = NavService.Pages.Find((info) => info.PageType == sourcePageType);
+                var page = NavService.Pages.Find(info => info.PageType == sourcePageType);
                 if (page == null)
                 {
                     MainNav.SelectedItem = null;
@@ -159,7 +159,7 @@ namespace FluentStore
             }
         }
 
-        private void MainFrame_Navigated(object sender, NavigationEventArgs e) => UpdateNavViewSelected(e.SourcePageType);
+        private void MainFrame_Navigated(object sender, object e) => UpdateNavViewSelected(e.GetType());
 
         private void NavigationView_SelectionChanged(object sender, NavigationViewSelectionChangedEventArgs args)
         {
@@ -167,13 +167,13 @@ namespace FluentStore
 
             if (args.IsSettingsSelected)
             {
-                App.Current.Window.Navigate(new Views.SettingsView());
+                NavService.AppNavigate(typeof(Views.SettingsView));
                 return;
             }
 
             if (args.SelectedItem is not NavigationViewItem navItem) goto navigate;
 
-            PageInfo pageInfo = NavService.Pages.Find((info) => info == navItem.Tag);
+            PageInfo pageInfo = NavService.Pages.Find(navItem.Tag.Equals);
             if (pageInfo == null) goto navigate;
 
             page = pageInfo.PageType;

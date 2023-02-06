@@ -95,7 +95,7 @@ namespace FluentStore
                 // Make sure to run on UI thread
                 Window.DispatcherQueue.TryEnqueue(() =>
                 {
-                    Window.Navigate(new Views.SplashScreen());
+                    Window.WindowContent.Navigate(new Views.SplashScreen());
                     Window.Activate();
                 });
 
@@ -146,11 +146,11 @@ namespace FluentStore
                 // Make sure to run on UI thread
                 Current.Window.DispatcherQueue.TryEnqueue(() =>
                 {
-                    Window.Navigate(new MainPage());
+                    Window.WindowContent.Navigate(new MainPage());
 
                     // Make sure users can't navigate back to
                     // a null page or the splash screen
-                    Window.ClearNavigationStack();
+                    Window.WindowContent.ClearNavigationStack();
 
                     navService.Navigate(result.Page, result.Parameter);
                 });

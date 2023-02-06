@@ -1,10 +1,10 @@
 ﻿using FluentStore.Helpers;
 using FluentStore.Views;
-using Flurl;
 using CommunityToolkit.Diagnostics;
 using System;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml.Controls;
+using FluentStore.Controls;
 using NavigationViewItem = Microsoft.UI.Xaml.Controls.NavigationViewItem;
 
 namespace FluentStore.Services
@@ -56,30 +56,14 @@ namespace FluentStore.Services
             };
         }
 
-        public Frame CurrentFrame { get; set; }
+        public NavigationFrame CurrentFrame { get; set; }
 
-        public override void Navigate(Type page)
-        {
-            CurrentFrame.Navigate(page);
-        }
+        public NavigationFrame AppFrame { get; set; }
 
-        public override void Navigate(Type page, object parameter)
+        public override void Navigate(Type page, object parameter = null)
         {
+            Guard.IsNotNull(page, nameof(page));
             CurrentFrame.Navigate(page, parameter);
-        }
-
-        public override void Navigate(string page)
-        {
-            Type type = ResolveType(page);
-            Guard.IsNotNull(type, nameof(page));
-            Navigate(type);
-        }
-
-        public override void Navigate(string page, object parameter)
-        {
-            Type type = ResolveType(page);
-            Guard.IsNotNull(type, nameof(page));
-            Navigate(type, parameter);
         }
 
         public override void Navigate(object parameter)
@@ -88,80 +72,44 @@ namespace FluentStore.Services
                 return;
             string paramName = parameter.GetType().Name;
             Type type = ResolveType(paramName);
-            Guard.IsNotNull(type, nameof(type));
             Navigate(type, parameter);
         }
 
         public override void NavigateBack()
         {
             if (CurrentFrame.CanGoBack)
-                CurrentFrame.GoBack();
+                CurrentFrame.NavigateBack();
         }
 
         public override void NavigateForward()
         {
             if (CurrentFrame.CanGoForward)
-                CurrentFrame.GoForward();
-        }
-
-
-        public override void AppNavigate(Type page)
-        {
-            App.Current.Window.Navigate(page);
+                CurrentFrame.NavigateForward();
         }
 
         public override void AppNavigate(Type page, object parameter)
         {
-            // TODO: Implement parameters
-            AppNavigate(page);
-        }
-
-        public override void AppNavigate(string page)
-        {
-            Type type = ResolveType(page);
-            Guard.IsNotNull(type, nameof(page));
-            AppNavigate(type);
-        }
-
-        public override void AppNavigate(string page, object parameter)
-        {
-            Type type = ResolveType(page);
-            Guard.IsNotNull(type, nameof(page));
-            AppNavigate(type, parameter);
+            Guard.IsNotNull(page, nameof(page));
+            AppNavigate(page, parameter);
         }
 
         public override void AppNavigate(object parameter)
         {
             string paramName = parameter.GetType().Name;
             Type type = ResolveType(paramName);
-            Guard.IsNotNull(type, nameof(type));
             AppNavigate(type, parameter);
         }
 
         public override void AppNavigateBack()
         {
-            App.Current.Window.NavigateBack();
+            if (AppFrame.CanGoBack)
+                AppFrame.NavigateBack();
         }
 
         public override void AppNavigateForward()
         {
-
-        }
-
-
-        public override async Task<bool> OpenInBrowser(Url url)
-        {
-            // Wrap in a try-catch block in order to prevent the
-            // app from crashing from invalid links.
-            // (specifically from project badges)
-            try
-            {
-                return await OpenInBrowser(url.ToUri());
-            }
-            catch
-            {
-                return false;
-            }
+            if (AppFrame.CanGoForward)
+                AppFrame.NavigateForward();
         }
 
         public override async Task<bool> OpenInBrowser(Uri uri)

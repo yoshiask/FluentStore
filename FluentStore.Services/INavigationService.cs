@@ -11,13 +11,13 @@ namespace FluentStore.Services
     {
         public List<PageInfo> Pages { get; protected set; }
 
-        public abstract void Navigate(Type page);
-
         public abstract void Navigate(Type page, object parameter);
 
-        public abstract void Navigate(string page);
-
-        public abstract void Navigate(string page, object parameter);
+        public void Navigate(string page, object parameter)
+        {
+            Type type = ResolveType(page);
+            Navigate(type, parameter);
+        }
 
         public abstract void Navigate(object parameter);
 
@@ -25,13 +25,13 @@ namespace FluentStore.Services
 
         public abstract void NavigateForward();
 
-        public abstract void AppNavigate(Type page);
-
         public abstract void AppNavigate(Type page, object parameter);
 
-        public abstract void AppNavigate(string page);
-
-        public abstract void AppNavigate(string page, object parameter);
+        public void AppNavigate(string page, object parameter)
+        {
+            Type type = ResolveType(page);
+            AppNavigate(type, parameter);
+        }
 
         public abstract void AppNavigate(object parameter);
 
@@ -53,7 +53,20 @@ namespace FluentStore.Services
             ShowHttpErrorPage(errorCode, errorMessage);
         }
 
-        public abstract Task<bool> OpenInBrowser(Url url);
+        public async Task<bool> OpenInBrowser(Url url)
+        {
+            // Wrap in a try-catch block in order to prevent the
+            // app from crashing from invalid links.
+            // (specifically from project badges)
+            try
+            {
+                return await OpenInBrowser(url.ToUri());
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         public abstract Task<bool> OpenInBrowser(Uri uri);
 

@@ -19,7 +19,6 @@ namespace FluentStore
     public sealed partial class MainWindow : WindowEx, IRecipient<SetPageHeaderMessage>
     {
         private IntPtr m_hwnd;
-        private Stack<object> m_navStack = new();
 
         public MainWindow()
         {
@@ -27,9 +26,12 @@ namespace FluentStore
 
             m_hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             
-            var navService = CommunityToolkit.Mvvm.DependencyInjection.Ioc.Default.GetService<Services.INavigationService>();
+            var navService = CommunityToolkit.Mvvm.DependencyInjection.Ioc.Default.GetService<Services.NavigationService>();
             if (navService != null)
+            {
                 navService.SetMainWindowHandle(m_hwnd);
+                navService.AppFrame = WindowContent;
+            }
 
             TaskBarIcon = Icon.FromFile(@"Assets\AppIcon.ico");
 
@@ -59,53 +61,6 @@ namespace FluentStore
 
         public IntPtr Handle => m_hwnd;
 
-        public void Navigate(Type type)
-        {
-            var page = type.GetConstructor(Type.EmptyTypes).Invoke(null) as UIElement;
-            Navigate(page);
-        }
-
-        public void Navigate(UIElement newContent)
-        {
-            var oldContent = WindowContent.Content;
-            m_navStack.Push(oldContent);
-            if (TryGetAppContent(out var oldAppContent))
-                oldAppContent.OnNavigatedFrom();
-
-            WindowContent.Content = newContent;
-            if (TryGetAppContent(out var newAppContent))
-                newAppContent.OnNavigatedTo();
-        }
-
-        public bool NavigateBack()
-        {
-            if (m_navStack.TryPop(out var oldContent))
-            {
-                if (TryGetAppContent(out var newAppContent))
-                    newAppContent.OnNavigatedFrom();
-
-                WindowContent.Content = oldContent;
-                if (TryGetAppContent(out var oldAppContent))
-                    oldAppContent.OnNavigatedTo();
-                return true;
-            }
-            return false;
-        }
-
-        public bool TryGetAppContent(out IAppContent content)
-        {
-            content = WindowContent.Content as IAppContent;
-            return content != null;
-        }
-
-        public void ClearNavigationStack() => m_navStack.Clear();
-
-        private unsafe HRESULT EnableThemeAwareTitleBar()
-        {
-            BOOL useDark = BOOL.TRUE;
-            return DwmApi.DwmSetWindowAttribute(m_hwnd, (DwmApi.DWMWINDOWATTRIBUTE)20, new(&useDark), sizeof(BOOL));
-        }
-
         enum BOOL
         {
             FALSE = 0,
@@ -115,7 +70,7 @@ namespace FluentStore
         void IRecipient<SetPageHeaderMessage>.Receive(SetPageHeaderMessage m)
         {
             Title = App.AppName;
-            if (TryGetAppContent(out var content) && content.IsCompact)
+            if (WindowContent.TryGetContent(out var content) && content.IsCompact)
                 Title += " - " + m.Value;
         }
     }

@@ -65,6 +65,7 @@
 
     <!-- XAML pages -->
     <ItemGroup>
+        <None Remove="Themes\NavigationFrame.xaml" />
         <None Remove="Views\Auth\AccountsView.xaml" />
         <None Remove="Views\Settings\General.xaml" />
         <None Remove="Views\Settings\Info.xaml" />
@@ -96,6 +97,11 @@
         <ProjectToBuild Include="../Sources/FluentStore.Sources.MicrosoftStore/FluentStore.Sources.MicrosoftStore.csproj" />
         <!--<ProjectToBuild Include="../Sources/FluentStore.Sources.UwpCommunity/FluentStore.Sources.UwpCommunity.csproj" />
         <ProjectToBuild Include="../Sources/FluentStore.Sources.WinGet/FluentStore.Sources.WinGet.csproj" />-->
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Themes\NavigationFrame.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
     </ItemGroup>
     <Target Name="BuildPlugins" AfterTargets="Build">
         <MSBuild Projects="@(ProjectToBuild)" Properties="Configuration=$(Configuration)" />

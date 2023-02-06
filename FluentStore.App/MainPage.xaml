@@ -5,6 +5,7 @@
     xmlns:local="using:FluentStore"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:FluentStore.Controls"
     mc:Ignorable="d"
     SizeChanged="Page_SizeChanged"
     Background="Transparent">
@@ -15,7 +16,7 @@
                         SelectionChanged="NavigationView_SelectionChanged">
 
             <Grid>
-                <Frame x:Name="MainFrame" />
+                <controls:NavigationFrame x:Name="MainFrame" />
                 <ProgressBar IsIndeterminate="True" VerticalAlignment="Top"
                              Visibility="{x:Bind ViewModel.IsPageLoading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
                 <InfoBar x:Name="MainInfoBar" IsOpen="False"

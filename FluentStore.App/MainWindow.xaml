@@ -5,7 +5,7 @@
     xmlns:local="using:FluentStore"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:winex="using:WinUIEx"
+    xmlns:winex="using:WinUIEx" xmlns:controls="using:FluentStore.Controls"
     mc:Ignorable="d">
 
     <winex:WindowEx.Backdrop>
@@ -31,14 +31,15 @@
                        FontSize="12" Grid.Column="1" VerticalAlignment="Center"/>
         </Grid>
 
-        <ContentControl x:Name="WindowContent" Grid.Row="1"
-                        HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+        <controls:NavigationFrame x:Name="WindowContent" x:FieldModifier="public"
+                                  Grid.Row="1"
+                                  HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
             <ContentControl.ContentTransitions>
                 <TransitionCollection>
                     <EntranceThemeTransition />
                 </TransitionCollection>
             </ContentControl.ContentTransitions>
-        </ContentControl>
+        </controls:NavigationFrame>
     </Grid>
 
 </winex:WindowEx>

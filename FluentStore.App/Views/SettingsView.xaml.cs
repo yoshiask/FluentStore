@@ -46,7 +46,7 @@ namespace FluentStore.Views
             NavView.SelectedItem = NavView.MenuItems[0];
         }
 
-        public void OnNavigatedFrom() => Helpers.Settings.Default.SaveAsync();
+        public void OnNavigatedFrom(object parameter) => Helpers.Settings.Default.SaveAsync();
 
         private void NavView_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
         {

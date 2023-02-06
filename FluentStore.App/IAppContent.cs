@@ -1,13 +1,11 @@
-﻿using System.Threading.Tasks;
-
-namespace FluentStore
+﻿namespace FluentStore
 {
     public interface IAppContent
     {
         public bool IsCompact { get; }
 
-        public void OnNavigatedTo() { }
+        public void OnNavigatedTo(object parameter) { }
 
-        public void OnNavigatedFrom() { }
+        public void OnNavigatedFrom(object parameter) { }
     }
 }
