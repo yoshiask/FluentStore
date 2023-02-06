@@ -41,17 +41,17 @@ namespace FluentStore.SDK.Downloads
         public static async Task<SystemFile> SaveLocally(this IFile srcFile, SystemFile dstFile, DataTransferProgress progress,
             CancellationToken cancellationToken = default)
         {
-            if (srcFile is SystemFile sysFile)
+            SystemFile localFile = srcFile as SystemFile;
+            if (localFile is null)
             {
-                progress.Report(1.0);
-                return sysFile;
+                progress.Report(null);
+                using var srcStream = await srcFile.OpenStreamAsync(cancellationToken: cancellationToken);
+                using var dstStream = await dstFile.OpenStreamAsync(FileAccess.Write, cancellationToken: cancellationToken);
+
+                await srcStream.CopyToAsync(dstStream, progress, cancellationToken: cancellationToken);
             }
 
-            using var srcStream = await srcFile.OpenStreamAsync(cancellationToken: cancellationToken);
-            using var dstStream = await dstFile.OpenStreamAsync(FileAccess.Write, cancellationToken: cancellationToken);
-
-            await srcStream.CopyToAsync(dstStream, progress, cancellationToken: cancellationToken);
-
+            progress.Report(1.0);
             return dstFile;
         }
 

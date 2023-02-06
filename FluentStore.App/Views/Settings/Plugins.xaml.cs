@@ -125,14 +125,17 @@ namespace FluentStore.Views.Settings
             DefaultPluginProgressIndicator.Visibility = Visibility.Visible;
             DefaultPluginsSetting.IsExpanded = true;
 
-            await Helpers.Settings.Default.InstallDefaultPlugins(false, true);
+            await Helpers.Settings.Default.InstallDefaultPlugins(true, true);
 
             WeakReferenceMessenger.Default.Unregister<ErrorMessage>(this);
             WeakReferenceMessenger.Default.Unregister<SuccessMessage>(this);
             WeakReferenceMessenger.Default.Unregister<PluginDownloadProgressMessage>(this);
-            DefaultPluginProgressIndicator.Visibility = Visibility.Collapsed;
-            DefaultPluginStatusBlock.Text = "Downloaded default plugins. Please restart Fluent Store.";
-            ReinstallDefaultPluginsButton.IsEnabled = true;
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                DefaultPluginProgressIndicator.Visibility = Visibility.Collapsed;
+                DefaultPluginStatusBlock.Text = "Downloaded default plugins. Please restart Fluent Store.";
+                ReinstallDefaultPluginsButton.IsEnabled = true;
+            });
         }
 
         private void DefaultPluginErrorMessage_Recieved(object recipient, ErrorMessage message)

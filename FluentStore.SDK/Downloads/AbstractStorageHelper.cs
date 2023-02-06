@@ -1,10 +1,7 @@
-﻿using Flurl;
-using OwlCore.Kubo;
+﻿using OwlCore.Kubo;
 using OwlCore.Storage;
 using OwlCore.Storage.SystemIO;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Downloads
 {
@@ -34,17 +31,17 @@ namespace FluentStore.SDK.Downloads
         /// <exception cref="ArgumentException">
         /// Thrown if the URL is not supported.
         /// </exception>
-        public static async Task<IFile> GetFileFromUrl(string url, CancellationToken cancellationToken = default)
+        public static IFile GetFileFromUrl(string url)
         {
             (string scheme, string path) = GetSchemeAndPath(url);
 
             return scheme switch
             {
                 "ipfs" or
-                "ipns" => await GetIpfsFileFromUrl(url, cancellationToken),
+                "ipns" => GetIpfsFileFromUrl(url),
 
                 "http" or
-                "https" => new HttpFile(new Uri(url)),
+                "https" => new WindowsHttpFile(new Uri(url)),
 
                 "file" => new SystemFile(path),
 
@@ -52,23 +49,16 @@ namespace FluentStore.SDK.Downloads
             };
         }
 
-        public static async Task<IpfsFile> GetIpfsFileFromUrl(string url, CancellationToken cancellationToken = default)
+        public static IFile GetIpfsFileFromUrl(string url)
         {
             // See https://github.com/ipfs/in-web-browsers/blob/dc1ce8d7718140eb3ae17681b0effd2e815ef8a8/ADDRESSING.md
             // for URI specification
             (string scheme, string id) = GetSchemeAndPath(url);
 
             if (scheme == "ipns")
-            {
-                string path = await IpfsClient.Name.ResolveAsync(id, recursive: true, cancel: cancellationToken);
-                cancellationToken.ThrowIfCancellationRequested();
+                return new IpnsFile($"/{scheme}/{id}", IpfsClient);
 
-                id = System.IO.Path.GetFileName(path);
-            }
-
-            Ipfs.Cid cid = id;
-            IpfsFile file = new(cid, IpfsClient);
-            return file;
+            return new IpfsFile(id, IpfsClient);
         }
 
         private static (string scheme, string path) GetSchemeAndPath(string url)

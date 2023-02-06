@@ -120,9 +120,8 @@ namespace FluentStore.SDK
                             tempPluginId, (ulong)prog.BytesDownloaded, (ulong)prog.TotalBytes));
                     });
 
-                    var remotePluginFile = await AbstractStorageHelper.GetFileFromUrl(pluginUrl);
-                    var pluginFile = (SystemFile)await pluginDirectory.CreateFileAsync(tempPluginId + ".zip", true);
-                    await remotePluginFile.SaveLocally(pluginFile, progress);
+                    var remotePluginFile = AbstractStorageHelper.GetFileFromUrl(pluginUrl);
+                    var pluginFile = await remotePluginFile.SaveLocally(pluginDirectory, progress, true);
 
                     if (install)
                         await InstallPlugin(settings, await pluginFile.OpenStreamAsync(), overwrite);
