@@ -32,14 +32,7 @@
         </Grid>
 
         <controls:NavigationFrame x:Name="WindowContent" x:FieldModifier="public"
-                                  Grid.Row="1"
-                                  HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-            <ContentControl.ContentTransitions>
-                <TransitionCollection>
-                    <EntranceThemeTransition />
-                </TransitionCollection>
-            </ContentControl.ContentTransitions>
-        </controls:NavigationFrame>
+                                  Grid.Row="1"/>
     </Grid>
 
 </winex:WindowEx>

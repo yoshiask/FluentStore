@@ -171,7 +171,7 @@ namespace FluentStore
                 return;
             }
 
-            if (args.SelectedItem is not NavigationViewItem navItem) goto navigate;
+            if (args.SelectedItem is not NavigationViewItem navItem) return;
 
             PageInfo pageInfo = NavService.Pages.Find(navItem.Tag.Equals);
             if (pageInfo == null) goto navigate;

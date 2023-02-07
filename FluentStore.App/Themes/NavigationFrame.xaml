@@ -8,6 +8,13 @@
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
         <Setter Property="VerticalContentAlignment" Value="Stretch"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="ContentTransitions">
+            <Setter.Value>
+                <TransitionCollection>
+                    <ContentThemeTransition/>
+                </TransitionCollection>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style TargetType="controls:NavigationFrame" BasedOn="{StaticResource DefaultNavigationFrameStyle}"/>
