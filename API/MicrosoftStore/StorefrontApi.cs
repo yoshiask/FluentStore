@@ -76,12 +76,15 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         /// <summary>
         /// Gets the cards displayed at the top of the Home page in the Microsoft Store Preview app.
         /// </summary>
-        public async Task<ResponseItem<V4.CollectionDetail>> GetHomeSpotlight(int pageSize = 15, RequestOptions options = null)
+        public async Task<V3.ProductList> GetHomeSpotlight(int pageSize = 15, RequestOptions options = null)
         {
-            return await GetStorefrontBase(options).AppendPathSegments("ems", "curated", "HomeSpotlight")
+            var json = await GetStorefrontBase(options).AppendPathSegments("pages", "home")
                 .SetQueryParam("cardsEnabled", true)
                 .SetQueryParam("placementId", 10837389)
-                .GetJsonAsync<ResponseItem<V4.CollectionDetail>>();
+                .GetStringAsync();
+
+            var responses = JsonConvert.DeserializeObject<ResponseItemList>(json, DefaultJsonSettings);
+            return responses.GetPayload<V3.ProductList>();
         }
 
         /// <summary>

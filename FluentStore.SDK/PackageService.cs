@@ -67,6 +67,7 @@ namespace FluentStore.SDK
                     results = await handler.GetFeaturedPackagesAsync();
                 }
                 catch { continue; }
+
                 if (results.Count <= 0)
                     continue;
                 yield return new HandlerPackageListPair(handler, results);

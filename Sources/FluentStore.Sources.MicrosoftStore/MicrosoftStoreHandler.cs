@@ -41,7 +41,7 @@ namespace FluentStore.Sources.MicrosoftStore
         public override async Task<List<PackageBase>> GetFeaturedPackagesAsync()
         {
             var packages = new List<PackageBase>();
-            var page = (await StorefrontApi.GetHomeSpotlight(options: GetSystemOptions())).Payload;
+            var page = await StorefrontApi.GetHomeSpotlight(options: GetSystemOptions());
             packages.AddRange(
                 page.Cards.Where(card => card.ProductId.Length == 12 && card.TypeTag == "app")
                           .Select(card => new MicrosoftStorePackage(this, card) { Status = PackageStatus.BasicDetails })
@@ -162,7 +162,7 @@ namespace FluentStore.Sources.MicrosoftStore
 
             // Get the rest of the reviews
             var options = GetSystemOptions();
-            var allReviews = StorefrontApi.GetAllProductReviews(msPkg.StoreId, startAt: msPkg.ReviewSummary?.Reviews.Count ?? 0, options: options);
+            var allReviews = StorefrontApi.GetAllProductReviews(msPkg.StoreId, startAt: msPkg.ReviewSummary?.Reviews.Count() ?? 0, options: options);
             await msPkg.Update(allReviews);
 
             return msPkg.ReviewSummary;
