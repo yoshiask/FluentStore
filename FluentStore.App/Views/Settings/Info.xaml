@@ -25,6 +25,16 @@
             </controls:SettingsBlockControl.ExpandableContent>
         </controls:SettingsBlockControl>
 
+        <controls:SettingsBlockControl Title="Log folder"
+                                       Description="Open the folder containing error and crash logs">
+            <controls:SettingsBlockControl.Icon>
+                <FontIcon Glyph="&#xE9F9;"/>
+            </controls:SettingsBlockControl.Icon>
+            <controls:SettingsBlockControl.SettingsActionableElement>
+                <Button Content="Open" Click="OpenLogDirButton_Click"/>
+            </controls:SettingsBlockControl.SettingsActionableElement>
+        </controls:SettingsBlockControl>
+
         <controls:SettingsBlockControl Title="Send feedback"
                                        Description="Submit bug reports and feature requests to the developer">
             <controls:SettingsBlockControl.Icon>

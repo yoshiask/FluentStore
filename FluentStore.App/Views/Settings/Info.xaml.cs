@@ -17,6 +17,15 @@ namespace FluentStore.Views.Settings
             this.InitializeComponent();
         }
 
+        private void OpenLogDirButton_Click(object sender, RoutedEventArgs e)
+        {
+            ICommonPathManager commonPathManager = Ioc.Default.GetRequiredService<ICommonPathManager>();
+
+            // Add a trailing slash to ensure that Explorer opens the folder,
+            // and not a file that might have the same name
+            System.Diagnostics.Process.Start("explorer.exe", $"\"{commonPathManager.GetDefaultLogDirectory()}{System.IO.Path.DirectorySeparatorChar}\"");
+        }
+
         private async void SendFeedbackButton_Click(object sender, RoutedEventArgs e)
         {
             await NavigationService.OpenInBrowser("https://github.com/yoshiask/FluentStore/issues/new/choose");
