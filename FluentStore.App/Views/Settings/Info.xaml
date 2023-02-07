@@ -25,14 +25,29 @@
             </controls:SettingsBlockControl.ExpandableContent>
         </controls:SettingsBlockControl>
 
-        <controls:SettingsBlockControl Title="Log folder"
-                                       Description="Open the folder containing error and crash logs">
+        <controls:SettingsBlockControl Title="Log directory"
+                                       Description="Where Fluent Store's error and crash logs are located on your computer">
             <controls:SettingsBlockControl.Icon>
-                <FontIcon Glyph="&#xE9F9;"/>
+                <FontIcon Glyph="&#xE9F9;" />
             </controls:SettingsBlockControl.Icon>
             <controls:SettingsBlockControl.SettingsActionableElement>
-                <Button Content="Open" Click="OpenLogDirButton_Click"/>
+                <Button Content="Open log folder" Click="OpenLogDirButton_Click"/>
             </controls:SettingsBlockControl.SettingsActionableElement>
+            <controls:SettingsBlockControl.ExpandableContent>
+                <StackPanel>
+
+                    <controls:SettingsDisplayControl Title="Clear logs" Margin="14"
+                                                     Description="Removes all previous logs">
+                        <controls:SettingsDisplayControl.Icon>
+                            <FontIcon Glyph="&#xE7A7;"/>
+                        </controls:SettingsDisplayControl.Icon>
+                        <controls:SettingsDisplayControl.SettingsActionableElement>
+                            <Button Content="Clear" Click="LogClearButton_Click"/>
+                        </controls:SettingsDisplayControl.SettingsActionableElement>
+                    </controls:SettingsDisplayControl>
+
+                </StackPanel>
+            </controls:SettingsBlockControl.ExpandableContent>
         </controls:SettingsBlockControl>
 
         <controls:SettingsBlockControl Title="Send feedback"

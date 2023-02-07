@@ -11,6 +11,7 @@ namespace FluentStore.Views.Settings
     public sealed partial class Info : UserControl
     {
         private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
+        private readonly ICommonPathManager CommonPathManager = Ioc.Default.GetRequiredService<ICommonPathManager>();
 
         public Info()
         {
@@ -19,11 +20,22 @@ namespace FluentStore.Views.Settings
 
         private void OpenLogDirButton_Click(object sender, RoutedEventArgs e)
         {
-            ICommonPathManager commonPathManager = Ioc.Default.GetRequiredService<ICommonPathManager>();
 
             // Add a trailing slash to ensure that Explorer opens the folder,
             // and not a file that might have the same name
-            System.Diagnostics.Process.Start("explorer.exe", $"\"{commonPathManager.GetDefaultLogDirectory()}{System.IO.Path.DirectorySeparatorChar}\"");
+            System.Diagnostics.Process.Start("explorer.exe", $"\"{CommonPathManager.GetDefaultLogDirectory()}{System.IO.Path.DirectorySeparatorChar}\"");
+        }
+
+        private void LogClearButton_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var file in CommonPathManager.GetDefaultLogDirectory().EnumerateFiles())
+            {
+                try
+                {
+                    file.Delete();
+                }
+                catch { }
+            }
         }
 
         private async void SendFeedbackButton_Click(object sender, RoutedEventArgs e)
