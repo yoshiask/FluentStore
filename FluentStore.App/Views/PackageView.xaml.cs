@@ -27,7 +27,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace FluentStore.Views
 {
-    public sealed partial class PackageView : Page
+    public sealed partial class PackageView : Page, IAppContent
     {
         public PackageView()
         {
@@ -49,11 +49,10 @@ namespace FluentStore.Views
         public static readonly DependencyProperty ViewModelProperty =
             DependencyProperty.Register(nameof(ViewModel), typeof(PackageViewModel), typeof(PackageView), new PropertyMetadata(null));
 
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
-        {
-            base.OnNavigatedTo(e);
-            object param = e.Parameter;
+        public bool IsCompact { get; private set; }
 
+        public async void OnNavigatedTo(object param)
+        {
             if (param is PackageBase package)
             {
                 ViewModel = new PackageViewModel(package);
@@ -599,8 +598,8 @@ namespace FluentStore.Views
 
         private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            string state = (App.Current.Window.Bounds.Width > (double)App.Current.Resources["CompactModeMinWidth"])
-                ? "DefaultLayout" : "CompactLayout";
+            IsCompact = App.Current.Window.Bounds.Width > (double)App.Current.Resources["CompactModeMinWidth"];
+            string state = IsCompact ? "DefaultLayout" : "CompactLayout";
             VisualStateManager.GoToState(this, state, true);
         }
 
