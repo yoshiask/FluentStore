@@ -103,8 +103,6 @@ namespace FluentStore.Helpers
             return AppUpdateStatus.None;
         }
 
-        public Task ClearSettings() => Folder.RecursiveDelete();
-
         public async Task InstallDefaultPlugins(bool install = true, bool overwrite = false)
         {
             var appVersion = Package.Current.Id.Version.ToVersion();

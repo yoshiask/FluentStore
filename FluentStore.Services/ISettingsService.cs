@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 namespace FluentStore.Services
 {
@@ -29,12 +28,6 @@ namespace FluentStore.Services
         /// Compares <see cref="LastLaunchedVersion"/> to the current app's version.
         /// </summary>
         public AppUpdateStatus GetAppUpdateStatus();
-
-        /// <summary>
-        /// Resets all settings to their default values.
-        /// </summary>
-        /// <returns></returns>
-        public Task ClearSettings();
     }
 
     public class DefaultSettingValues

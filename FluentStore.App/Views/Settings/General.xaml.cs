@@ -31,9 +31,9 @@ namespace FluentStore.Views.Settings
             cache.Clear();
         }
 
-        private async void ResetButton_Click(object sender, RoutedEventArgs e)
+        private void ResetButton_Click(object sender, RoutedEventArgs e)
         {
-            await Helpers.Settings.Default.ClearSettings();
+            Helpers.Settings.Default.ResetAllSettings();
         }
 
         private async void ImportButton_Click(object sender, RoutedEventArgs e)
