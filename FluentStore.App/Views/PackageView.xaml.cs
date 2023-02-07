@@ -113,7 +113,7 @@ namespace FluentStore.Views
                 catch (Exception ex)
                 {
                     var logger = Ioc.Default.GetRequiredService<LoggerService>();
-                    logger.UnhandledException(ex, "Exception from Win32 component");
+                    logger.UnhandledException(ex, OwlCore.Diagnostics.LogLevel.Error);
                 }
                 if (canLaunch)
                     UpdateInstallButtonToLaunch();

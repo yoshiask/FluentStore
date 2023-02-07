@@ -26,6 +26,7 @@ namespace FluentStore
     public partial class App : Application
     {
         private readonly SingleInstanceDesktopApp _singleInstanceApp;
+        private LoggerService _log;
 
         public const string AppName = "Fluent Store";
 
@@ -48,12 +49,13 @@ namespace FluentStore
         public App()
         {
             this.InitializeComponent();
-            
+
             // Set up error reporting handlers
-            UnhandledException += (sender, e) => OnUnhandledException(e.Exception);
-            TaskScheduler.UnobservedTaskException += (sender, e) => OnUnhandledException(e.Exception);
+            AppDomain.CurrentDomain.FirstChanceException += (sender, e) => _log?.UnhandledException(e.Exception, OwlCore.Diagnostics.LogLevel.Error);
             AppDomain.CurrentDomain.UnhandledException += (sender, e)
               => OnUnhandledException(e.ExceptionObject as Exception ?? new Exception());
+            UnhandledException += (sender, e) => OnUnhandledException(e.Exception);
+            TaskScheduler.UnobservedTaskException += (sender, e) => OnUnhandledException(e.Exception);
 
             // Set up IoC services
             Services = ConfigureServices();
@@ -157,46 +159,11 @@ namespace FluentStore
             }
         }
 
-        private static void OnUnhandledException(Exception ex)
+        private void OnUnhandledException(Exception ex)
         {
-            /// Mostly yoinked from https://github.com/files-community/Files/blob/ace2f355ec87f4ca27975c25026636be8514f1e0/Files/App.xaml.cs#L432
+            /// Adapted from https://github.com/files-community/Files/blob/ace2f355ec87f4ca27975c25026636be8514f1e0/Files/App.xaml.cs#L432
 
-            LoggerService Logger = Ioc.Default.GetService<LoggerService>();
-            string formattedException = string.Empty;
-
-            formattedException += "--------- UNHANDLED EXCEPTION ---------";
-            if (ex != null)
-            {
-                formattedException += $"\n>>>> HRESULT: {ex.HResult}\n";
-                if (ex.Message != null)
-                {
-                    formattedException += "\n--- MESSAGE ---";
-                    formattedException += ex.Message;
-                }
-                if (ex.StackTrace != null)
-                {
-                    formattedException += "\n--- STACKTRACE ---";
-                    formattedException += ex.StackTrace;
-                }
-                if (ex.Source != null)
-                {
-                    formattedException += "\n--- SOURCE ---";
-                    formattedException += ex.Source;
-                }
-                if (ex.InnerException != null)
-                {
-                    formattedException += "\n--- INNER ---";
-                    formattedException += ex.InnerException;
-                }
-            }
-            else
-            {
-                formattedException += "\nException is null!\n";
-            }
-
-            formattedException += "---------------------------------------";
-
-            Logger?.UnhandledException(ex, ex.Message);
+            _log?.UnhandledException(ex, OwlCore.Diagnostics.LogLevel.Critical);
 
 #if DEBUG
             System.Diagnostics.Debugger.Launch();
@@ -254,7 +221,7 @@ namespace FluentStore
         /// <summary>
         /// Configures the services for the application.
         /// </summary>
-        private static IServiceProvider ConfigureServices()
+        private IServiceProvider ConfigureServices()
         {
             var services = new ServiceCollection();
 
@@ -263,7 +230,8 @@ namespace FluentStore
 
             var logFile = pathManager.CreateLogFile();
             var logFileStream = logFile.Open(System.IO.FileMode.Create);
-            services.AddSingleton(new LoggerService(logFileStream));
+            _log = new LoggerService(logFileStream);
+            services.AddSingleton(_log);
 
             services.AddSingleton(new Microsoft.Marketplace.Storefront.Contracts.StorefrontApi());
             services.AddSingleton<ISettingsService>(new Settings(pathManager));

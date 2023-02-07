@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OwlCore.Diagnostics;
+using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -7,6 +8,13 @@ namespace FluentStore.Services
     public class LoggerService : IDisposable
     {
         private readonly StreamWriter m_logWriter;
+
+        public LogLevel LogLevel { get; set; } =
+#if DEBUG
+            LogLevel.Warning;
+#else
+            LogLevel.Critical;
+#endif
 
         public LoggerService(Stream logFile = null) : this(new StreamWriter(logFile))
         {
@@ -22,7 +30,8 @@ namespace FluentStore.Services
         /// </summary>
         public void Log(string message, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
         {
-            WriteLine($"{Path.GetFileName(filePath)}_L{lineNumber:D}_{memberName}() : {message}");   
+            if (LogLevel.CompareTo(LogLevel.Trace) <= 0)
+                WriteLine($"{Path.GetFileName(filePath)}_L{lineNumber:D}_{memberName}() : {message}");
         }
 
         /// <summary>
@@ -30,6 +39,9 @@ namespace FluentStore.Services
         /// </summary>
         public void Warn(Exception ex, string message, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
         {
+            if (LogLevel.CompareTo(LogLevel.Warning) > 0)
+                return;
+
             WriteLine("=== WARN ===");
             Log(message, filePath, memberName, lineNumber);
             WriteLine(ex.ToString());
@@ -39,11 +51,14 @@ namespace FluentStore.Services
         /// <summary>
         /// Log a fatal exception to the debug output.
         /// </summary>
-        public void UnhandledException(Exception ex, string message, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
+        public void UnhandledException(Exception ex, LogLevel errorLevel, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
         {
-            WriteLine("=== FATAL EXCEPTION ===");
-            Log(message, filePath, memberName, lineNumber);
-            WriteLine(ex.ToString());
+            if (LogLevel.CompareTo(errorLevel) > 0)
+                return;
+
+            WriteLine($"=== {errorLevel} EXCEPTION ===");
+            WriteLine($"{ex.GetType().Name}: {ex.Message}");
+            WriteLine(ex.StackTrace);
             WriteLine("=== =============== ===");
         }
 

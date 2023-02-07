@@ -46,7 +46,7 @@ namespace FluentStore.ViewModels
             catch (System.Exception ex)
             {
                 var logger = Ioc.Default.GetRequiredService<LoggerService>();
-                logger.UnhandledException(ex, ex.Message);
+                logger.UnhandledException(ex, OwlCore.Diagnostics.LogLevel.Warning);
             }
         }
 
