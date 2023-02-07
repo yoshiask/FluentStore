@@ -4,7 +4,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:FluentStore.Views.Settings"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:controls="using:FluentStore.Controls" xmlns:helpers="using:FluentStore.Helpers"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:FluentStore.Controls"
+    xmlns:helpers="using:FluentStore.Helpers"
+    xmlns:tkui="using:CommunityToolkit.WinUI.UI"
+    xmlns:ocDiag="using:OwlCore.Diagnostics"
     mc:Ignorable="d">
 
     <StackPanel Spacing="4">
@@ -39,10 +43,21 @@
                     <controls:SettingsDisplayControl Title="Clear logs" Margin="14"
                                                      Description="Removes all previous logs">
                         <controls:SettingsDisplayControl.Icon>
-                            <FontIcon Glyph="&#xE7A7;"/>
+                            <FontIcon Glyph="&#xE894;"/>
                         </controls:SettingsDisplayControl.Icon>
                         <controls:SettingsDisplayControl.SettingsActionableElement>
                             <Button Content="Clear" Click="LogClearButton_Click"/>
+                        </controls:SettingsDisplayControl.SettingsActionableElement>
+                    </controls:SettingsDisplayControl>
+                    
+                    <controls:SettingsDisplayControl Title="Log level" Margin="14"
+                                                     Description="The level of detail to include in logs">
+                        <controls:SettingsDisplayControl.Icon>
+                            <FontIcon Glyph="&#xE171;"/>
+                        </controls:SettingsDisplayControl.Icon>
+                        <controls:SettingsDisplayControl.SettingsActionableElement>
+                            <ComboBox ItemsSource="{tkui:EnumValues Type=ocDiag:LogLevel}"
+                                      SelectedItem="{x:Bind helpers:Settings.Default.LoggingLevel, Mode=OneWay}" />
                         </controls:SettingsDisplayControl.SettingsActionableElement>
                     </controls:SettingsDisplayControl>
 
