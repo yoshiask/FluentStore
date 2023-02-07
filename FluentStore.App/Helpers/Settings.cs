@@ -3,6 +3,7 @@ using FluentStore.SDK;
 using FluentStore.SDK.Helpers;
 using FluentStore.Services;
 using OwlCore.ComponentModel;
+using OwlCore.Diagnostics;
 using OwlCore.Services;
 using OwlCore.Storage;
 using OwlCore.Storage.SystemIO;
@@ -49,6 +50,12 @@ namespace FluentStore.Helpers
         public Version LastLaunchedVersion
         {
             get => GetSetting(s_defVals.LastLaunchedVersion);
+            set => SetSetting(value);
+        }
+
+        public LogLevel LoggingLevel
+        {
+            get => GetSetting(s_defVals.LoggingLevel);
             set => SetSetting(value);
         }
 

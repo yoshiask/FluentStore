@@ -9,12 +9,7 @@ namespace FluentStore.Services
     {
         private readonly StreamWriter m_logWriter;
 
-        public LogLevel LogLevel { get; set; } =
-#if DEBUG
-            LogLevel.Warning;
-#else
-            LogLevel.Critical;
-#endif
+        public LogLevel LogLevel { get; set; } = LogLevel.Error;
 
         public LoggerService(Stream logFile = null) : this(new StreamWriter(logFile))
         {

@@ -228,15 +228,20 @@ namespace FluentStore
             PackagedPathManager pathManager = new();
             services.AddSingleton<ICommonPathManager>(pathManager);
 
+            Settings settings = new(pathManager);
+            services.AddSingleton<ISettingsService>(settings);
+
             var logFile = pathManager.CreateLogFile();
             var logFileStream = logFile.Open(System.IO.FileMode.Create);
-            _log = new LoggerService(logFileStream);
+            _log = new LoggerService(logFileStream)
+            {
+                LogLevel = settings.LoggingLevel
+            };
             services.AddSingleton(_log);
 
-            services.AddSingleton(new Microsoft.Marketplace.Storefront.Contracts.StorefrontApi());
-            services.AddSingleton<ISettingsService>(new Settings(pathManager));
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
+            services.AddSingleton(new Microsoft.Marketplace.Storefront.Contracts.StorefrontApi());
             services.AddSingleton(new FluentStoreAPI.FluentStoreAPI());
             services.AddSingleton(new PackageService());
 

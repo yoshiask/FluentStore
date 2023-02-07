@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OwlCore.Diagnostics;
+using System;
 
 namespace FluentStore.Services
 {
@@ -11,6 +12,8 @@ namespace FluentStore.Services
         public string PluginDirectory { get; set; }
 
         public Version LastLaunchedVersion { get; set; }
+
+        public LogLevel LoggingLevel { get; set; }
 
         public event EventHandler<PackageHandlerEnabledStateChangedEventArgs> PackageHandlerEnabledStateChanged;
 
@@ -45,6 +48,13 @@ namespace FluentStore.Services
         }
 
         public virtual Version LastLaunchedVersion() => null;
+
+        public virtual LogLevel LoggingLevel() =>
+#if DEBUG
+            LogLevel.Warning;
+#else
+            LogLevel.Critical;
+#endif
     }
 
     public enum AppUpdateStatus : byte
