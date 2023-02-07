@@ -1,4 +1,4 @@
-﻿<Page
+﻿<local:ViewBase
     x:Class="FluentStore.Views.MyAppsView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -110,4 +110,4 @@
         </GridView>
     </Grid>
 
-</Page>
+</local:ViewBase>

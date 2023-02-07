@@ -1,13 +1,11 @@
 ﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
 
 namespace FluentStore.Views
 {
     /// <summary>
     /// An page that displays an HTTP error code, along with a brief message.
     /// </summary>
-    public sealed partial class HttpErrorPage : Page
+    public sealed partial class HttpErrorPage : ViewBase
     {
         public HttpErrorPage()
         {
@@ -53,9 +51,9 @@ namespace FluentStore.Views
                 page.ErrorTitle = ianaErrorMessage;
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        public override void OnNavigatedTo(object parameter)
         {
-            if (e.Parameter is (int errorCode, string errorMessage))
+            if (parameter is (int errorCode, string errorMessage))
             {
                 ErrorCode = errorCode;
                 ErrorMessage = errorMessage;

@@ -1,4 +1,4 @@
-﻿<Page
+﻿<local:ViewBase
     x:Class="FluentStore.Views.SearchResultsView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -20,4 +20,4 @@
         <controls:PackageCardGridView Packages="{x:Bind ViewModel.PackageList}" SelectedPackage="{x:Bind ViewModel.SelectedPackage}"/>
     </Grid>
 
-</Page>
+</local:ViewBase>

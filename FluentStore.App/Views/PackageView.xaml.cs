@@ -16,7 +16,6 @@ using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Navigation;
 using Windows.UI.Notifications;
 using SplitButton = Microsoft.UI.Xaml.Controls.SplitButton;
 using SplitButtonClickEventArgs = Microsoft.UI.Xaml.Controls.SplitButtonClickEventArgs;
@@ -27,7 +26,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace FluentStore.Views
 {
-    public sealed partial class PackageView : Page, IAppContent
+    public sealed partial class PackageView : ViewBase
     {
         public PackageView()
         {
@@ -49,9 +48,7 @@ namespace FluentStore.Views
         public static readonly DependencyProperty ViewModelProperty =
             DependencyProperty.Register(nameof(ViewModel), typeof(PackageViewModel), typeof(PackageView), new PropertyMetadata(null));
 
-        public bool IsCompact { get; private set; }
-
-        public async void OnNavigatedTo(object param)
+        public override async void OnNavigatedTo(object param)
         {
             if (param is PackageBase package)
             {

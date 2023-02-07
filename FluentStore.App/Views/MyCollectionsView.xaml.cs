@@ -1,5 +1,4 @@
 ﻿using FluentStore.ViewModels;
-using FluentStoreAPI.Models;
 using System;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -13,7 +12,7 @@ namespace FluentStore.Views
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
     [Helpers.RequiresSignIn]
-    public sealed partial class MyCollectionsView : Page
+    public sealed partial class MyCollectionsView : ViewBase
     {
         public MyCollectionsViewModel ViewModel
         {

@@ -1,4 +1,4 @@
-﻿<Page
+﻿<local:ViewBase
     x:Class="FluentStore.Views.HttpErrorPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -35,4 +35,4 @@
         </ScrollViewer>
     </StackPanel>
 
-</Page>
+</local:ViewBase>
