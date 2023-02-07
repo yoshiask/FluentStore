@@ -1,7 +1,11 @@
 ﻿using OwlCore.Diagnostics;
 using System;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace FluentStore.Services
 {
@@ -51,16 +55,18 @@ namespace FluentStore.Services
             if (LogLevel.CompareTo(errorLevel) > 0)
                 return;
 
+            StackTrace trace = new(2, true);
+
             WriteLine($"=== {errorLevel} EXCEPTION ===");
             WriteLine($"{ex.GetType().Name}: {ex.Message}");
-            WriteLine(ex.StackTrace);
+            WriteLine(ToTraceString(trace));
             WriteLine("=== =============== ===");
         }
 
         private void WriteLine(string line)
         {
 #if DEBUG
-            System.Diagnostics.Debug.WriteLine(line);
+            Debug.WriteLine(line);
 #endif
 
             m_logWriter?.WriteLine(line);
@@ -71,6 +77,164 @@ namespace FluentStore.Services
         {
             m_logWriter?.Flush();
             m_logWriter?.Dispose();
+        }
+
+        private static string ToTraceString(StackTrace trace)
+        {
+            StringBuilder sb = new(256);
+            // Passing a default string for "at" in case SR.UsingResourceKeys() is true
+            // as this is a special case and we don't want to have "Word_At" on stack traces.
+            string word_At = "at";
+            // We also want to pass in a default for inFileLineNumber.
+            string inFileLineNum = "in {0}:line {1}";
+            string inFileILOffset = "in {0}:token 0x{1:x}+0x{2:x}";
+            bool fFirstFrame = true;
+            var frames = trace.GetFrames();
+            for (int iFrameIndex = 0; iFrameIndex < frames.Length; iFrameIndex++)
+            {
+                StackFrame? sf = frames[iFrameIndex];
+                MethodBase? mb = sf?.GetMethod();
+                if (mb != null && (mb.Module.Name.StartsWith("FluentStore") ||
+                                   (iFrameIndex == frames.Length- 1))) // Don't filter last frame
+                {
+                    // We want a newline at the end of every line except for the last
+                    if (fFirstFrame)
+                        fFirstFrame = false;
+                    else
+                        sb.AppendLine();
+
+                    sb.Append("   ").Append(word_At).Append(' ');
+
+                    bool isAsync = false;
+                    Type? declaringType = mb.DeclaringType;
+                    string methodName = mb.Name;
+                    bool methodChanged = false;
+                    if (declaringType != null && declaringType.IsDefined(typeof(CompilerGeneratedAttribute), inherit: false))
+                    {
+                        isAsync = typeof(IAsyncStateMachine).IsAssignableFrom(declaringType);
+                        if (isAsync || typeof(System.Collections.IEnumerator).IsAssignableFrom(declaringType))
+                        {
+                            //methodChanged = TryResolveStateMachineMethod(ref mb, out declaringType);
+                        }
+                    }
+
+                    // if there is a type (non global method) print it
+                    // ResolveStateMachineMethod may have set declaringType to null
+                    if (declaringType != null)
+                    {
+                        // Append t.FullName, replacing '+' with '.'
+                        string fullName = declaringType.FullName!;
+                        for (int i = 0; i < fullName.Length; i++)
+                        {
+                            char ch = fullName[i];
+                            sb.Append(ch == '+' ? '.' : ch);
+                        }
+                        sb.Append('.');
+                    }
+                    sb.Append(mb.Name);
+
+                    // deal with the generic portion of the method
+                    if (mb is MethodInfo mi && mi.IsGenericMethod)
+                    {
+                        Type[] typars = mi.GetGenericArguments();
+                        sb.Append('[');
+                        int k = 0;
+                        bool fFirstTyParam = true;
+                        while (k < typars.Length)
+                        {
+                            if (!fFirstTyParam)
+                                sb.Append(',');
+                            else
+                                fFirstTyParam = false;
+
+                            sb.Append(typars[k].Name);
+                            k++;
+                        }
+                        sb.Append(']');
+                    }
+
+                    ParameterInfo[]? pi = null;
+                    try
+                    {
+                        pi = mb.GetParameters();
+                    }
+                    catch
+                    {
+                        // The parameter info cannot be loaded, so we don't
+                        // append the parameter list.
+                    }
+                    if (pi != null)
+                    {
+                        // arguments printing
+                        sb.Append('(');
+                        bool fFirstParam = true;
+                        for (int j = 0; j < pi.Length; j++)
+                        {
+                            if (!fFirstParam)
+                                sb.Append(", ");
+                            else
+                                fFirstParam = false;
+
+                            string typeName = "<UnknownType>";
+                            if (pi[j].ParameterType != null)
+                                typeName = pi[j].ParameterType.Name;
+                            sb.Append(typeName);
+                            string? parameterName = pi[j].Name;
+                            if (parameterName != null)
+                            {
+                                sb.Append(' ');
+                                sb.Append(parameterName);
+                            }
+                        }
+                        sb.Append(')');
+                    }
+
+                    if (methodChanged)
+                    {
+                        // Append original method name e.g. +MoveNext()
+                        sb.Append('+');
+                        sb.Append(methodName);
+                        sb.Append('(').Append(')');
+                    }
+
+                    // source location printing
+                    if (sf!.GetILOffset() != -1)
+                    {
+                        // If we don't have a PDB or PDB-reading is disabled for the module,
+                        // then the file name will be null.
+                        string? fileName = sf.GetFileName();
+
+                        if (fileName != null)
+                        {
+                            // tack on " in c:\tmp\MyFile.cs:line 5"
+                            sb.Append(' ');
+                            sb.AppendFormat(CultureInfo.InvariantCulture, inFileLineNum, fileName, sf.GetFileLineNumber());
+                        }
+                        else if (true && mb.ReflectedType != null)
+                        {
+                            string assemblyName = mb.ReflectedType.Module.ScopeName;
+                            try
+                            {
+                                int token = mb.MetadataToken;
+                                sb.Append(' ');
+                                sb.AppendFormat(CultureInfo.InvariantCulture, inFileILOffset, assemblyName, token, sf.GetILOffset());
+                            }
+                            catch (System.InvalidOperationException) { }
+                        }
+                    }
+
+                    // Skip EDI boundary for async
+                    //sf.IsLastFrameFromForeignExceptionStackTrace
+                    if (false && !isAsync)
+                    {
+                        sb.AppendLine();
+                        // Passing default for Exception_EndStackTraceFromPreviousThrow in case SR.UsingResourceKeys is set.
+                        sb.Append("--- End of stack trace from previous location ---");
+                    }
+                }
+            }
+
+            return sb.ToString();
         }
     }
 }

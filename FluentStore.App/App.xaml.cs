@@ -3,16 +3,11 @@ using CommunityToolkit.WinUI.Notifications;
 using FluentStore.Helpers;
 using FluentStore.SDK;
 using FluentStore.SDK.Helpers;
-using FluentStore.SDK.Users;
 using FluentStore.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Microsoft.Windows.AppLifecycle;
 using System;
-using System.IO.Compression;
-using System.Linq;
 using System.Threading.Tasks;
-using Windows.ApplicationModel.Activation;
 using Windows.UI.Notifications;
 
 // To learn more about WinUI, the WinUI project structure,
