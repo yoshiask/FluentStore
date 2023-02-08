@@ -84,23 +84,35 @@ namespace FluentStore.SDK.Helpers
         public static ImageBase GetAppIcon(Stream stream)
         {
             // Open package archive for reading
-            using ZipArchive archive = new(stream);
-
-            // Get the app icon
-            ZipArchiveEntry iconEntry = archive.Entries.FirstOrDefault(e => e.FullName.StartsWith(".rsrc/ICON/1"));
-            if (iconEntry != null)
+            ZipArchive archive = new(stream);
+            try
             {
-                return new StreamImage
+                // Get the app icon
+                ZipArchiveEntry iconEntry = archive.Entries.FirstOrDefault(e => e.FullName.StartsWith(".rsrc/ICON/1"));
+                if (iconEntry != null)
                 {
-                    ImageType = ImageType.Logo,
-                    BackgroundColor = "Transparent",
-                    Stream = iconEntry.Open()
-                };
+                    // Copy the image to memory so the archive can be closed
+                    using var iconStream = iconEntry.Open();
+                    MemoryStream memIconStream = new();
+                    iconStream.CopyTo(memIconStream);
+
+                    return new StreamImage
+                    {
+                        ImageType = ImageType.Logo,
+                        BackgroundColor = "Transparent",
+                        Stream = iconEntry.Open()
+                    };
+                }
+                else
+                {
+                    return null;
+                }
             }
-            else
+            finally
             {
-                return null;
+                archive.Dispose();
             }
+            
         }
 
         private static string GetInstallErrorMessage(long exitCode)
