@@ -256,8 +256,19 @@ namespace FluentStore.SDK
 
         private IEnumerable<PackageBase> SortPackages(string query, IList<PackageBase> packages)
         {
-            return _fuse.Search(query, packages.Select(p => p.Title + " - " + p.DeveloperName))
+            string Flat(PackageBase p)
+                => p.Title + (p.DeveloperName != null ? " - " + p.DeveloperName : string.Empty);
+
+            try
+            {
+                return _fuse.Search(query, packages.Select(Flat))
                 .Select(r => packages[r.Index]);
+
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         #region Account handling
