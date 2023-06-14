@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using UnifiedUpdatePlatform.Services.WindowsUpdate;
 
 namespace FluentStore.Sources.MicrosoftStore
 {
@@ -35,7 +36,7 @@ namespace FluentStore.Sources.MicrosoftStore
 
                 // Get update data
                 WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
-                var updates = await WindowsUpdateLib.FE3Handler.GetUpdates(categoryIds, sysInfo, "", WindowsUpdateLib.FileExchangeV3UpdateFilter.Application);
+                var updates = await FE3Handler.GetUpdates(categoryIds, sysInfo, "", FileExchangeV3UpdateFilter.Application);
                 if (updates == null || !updates.Any())
                 {
                     WeakReferenceMessenger.Default.Send(new ErrorMessage(

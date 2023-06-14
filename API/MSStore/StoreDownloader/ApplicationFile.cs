@@ -1,22 +1,21 @@
 ﻿using System;
-using WindowsUpdateLib;
+using UnifiedUpdatePlatform.Services.WindowsUpdate;
 
-namespace StoreDownloader
+namespace StoreDownloader;
+
+public class ApplicationFile
 {
-    public class ApplicationFile
-    {
-        public string UpdateID;
-        public string RevisionNumber;
-        public string Token;
-        public CTAC CTAC;
+    public string UpdateID;
+    public string RevisionNumber;
+    public string Token;
+    public CTAC CTAC;
 
-        public string Digest;
-        public string Filename;
+    public string Digest;
+    public string Filename;
 
-        public DateTime Modified;
-        public string[] Targets;
+    public DateTime Modified;
+    public string[] Targets;
 
-        public UpdateData UpdateData;
-        public string Size;
-    }
+    public UpdateData UpdateData;
+    public string Size;
 }
