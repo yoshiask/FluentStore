@@ -142,7 +142,7 @@ namespace StoreDownloader
                 10 => "Windows Holographic",
                 16 => "Windows Core",
 
-                _ => "Unknown (" + value + ")",
+                _ => $"Unknown ({value})",
             };
         }
     }

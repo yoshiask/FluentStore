@@ -87,7 +87,7 @@ namespace FluentStore.Sources.UwpCommunity
             if (status.IsAtLeast(PackageStatus.Details))
             {
                 var images = await BASE_URL.AppendPathSegments("projects", "images")
-                .SetQueryParam("projectId", projectIdStr).GetJsonAsync<List<string>>();
+                    .SetQueryParam("projectId", projectIdStr).GetJsonAsync<List<string>>();
                 package.UpdateWithImages(images);
 
                 var collaborators = await BASE_URL.AppendPathSegments("projects", "collaborators")

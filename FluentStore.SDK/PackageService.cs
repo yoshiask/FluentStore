@@ -262,7 +262,7 @@ namespace FluentStore.SDK
             try
             {
                 return _fuse.Search(query, packages.Select(Flat))
-                .Select(r => packages[r.Index]);
+                    .Select(r => packages[r.Index]);
 
             }
             catch

@@ -46,7 +46,8 @@ namespace FluentStore.Sources.WinGet
             ReleaseDate = pack.UpdatedAt;
             Description = pack.Description;
             Version = pack.LatestVersion;
-            Website = Link.Create(pack.HomepageUrl, ShortTitle + " website");
+            if (pack.HomepageUrl != null)
+                Website = Link.Create(pack.HomepageUrl, ShortTitle + " website");
         }
 
         public void Update(PopularApp popApp)
