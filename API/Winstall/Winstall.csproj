@@ -7,11 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AngleSharp" Version="1.0.1" />
+        <PackageReference Include="AngleSharp" Version="1.0.3" />
         <PackageReference Include="Flurl.Http" Version="3.2.4" />
         <PackageReference Include="FuseSharp" Version="1.4.0" />
         <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-        <PackageReference Include="YamlDotNet" Version="12.3.1" />
+        <PackageReference Include="YamlDotNet" Version="13.1.0" />
     </ItemGroup>
 
 </Project>
