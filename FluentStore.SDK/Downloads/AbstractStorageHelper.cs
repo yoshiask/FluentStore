@@ -1,7 +1,12 @@
-﻿using OwlCore.Kubo;
+﻿using FluentStore.SDK.Helpers;
+using OwlCore.Kubo;
 using OwlCore.Storage;
+using OwlCore.Storage.Archive;
 using OwlCore.Storage.SystemIO;
 using System;
+using System.IO;
+using System.IO.Compression;
+using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Downloads
 {
@@ -59,6 +64,22 @@ namespace FluentStore.SDK.Downloads
                 return new IpnsFile($"/{scheme}/{id}", IpfsClient);
 
             return new IpfsFile(id, IpfsClient);
+        }
+
+        public static async Task<ZipArchiveFolder> CreateArchiveFromFolder(IFolder folder, IFile? archiveFile = null)
+        {
+            // Create new archive in memory
+            Stream archiveStream = archiveFile is null
+                ? new MemoryStream()
+                : await archiveFile.OpenStreamAsync(FileAccess.ReadWrite);
+
+            ZipArchive archive = new(archiveStream, ZipArchiveMode.Update);
+            ZipArchiveFolder archiveFolder = new(archive, new($"{Guid.NewGuid()}", $"{folder.Name}.zip"));
+
+            await archiveFolder.CreateRecursiveCopyOfAsync(folder, extractToRoot: true);
+            archiveStream.Flush();
+
+            return archiveFolder;
         }
 
         private static (string scheme, string path) GetSchemeAndPath(string url)

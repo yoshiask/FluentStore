@@ -1,18 +1,19 @@
-﻿using FluentStore.SDK.Messages;
-using Garfoot.Utilities.FluentUrn;
-using CommunityToolkit.Diagnostics;
+﻿using CommunityToolkit.Diagnostics;
 using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.SDK.Downloads;
+using FluentStore.SDK.Messages;
+using Garfoot.Utilities.FluentUrn;
+using OwlCore.Storage;
 using System;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Windows.Web.Http;
-using System.IO;
-using System.Linq;
 using Windows.Storage.Streams;
-using System.IO.Compression;
-using FluentStore.SDK.Downloads;
-using OwlCore.Storage;
+using Windows.Web.Http;
 
 namespace FluentStore.SDK.Helpers
 {
@@ -97,11 +98,29 @@ namespace FluentStore.SDK.Helpers
 
         public static async Task RecursiveDelete(this IStorable storable)
         {
-            if (storable is IAddressableStorable addressableStorable)
+            if (storable is IStorableChild storableChild)
             {
-                var parent = await addressableStorable.GetParentAsync();
+                var parent = await storableChild.GetParentAsync();
                 if (parent is IModifiableFolder mutParent)
-                    await mutParent.DeleteAsync(addressableStorable);
+                    await mutParent.DeleteAsync(storableChild);
+            }
+        }
+
+        public static async Task CreateRecursiveCopyOfAsync(this IModifiableFolder destinationFolder, IStorable storableToCopy, bool overwrite = false, bool extractToRoot = false, CancellationToken token = default)
+        {
+            if (storableToCopy is IFile file)
+            {
+                await destinationFolder.CreateCopyOfAsync(file, overwrite, token);
+            }
+            else if (storableToCopy is IFolder folder)
+            {
+                IModifiableFolder childDestinationFolder = extractToRoot
+                    ? destinationFolder
+                    : await destinationFolder.CreateFolderAsync(destinationFolder.Name, overwrite, token) as IModifiableFolder
+                    ?? throw new InvalidOperationException("Recursive copying requires new folders in the destination to be modifiable.");
+
+                await foreach (var childStorable in folder.GetItemsAsync(cancellationToken: token))
+                    await childDestinationFolder.CreateRecursiveCopyOfAsync(childStorable, overwrite, false, token);
             }
         }
 
