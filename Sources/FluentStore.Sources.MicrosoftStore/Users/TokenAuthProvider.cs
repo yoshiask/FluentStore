@@ -1,7 +1,11 @@
 ﻿using CommunityToolkit.Diagnostics;
 using Microsoft.Graph;
+using Microsoft.Kiota.Abstractions;
+using Microsoft.Kiota.Abstractions.Authentication;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FluentStore.Sources.MicrosoftStore.Users
@@ -28,6 +32,12 @@ namespace FluentStore.Sources.MicrosoftStore.Users
         {
             request.Headers.Authorization = new AuthenticationHeaderValue(CoreConstants.Headers.Bearer, _token);
 
+            return Task.CompletedTask;
+        }
+
+        public Task AuthenticateRequestAsync(RequestInformation request, Dictionary<string, object> additionalAuthenticationContext = null, CancellationToken cancellationToken = default)
+        {
+            request.Headers.Add("Authorization", $"Bearer: {_token}");
             return Task.CompletedTask;
         }
     }

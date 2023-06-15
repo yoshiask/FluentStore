@@ -1,6 +1,7 @@
 ﻿using FluentStore.SDK.Models;
 using System.Linq;
 using System.Management;
+using UnifiedUpdatePlatform.Services.WindowsUpdate;
 
 namespace FluentStore.Handlers.MicrosoftStore
 {
@@ -8,22 +9,22 @@ namespace FluentStore.Handlers.MicrosoftStore
     {
         private const string REG_NTCURRENTVERSION = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion";
 
-        public static WindowsUpdateLib.CTAC GetSystemInfo()
+        public static CTAC GetSystemInfo()
         {
             ObjectQuery query = new("SELECT * FROM Win32_OperatingSystem");
             ManagementObjectSearcher searcher = new(query);
             var info = searcher.Get().Cast<ManagementObject>().FirstOrDefault();
 
-            var sku = (WindowsUpdateLib.OSSkuId)(int)(uint)info["OperatingSystemSKU"];
+            var sku = (OSSkuId)(int)(uint)info["OperatingSystemSKU"];
             var osVersion = info["Version"].ToString();
             var arch = SDK.Helpers.Win32Helper.GetSystemArchitecture() switch
             {
-                Architecture.x86 => WindowsUpdateLib.MachineType.x86,
-                Architecture.x64 => WindowsUpdateLib.MachineType.amd64,
-                Architecture.Arm32 => WindowsUpdateLib.MachineType.arm,
-                Architecture.Arm64 => WindowsUpdateLib.MachineType.arm64,
+                Architecture.x86 => MachineType.x86,
+                Architecture.x64 => MachineType.amd64,
+                Architecture.Arm32 => MachineType.arm,
+                Architecture.Arm64 => MachineType.arm64,
 
-                _ => WindowsUpdateLib.MachineType.unknown
+                _ => MachineType.unknown
             };
 
             var ntCurrentVersion = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(REG_NTCURRENTVERSION);

@@ -1,5 +1,5 @@
 ﻿using FluentStore.SDK.Users;
-using Microsoft.Graph;
+using Microsoft.Graph.Models;
 
 namespace FluentStore.Sources.MicrosoftStore.Users
 {
