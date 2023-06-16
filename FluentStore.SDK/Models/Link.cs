@@ -49,11 +49,7 @@ namespace FluentStore.SDK.Models
         /// is <c>null</c>.
         /// </returns>
         public static Link Create(Uri uri, string textContent = null)
-        {
-            if (uri == null)
-                return null;
-            return new(uri, textContent);
-        }
+            => uri is null ? null : new(uri, textContent);
 
         /// <summary>
         /// Creates an instance of <see cref="Link"/>.
@@ -65,15 +61,9 @@ namespace FluentStore.SDK.Models
         /// </returns>
         public static Link Create(string url, string textContent = null)
         {
-            try
-            {
-                Uri uri = new(url);
+            if (Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri))
                 return new(uri, textContent);
-            }
-            catch
-            {
-                return null;
-            }
+            return null;
         }
 
         public static implicit operator Flurl.Url(Link link) => link.Uri;

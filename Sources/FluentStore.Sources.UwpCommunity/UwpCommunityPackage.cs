@@ -46,8 +46,7 @@ namespace FluentStore.Sources.UwpCommunity
             ReleaseDate = project.createdAt;
             Price = 0.0;
             DisplayPrice = "View";
-            if (project.externalLink != null)
-                Website = Link.Create(project.externalLink, ShortTitle + " website");
+            Website = Link.Create(project.externalLink, ShortTitle + " website");
 
             if (project.heroImage != null)
                 Images.Add(new FileImage
@@ -66,10 +65,8 @@ namespace FluentStore.Sources.UwpCommunity
 
             // Set UWPC properties
             ProjectId = (int)project.id;
-            if (project.downloadLink != null)
-                PackageUri = new(project.downloadLink);
-            if (project.githubLink != null)
-                GithubLink = Link.Create(project.githubLink, ShortTitle + " on GitHub");
+            PackageUri = new(project.downloadLink);
+            GithubLink = Link.Create(project.githubLink, ShortTitle + " on GitHub");
             if (project.tags != null)
                 foreach (dynamic tag in project.tags)
                     Tags.Add(tag.name);
