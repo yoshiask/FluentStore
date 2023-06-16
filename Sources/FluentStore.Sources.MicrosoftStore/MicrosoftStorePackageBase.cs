@@ -224,18 +224,21 @@ namespace FluentStore.Sources.MicrosoftStore
         public override bool RequiresDownloadForCompatCheck => false;
         public override async Task<string> GetCannotBeInstalledReason()
         {
-            // Check Windows platform
-            PlatWindows? currentPlat = PlatWindowsStringConverter.Parse(AnalyticsInfo.VersionInfo.DeviceFamily);
-            if (!currentPlat.HasValue)
+            var minRequirements = Model?.SystemRequirements?.Minimum?.Items;
+            if (minRequirements == null)
             {
-                return "Cannot identify the current Windows platform.";
-            }
-            else if (AllowedPlatforms != null && !AllowedPlatforms.Contains(currentPlat.Value))
-            {
-                return Title + " does not support " + currentPlat.ToString();
+                // No requirements were specifid, just check Windows platform
+                PlatWindows? currentPlat = PlatWindowsStringConverter.Parse(AnalyticsInfo.VersionInfo.DeviceFamily);
+                if (!currentPlat.HasValue)
+                    return "Cannot identify the current Windows platform.";
+                else if (AllowedPlatforms != null && !AllowedPlatforms.Contains(currentPlat.Value))
+                    return $"{Title} does not support {currentPlat}.";
             }
 
-            // TODO: Check architecture, etc.
+            // Ensure that all minimum requirements are met
+            foreach (var requirement in Model.SystemRequirements.Minimum.Items)
+                if (!requirement.IsValidationPassed && requirement.Level == "HardBlock")
+                    return $"{requirement.Name} {requirement.Description}";
 
             return null;
         }
