@@ -22,7 +22,6 @@
     <converters:NameToFontFamilyConverter x:Key="NameToFontFamilyConverter"/>
     <converters:NumberToStarGridLength x:Key="NumberToStarGridLength"/>
     <converters:CSSColorToBrushConverter x:Name="CSSColorToBrushConverter"/>
-    <converters:PlatWindowsEnumToVisibility x:Key="PlatWindowsEnumToVisibility"/>
     <converters:PackageBaseEnumerableToViewModelEnumerable x:Key="PackageBaseEnumerableToViewModelEnumerable"/>
     <converters:PackageDisplayConverter x:Key="PackageDisplayConverter"/>
     <converters:BoolToHeightOrZero x:Key="BoolToHeightOrZero"/>
