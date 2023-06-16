@@ -101,7 +101,9 @@
 
                             <AppBarElementContainer>
                                 <SplitButton x:Name="InstallButton" Padding="8" Click="InstallSplitButton_Click"
-                                                   VerticalAlignment="Stretch">
+                                             IsEnabled="{x:Bind ViewModel.CanInstall}"
+                                             ToolTipService.ToolTip="{x:Bind ViewModel.CannotInstallReason}"
+                                             VerticalAlignment="Stretch">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <FontIcon Glyph="&#xECAA;" FontSize="16" />
                                         <TextBlock Text="Install" x:Name="InstallButtonText" />
@@ -198,6 +200,11 @@
                                 <Setter Property="Margin" Value="0,12,0,0"/>
                             </Style>
                         </StackPanel.Resources>
+
+                        <!-- Cannot install reason -->
+                        <InfoBar Visibility="{x:Bind ViewModel.CanInstall, Converter={StaticResource NotBoolToVisibilityConverter}}"
+                                 Title="This package cannot be installed." IsOpen="True" IsClosable="False" Severity="Error"
+                                 Message="{x:Bind ViewModel.CannotInstallReason}" Margin="0"/>
 
                         <!-- Screenshots -->
                         <StackPanel Visibility="{x:Bind ViewModel.Screenshots, Converter={StaticResource CollectionVisibilityConverter}}"

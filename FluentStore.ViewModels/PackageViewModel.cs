@@ -26,8 +26,6 @@ namespace FluentStore.ViewModels
         public PackageViewModel(PackageBase package) : this()
         {
             Package = package;
-
-            UpdateImages();
         }
 
         private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
@@ -52,6 +50,15 @@ namespace FluentStore.ViewModels
                 CanEdit = Package?.PackageHandler?.CanEditPackage(Package) ?? false;
                 CanDelete = Package?.PackageHandler?.CanDeletePackage(Package) ?? false;
                 HasReviews = Package?.ReviewSummary?.HasReviews ?? false;
+
+                Package.GetCannotBeInstalledReason().ContinueWith((task, obj) =>
+                {
+                    var vm = (PackageViewModel)obj;
+                    string reason = task.Result;
+
+                    vm.CannotInstallReason = reason ?? "Download and install now";
+                    vm.CanInstall = reason is null;
+                }, this);
             }
         }
 
@@ -109,6 +116,20 @@ namespace FluentStore.ViewModels
         {
             get => _CanDelete;
             set => SetProperty(ref _CanDelete, value);
+        }
+
+        private bool _CanInstall = false;
+        public bool CanInstall
+        {
+            get => _CanInstall;
+            set => SetProperty(ref _CanInstall, value);
+        }
+
+        private string _CannotInstallReason = "Unknown";
+        public string CannotInstallReason
+        {
+            get => _CannotInstallReason;
+            set => SetProperty(ref _CannotInstallReason, value);
         }
 
         private ImageBase _AppIcon;
