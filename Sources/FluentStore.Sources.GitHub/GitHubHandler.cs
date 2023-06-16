@@ -66,7 +66,7 @@ namespace FluentStore.Sources.GitHub
 
         public override Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(new List<PackageBase>());
         }
 
         public override Url GetUrlFromPackage(PackageBase package)
@@ -76,7 +76,7 @@ namespace FluentStore.Sources.GitHub
 
         public override Task<List<PackageBase>> SearchAsync(string query)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(new List<PackageBase>());
         }
 
         public static Task<IReadOnlyList<Release>> GetReleases(Repository repo)
