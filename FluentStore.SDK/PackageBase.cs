@@ -76,12 +76,12 @@ namespace FluentStore.SDK
         /// Gets a message describing why this package cannot be installed on this system.
         /// </summary>
         /// <returns><c>null</c> if it can be installed, a reason if it can't.</returns>
-        public virtual Task<string> GetCannotBeInstalledReason() => null;
+        public virtual Task<string> GetCannotBeInstalledReason() => Task.FromResult<string>(null);
 
         /// <summary>
         /// Determines if this package can be installed on this system.
         /// </summary>
-        public bool CanBeInstalled() => GetCannotBeInstalledReason() == null;
+        public async Task<bool> CanBeInstalled() => await GetCannotBeInstalledReason() == null;
 
         public abstract Task<bool> InstallAsync();
 
