@@ -15,7 +15,7 @@ using Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic;
 
 namespace FluentStore.Sources.MicrosoftStore
 {
-    public class MicrosoftStoreHandler : PackageHandlerBase<Users.MicrosoftAccountHandler>
+    public partial class MicrosoftStoreHandler : PackageHandlerBase<Users.MicrosoftAccountHandler>
     {
         internal readonly StorefrontApi StorefrontApi = new();
         internal readonly StoreEdgeFDApi StoreEdgeFDApi = new();
@@ -141,11 +141,13 @@ namespace FluentStore.Sources.MicrosoftStore
 
         public override async Task<PackageBase> GetPackageFromUrl(Url url)
         {
-            Regex rx = new(@"^https?:\/\/(?:(?:www\.)?microsoft\.com\/(?:(?<locale>[a-z]{2}-[a-z]{2})\/)?(?:store\/(?:apps|productId)|(?:p|store\/r)(?:\/.+)?)|apps\.microsoft\.com\/store\/detail(?:\/[\w-]+)?)\/(?<id>\w{12})",
-                RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            Match m = rx.Match(url.ToString());
+            Match m = MsStoreAppsRegex().Match(url);
             if (!m.Success)
-                return null;
+            {
+                m = XboxGamesRegex().Match(url);
+                if (!m.Success)
+                    return null;
+            }
 
             return await GetPackageFromPage(m.Groups["id"].Value, CatalogIdType.ProductId, PackageStatus.Details);
         }
@@ -226,5 +228,11 @@ namespace FluentStore.Sources.MicrosoftStore
             package.Status = status;
             return package;
         }
+
+        [GeneratedRegex(@"(?:https?:\/\/)?(?:(?:www\.)?microsoft\.com\/(?:(?<locale>[a-z]{2}-[a-z]{2})\/)?(?:store\/(?:apps|productId)|(?:p|store\/r)(?:\/.+)?)|apps\.microsoft\.com\/store\/detail(?:\/[\w-]+)?)\/(?<id>\w{12})", RegexOptions.IgnoreCase | RegexOptions.Singleline, "en-US")]
+        private static partial Regex MsStoreAppsRegex();
+
+        [GeneratedRegex(@"^(?:https?:\/\/)?(?:www\.)?xbox\.com\/(?:(?<locale>[a-z]{2}-[a-z]{2})\/)?(?:games\/store)(?:\/.+)?\/(?<id>\w{12})")]
+        private static partial Regex XboxGamesRegex();
     }
 }
