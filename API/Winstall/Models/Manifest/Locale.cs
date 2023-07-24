@@ -127,6 +127,12 @@ public class Locale
     public List<Agreement> Agreements { get; set; }
 
     /// <summary>
+    /// Any documentation for providing software guides such as manuals and troubleshooting URLs
+    /// </summary>
+    [MaxLength(128)]
+    public List<Document> Documentations { get; set; }
+
+    /// <summary>
     /// The package release notes
     /// </summary>
     [StringLength(10000, MinimumLength = 1)]
