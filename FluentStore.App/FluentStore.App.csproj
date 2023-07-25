@@ -91,12 +91,12 @@
 
     <!-- Build plugins without referencing them -->
     <ItemGroup>
-        <!--<ProjectToBuild Include="../Sources/FluentStore.Sources.Chocolatey/FluentStore.Sources.Chocolatey.csproj" />
+        <ProjectToBuild Include="../Sources/FluentStore.Sources.Chocolatey/FluentStore.Sources.Chocolatey.csproj" />
         <ProjectToBuild Include="../Sources/FluentStore.Sources.FluentStore/FluentStore.Sources.FluentStore.csproj" />
-        <ProjectToBuild Include="../Sources/FluentStore.Sources.GitHub/FluentStore.Sources.GitHub.csproj" />-->
+        <ProjectToBuild Include="../Sources/FluentStore.Sources.GitHub/FluentStore.Sources.GitHub.csproj" />
         <ProjectToBuild Include="../Sources/FluentStore.Sources.MicrosoftStore/FluentStore.Sources.MicrosoftStore.csproj" />
-        <!--<ProjectToBuild Include="../Sources/FluentStore.Sources.UwpCommunity/FluentStore.Sources.UwpCommunity.csproj" />
-        <ProjectToBuild Include="../Sources/FluentStore.Sources.WinGet/FluentStore.Sources.WinGet.csproj" />-->
+        <ProjectToBuild Include="../Sources/FluentStore.Sources.UwpCommunity/FluentStore.Sources.UwpCommunity.csproj" />
+        <ProjectToBuild Include="../Sources/FluentStore.Sources.WinGet/FluentStore.Sources.WinGet.csproj" />
     </ItemGroup>
     <ItemGroup>
       <Page Update="Themes\NavigationFrame.xaml">
