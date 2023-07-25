@@ -13,7 +13,7 @@ using System.Linq;
 
 namespace FluentStore.Sources.WinGet
 {
-    public class WinGetHandler : PackageHandlerBase
+    public partial class WinGetHandler : PackageHandlerBase
     {
         private readonly WinstallApi _api = new();
 
@@ -125,8 +125,7 @@ namespace FluentStore.Sources.WinGet
             string ns = NAMESPACE_WINGET;
             string id = null;
 
-            Regex rx = new(@"^https:\/\/((www\.)?github|raw\.githubusercontent)\.com\/microsoft\/winget-pkgs(\/(blob|tree))?\/master\/manifests\/[0-9a-z]\/(?<packageId>[^\/\s]+)()",
-                RegexOptions.IgnoreCase);
+            Regex rx = WinGetManifestRepoRx();
             Match m = rx.Match(url);
             if (m.Success)
             {
@@ -134,7 +133,7 @@ namespace FluentStore.Sources.WinGet
                 goto success;
             }
 
-            rx = new(@"^https?://(www\.)?winstall\.app/(?<type>apps|packs)/(?<id>[^/\s]+)\??", RegexOptions.IgnoreCase);
+            rx = WinstallRx();
             m = rx.Match(url);
             if (m.Success)
             {
@@ -164,5 +163,11 @@ namespace FluentStore.Sources.WinGet
             Url url = Constants.WINSTALL_HOST.AppendPathSegments(path, package.Urn.GetContent());
             return url;
         }
+
+        [GeneratedRegex("^https:\\/\\/((www\\.)?github|raw\\.githubusercontent)\\.com\\/microsoft\\/winget-pkgs(\\/(blob|tree))?\\/master\\/manifests\\/[0-9a-z]\\/(?<packageId>[^\\/\\s]+)()", RegexOptions.IgnoreCase, "en-US")]
+        private static partial Regex WinGetManifestRepoRx();
+
+        [GeneratedRegex("^https?://(www\\.)?winstall\\.app/(?<type>apps|packs)/(?<id>[^/\\s]+)\\??", RegexOptions.IgnoreCase, "en-US")]
+        private static partial Regex WinstallRx();
     }
 }

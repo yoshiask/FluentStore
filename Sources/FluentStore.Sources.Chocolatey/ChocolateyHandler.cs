@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace FluentStore.Sources.Chocolatey
 {
-    public class ChocolateyHandler : PackageHandlerBase
+    public partial class ChocolateyHandler : PackageHandlerBase
     {
         public const string NAMESPACE_CHOCO = "choco";
 
@@ -27,7 +27,7 @@ namespace FluentStore.Sources.Chocolatey
 
         public override string DisplayName => "Chocolatey";
 
-        public override async Task<PackageBase> GetPackage(Urn packageUrn, SDK.PackageStatus status = SDK.PackageStatus.Details)
+        public override async Task<PackageBase> GetPackage(Urn packageUrn, PackageStatus status = PackageStatus.Details)
         {
             Guard.IsEqualTo(packageUrn.NamespaceIdentifier, NAMESPACE_CHOCO, nameof(packageUrn));
 
@@ -60,8 +60,7 @@ namespace FluentStore.Sources.Chocolatey
 
         public override async Task<PackageBase> GetPackageFromUrl(Url url)
         {
-            Regex rx = new(@"^https?:\/\/community\.chocolatey\.org\/packages\/(?<id>[^\/\s]+)(?:\/(?<version>[\d.]+))?",
-                RegexOptions.IgnoreCase);
+            Regex rx = ChocoRx();
             Match m = rx.Match(url.ToString());
             if (!m.Success)
                 return null;
@@ -86,5 +85,8 @@ namespace FluentStore.Sources.Chocolatey
 
             return url;
         }
+
+        [GeneratedRegex("^https?:\\/\\/community\\.chocolatey\\.org\\/packages\\/(?<id>[^\\/\\s]+)(?:\\/(?<version>[\\d.]+))?", RegexOptions.IgnoreCase, "en-US")]
+        private static partial Regex ChocoRx();
     }
 }
