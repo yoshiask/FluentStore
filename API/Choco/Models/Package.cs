@@ -55,8 +55,8 @@ namespace Chocolatey.Models
             MailingListUrl = props.Element(Constants.XMLNS_ADO_DATASERVICES + "MailingListUrl").Value;
             BugTrackerUrl = props.Element(Constants.XMLNS_ADO_DATASERVICES + "BugTrackerUrl").Value;
             IsApproved = bool.Parse(props.Element(Constants.XMLNS_ADO_DATASERVICES + "IsApproved").Value);
-            PackageStatus = Extensions.TryParseEnum<PackageStatus>(props.Element(Constants.XMLNS_ADO_DATASERVICES + "PackageStatus").Value);
-            PackageSubmittedStatus = Extensions.TryParseEnum<PackageStatus>(props.Element(Constants.XMLNS_ADO_DATASERVICES + "PackageSubmittedStatus").Value);
+            PackageStatus = Extensions.ParseEnum<PackageStatus>(props.Element(Constants.XMLNS_ADO_DATASERVICES + "PackageStatus").Value);
+            PackageSubmittedStatus = Extensions.ParseEnum<PackageStatus>(props.Element(Constants.XMLNS_ADO_DATASERVICES + "PackageSubmittedStatus").Value);
             PackageTestResultUrl = props.Element(Constants.XMLNS_ADO_DATASERVICES + "PackageTestResultUrl").Value;
             PackageTestResultStatus = props.Element(Constants.XMLNS_ADO_DATASERVICES + "PackageTestResultStatus").Value;
             PackageTestResultStatusDate = DateTimeOffset.TryParse(
