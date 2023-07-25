@@ -17,14 +17,15 @@ Several sources are currently supported, with several more planned for the futur
 ---        | :---:
 | ✅      | Available in latest release
 | ☑       | Available in next release
+| 🔷      | Currently in development
 | ❌      | Not available at this time
 
 | Source Name       | Search | Download | Install | Collections
 ---                 | :---:  | :---:    | :---:   | :---:
 | Microsoft Store   | ✅     | ✅      | ✅      | ✅
-| WinGet            | ✅     | ✅      | ✅      | ☑
+| WinGet            | ✅     | ✅      | ✅      | ✅
 | GitHub Releases   | ❌     | ✅      | ✅      | ❌
-| Chocolatey        | ❌     | ❌      | ❌      | ❌
+| Chocolatey        | 🔷     | 🔷      | 🔷      | ❌
 | Scoop             | ❌     | ❌      | ❌      | ❌
 | UWP Community     | ❌     | ✅¹     | ✅¹     | ✅
 | Fluent Store      | ❌     | ✅²     | ✅²     | ✅
@@ -37,3 +38,10 @@ Several sources are currently supported, with several more planned for the futur
 
 ## Where to download?
 - [GitHub Releases](https://github.com/yoshiask/FluentStore/releases)
+
+## Frequently Asked Questions
+### What are the system requirements?
+Fluent Store only requires Windows 10 version 1809 (build 17763) or any version of Windows 11. Stripped down or de-bloated Windows installs are not supported.
+
+### I've just installed Fluent Store and my Home page is blank!
+This can happen when plugins are not available, possibly due to a propgram or internet error during first-time setup. The setup can be re-attempted by clicking on `Settings > Plugins > Default Plugins > Reinstall...`.
