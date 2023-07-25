@@ -53,6 +53,9 @@ namespace FluentStore.ViewModels
 
                 Package.GetCannotBeInstalledReason().ContinueWith((task, obj) =>
                 {
+                    if (!task.IsCompletedSuccessfully)
+                        return;
+
                     var vm = (PackageViewModel)obj;
                     string reason = task.Result;
 
