@@ -74,6 +74,7 @@ namespace FluentStore
         {
             var log = Ioc.Default.GetService<LoggerService>();
             var navService = Ioc.Default.GetRequiredService<INavigationService>();
+            var pluginLoader = Ioc.Default.GetRequiredService<PluginLoader>();
 
             ProtocolResult result = navService.ParseProtocol(e.Arguments, isFirstInstance: e.IsFirstInstance);
             log?.Log($"Parse protocol result: {result}");
@@ -104,14 +105,14 @@ namespace FluentStore
                     case AppUpdateStatus.NewlyInstalled:
                         // Download and install default plugins
                         log?.Log($"Began installing default plugins");
-                        await Settings.Default.InstallDefaultPlugins();
+                        await pluginLoader.InstallDefaultPlugins();
                         log?.Log($"Finished installing plugins");
                         break;
 
                     default:
                         // Always install pending plugins
                         log?.Log($"Began installing pending plugins");
-                        await PluginLoader.InstallPendingPlugins(Settings.Default);
+                        await pluginLoader.InstallPendingPlugins();
                         log?.Log($"Finished install pending plugins");
                         break;
                 }
@@ -122,7 +123,7 @@ namespace FluentStore
                 Settings.Default.PackageHandlerEnabledStateChanged += pkgSvc.UpdatePackageHandlerEnabledStates;
 
                 log?.Log($"Began loading plugins");
-                var pluginLoadResult = PluginLoader.LoadPlugins(Settings.Default, passwordVaultService);
+                var pluginLoadResult = pluginLoader.LoadPlugins();
                 pkgSvc.PackageHandlers = pluginLoadResult.PackageHandlers;
                 log?.Log($"Finished loading plugins");
 
@@ -236,9 +237,10 @@ namespace FluentStore
 
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
-            services.AddSingleton(new Microsoft.Marketplace.Storefront.Contracts.StorefrontApi());
-            services.AddSingleton(new FluentStoreAPI.FluentStoreAPI());
-            services.AddSingleton(new PackageService());
+            services.AddSingleton<Microsoft.Marketplace.Storefront.Contracts.StorefrontApi>();
+            services.AddSingleton<FluentStoreAPI.FluentStoreAPI>();
+            services.AddSingleton<PackageService>();
+            services.AddSingleton<PluginLoader>();
 
             return services.BuildServiceProvider();
         }

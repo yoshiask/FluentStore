@@ -1,21 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.Helpers;
 using FluentStore.SDK;
 using FluentStore.SDK.Messages;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -25,6 +17,7 @@ namespace FluentStore.Views.Settings
     public sealed partial class Plugins : UserControl
     {
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
+        private readonly PluginLoader PluginLoader = Ioc.Default.GetRequiredService<PluginLoader>();
 
         public Plugins()
         {
@@ -70,7 +63,7 @@ namespace FluentStore.Views.Settings
                 WeakReferenceMessenger.Default.Register<SuccessMessage>(this, InstallPluginSuccessMessage_Recieved);
 
                 var plugin = await pluginFile.OpenReadAsync();
-                var installStatus = await PluginLoader.InstallPlugin(Helpers.Settings.Default, plugin.AsStream(), true);
+                var installStatus = await PluginLoader.InstallPlugin(plugin.AsStream(), true);
 
                 WeakReferenceMessenger.Default.Unregister<ErrorMessage>(this);
                 WeakReferenceMessenger.Default.Unregister<SuccessMessage>(this);
@@ -125,7 +118,7 @@ namespace FluentStore.Views.Settings
             DefaultPluginProgressIndicator.Visibility = Visibility.Visible;
             DefaultPluginsSetting.IsExpanded = true;
 
-            await Helpers.Settings.Default.InstallDefaultPlugins(true, true);
+            await PluginLoader.InstallDefaultPlugins(true, true);
 
             WeakReferenceMessenger.Default.Unregister<ErrorMessage>(this);
             WeakReferenceMessenger.Default.Unregister<SuccessMessage>(this);

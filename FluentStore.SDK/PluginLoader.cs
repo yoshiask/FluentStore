@@ -1,8 +1,10 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK.Downloads;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Models;
 using FluentStore.Services;
+using Microsoft.Extensions.DependencyInjection;
 using OwlCore.Storage.SystemIO;
 using System;
 using System.Collections.Generic;
@@ -11,25 +13,32 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Windows.Storage.Streams;
 
 namespace FluentStore.SDK
 {
-    public static class PluginLoader
+    public class PluginLoader
     {
-        private static readonly Type[] _ctorTypeList = new[] { typeof(IPasswordVaultService) };
         private static readonly Version _currentSdkVersion = typeof(PluginLoader).Assembly.GetName().Version;
+
+        private readonly ISettingsService _settings;
+        private readonly IPasswordVaultService _passwordVaultService;
+
+        public PluginLoader(ISettingsService settings, IPasswordVaultService passwordVaultService)
+        {
+            _settings = settings;
+            _passwordVaultService = passwordVaultService;
+        }
 
         /// <summary>
         /// Attempts to load all plugins located in <see cref="ISettingsService.PluginDirectory"/>
         /// and registers all loaded package handlers with the provided <paramref name="packageHandlers"/>.
         /// </summary>
         /// <param name="packageHandlers">The dictionary to add loaded package handlers to.</param>
-        public static PluginLoadResult LoadPlugins(ISettingsService settings, IPasswordVaultService passwordVaultService)
+        public PluginLoadResult LoadPlugins()
         {
             PluginLoadResult result = new();
 
-            if (!Directory.Exists(settings.PluginDirectory))
+            if (!Directory.Exists(_settings.PluginDirectory))
                 return result;
 
             // Make sure that the runtime looks for plugin dependencies
@@ -37,7 +46,7 @@ namespace FluentStore.SDK
             AppDomain currentDomain = AppDomain.CurrentDomain;
             currentDomain.AssemblyResolve += LoadFromSameFolder;
 
-            foreach (string pluginMetadataPath in Directory.EnumerateFiles(settings.PluginDirectory, PluginMetadata.MetadataFileName, SearchOption.AllDirectories))
+            foreach (string pluginMetadataPath in Directory.EnumerateFiles(_settings.PluginDirectory, PluginMetadata.MetadataFileName, SearchOption.AllDirectories))
             {
                 // The plugin metadata specifies a relative path to the DLL containing
                 // the actual plugin implementation.
@@ -50,7 +59,7 @@ namespace FluentStore.SDK
                 var metadata = PluginMetadata.DeserializeFromFile(pluginMetadataPath);
 
                 // Ensure plugin is compatible with current Fluent Store SDK.
-                if (!metadata.PluginVersion.IsVersionCompatible(_currentSdkVersion))
+                if (!IsVersionCompatible(metadata.PluginVersion, _currentSdkVersion))
                     continue;
 
                 // Get path to primary DLL.
@@ -64,7 +73,7 @@ namespace FluentStore.SDK
                     // and are public.
                     var assembly = Assembly.LoadFile(assemblyPath);
 
-                    foreach (PackageHandlerBase handler in InstantiateAllPackageHandlers(assembly, settings, passwordVaultService))
+                    foreach (PackageHandlerBase handler in InstantiateAllPackageHandlers(assembly))
                     {
                         // Register handler.
                         result.PackageHandlers.Add(handler);
@@ -85,7 +94,7 @@ namespace FluentStore.SDK
         /// <summary>
         /// Downloads and installs each plugin from the list of URLS.
         /// </summary>
-        /// <param name="settings">
+        /// <param name="_settings">
         /// The current application's settings.
         /// </param>
         /// <param name="pluginUrls">
@@ -99,10 +108,9 @@ namespace FluentStore.SDK
         /// Whether to install the downloaded plugins. Only use this option at the
         /// start of app initialization, when no plugins are loaded yet.
         /// </param>
-        public static async Task InstallDefaultPlugins(ISettingsService settings, IEnumerable<string> pluginUrls,
-            bool install = true, bool overwrite = false)
+        public async Task InstallDefaultPlugins(IEnumerable<string> pluginUrls, bool install = true, bool overwrite = false)
         {
-            SystemFolder pluginDirectory = new(Directory.CreateDirectory(settings.PluginDirectory));
+            SystemFolder pluginDirectory = new(Directory.CreateDirectory(_settings.PluginDirectory));
 
             Windows.Web.Http.HttpClient client = new();
             foreach (string url in pluginUrls)
@@ -124,7 +132,7 @@ namespace FluentStore.SDK
                     var pluginFile = await remotePluginFile.SaveLocally(pluginDirectory, progress, true);
 
                     if (install)
-                        await InstallPlugin(settings, await pluginFile.OpenStreamAsync(), overwrite);
+                        await InstallPlugin(await pluginFile.OpenStreamAsync(), overwrite);
                 }
                 catch (Exception ex)
                 {
@@ -140,7 +148,7 @@ namespace FluentStore.SDK
         /// <summary>
         /// Installs the provided plugin.
         /// </summary>
-        /// <param name="settings">
+        /// <param name="_settings">
         /// The current application's settings.
         /// </param>
         /// <param name="plugin">
@@ -154,7 +162,7 @@ namespace FluentStore.SDK
         /// Whether the plugin was installed successfully. <see langword="false"/> if the plugin
         /// was already installed and <paramref name="overwrite"/> was <see langword="false"/>.
         /// </returns>
-        public static Task<PluginInstallStatus> InstallPlugin(ISettingsService settings, Stream plugin, bool overwrite = false)
+        public Task<PluginInstallStatus> InstallPlugin(Stream plugin, bool overwrite = false)
         {
             return Task.Run(delegate
             {
@@ -177,12 +185,11 @@ namespace FluentStore.SDK
                         pluginId = metadata.Id;
                     }
 
-                    WeakReferenceMessenger.Default.Send(
-                        new Messages.PluginInstallStartedMessage(pluginId));
+                    WeakReferenceMessenger.Default.Send(new Messages.PluginInstallStartedMessage(pluginId));
 
-                    Directory.CreateDirectory(settings.PluginDirectory);
+                    Directory.CreateDirectory(_settings.PluginDirectory);
 
-                    string dir = Path.Combine(settings.PluginDirectory, pluginId);
+                    string dir = Path.Combine(_settings.PluginDirectory, pluginId);
                     if (Directory.Exists(dir))
                     {
                         string oldMetadataPath = Path.Combine(dir, PluginMetadata.MetadataFileName);
@@ -227,7 +234,7 @@ namespace FluentStore.SDK
                         // in the plugin folder so the call to InstallPendingPlugins
                         // picks it up and finishes the install.
                         string pluginFileName = $"{metadata.Id}_{metadata.PluginVersion}.zip";
-                        using Stream stream = File.Open(Path.Combine(settings.PluginDirectory, pluginFileName), FileMode.Create);
+                        using Stream stream = File.Open(Path.Combine(_settings.PluginDirectory, pluginFileName), FileMode.Create);
                         plugin.Position = 0;
                         plugin.CopyTo(stream);
                     }
@@ -248,19 +255,19 @@ namespace FluentStore.SDK
         /// <summary>
         /// Installs any zipped plugins in the plugin directory.
         /// </summary>
-        /// <param name="settings">
+        /// <param name="_settings">
         /// The current application's settings.
         /// </param>
-        public static async Task InstallPendingPlugins(ISettingsService settings)
+        public async Task InstallPendingPlugins()
         {
-            if (!Directory.Exists(settings.PluginDirectory))
+            if (!Directory.Exists(_settings.PluginDirectory))
                 return;
 
-            foreach (string pluginPath in Directory.GetFiles(settings.PluginDirectory, "*.zip"))
+            foreach (string pluginPath in Directory.GetFiles(_settings.PluginDirectory, "*.zip"))
             {
                 using FileStream plugin = new(pluginPath, FileMode.Open);
 
-                var installStatus = await InstallPlugin(settings, plugin, true);
+                var installStatus = await InstallPlugin(plugin, true);
                 if (installStatus.IsAtLeast(PluginInstallStatus.AppRestartRequired))
                     File.Delete(pluginPath);
             }
@@ -277,24 +284,20 @@ namespace FluentStore.SDK
             return assembly;
         }
 
-        private static IEnumerable<PackageHandlerBase> InstantiateAllPackageHandlers(Assembly pluginAssembly, ISettingsService settings, IPasswordVaultService passwordVaultService)
+        private IEnumerable<PackageHandlerBase> InstantiateAllPackageHandlers(Assembly pluginAssembly)
         {
-            object[] ctorArgs = new object[] { passwordVaultService };
+            object[] ctorArgs = new object[] { _passwordVaultService };
 
             foreach (Type type in pluginAssembly.GetTypes()
                 .Where(t => t.BaseType.IsAssignableTo(typeof(PackageHandlerBase)) && t.IsPublic))
             {
-                var ctr = type.GetConstructor(_ctorTypeList);
-                if (ctr == null)
-                    continue;
-
                 // Create a new instance of the handler
-                var handler = (PackageHandlerBase)ctr.Invoke(ctorArgs);
+                var handler = (PackageHandlerBase)ActivatorUtilities.CreateInstance(Ioc.Default, type);
                 if (handler == null)
                     continue;
 
                 // Enable or disable according to user settings
-                handler.IsEnabled = settings.GetPackageHandlerEnabledState(type.Name);
+                handler.IsEnabled = _settings.GetPackageHandlerEnabledState(type.Name);
 
                 // Register handler with the type name as its ID
                 yield return handler;
@@ -305,7 +308,7 @@ namespace FluentStore.SDK
         /// Determines if the specified version is compatible, loosely following
         /// <see href="https://semver.org/">semantic versioning</see> rules.
         /// </summary>
-        private static bool IsVersionCompatible(this Version curVer, Version newVer)
+        private static bool IsVersionCompatible(Version curVer, Version newVer)
         {
             // Doesn't make sense to compare null versions.
             if (curVer == null || newVer == null)

@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using FluentStore.SDK;
-using FluentStore.SDK.Helpers;
+﻿using FluentStore.SDK.Helpers;
 using FluentStore.Services;
 using OwlCore.ComponentModel;
 using OwlCore.Diagnostics;
@@ -9,7 +7,6 @@ using OwlCore.Storage;
 using OwlCore.Storage.SystemIO;
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using Windows.ApplicationModel;
 
 namespace FluentStore.Helpers
@@ -108,16 +105,6 @@ namespace FluentStore.Helpers
                 return AppUpdateStatus.Downgraded;
 
             return AppUpdateStatus.None;
-        }
-
-        public async Task InstallDefaultPlugins(bool install = true, bool overwrite = false)
-        {
-            var appVersion = Package.Current.Id.Version.ToVersion();
-            var arch = Win32Helper.GetSystemArchitecture().ToString();
-            var fsApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
-            
-            var defaults = await fsApi.GetDefaultPlugins(appVersion, arch);
-            await PluginLoader.InstallDefaultPlugins(this, defaults, install, overwrite);
         }
 
         private static string GetPackageHandlerEnabledKey(string typeName) => $"{KEY_PackageHandlerEnabled}_{typeName}";

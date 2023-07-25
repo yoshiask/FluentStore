@@ -1,5 +1,10 @@
-﻿using Microsoft.UI.Xaml;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using FluentStore.SDK.Helpers;
+using FluentStore.SDK;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using System.Threading.Tasks;
+using Windows.ApplicationModel;
 
 namespace FluentStore.Helpers
 {
@@ -41,6 +46,16 @@ namespace FluentStore.Helpers
                 }
             }
             return result;
+        }
+
+        public static async Task InstallDefaultPlugins(this PluginLoader pluginLoader, bool install = true, bool overwrite = false)
+        {
+            var appVersion = Package.Current.Id.Version.ToVersion();
+            var arch = Win32Helper.GetSystemArchitecture().ToString();
+            var fsApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
+
+            var defaults = await fsApi.GetDefaultPlugins(appVersion, arch);
+            await pluginLoader.InstallDefaultPlugins(defaults, install, overwrite);
         }
     }
 }
