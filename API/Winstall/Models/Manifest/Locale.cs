@@ -146,6 +146,22 @@ public class Locale
     public string ReleaseNotesUrl { get; set; }
 
     /// <summary>
+    /// The purchase url for acquiring entitlement for the package.
+    /// </summary>
+    [StringLength(2048)]
+    [RegularExpression(@"^([Hh][Tt][Tt][Pp][Ss]?)://.+$")]
+    public string PurchaseUrl { get; set; }
+
+    /// <summary>
+    /// The notes displayed to the user upon completion of a package installation.
+    /// </summary>
+    [StringLength(10000, MinimumLength =13)]
+    public string InstallationNotes { get; set; }
+
+    [MaxLength(1024)]
+    public List<Icon> Icons { get; set; }
+
+    /// <summary>
     /// The manifest type
     /// </summary>
     [Required(AllowEmptyStrings = true)]
@@ -156,5 +172,5 @@ public class Locale
     /// </summary>
     [Required(AllowEmptyStrings = true)]
     [RegularExpression(@"^(0|[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])(\.(0|[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])){2}$")]
-    public string ManifestVersion { get; set; } = "1.1.0";
+    public string ManifestVersion { get; set; } = "1.5.0";
 }

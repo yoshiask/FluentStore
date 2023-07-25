@@ -77,6 +77,9 @@ namespace FluentStore.Sources.WinGet
             Website = Link.Create(locale.PackageUrl, ShortTitle + " website");
             PrivacyUri = Link.Create(locale.PrivacyUrl, ShortTitle + " privacy policy");
 
+            if (locale is { Icons: not null, Icons.Count: > 0 })
+                _appIcon = locale.Icons.MaxBy(i => i.IconResolution).IconUrl;
+
             // Set WinGet properties
             SupportUrl = Link.Create(locale.PublisherSupportUrl, DeveloperName + " support");
         }
