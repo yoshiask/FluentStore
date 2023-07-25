@@ -46,29 +46,36 @@ namespace FluentStore.Sources.UwpCommunity
             ReleaseDate = project.createdAt;
             Price = 0.0;
             DisplayPrice = "View";
-            Website = Link.Create(project.externalLink, ShortTitle + " website");
 
-            if (project.heroImage != null)
+            if (project.externalLink is string externalLink)
+                Website = Link.Create(externalLink, ShortTitle + " website");
+
+            if (project.heroImage is string heroImage)
                 Images.Add(new FileImage
                 {
-                    Url = project.heroImage,
+                    Url = heroImage,
                     ImageType = ImageType.Hero
                 });
 
-            if (project.appIcon != null)
+            if (project.appIcon is string appIcon)
                 Images.Add(new FileImage
                 {
-                    Url = project.appIcon,
+                    Url = appIcon,
                     ImageType = ImageType.Logo,
                     BackgroundColor = project.accentColor,
                 });
 
             // Set UWPC properties
             ProjectId = (int)project.id;
-            PackageUri = new(project.downloadLink);
-            GithubLink = Link.Create(project.githubLink, ShortTitle + " on GitHub");
+
+            if (project.downloadLink is string downloadLink)
+                PackageUri = new(downloadLink);
+
+            if (project.githubLink is string githubLink)
+                GithubLink = Link.Create(githubLink, ShortTitle + " on GitHub");
+
             if (project.tags != null)
-                foreach (dynamic tag in project.tags)
+                foreach (var tag in project.tags)
                     Tags.Add(tag.name);
 
             Urn = new(UwpCommunityHandler.NAMESPACE_PROJECT, new RawNamespaceSpecificString(ProjectId.ToInvariantString()));
