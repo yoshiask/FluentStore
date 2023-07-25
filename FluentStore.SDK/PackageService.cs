@@ -77,7 +77,7 @@ namespace FluentStore.SDK
         /// <summary>
         /// Performs a search across all package handlers with the given query.
         /// </summary>
-        public async Task<List<PackageBase>> SearchAsync(string query)
+        public async Task<IEnumerable<PackageBase>> SearchAsync(string query)
         {
             var packages = new List<PackageBase>();
             foreach (var handler in PackageHandlers)
@@ -90,12 +90,12 @@ namespace FluentStore.SDK
                     results = await handler.SearchAsync(query);
                 }
                 catch { continue; }
-                // Filter results already in list
+
                 packages.AddRange(results);
             }
 
             // Fuzzy search to resort by relevance
-            return SortPackages(query, packages).ToList();
+            return SortPackages(query, packages);
         }
 
         /// <summary>
