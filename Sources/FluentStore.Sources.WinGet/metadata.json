@@ -1,6 +1,6 @@
 {
     "Id": "FluentStore.Sources.WinGet",
-    "DisplayName": "Windows Package Manager Community Repository",
+    "DisplayName": "Winstall",
     "PluginVersion": "0.3.3.0",
     "SdkVersion": "0.3.3.0",
     "PluginAssembly": "FluentStore.Sources.WinGet.dll"
