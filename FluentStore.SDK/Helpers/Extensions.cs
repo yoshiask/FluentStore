@@ -8,33 +8,6 @@ namespace FluentStore.SDK.Helpers
 {
     public static class Extensions
     {
-        public static TOut GetOrDefault<TOut, TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TOut defaultValue = default)
-        {
-            // If dictionary is null or key is invalid, return default.
-            if (dictionary == null || key == null)
-            {
-                return defaultValue;
-            }
-
-            // If setting doesn't exist, create it.
-            if (!dictionary.ContainsKey(key))
-            {
-                dictionary[key] = (TValue)(object)defaultValue;
-            }
-
-            return (TOut)(object)dictionary[key];
-        }
-
-        /// <summary>
-        /// Acts exactly like <see cref="string.Join(char, string?[])"/>, but for any <see cref="IList{T}"/>.
-        /// </summary>
-        public static void Join<T>(this IList<T> list, T insert)
-        {
-            for (int i = 0; i < list.Count - 1; i += 2)
-            {
-                list.Insert(i + 1, insert);
-            }
-        }
 
         public static Version ToVersion(this Windows.ApplicationModel.PackageVersion packageVersion)
         {
@@ -75,7 +48,6 @@ namespace FluentStore.SDK.Helpers
             return contains;
         }
 
-        // TODO: Does this really belong here?
         public static bool TryParseUrn(string str, [NotNullWhen(true)] out Urn urn)
         {
             try
