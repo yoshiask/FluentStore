@@ -9,7 +9,6 @@
 
         <!-- Use preview tooling for dotnet CLI support -->
         <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
-        <GenerateLibraryLayout>true</GenerateLibraryLayout>
     </PropertyGroup>
 </Project>
 

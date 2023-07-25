@@ -8,6 +8,8 @@
     <PropertyGroup>
         <!-- Ensure that all dependencies get copied to the plugin directory -->
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		
+		<GenerateLibraryLayout>true</GenerateLibraryLayout>
     </PropertyGroup>
 
     <PropertyGroup>
