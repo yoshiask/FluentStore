@@ -1,8 +1,10 @@
-﻿using FluentStore.SDK.Models;
+﻿using CliWrap;
+using FluentStore.SDK.Models;
+using Spectre.Console;
 using System.IO.Compression;
 
 // List architectures
-var archs = new[] { "x64", "x86", "arm64" };
+string[] archs = new[] { "x64", "x86", "arm64" };
 
 // Get folder containing plugin projects
 string curDir = Environment.CurrentDirectory;
@@ -14,29 +16,58 @@ Directory.CreateDirectory(zipOutDir);
 
 Console.WriteLine($"Searching for plugins in '{sourcesDir}'");
 
-Parallel.ForEach(Directory.GetDirectories(sourcesDir).Where(d => d != zipOutDir), pluginSrcDir =>
-{
-    // Get build output directories
-    var metadata = PluginMetadata.DeserializeFromFile(Path.Combine(pluginSrcDir, PluginMetadata.MetadataFileName));
-
-    Console.WriteLine($"Read metadata for {metadata.DisplayName} ({metadata.Id}, {metadata.PluginVersion})");
-
-    foreach (var arch in archs)
+await AnsiConsole.Progress()
+    .StartAsync(async ctx =>
     {
-        string pluginTarget = $"{metadata.Id}_{metadata.PluginVersion}_{arch}";
+        var pluginDirs = Directory.GetDirectories(sourcesDir).Where(d => d != zipOutDir);
+        await Parallel.ForEachAsync(pluginDirs, async (pluginSrcDir, token) =>
+        {
+            // Get build output directories
+            var metadata = PluginMetadata.DeserializeFromFile(Path.Combine(pluginSrcDir, PluginMetadata.MetadataFileName));
 
-        string pluginOutDir = Path.Combine(pluginSrcDir, "bin", arch, "Debug", targetFramework);
-        string zipPath = Path.Combine(zipOutDir, pluginTarget + ".zip");
+            var pluginProgress = ctx.AddTask($"{metadata.DisplayName} ({metadata.Id}, {metadata.PluginVersion})");
+            pluginProgress.MaxValue = archs.Length * 2;
+            pluginProgress.StartTask();
 
-        Console.WriteLine($"[{pluginTarget}] Creating archive...");
-        ZipFile.CreateFromDirectory(pluginOutDir, zipPath);
-        Console.WriteLine($"[{pluginTarget}] Saved to '{zipPath}'");
-    }
-});
+            foreach (var arch in archs)
+            {
+                var rid = $"win-{arch}";
+                var pluginTarget = $"{metadata.Id}_{metadata.PluginVersion}_{arch}";
+                var pluginOutDir = Path.Combine(pluginSrcDir, "bin", "Debug", targetFramework, rid);
+                var zipPath = Path.Combine(zipOutDir, pluginTarget + ".zip");
 
-var foreColor = Console.ForegroundColor;
-Console.ForegroundColor = ConsoleColor.Green;
+                if (File.Exists(zipPath))
+                {
+                    pluginProgress.Increment(2);
+                    continue;
+                }
 
-Console.WriteLine($"Finished archiving plugins to '{zipOutDir}'");
+                var buildResult = await Cli.Wrap("dotnet")
+                    .WithArguments(new[] { "build", "-r", rid, "--no-self-contained" })
+                    .WithWorkingDirectory(pluginSrcDir)
+                    .WithValidation(CommandResultValidation.None)
+                    .ExecuteAsync(token);
+                if (buildResult.ExitCode == 0)
+                    pluginProgress.Increment(1);
+                else
+                    continue;
 
-Console.ForegroundColor = foreColor;
+                File.Delete(zipPath);
+                ZipFile.CreateFromDirectory(pluginOutDir, zipPath);
+                
+                pluginProgress.Increment(1);
+            }
+
+            pluginProgress.StopTask();
+        }).ConfigureAwait(false);
+    });
+
+WriteSuccess($"Finished packaging plugins to '{zipOutDir}'");
+
+static void WriteSuccess(string message)
+{
+    var foreColor = Console.ForegroundColor;
+    Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine(message);
+    Console.ForegroundColor = foreColor;
+}

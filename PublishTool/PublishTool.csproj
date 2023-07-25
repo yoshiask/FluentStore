@@ -9,6 +9,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="CliWrap" Version="3.6.4" />
+      <PackageReference Include="Spectre.Console" Version="0.47.0" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj" />
     </ItemGroup>
 
