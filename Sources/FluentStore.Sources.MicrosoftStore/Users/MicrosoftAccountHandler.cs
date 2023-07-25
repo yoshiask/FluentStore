@@ -28,7 +28,8 @@ namespace FluentStore.Sources.MicrosoftStore.Users
 
         public MicrosoftAccountHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
         {
-
+            // Disable this handler until it works reliably.
+            IsEnabled = false;
         }
 
         protected override async Task<Account> UpdateCurrentUser()
@@ -109,7 +110,7 @@ namespace FluentStore.Sources.MicrosoftStore.Users
 
         private async void GetMsaTokenAsync(WebAccountProviderCommand command)
         {
-            WebTokenRequest request = new(command.WebAccountProvider, "wl.basic");
+            WebTokenRequest request = new(command.WebAccountProvider, "WindowsUpdates.ReadWrite.All,User.Read", "fb3b123d-e069-4d8a-bc53-6e8da8dfdd7e");
 
             var hwnd = _navService.GetMainWindowHandle();
             WebTokenRequestResult result = await WebAuthenticationCoreManagerInterop.RequestTokenForWindowAsync(hwnd, request);
@@ -117,6 +118,10 @@ namespace FluentStore.Sources.MicrosoftStore.Users
             if (result.ResponseStatus == WebTokenRequestStatus.Success)
             {
                 string token = result.ResponseData[0].Token;
+            }
+            else
+            {
+                throw new Exception(result.ResponseError.ErrorMessage);
             }
         }
     }
