@@ -225,7 +225,7 @@ namespace FluentStore.Sources.MicrosoftStore
         public override async Task<string> GetCannotBeInstalledReason()
         {
             var minRequirements = Model?.SystemRequirements?.Minimum?.Items;
-            if (minRequirements == null)
+            if (minRequirements is null)
             {
                 // No requirements were specifid, just check Windows platform
                 PlatWindows? currentPlat = PlatWindowsStringConverter.Parse(AnalyticsInfo.VersionInfo.DeviceFamily);
@@ -234,11 +234,13 @@ namespace FluentStore.Sources.MicrosoftStore
                 else if (AllowedPlatforms != null && !AllowedPlatforms.Contains(currentPlat.Value))
                     return $"{Title} does not support {currentPlat}.";
             }
-
-            // Ensure that all minimum requirements are met
-            foreach (var requirement in Model.SystemRequirements.Minimum.Items)
-                if (!requirement.IsValidationPassed && requirement.Level == "HardBlock")
-                    return $"{requirement.Name} {requirement.Description}";
+            else
+            {
+                // Ensure that all minimum requirements are met
+                foreach (var requirement in minRequirements)
+                    if (!requirement.IsValidationPassed && requirement.Level == "HardBlock")
+                        return $"{requirement.Name} {requirement.Description}";
+            }
 
             return null;
         }
