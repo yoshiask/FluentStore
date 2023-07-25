@@ -342,4 +342,5 @@ ASALocalRun/
 healthchecksdb
 
 **/Secrets.cs
+**/*.Secrets.cs
 /BuildPackage.ps1
