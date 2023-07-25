@@ -1,5 +1,4 @@
 ﻿using Chocolatey;
-using Chocolatey.Models;
 using CommunityToolkit.Diagnostics;
 using FluentStore.SDK;
 using FluentStore.SDK.Images;
@@ -28,8 +27,6 @@ namespace FluentStore.Sources.Chocolatey
 
         public override string DisplayName => "Chocolatey";
 
-        public override Task<List<PackageBase>> GetFeaturedPackagesAsync() => Task.FromResult(_emptyPackageList);
-
         public override async Task<PackageBase> GetPackage(Urn packageUrn, SDK.PackageStatus status = SDK.PackageStatus.Details)
         {
             Guard.IsEqualTo(packageUrn.NamespaceIdentifier, NAMESPACE_CHOCO, nameof(packageUrn));
@@ -44,16 +41,12 @@ namespace FluentStore.Sources.Chocolatey
             return new ChocolateyPackage(this, package);
         }
 
-        public override Task<List<PackageBase>> GetSearchSuggestionsAsync(string query) => Task.FromResult(_emptyPackageList);
-
-        public override async Task<List<PackageBase>> SearchAsync(string query)
+        public override async IAsyncEnumerable<PackageBase> SearchAsync(string query)
         {
-            List<PackageBase> packages = new();
             var results = await Choco.SearchAsync(query);
-            foreach (Package chocoPackage in results)
-                packages.Add(new ChocolateyPackage(this, chocoPackage));
 
-            return packages;
+            foreach (var chocoPackage in results)
+                yield return new ChocolateyPackage(this, chocoPackage);
         }
 
         public override ImageBase GetImage()

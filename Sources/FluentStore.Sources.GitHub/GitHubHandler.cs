@@ -5,7 +5,6 @@ using FluentStore.Services;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using Octokit;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -29,11 +28,6 @@ namespace FluentStore.Sources.GitHub
         };
 
         public override string DisplayName => "GitHub";
-
-        public override Task<List<PackageBase>> GetFeaturedPackagesAsync()
-        {
-            return Task.FromResult(new List<PackageBase>());
-        }
 
         public override ImageBase GetImage()
         {
@@ -64,19 +58,9 @@ namespace FluentStore.Sources.GitHub
             return null;
         }
 
-        public override Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
-        {
-            return Task.FromResult(new List<PackageBase>());
-        }
-
         public override Url GetUrlFromPackage(PackageBase package)
         {
             return $"https://github.com/{package.PublisherId}/{package.Title}";
-        }
-
-        public override Task<List<PackageBase>> SearchAsync(string query)
-        {
-            return Task.FromResult(new List<PackageBase>());
         }
 
         public static Task<IReadOnlyList<Release>> GetReleases(Repository repo)

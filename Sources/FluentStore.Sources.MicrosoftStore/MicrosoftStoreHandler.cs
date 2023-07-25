@@ -38,65 +38,55 @@ namespace FluentStore.Sources.MicrosoftStore
 
         public override string DisplayName => "Microsoft Store";
 
-        public override async Task<List<PackageBase>> GetFeaturedPackagesAsync()
+        public override async IAsyncEnumerable<PackageBase> GetFeaturedPackagesAsync()
         {
-            var packages = new List<PackageBase>();
             var page = await StorefrontApi.GetHomeSpotlight(options: GetSystemOptions());
-            packages.AddRange(
-                page.Cards.Where(card => card.ProductId.Length == 12 && card.TypeTag == "app")
-                          .Select(card => new MicrosoftStorePackage(this, card) { Status = PackageStatus.BasicDetails })
-            );
 
-            return packages;
+            var packages = page.Cards.Where(card => card.ProductId.Length == 12 && card.TypeTag == "app")
+                .Select(card => new MicrosoftStorePackage(this, card) { Status = PackageStatus.BasicDetails });
+
+            foreach (var package in packages)
+                yield return package;
         }
 
-        public override async Task<List<PackageBase>> SearchAsync(string query)
+        public override async IAsyncEnumerable<PackageBase> SearchAsync(string query)
         {
-            var packages = new List<PackageBase>();
-
             var page = (await StorefrontApi.Search(query, "apps", GetSystemOptions())).Payload;
-            AddToResults();
 
-            for (int p = 1; p < 3 && page.NextUri != null; p++)
-            {
-                page = (await StorefrontApi.NextSearchPage(page)).Payload;
-                AddToResults();
-            }
-
-            return packages;
-
-            void AddToResults()
+            do
             {
                 foreach (var details in page.HighlightedResults)
                 {
                     var package = MicrosoftStorePackageBase.Create(this, details.ProductId, product: details);
                     package.Status = PackageStatus.BasicDetails;
 
-                    packages.Add(package);
+                    yield return package;
                 }
                 foreach (var card in page.SearchResults)
                 {
                     var package = MicrosoftStorePackageBase.Create(this, card.ProductId, card);
                     package.Status = PackageStatus.BasicDetails;
 
-                    packages.Add(package);
+                    yield return package;
                 }
+
+                page = page.NextUri is null
+                    ? null : (await StorefrontApi.NextSearchPage(page)).Payload;
             }
+            while (page.NextUri is not null);
         }
 
-        public override async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
+        public override async IAsyncEnumerable<PackageBase> GetSearchSuggestionsAsync(string query)
         {
             var suggs = await StorefrontApi.GetSearchSuggestions(query, GetSystemOptions());
-            var packages = new List<PackageBase>();
+
             foreach (var summ in suggs.Payload.AssetSuggestions)
             {
                 var package = MicrosoftStorePackageBase.Create(this, summ.ProductId, summary: summ);
                 package.Status = PackageStatus.BasicDetails;
 
-                packages.Add(package);
+                yield return package;
             }
-
-            return packages;
         }
 
         public override async Task<PackageBase> GetPackage(Urn packageUrn, PackageStatus status = PackageStatus.Details)
@@ -122,13 +112,17 @@ namespace FluentStore.Sources.MicrosoftStore
             }
         }
 
-        public override async Task<List<PackageBase>> GetCollectionsAsync()
+        public override async IAsyncEnumerable<PackageBase> GetCollectionsAsync()
         {
             var collectionDetail = (await StorefrontApi.GetCollections(options: GetSystemOptions())).Payload;
-            return collectionDetail.Cards.Select(c => (PackageBase)new MicrosoftStorePackage(this, c)
+
+            foreach (var coll in collectionDetail.Cards)
             {
-                Urn = new(NAMESPACE_COLLECTION, new RawNamespaceSpecificString(c.ProductId))
-            }).ToList();
+                yield return new MicrosoftStorePackage(this, coll)
+                {
+                    Urn = new(NAMESPACE_COLLECTION, new RawNamespaceSpecificString(coll.ProductId))
+                };
+            }
         }
 
         public override ImageBase GetImage()

@@ -38,8 +38,6 @@ namespace FluentStore.Sources.FluentStore
 
         public override string DisplayName => "Fluent Store";
 
-        public override Task<List<PackageBase>> GetFeaturedPackagesAsync() => Task.FromResult(_emptyPackageList);
-
         public override async Task<PackageBase> GetPackage(Urn urn, PackageStatus status)
         {
             if (urn.NamespaceIdentifier == NAMESPACE_COLLECTION)
@@ -78,18 +76,16 @@ namespace FluentStore.Sources.FluentStore
             return null;
         }
 
-        public override Task<List<PackageBase>> GetSearchSuggestionsAsync(string query) => Task.FromResult(_emptyPackageList);
-
-        public override Task<List<PackageBase>> SearchAsync(string query) => Task.FromResult(_emptyPackageList);
-
-        public override async Task<List<PackageBase>> GetCollectionsAsync()
+        public override async IAsyncEnumerable<PackageBase> GetCollectionsAsync()
         {
             // Get current user
             if (!AccountHandler.IsLoggedIn)
-                return _emptyPackageList;
+                yield break;
 
             var collections = await FSApi.GetCollectionsAsync(AccountHandler.CurrentUser.Id);
-            return collections.Select(c => (PackageBase)new CollectionPackage(this, c) { Status = PackageStatus.BasicDetails }).ToList();
+
+            foreach (var coll in collections)
+                yield return new CollectionPackage(this, coll) { Status = PackageStatus.BasicDetails };
         }
 
         public override ImageBase GetImage() => GetImageStatic();

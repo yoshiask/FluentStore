@@ -33,24 +33,21 @@ namespace FluentStore.Sources.WinGet
 
         public override string DisplayName => "Winstall";
 
-        public override async Task<List<PackageBase>> GetFeaturedPackagesAsync()
+        public override async IAsyncEnumerable<PackageBase> GetFeaturedPackagesAsync()
         {
-            var packages = new List<PackageBase>();
             var index = await _api.GetIndexAsync();
 
             foreach (PopularApp wgApp in index.Popular)
-                packages.Add(new WinGetPackage(this, popApp: wgApp)
+                yield return new WinGetPackage(this, popApp: wgApp)
                 {
                     Status = PackageStatus.BasicDetails
-                });
+                };
 
             foreach (Pack wgPack in index.Recommended)
-                packages.Add(new WinstallPack(this, wgPack)
+                yield return new WinstallPack(this, wgPack)
                 {
                     Status = PackageStatus.Details
-                });
-
-            return packages;
+                };
         }
 
         public override Task<PackageBase> GetPackage(Urn packageUrn, PackageStatus status = PackageStatus.Details)
@@ -96,29 +93,23 @@ namespace FluentStore.Sources.WinGet
             return null;
         }
 
-        public override Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
-        {
-            return SearchAsync(query);
-        }
+        public override IAsyncEnumerable<PackageBase> GetSearchSuggestionsAsync(string query) => SearchAsync(query);
 
-        public override async Task<List<PackageBase>> SearchAsync(string query)
+        public override async IAsyncEnumerable<PackageBase> SearchAsync(string query)
         {
-            var packages = new List<PackageBase>();
-
             var results = await _api.SearchAppsAsync(query);
-            foreach (App wgApp in results)
-                packages.Add(new WinGetPackage(this, wgApp));
-
-            return packages;
+            foreach (var wgApp in results)
+                yield return new WinGetPackage(this, wgApp);
         }
 
-        public override async Task<List<PackageBase>> GetCollectionsAsync()
+        public override async IAsyncEnumerable<PackageBase> GetCollectionsAsync()
         {
             var result = await _api.GetPacksAsync();
-            return result.Packs.Take(10).Select<Pack, PackageBase>(p => new WinstallPack(this, p)
-            {
-                Status = PackageStatus.Details
-            }).ToList();
+            foreach (var p in result.Packs.Take(10))
+                yield return new WinstallPack(this, p)
+                {
+                    Status = PackageStatus.Details
+                };
         }
 
         public override ImageBase GetImage()

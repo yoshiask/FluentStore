@@ -5,7 +5,9 @@ using FluentStore.SDK.Users;
 using FluentStore.Services;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -13,8 +15,6 @@ namespace FluentStore.SDK
 {
     public abstract class PackageHandlerBase : IEqualityComparer<PackageHandlerBase>
     {
-        protected static readonly List<PackageBase> _emptyPackageList = new(0);
-
         /// <summary>
         /// Initializes a new instance of <see cref="PackageHandlerBase"/>.
         /// </summary>
@@ -75,17 +75,17 @@ namespace FluentStore.SDK
         /// <summary>
         /// Gets a list of featured packages.
         /// </summary>
-        public abstract Task<List<PackageBase>> GetFeaturedPackagesAsync();
+        public virtual IAsyncEnumerable<PackageBase> GetFeaturedPackagesAsync() => Array.Empty<PackageBase>().ToAsyncEnumerable();
 
         /// <summary>
         /// Performs a search using the given query.
         /// </summary>
-        public abstract Task<List<PackageBase>> SearchAsync(string query);
+        public virtual IAsyncEnumerable<PackageBase> SearchAsync(string query) => Array.Empty<PackageBase>().ToAsyncEnumerable();
 
         /// <summary>
         /// Gets search suggestions for the given query.
         /// </summary>
-        public abstract Task<List<PackageBase>> GetSearchSuggestionsAsync(string query);
+        public virtual IAsyncEnumerable<PackageBase> GetSearchSuggestionsAsync(string query) => Array.Empty<PackageBase>().ToAsyncEnumerable();
 
         /// <summary>
         /// Gets the package with the specified <paramref name="packageUrn"/>.
@@ -117,7 +117,7 @@ namespace FluentStore.SDK
         /// This method will return a list of <see cref="PackageBase{TModel}"/>s that implement <see cref="Packages.IPackageCollection"/>,
         /// such as <see cref="Packages.GenericPackageCollection{TModel}"/>.
         /// </remarks>
-        public virtual Task<List<PackageBase>> GetCollectionsAsync() => Task.FromResult(_emptyPackageList);
+        public virtual IAsyncEnumerable<PackageBase> GetCollectionsAsync() => Array.Empty<PackageBase>().ToAsyncEnumerable();
 
         /// <summary>
         /// Gets the review summary for the specified package.

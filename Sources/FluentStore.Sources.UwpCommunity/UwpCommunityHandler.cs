@@ -38,23 +38,19 @@ namespace FluentStore.Sources.UwpCommunity
 
         public override string DisplayName => "UWP Community";
 
-        public override async Task<List<PackageBase>> GetFeaturedPackagesAsync()
+        public override async IAsyncEnumerable<PackageBase> GetFeaturedPackagesAsync()
         {
             string launchYearStr = GetLastLaunchYear().ToString();
             var projects = (await BASE_URL.AppendPathSegments("projects", "launch", launchYearStr)
                 .GetJsonAsync()).projects;
 
-            List<PackageBase> packages = new(projects.Count);
             foreach (dynamic project in projects)
             {
-                UwpCommunityPackage package = new(this, project)
+                yield return new UwpCommunityPackage(this, project)
                 {
                     Status = PackageStatus.BasicDetails
                 };
-                packages.Add(package);
             }
-
-            return packages;
         }
 
         public override async Task<PackageBase> GetPackage(Urn urn, PackageStatus status)
@@ -155,22 +151,11 @@ namespace FluentStore.Sources.UwpCommunity
             return listPackage;
         }
 
-        public override Task<List<PackageBase>> GetSearchSuggestionsAsync(string query) => Task.FromResult(_emptyPackageList);
-
-        public override Task<List<PackageBase>> SearchAsync(string query) => Task.FromResult(_emptyPackageList);
-
-        public override async Task<List<PackageBase>> GetCollectionsAsync()
+        public override async IAsyncEnumerable<PackageBase> GetCollectionsAsync()
         {
             int lastLaunchYear = GetLastLaunchYear();
-            List<PackageBase> collections = new(lastLaunchYear - 2019);
-
             for (int launchYear = 2019; launchYear <= lastLaunchYear; launchYear++)
-            {
-                var launchCollection = await GetLaunchCollection(launchYear.ToString(), PackageStatus.BasicDetails);
-                collections.Add(launchCollection);
-            }
-
-            return collections;
+                yield return await GetLaunchCollection(launchYear.ToString(), PackageStatus.BasicDetails);
         }
 
         public override ImageBase GetImage()

@@ -64,7 +64,7 @@ namespace FluentStore.SDK
                 List<PackageBase> results;
                 try
                 {
-                    results = await handler.GetFeaturedPackagesAsync();
+                    results = await handler.GetFeaturedPackagesAsync().ToListAsync();
                 }
                 catch { continue; }
 
@@ -87,7 +87,7 @@ namespace FluentStore.SDK
                 List<PackageBase> results;
                 try
                 {
-                    results = await handler.SearchAsync(query);
+                    results = await handler.SearchAsync(query).ToListAsync();
                 }
                 catch { continue; }
 
@@ -111,10 +111,10 @@ namespace FluentStore.SDK
                 List<PackageBase> results;
                 try
                 {
-                    results = await handler.GetSearchSuggestionsAsync(query);
+                    results = await handler.GetSearchSuggestionsAsync(query).ToListAsync();
                 }
                 catch { continue; }
-                // Filter results already in list
+
                 packages.AddRange(results);
             }
 
@@ -196,14 +196,14 @@ namespace FluentStore.SDK
             {
                 if (!handler.IsEnabled) continue;
 
-                List<PackageBase> results;
+                IAsyncEnumerable<PackageBase> results;
                 try
                 {
-                    results = await handler.GetCollectionsAsync();
+                    results = handler.GetCollectionsAsync();
                 }
                 catch { continue; }
 
-                foreach (var result in results)
+                await foreach (var result in results)
                     yield return result;
             }
         }
