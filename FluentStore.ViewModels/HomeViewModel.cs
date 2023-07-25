@@ -52,8 +52,9 @@ namespace FluentStore.ViewModels
 
         public async Task LoadFeaturedAsync()
         {
+            FeaturedPackages.Clear();
+
             // Load featured packages from other sources
-            FeaturedPackages = new ObservableCollection<HandlerPackageListPair>();
             await foreach (HandlerPackageListPair pair in PackageService.GetFeaturedPackagesAsync())
                 FeaturedPackages.Add(pair);
         }
@@ -123,7 +124,7 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _SelectedCarouselItem, value);
         }
 
-        private ObservableCollection<HandlerPackageListPair> _FeaturedPackages;
+        private ObservableCollection<HandlerPackageListPair> _FeaturedPackages = new();
         public ObservableCollection<HandlerPackageListPair> FeaturedPackages
         {
             get => _FeaturedPackages;
