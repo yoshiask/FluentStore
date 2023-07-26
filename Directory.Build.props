@@ -9,6 +9,8 @@
 
         <!-- Use preview tooling for dotnet CLI support -->
         <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
+
+        <DefaultItemExcludes>$(DefaultItemExcludes);obj/**</DefaultItemExcludes>
     </PropertyGroup>
 </Project>
 
