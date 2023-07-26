@@ -5,6 +5,13 @@ using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Models;
 using FluentStore.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NuGet.Configuration;
+using NuGet.Frameworks;
+using NuGet.PackageManagement;
+using NuGet.Packaging;
+using NuGet.Protocol;
+using NuGet.Protocol.Core.Types;
 using OwlCore.Storage.SystemIO;
 using System;
 using System.Collections.Generic;
@@ -22,11 +29,13 @@ namespace FluentStore.SDK
 
         private readonly ISettingsService _settings;
         private readonly IPasswordVaultService _passwordVaultService;
+        private readonly LoggerService _log;
 
-        public PluginLoader(ISettingsService settings, IPasswordVaultService passwordVaultService)
+        public PluginLoader(ISettingsService settings, IPasswordVaultService passwordVaultService, LoggerService log)
         {
             _settings = settings;
             _passwordVaultService = passwordVaultService;
+            _log = log;
         }
 
         /// <summary>
@@ -45,6 +54,18 @@ namespace FluentStore.SDK
             // in the plugin's folder.
             AppDomain currentDomain = AppDomain.CurrentDomain;
             currentDomain.AssemblyResolve += LoadFromSameFolder;
+
+            using Stream inputStream = new FileStream(@"D:\Repos\yoshiask\FluentStore\Sources\FluentStore.Sources.FluentStore\bin\Release\FluentStore.Sources.FluentStore.1.0.0.nupkg", FileMode.Open);
+            using PackageArchiveReader reader = new(inputStream);
+            NuspecReader nuspec = reader.NuspecReader;
+
+            FrameworkReducer tfmReducer = new();
+            var tfm = tfmReducer.GetNearest(NuGetFramework.Parse("net7.0-windows10.0.22000.0"), reader.GetSupportedFrameworks());
+
+            var libItems = reader.GetLibItems().First(g => g.TargetFramework == tfm).Items;
+            foreach (var libItem in libItems)
+            {
+            }
 
             foreach (string pluginMetadataPath in Directory.EnumerateFiles(_settings.PluginDirectory, PluginMetadata.MetadataFileName, SearchOption.AllDirectories))
             {
@@ -81,9 +102,7 @@ namespace FluentStore.SDK
                 }
                 catch (Exception ex)
                 {
-#if DEBUG
-                    System.Diagnostics.Debug.WriteLine(ex);
-#endif
+                    _log.UnhandledException(ex, OwlCore.Diagnostics.LogLevel.Error);
                     continue;
                 }
             }
@@ -136,9 +155,7 @@ namespace FluentStore.SDK
                 }
                 catch (Exception ex)
                 {
-#if DEBUG
-                    System.Diagnostics.Debug.WriteLine(ex);
-#endif
+                    _log.UnhandledException(ex, OwlCore.Diagnostics.LogLevel.Error);
                     WeakReferenceMessenger.Default.Send(new Messages.ErrorMessage(
                         ex, url, Messages.ErrorType.PluginDownloadFailed));
                 }
