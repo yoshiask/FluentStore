@@ -5,7 +5,8 @@
         <TargetPlatformMinVersion>$(MinWindowsVersion)</TargetPlatformMinVersion>
         <LangVersion>latest</LangVersion>
         <Platforms>AnyCPU;x64;x86;ARM64</Platforms>
-        <AssemblyVersion>$(FluentStoreVersion)</AssemblyVersion>
+        <Version>$(FluentStoreVersion)</Version>
+        <AssemblyVersion>$(Version)</AssemblyVersion>
         <FileVersion>$(AssemblyVersion)</FileVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
@@ -18,7 +19,7 @@
         <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.3.4" />
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.3.230602002" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.756" />
-		<PackageReference Include="NuGet.PackageManagement" Version="6.6.1" />
+        <PackageReference Include="NuGet.PackageManagement" Version="6.6.1" />
         <PackageReference Include="NuGet.Packaging" Version="6.6.1" />
         <PackageReference Include="NuGet.Protocol" Version="6.6.1" />
         <PackageReference Include="OwlCore" Version="0.4.0" />
