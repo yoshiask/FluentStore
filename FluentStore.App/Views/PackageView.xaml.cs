@@ -109,7 +109,7 @@ namespace FluentStore.Views
                 catch (Exception ex)
                 {
                     var logger = Ioc.Default.GetRequiredService<LoggerService>();
-                    logger.UnhandledException(ex, OwlCore.Diagnostics.LogLevel.Error);
+                    logger.UnhandledException(ex, Microsoft.Extensions.Logging.LogLevel.Error);
                 }
                 if (canLaunch)
                     UpdateInstallButtonToLaunch();

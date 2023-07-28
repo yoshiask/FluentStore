@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK.Downloads;
 using FluentStore.SDK.Helpers;
-using FluentStore.SDK.Models;
 using FluentStore.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -10,32 +9,40 @@ using NuGet.Configuration;
 using NuGet.Frameworks;
 using NuGet.PackageManagement;
 using NuGet.Packaging;
+using NuGet.ProjectManagement;
+using NuGet.ProjectManagement.Projects;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
+using NuGet.Protocol.Plugins;
+using NuGet.Versioning;
 using OwlCore.Storage.SystemIO;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace FluentStore.SDK
+namespace FluentStore.SDK.Plugins
 {
     public class PluginLoader
     {
-        private static readonly Version _currentSdkVersion = typeof(PluginLoader).Assembly.GetName().Version;
+        private static readonly NuGetFramework _targetFramework = NuGetFramework.Parse("net7.0-windows10.0.22000.0");
 
         private readonly ISettingsService _settings;
         private readonly IPasswordVaultService _passwordVaultService;
         private readonly LoggerService _log;
+        private readonly FluentStoreNuGetProject _proj;
+        private readonly INuGetProjectContext _projContext;
 
         public PluginLoader(ISettingsService settings, IPasswordVaultService passwordVaultService, LoggerService log)
         {
             _settings = settings;
             _passwordVaultService = passwordVaultService;
             _log = log;
+            _proj = new(settings.PluginDirectory, _targetFramework);
+            _projContext = new FluentStoreProjectContext(_settings.PluginDirectory, _log);
         }
 
         /// <summary>
@@ -43,7 +50,7 @@ namespace FluentStore.SDK
         /// and registers all loaded package handlers with the provided <paramref name="packageHandlers"/>.
         /// </summary>
         /// <param name="packageHandlers">The dictionary to add loaded package handlers to.</param>
-        public PluginLoadResult LoadPlugins()
+        public async Task<PluginLoadResult> LoadPlugins()
         {
             PluginLoadResult result = new();
 
@@ -55,36 +62,16 @@ namespace FluentStore.SDK
             AppDomain currentDomain = AppDomain.CurrentDomain;
             currentDomain.AssemblyResolve += LoadFromSameFolder;
 
-            using Stream inputStream = new FileStream(@"D:\Repos\yoshiask\FluentStore\Sources\FluentStore.Sources.FluentStore\bin\Release\FluentStore.Sources.FluentStore.1.0.0.nupkg", FileMode.Open);
-            using PackageArchiveReader reader = new(inputStream);
-            NuspecReader nuspec = reader.NuspecReader;
+            var installedPlugins = await _proj.GetInstalledPackagesAsync(default);
 
-            FrameworkReducer tfmReducer = new();
-            var tfm = tfmReducer.GetNearest(NuGetFramework.Parse("net7.0-windows10.0.22000.0"), reader.GetSupportedFrameworks());
-
-            var libItems = reader.GetLibItems().First(g => g.TargetFramework == tfm).Items;
-            foreach (var libItem in libItems)
+            var pluginPackagePaths = installedPlugins.Select(p => Path.Combine(_settings.PluginDirectory, p.PackageIdentity.Id, $"{p.PackageIdentity.Id}.nuspec"));
+            foreach (string pluginPackagePath in pluginPackagePaths)
             {
-            }
-
-            foreach (string pluginMetadataPath in Directory.EnumerateFiles(_settings.PluginDirectory, PluginMetadata.MetadataFileName, SearchOption.AllDirectories))
-            {
-                // The plugin metadata specifies a relative path to the DLL containing
-                // the actual plugin implementation.
-                // This is to avoid unnecessarily loading and searching for package
-                // handlers in DLLs that are only for dependencies (and also serves
-                // to prevent loading the same plugin twice, if one plugin depends
-                // on another).
-
-                // Deserialize metadata.
-                var metadata = PluginMetadata.DeserializeFromFile(pluginMetadataPath);
-
-                // Ensure plugin is compatible with current Fluent Store SDK.
-                if (!IsVersionCompatible(metadata.PluginVersion, _currentSdkVersion))
-                    continue;
+                using Stream nuspecStream = new FileStream(pluginPackagePath, FileMode.Open);
+                NuspecReader nuspec = new(nuspecStream);
 
                 // Get path to primary DLL.
-                string assemblyPath = Path.Combine(Path.GetDirectoryName(pluginMetadataPath), metadata.PluginAssembly);
+                string assemblyPath = Path.Combine(Path.GetDirectoryName(pluginPackagePath), $"{nuspec.GetId()}.dll");
                 if (string.IsNullOrWhiteSpace(assemblyPath))
                     continue;
 
@@ -102,7 +89,7 @@ namespace FluentStore.SDK
                 }
                 catch (Exception ex)
                 {
-                    _log.UnhandledException(ex, OwlCore.Diagnostics.LogLevel.Error);
+                    _log.UnhandledException(ex, LogLevel.Error);
                     continue;
                 }
             }
@@ -155,7 +142,7 @@ namespace FluentStore.SDK
                 }
                 catch (Exception ex)
                 {
-                    _log.UnhandledException(ex, OwlCore.Diagnostics.LogLevel.Error);
+                    _log.UnhandledException(ex, LogLevel.Error);
                     WeakReferenceMessenger.Default.Send(new Messages.ErrorMessage(
                         ex, url, Messages.ErrorType.PluginDownloadFailed));
                 }
@@ -179,94 +166,52 @@ namespace FluentStore.SDK
         /// Whether the plugin was installed successfully. <see langword="false"/> if the plugin
         /// was already installed and <paramref name="overwrite"/> was <see langword="false"/>.
         /// </returns>
-        public Task<PluginInstallStatus> InstallPlugin(Stream plugin, bool overwrite = false)
+        public async Task<PluginInstallStatus> InstallPlugin(Stream plugin, bool overwrite = false, CancellationToken token = default)
         {
-            return Task.Run(delegate
+            string pluginId = "[UNKNOWN]";
+            PluginInstallStatus status = PluginInstallStatus.Failed;
+            Directory.CreateDirectory(_settings.PluginDirectory);
+
+            try
             {
-                string pluginId = "[UNKNOWN]";
-                PluginInstallStatus status = PluginInstallStatus.Failed;
+                // Read package metadata
+                using PackageArchiveReader reader = new(plugin);
+                NuspecReader nuspec = reader.NuspecReader;
+                pluginId = nuspec.GetId().ToString();
 
-                try
+                WeakReferenceMessenger.Default.Send(new Messages.PluginInstallStartedMessage(pluginId));
+
+                var installed = await _proj.InstallPackageAsync(nuspec.GetIdentity(),
+                    new(plugin, reader, "https://ipfs.askharoun.com"), null, token);
+
+                status = _proj.Entries[pluginId].Status;
+                if (status != PluginInstallStatus.AppRestartRequired)
                 {
-                    using ZipArchive archive = new(plugin);
-                    var metadataEntry = archive.Entries.FirstOrDefault(
-                        e => e.Name.Equals(PluginMetadata.MetadataFileName, StringComparison.OrdinalIgnoreCase));
-                    if (metadataEntry == null)
-                        return PluginInstallStatus.Failed;
-
-                    // Read metadata before extracting archive.
-                    PluginMetadata metadata;
-                    using (var metadataEntryStream = metadataEntry.Open())
-                    {
-                        metadata = PluginMetadata.DeserializeFromStream(metadataEntryStream);
-                        pluginId = metadata.Id;
-                    }
-
-                    WeakReferenceMessenger.Default.Send(new Messages.PluginInstallStartedMessage(pluginId));
-
-                    Directory.CreateDirectory(_settings.PluginDirectory);
-
-                    string dir = Path.Combine(_settings.PluginDirectory, pluginId);
-                    if (Directory.Exists(dir))
-                    {
-                        string oldMetadataPath = Path.Combine(dir, PluginMetadata.MetadataFileName);
-                        if (File.Exists(oldMetadataPath))
-                        {
-                            // Check if this version is newer than the currently installed one.
-                            var oldMetadata = PluginMetadata.DeserializeFromFile(Path.Combine(dir, PluginMetadata.MetadataFileName));
-                            overwrite |= metadata.PluginVersion > oldMetadata.PluginVersion;
-                        }
-                        else
-                        {
-                            // If it's missing metadata, it's an invalid install anyway.
-                            overwrite = true;
-                        }
-
-                        if (overwrite)
-                        {
-                            try
-                            {
-                                Directory.Delete(dir, true);
-                            }
-                            catch
-                            {
-                                status = PluginInstallStatus.AppRestartRequired;
-                            }
-                        }
-                        else
-                        {
-                            return PluginInstallStatus.NoAction;
-                        }
-                    }
-
-                    if (status != PluginInstallStatus.AppRestartRequired)
-                    {
-                        // App won't need to restart, we can finish the install now
-                        archive.ExtractToDirectory(dir);
-                        status = PluginInstallStatus.Completed;
-                    }
-                    else
-                    {
-                        // App will need to restart, make sure the ZIP file is
-                        // in the plugin folder so the call to InstallPendingPlugins
-                        // picks it up and finishes the install.
-                        string pluginFileName = $"{metadata.Id}_{metadata.PluginVersion}.zip";
-                        using Stream stream = File.Open(Path.Combine(_settings.PluginDirectory, pluginFileName), FileMode.Create);
-                        plugin.Position = 0;
-                        plugin.CopyTo(stream);
-                    }
-
-                    WeakReferenceMessenger.Default.Send(
-                        Messages.SuccessMessage.CreateForPluginInstallCompleted(pluginId));
-                    return status;
+                    // App won't need to restart, we can finish the install now
+                    //archive.ExtractToDirectory(dir);
+                    status = PluginInstallStatus.Completed;
                 }
-                catch (Exception ex)
+                else
                 {
-                    WeakReferenceMessenger.Default.Send(new Messages.ErrorMessage(
-                        ex, pluginId, Messages.ErrorType.PluginInstallFailed));
-                    return PluginInstallStatus.Failed;
+                    // App will need to restart, make sure the ZIP file is
+                    // in the plugin folder so the call to InstallPendingPlugins
+                    // picks it up and finishes the install.
+                    string pluginFileName = $"{pluginId}_{nuspec.GetVersion()}.zip";
+                    using Stream stream = File.Open(Path.Combine(_settings.PluginDirectory, pluginFileName), FileMode.Create);
+                    plugin.Position = 0;
+                    plugin.CopyTo(stream);
                 }
-            });
+
+                WeakReferenceMessenger.Default.Send(
+                    Messages.SuccessMessage.CreateForPluginInstallCompleted(pluginId));
+                return status;
+            }
+            catch (Exception ex)
+            {
+                WeakReferenceMessenger.Default.Send(new Messages.ErrorMessage(
+                    ex, pluginId, Messages.ErrorType.PluginInstallFailed));
+                return PluginInstallStatus.Failed;
+            }
         }
 
         /// <summary>
@@ -280,12 +225,16 @@ namespace FluentStore.SDK
             if (!Directory.Exists(_settings.PluginDirectory))
                 return;
 
-            foreach (string pluginPath in Directory.GetFiles(_settings.PluginDirectory, "*.zip"))
+            var pendingPlugins = _proj.Entries.Values
+                .Where(e => e.Status is PluginInstallStatus.AppRestartRequired or PluginInstallStatus.SystemRestartRequired);
+
+            foreach (var entry in pendingPlugins)
             {
+                var pluginPath = Path.Combine(_settings.PluginDirectory, entry.Id);
                 using FileStream plugin = new(pluginPath, FileMode.Open);
 
                 var installStatus = await InstallPlugin(plugin, true);
-                if (installStatus.IsAtLeast(PluginInstallStatus.AppRestartRequired))
+                if (installStatus.IsAtLeast(PluginInstallStatus.Completed))
                     File.Delete(pluginPath);
             }
         }
@@ -325,7 +274,7 @@ namespace FluentStore.SDK
         /// Determines if the specified version is compatible, loosely following
         /// <see href="https://semver.org/">semantic versioning</see> rules.
         /// </summary>
-        private static bool IsVersionCompatible(Version curVer, Version newVer)
+        private static bool IsVersionCompatible(SemanticVersion curVer, SemanticVersion newVer)
         {
             // Doesn't make sense to compare null versions.
             if (curVer == null || newVer == null)

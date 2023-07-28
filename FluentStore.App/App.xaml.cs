@@ -3,8 +3,10 @@ using CommunityToolkit.WinUI.Notifications;
 using FluentStore.Helpers;
 using FluentStore.SDK;
 using FluentStore.SDK.Helpers;
+using FluentStore.SDK.Plugins;
 using FluentStore.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using System;
 using System.Threading.Tasks;
@@ -46,7 +48,7 @@ namespace FluentStore
             this.InitializeComponent();
 
             // Set up error reporting handlers
-            AppDomain.CurrentDomain.FirstChanceException += (sender, e) => _log?.UnhandledException(e.Exception, OwlCore.Diagnostics.LogLevel.Error);
+            AppDomain.CurrentDomain.FirstChanceException += (sender, e) => _log?.UnhandledException(e.Exception, LogLevel.Error);
             AppDomain.CurrentDomain.UnhandledException += (sender, e)
               => OnUnhandledException(e.ExceptionObject as Exception ?? new Exception());
             UnhandledException += (sender, e) => OnUnhandledException(e.Exception);
@@ -123,7 +125,7 @@ namespace FluentStore
                 Settings.Default.PackageHandlerEnabledStateChanged += pkgSvc.UpdatePackageHandlerEnabledStates;
 
                 log?.Log($"Began loading plugins");
-                var pluginLoadResult = pluginLoader.LoadPlugins();
+                var pluginLoadResult = await pluginLoader.LoadPlugins();
                 pkgSvc.PackageHandlers = pluginLoadResult.PackageHandlers;
                 log?.Log($"Finished loading plugins");
 
@@ -159,7 +161,7 @@ namespace FluentStore
         {
             /// Adapted from https://github.com/files-community/Files/blob/ace2f355ec87f4ca27975c25026636be8514f1e0/Files/App.xaml.cs#L432
 
-            _log?.UnhandledException(ex, OwlCore.Diagnostics.LogLevel.Critical);
+            _log?.UnhandledException(ex, LogLevel.Critical);
 
 #if DEBUG
             System.Diagnostics.Debugger.Launch();
@@ -231,9 +233,10 @@ namespace FluentStore
             var logFileStream = logFile.Open(System.IO.FileMode.Create);
             _log = new LoggerService(logFileStream)
             {
-                LogLevel = settings.LoggingLevel
+                LogLevel = settings.LoggingLevel.ToMsLogLevel()
             };
             services.AddSingleton(_log);
+            services.AddSingleton<ILogger>(_log);
 
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
