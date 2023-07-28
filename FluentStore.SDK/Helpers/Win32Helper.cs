@@ -75,7 +75,7 @@ namespace FluentStore.SDK.Helpers
             {
                 WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, package, ErrorType.PackageInstallFailed));
                 var logger = Ioc.Default.GetRequiredService<Services.LoggerService>();
-                logger.UnhandledException(ex, OwlCore.Diagnostics.LogLevel.Error);
+                logger.UnhandledException(ex, Microsoft.Extensions.Logging.LogLevel.Error);
                 return false;
             }
         }

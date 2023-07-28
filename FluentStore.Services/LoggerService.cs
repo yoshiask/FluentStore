@@ -1,4 +1,4 @@
-﻿using OwlCore.Diagnostics;
+﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
 using System.Globalization;
@@ -9,7 +9,7 @@ using System.Text;
 
 namespace FluentStore.Services
 {
-    public class LoggerService : IDisposable
+    public class LoggerService : IDisposable, ILogger
     {
         private readonly StreamWriter m_logWriter;
 
@@ -29,7 +29,7 @@ namespace FluentStore.Services
         /// </summary>
         public void Log(string message, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
         {
-            if (LogLevel.CompareTo(LogLevel.Trace) <= 0)
+            if (IsEnabled(LogLevel.Trace))
                 WriteLine($"{Path.GetFileName(filePath)}_L{lineNumber:D}_{memberName}() : {message}");
         }
 
@@ -38,7 +38,7 @@ namespace FluentStore.Services
         /// </summary>
         public void Warn(Exception ex, string message, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
         {
-            if (LogLevel.CompareTo(LogLevel.Warning) > 0)
+            if (!IsEnabled(LogLevel.Warning))
                 return;
 
             WriteLine("=== WARN ===");
@@ -52,7 +52,7 @@ namespace FluentStore.Services
         /// </summary>
         public void UnhandledException(Exception ex, LogLevel errorLevel, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
         {
-            if (LogLevel.CompareTo(errorLevel) > 0)
+            if (!IsEnabled(errorLevel))
                 return;
 
             StackTrace trace = new(2, true);
@@ -95,7 +95,7 @@ namespace FluentStore.Services
                 StackFrame? sf = frames[iFrameIndex];
                 MethodBase? mb = sf?.GetMethod();
                 if (mb != null && (mb.Module.Name.StartsWith("FluentStore") ||
-                                   (iFrameIndex == frames.Length- 1))) // Don't filter last frame
+                                   (iFrameIndex == frames.Length - 1))) // Don't filter last frame
                 {
                     // We want a newline at the end of every line except for the last
                     if (fFirstFrame)
@@ -236,5 +236,32 @@ namespace FluentStore.Services
 
             return sb.ToString();
         }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        {
+            if (IsEnabled(logLevel))
+                WriteLine(formatter(state, exception));
+        }
+
+        public bool IsEnabled(LogLevel logLevel) => LogLevel.CompareTo(logLevel) <= 0;
+
+        public IDisposable BeginScope<TState>(TState state) => NullScope.Instance;
+    }
+}
+
+/// <summary>
+/// An empty scope without any logic
+/// </summary>
+public sealed class NullScope : IDisposable
+{
+    public static NullScope Instance { get; } = new NullScope();
+
+    private NullScope()
+    {
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
     }
 }

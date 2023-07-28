@@ -1,10 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using FluentStore.SDK.Helpers;
-using FluentStore.SDK;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
+using FluentStore.SDK.Plugins;
 
 namespace FluentStore.Helpers
 {

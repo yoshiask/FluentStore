@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.Helpers;
 using FluentStore.SDK;
 using FluentStore.SDK.Messages;
+using FluentStore.SDK.Plugins;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -55,6 +56,7 @@ namespace FluentStore.Views.Settings
             WinRT.Interop.InitializeWithWindow.Initialize(openPicker, App.Current.Window.Handle);
 
             openPicker.FileTypeFilter.Add(".zip");
+            openPicker.FileTypeFilter.Add(".nupkg");
 
             var pluginFile = await openPicker.PickSingleFileAsync();
             if (pluginFile != null)

@@ -325,7 +325,7 @@ namespace FluentStore.ViewModels
         private void HandleFaultedTask(Task task)
         {
             if (!task.IsFaulted) return;
-            Logger?.UnhandledException(task.Exception, OwlCore.Diagnostics.LogLevel.Warning);
+            Logger?.UnhandledException(task.Exception, Microsoft.Extensions.Logging.LogLevel.Warning);
         }
 
         private void UpdateImages()

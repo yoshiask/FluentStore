@@ -1,7 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <ProjectReference Include="..\..\API\FluentStoreAPI\FluentStoreAPI.csproj" />
+        <ProjectReference Include="..\..\API\FluentStoreAPI\FluentStoreAPI.csproj">
+            <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+            <IncludeAssets>FluentStoreAPI.dll</IncludeAssets>
+        </ProjectReference>
         <ProjectReference Include="..\..\FluentStore.SDK\FluentStore.SDK.csproj" />
     </ItemGroup>
 

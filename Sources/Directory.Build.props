@@ -8,8 +8,10 @@
     <PropertyGroup>
         <!-- Ensure that all dependencies get copied to the plugin directory -->
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-		
-		<GenerateLibraryLayout>true</GenerateLibraryLayout>
+        
+        <GenerateLibraryLayout>true</GenerateLibraryLayout>
+        
+        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -18,13 +20,13 @@
         <LangVersion>latest</LangVersion>
         <Platforms>x64;x86;ARM64</Platforms>
         <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
-		
+        
         <Version>$(FluentStoreVersion)</Version>
         <AssemblyVersion>$(Version)</AssemblyVersion>
         <FileVersion>$(Version)</FileVersion>
 
-		<Authors>Joshua Askharoun</Authors>
-		<RepositoryUrl>https://github.com/yoshiask/FluentStore</RepositoryUrl>
+        <Authors>Joshua Askharoun</Authors>
+        <RepositoryUrl>https://github.com/yoshiask/FluentStore</RepositoryUrl>
     </PropertyGroup>
 </Project>
 
