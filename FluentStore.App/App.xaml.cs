@@ -91,7 +91,7 @@ namespace FluentStore
                 {
                     Title = AppName
                 };
-                
+
                 // Make sure to run on UI thread
                 Window.DispatcherQueue.TryEnqueue(() =>
                 {
@@ -233,7 +233,16 @@ namespace FluentStore
             var logFileStream = logFile.Open(System.IO.FileMode.Create);
             _log = new LoggerService(logFileStream)
             {
-                LogLevel = settings.LoggingLevel.ToMsLogLevel()
+                LogLevel = settings.LoggingLevel switch
+                {
+                    OwlCore.Diagnostics.LogLevel.Trace => LogLevel.Trace,
+                    OwlCore.Diagnostics.LogLevel.Information => LogLevel.Information,
+                    OwlCore.Diagnostics.LogLevel.Warning => LogLevel.Warning,
+                    OwlCore.Diagnostics.LogLevel.Error => LogLevel.Error,
+                    OwlCore.Diagnostics.LogLevel.Critical => LogLevel.Critical,
+
+                    _ => throw new ArgumentOutOfRangeException("LoggingLevel")
+                }
             };
             services.AddSingleton(_log);
             services.AddSingleton<ILogger>(_log);

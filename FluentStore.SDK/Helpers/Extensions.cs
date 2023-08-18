@@ -78,19 +78,5 @@ namespace FluentStore.SDK.Helpers
             else
                 return WindowsPlatform.Unknown;
         }
-
-        public static Microsoft.Extensions.Logging.LogLevel ToMsLogLevel(this OwlCore.Diagnostics.LogLevel logLevel)
-        {
-            return logLevel switch
-            {
-                OwlCore.Diagnostics.LogLevel.Trace => Microsoft.Extensions.Logging.LogLevel.Trace,
-                OwlCore.Diagnostics.LogLevel.Information => Microsoft.Extensions.Logging.LogLevel.Information,
-                OwlCore.Diagnostics.LogLevel.Warning => Microsoft.Extensions.Logging.LogLevel.Warning,
-                OwlCore.Diagnostics.LogLevel.Error => Microsoft.Extensions.Logging.LogLevel.Error,
-                OwlCore.Diagnostics.LogLevel.Critical => Microsoft.Extensions.Logging.LogLevel.Critical,
-
-                _ => throw new ArgumentOutOfRangeException(nameof(logLevel))
-            };
-        }
     }
 }
