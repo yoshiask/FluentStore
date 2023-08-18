@@ -109,8 +109,10 @@ namespace FluentStore.SDK
 
         public static bool operator ==(PackageBase lhs, PackageBase rhs)
         {
-            // Equals handles case of null on right side.
-            return (lhs is null && rhs is null) || lhs.Equals(rhs);
+            if (lhs is null)
+                return rhs is null;
+
+            return lhs.Equals(rhs);
         }
 
         public static bool operator !=(PackageBase lhs, PackageBase rhs)
