@@ -11,14 +11,14 @@
     Background="{ThemeResource SystemControlAcrylicWindowBrush}">
 
     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Stretch"
-                Margin="16" Spacing="16" MaxWidth="400">
+                Margin="16" Spacing="16" MaxWidth="600">
         <tkcontrols:WrapPanel VerticalAlignment="Center" HorizontalAlignment="Center"
                               HorizontalSpacing="16" VerticalSpacing="8">
 
             <TextBlock Text="Oops!" FontSize="64" FontWeight="Bold" VerticalAlignment="Center"
                        d:Text="Oops!"/>
 
-            <StackPanel Spacing="4">
+            <StackPanel Visibility="{x:Bind ShowErrorCode}" Spacing="4">
                 <TextBlock Text="{x:Bind ErrorCode}" FontSize="48" FontWeight="SemiBold"
                            TextLineBounds="TrimToBaseline" VerticalAlignment="Bottom"
                            d:Text="404"/>

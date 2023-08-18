@@ -12,10 +12,15 @@ namespace FluentStore.Views
             this.InitializeComponent();
         }
 
-        public HttpErrorPage(int errorCode, string errorMessage = null) : this()
+        public HttpErrorPage(string errorMessage = null, int? errorCode = null) : this()
         {
-            ErrorCode = errorCode;
-            UpdateErrorTitle(this);
+            ShowErrorCode = errorCode is not null;
+            if (ShowErrorCode)
+            {
+                ErrorCode = errorCode.Value;
+                UpdateErrorTitle(this);
+            }
+
             ErrorMessage = errorMessage;
         }
 
@@ -43,6 +48,14 @@ namespace FluentStore.Views
         public static readonly DependencyProperty ErrorTitleProperty = DependencyProperty.Register(
             nameof(ErrorTitle), typeof(string), typeof(HttpErrorPage), new PropertyMetadata(string.Empty));
 
+        public bool ShowErrorCode
+        {
+            get => (bool)GetValue(ShowErrorCodeProperty);
+            set => SetValue(ShowErrorCodeProperty, value);
+        }
+        public static readonly DependencyProperty ShowErrorCodeProperty = DependencyProperty.Register(
+            nameof(ShowErrorCode), typeof(bool), typeof(HttpErrorPage), new PropertyMetadata(false));
+
         private static void UpdateErrorTitle(HttpErrorPage page, int? errorCode = null)
         {
             // Set error message to HTTP status code names as listed by IANA
@@ -58,6 +71,12 @@ namespace FluentStore.Views
                 ErrorCode = errorCode;
                 ErrorMessage = errorMessage;
                 UpdateErrorTitle(this, errorCode);
+                ShowErrorCode = true;
+            }
+            else if (parameter is string soloErrorMessage)
+            {
+                ErrorMessage = soloErrorMessage;
+                ShowErrorCode = false;
             }
         }
 
