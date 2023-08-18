@@ -5,9 +5,9 @@ namespace FluentStore.Controls
 {
     public class HttpErrorFlyout : Flyout
     {
-        public HttpErrorFlyout(int errorCode, string errorMessage = null)
+        public HttpErrorFlyout(string errorMessage = null, int? errorCode = null)
         {
-            Content = new HttpErrorPage(errorCode, errorMessage)
+            Content = new HttpErrorPage(errorMessage, errorCode)
             {
                 Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent)
             };

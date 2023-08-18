@@ -67,7 +67,7 @@ namespace FluentStore
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="args">Details about the launch request and process.</param>
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
             _singleInstanceApp.Launch(args.Arguments);
         }
@@ -120,7 +120,6 @@ namespace FluentStore
                 }
 
                 // Load plugins and initialize package and account services
-                var passwordVaultService = Ioc.Default.GetRequiredService<IPasswordVaultService>();
                 var pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
                 Settings.Default.PackageHandlerEnabledStateChanged += pkgSvc.UpdatePackageHandlerEnabledStates;
 
@@ -133,8 +132,7 @@ namespace FluentStore
                 await pkgSvc.TrySlientSignInAsync();
 
                 // Update last launched version
-                var appVersion = Windows.ApplicationModel.Package.Current.Id.Version.ToVersion();
-                Settings.Default.LastLaunchedVersion = appVersion;
+                Settings.Default.LastLaunchedVersion = Windows.ApplicationModel.Package.Current.Id.Version.ToVersion();
                 await Settings.Default.SaveAsync();
             }
             log?.Log($"Redirect activation?: {result.RedirectActivation}");
@@ -168,11 +166,15 @@ namespace FluentStore
             System.Diagnostics.Debugger.Break(); // Please check "Output Window" for exception details (View -> Output Window) (CTRL + ALT + O)
 #endif
 
+            // Persist error message to file
+            var pathManager = Services.GetRequiredService<ICommonPathManager>();
+            var errorFileName = $"Crash_{DateTimeOffset.UtcNow:yyyy-MM-dd_HH-mm-ss-fff}.txt";
+            var errorFilePath = System.IO.Path.Combine(pathManager.GetDefaultLogDirectory().FullName, errorFileName);
+            using (var textWriter = System.IO.File.CreateText(errorFilePath))
+                textWriter.Write(ex.ToString());
+
             if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 18362))
                 return;
-
-            // Encode error message and stack trace
-            string message = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(ex.ToString()));
 
             var toastContent = new ToastContent()
             {
@@ -191,17 +193,13 @@ namespace FluentStore
                                 Text = "An error occurred that Fluent Store could not recover from."
                             }
                         },
-                        //AppLogoOverride = new ToastGenericAppLogo()
-                        //{
-                        //    Source = "ms-appx:///Assets/error.png"
-                        //}
                     }
                 },
                 Actions = new ToastActionsCustom()
                 {
                     Buttons =
                     {
-                        new ToastButton("View", $"crash?msg={message}")
+                        new ToastButton("View", $"crash/{errorFileName}")
                         {
                             ActivationType = ToastActivationType.Foreground
                         }

@@ -9,6 +9,13 @@ namespace FluentStore.Services
 {
     public abstract class INavigationService
     {
+        private readonly ICommonPathManager _pathManager;
+
+        public INavigationService(ICommonPathManager pathManager)
+        {
+            _pathManager = pathManager;
+        }
+
         public List<PageInfo> Pages { get; protected set; }
 
         public abstract void Navigate(Type page, object parameter);
@@ -86,7 +93,7 @@ namespace FluentStore.Services
 
             try
             {
-                switch (string.IsNullOrEmpty(ptcl.Host) ? ptcl.Path : ptcl.Host)
+                switch (string.IsNullOrEmpty(ptcl.Host) ? ptcl.PathSegments[0] : ptcl.Host)
                 {
                     case "package":
                         result.Page = ResolveType("PackageView");
@@ -112,15 +119,10 @@ namespace FluentStore.Services
 
                     case "crash":
                         result.Page = ResolveType("HttpErrorPage");
-                        int code = 418;
-                        string message = null;
-                        if (ptcl.QueryParams.TryGetFirst("code", out object codeParam))
-                            int.TryParse(codeParam.ToString(), out code);
-                        if (ptcl.QueryParams.TryGetFirst("msg", out object messageParam))
-                            message = Encoding.UTF8.GetString(Convert.FromBase64String(messageParam.ToString()));
-                        if (ptcl.QueryParams.TryGetFirst("trace", out object traceParam))
-                            message += "\r\n" + Encoding.UTF8.GetString(Convert.FromBase64String(messageParam.ToString()));
-                        result.Parameter = (code, message);
+
+                        // Load error message from file
+                        var errorFilePath = System.IO.Path.Combine(_pathManager.GetDefaultLogDirectory().FullName, ptcl.PathSegments[1]);
+                        result.Parameter = System.IO.File.ReadAllText(errorFilePath);
                         break;
 
                     default:

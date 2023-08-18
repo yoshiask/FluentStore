@@ -13,7 +13,7 @@ namespace FluentStore.Services
     {
         private IntPtr m_hwnd;
 
-        public NavigationService()
+        public NavigationService(ICommonPathManager pathManager) : base(pathManager)
         {
             Pages = new()
             {
