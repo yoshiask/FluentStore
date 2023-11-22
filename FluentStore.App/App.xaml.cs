@@ -126,8 +126,7 @@ namespace FluentStore
                 Settings.Default.PackageHandlerEnabledStateChanged += pkgSvc.UpdatePackageHandlerEnabledStates;
 
                 log?.Log($"Began loading plugins");
-                var pluginLoadResult = await pluginLoader.LoadPlugins();
-                pkgSvc.PackageHandlers = pluginLoadResult.PackageHandlers;
+                await pluginLoader.LoadPlugins();
                 log?.Log($"Finished loading plugins");
 
                 // Attempt to silently sign into any saved accounts

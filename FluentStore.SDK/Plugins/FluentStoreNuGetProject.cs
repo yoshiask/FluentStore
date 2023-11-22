@@ -61,24 +61,53 @@ internal class FluentStoreNuGetProject : NuGetProject
         }
     }
 
-    public override async Task<bool> InstallPackageAsync(PackageIdentity packageIdentity, DownloadResourceResult downloadResourceResult, INuGetProjectContext nuGetProjectContext, CancellationToken token)
+    public override async Task<bool> InstallPackageAsync(PackageIdentity packageIdentity, DownloadResourceResult downloadResourceResult, INuGetProjectContext nuGetProjectContext, CancellationToken token = default)
     {
         var pluginFolder = Path.Combine(PluginRoot, packageIdentity.Id);
-        var (status, tfm) = await InstallPackageCoreAsync(packageIdentity, downloadResourceResult, nuGetProjectContext, pluginFolder, true, token);
+        PluginInstallStatus status = PluginInstallStatus.Completed;
+        NuGetFramework tfm = NuGetFramework.UnsupportedFramework;
 
-        if (!status.IsAtLeast(PluginInstallStatus.AppRestartRequired))
-            return false;
+        if (nuGetProjectContext?.ActionType == NuGetActionType.Reinstall)
+        {
+            var uninstalled = await UninstallPackageAsync(packageIdentity, nuGetProjectContext, token);
+            if (!uninstalled)
+            {
+                // App will need to restart, make sure the package is
+                // in the plugin folder so we can pick it up next time.
+                status = PluginInstallStatus.AppRestartRequired;
+
+                string pluginFilePath = Path.Combine(PluginRoot, $"{packageIdentity}.nupkg");
+                await downloadResourceResult.PackageReader.CopyNupkgAsync(pluginFilePath, token);
+            }
+        }
+
+        if (status == PluginInstallStatus.Completed)
+        {
+            (status, tfm) = await InstallPackageCoreAsync(packageIdentity, downloadResourceResult,
+                nuGetProjectContext, pluginFolder, true, token);
+        }
 
         // Add plugin to list of installed packages
-        _entries.Add(packageIdentity.Id, new(packageIdentity, tfm, status));
+        _entries[packageIdentity.Id] = new(packageIdentity, tfm, status);
         await FlushAsync(token);
-        return true;
+
+        return status.IsAtLeast(PluginInstallStatus.AppRestartRequired);
     }
 
-    public override async Task<bool> UninstallPackageAsync(PackageIdentity packageIdentity, INuGetProjectContext nuGetProjectContext, CancellationToken token)
+    public override async Task<bool> UninstallPackageAsync(PackageIdentity packageIdentity, INuGetProjectContext nuGetProjectContext, CancellationToken token = default)
     {
-        // Delete all plugin files
-        OwlCore.Flow.Catch(() => Directory.Delete(packageIdentity.Id, true));
+        try
+        {
+            // Delete all plugin files
+            var pluginFolder = Path.Combine(PluginRoot, packageIdentity.Id);
+            Directory.Delete(pluginFolder, true);
+        }
+        catch (DirectoryNotFoundException) { }
+        catch (Exception ex)
+        {
+            nuGetProjectContext?.ReportError(ex.ToString());
+            return false;
+        }
 
         // Remove plugin from list of installed packages
         _entries.Remove(packageIdentity.Id);
@@ -87,7 +116,7 @@ internal class FluentStoreNuGetProject : NuGetProject
         return true;
     }
 
-    public override async Task<IEnumerable<PackageReference>> GetInstalledPackagesAsync(CancellationToken token)
+    public override async Task<IEnumerable<PackageReference>> GetInstalledPackagesAsync(CancellationToken token = default)
     {
         return _entries.Values
             .Where(e => e.Status == PluginInstallStatus.Completed)
@@ -143,14 +172,16 @@ internal class FluentStoreNuGetProject : NuGetProject
         {
             if (reader.NuspecReader.GetVersion() > existingEntry.Version)
             {
-                if (!await UninstallPackageAsync(existingEntry.GetPackageIdentity(), nuGetProjectContext, token))
+                // This is a newer version; uninstall the old one
+                if (!await UninstallPackageAsync(existingEntry.ToPackageIdentity(), nuGetProjectContext, token))
                 {
                     status = PluginInstallStatus.AppRestartRequired;
                     attemptInstall = false;
                 }
             }
-            else
+            else if (existingEntry.Status.IsAtLeast(PluginInstallStatus.AppRestartRequired))
             {
+                // This plugin has already been installed successfully
                 status = PluginInstallStatus.NoAction;
                 attemptInstall = false;
             }

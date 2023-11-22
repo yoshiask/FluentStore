@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NuGet.Frameworks;
 using NuGet.Packaging;
+using NuGet.ProjectManagement;
 using OwlCore.ComponentModel;
 using OwlCore.Storage.SystemIO;
 using System;
@@ -112,7 +113,7 @@ namespace FluentStore.SDK.Plugins
                 {
                     _packageService.RegisterPackageHandler(handler);
                     result.PackageHandlers.Add(handler);
-            }
+                }
             }
             catch (Exception ex)
             {
@@ -208,34 +209,35 @@ namespace FluentStore.SDK.Plugins
 
                 WeakReferenceMessenger.Default.Send(new Messages.PluginInstallStartedMessage(pluginId));
 
-                if (overwrite)
-                    await _proj.UninstallPackageAsync(identity, null, token);
+                EmptyNuGetProjectContext projectContext = new()
+                {
+                    ActionType = overwrite ? NuGetActionType.Reinstall : NuGetActionType.Install,
+                };
 
                 var installed = await _proj.InstallPackageAsync(identity,
-                    new(plugin, reader, "https://ipfs.askharoun.com"), null, token);
-
+                    new(plugin, reader, "https://ipfs.askharoun.com"), projectContext, token);
                 status = _proj.Entries[pluginId].Status;
-                if (status != PluginInstallStatus.AppRestartRequired)
-                {
-                    // App doesn't need to restart, we can finish the install now
-                    status = PluginInstallStatus.Completed;
 
-                    var result = LoadPlugin(pluginId);
-                    _packageService.PackageHandlers.AddRange(result.PackageHandlers);
+                if (status == PluginInstallStatus.NoAction)
+                {
+                    WeakReferenceMessenger.Default.Send(
+                        new Messages.WarningMessage($"A newer version of {pluginId} is already installed", pluginId));
+                }
+                else if (status == PluginInstallStatus.AppRestartRequired)
+                {
+                    WeakReferenceMessenger.Default.Send(new Messages.SuccessMessage(
+                        $"{pluginId} will be installed the next time Fluent Store starts.",
+                        pluginId, Messages.SuccessType.PluginInstallCompleted));
                 }
                 else
                 {
-                    // App will need to restart, make sure the package is
-                    // in the plugin folder so the call to InstallPendingPlugins
-                    // picks it up and finishes the install.
-                    string pluginFileName = $"{pluginId}_{nuspec.GetVersion()}.nupkg";
-                    using Stream stream = File.Open(Path.Combine(_settings.PluginDirectory, pluginFileName), FileMode.Create);
-                    plugin.Position = 0;
-                    plugin.CopyTo(stream);
+                    // Fully installed, load the plugin now
+                    LoadPlugin(pluginId);
+
+                    WeakReferenceMessenger.Default.Send(
+                        Messages.SuccessMessage.CreateForPluginInstallCompleted(pluginId));
                 }
 
-                WeakReferenceMessenger.Default.Send(
-                    Messages.SuccessMessage.CreateForPluginInstallCompleted(pluginId));
                 return status;
             }
             catch (Exception ex)
@@ -258,11 +260,12 @@ namespace FluentStore.SDK.Plugins
                 return;
 
             var pendingPlugins = _proj.Entries.Values
-                .Where(e => e.Status is PluginInstallStatus.AppRestartRequired or PluginInstallStatus.SystemRestartRequired);
+                .Where(e => e.Status is PluginInstallStatus.AppRestartRequired or PluginInstallStatus.SystemRestartRequired)
+                .ToArray();
 
             foreach (var entry in pendingPlugins)
             {
-                var pluginPath = Path.Combine(_settings.PluginDirectory, entry.Id);
+                var pluginPath = Path.Combine(_settings.PluginDirectory, $"{entry.ToPackageIdentity()}.nupkg");
                 using FileStream plugin = new(pluginPath, FileMode.Open);
 
                 var installStatus = await InstallPlugin(plugin, true);
