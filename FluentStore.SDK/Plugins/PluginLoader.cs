@@ -7,8 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NuGet.Frameworks;
 using NuGet.Packaging;
-using NuGet.ProjectManagement;
-using NuGet.Versioning;
 using OwlCore.ComponentModel;
 using OwlCore.Storage.SystemIO;
 using System;
@@ -31,15 +29,17 @@ namespace FluentStore.SDK.Plugins
         };
 
         private readonly ISettingsService _settings;
+        private readonly PackageService _packageService;
         private readonly IPasswordVaultService _passwordVaultService;
         private readonly LoggerService _log;
         private readonly FluentStoreNuGetProject _proj;
 
         public bool IsInitialized { get; private set; }
 
-        public PluginLoader(ISettingsService settings, IPasswordVaultService passwordVaultService, LoggerService log)
+        public PluginLoader(ISettingsService settings, PackageService packageService, IPasswordVaultService passwordVaultService, LoggerService log)
         {
             _settings = settings;
+            _packageService = packageService;
             _passwordVaultService = passwordVaultService;
             _log = log;
             _proj = new(settings.PluginDirectory, _targetFramework);
@@ -83,35 +83,38 @@ namespace FluentStore.SDK.Plugins
             currentDomain.AssemblyResolve += LoadFromSameFolder;
 
             var installedPlugins = await _proj.GetInstalledPackagesAsync(default);
+            foreach (var plugin in installedPlugins)
+                LoadPlugin(plugin.PackageIdentity.Id, result);
 
-            var pluginPackagePaths = installedPlugins.Select(p => Path.Combine(_settings.PluginDirectory, p.PackageIdentity.Id, $"{p.PackageIdentity.Id}.nuspec"));
-            foreach (string pluginPackagePath in pluginPackagePaths)
+            return result;
+        }
+
+        public PluginLoadResult LoadPlugin(string pluginId, PluginLoadResult? result = null)
+        {
+            result ??= new();
+
+            var pluginPackagePath = Path.Combine(_settings.PluginDirectory, pluginId, $"{pluginId}.nuspec");
+            using Stream nuspecStream = new FileStream(pluginPackagePath, FileMode.Open);
+            NuspecReader nuspec = new(nuspecStream);
+
+            // Get path to primary DLL
+            string assemblyPath = Path.Combine(Path.GetDirectoryName(pluginPackagePath), $"{nuspec.GetId()}.dll");
+            if (string.IsNullOrWhiteSpace(assemblyPath))
+                return result;
+
+            try
             {
-                using Stream nuspecStream = new FileStream(pluginPackagePath, FileMode.Open);
-                NuspecReader nuspec = new(nuspecStream);
+                // Load assembly and consider only public types that inherit from PackageHandlerBase
+                var assembly = Assembly.LoadFile(assemblyPath);
 
-                // Get path to primary DLL.
-                string assemblyPath = Path.Combine(Path.GetDirectoryName(pluginPackagePath), $"{nuspec.GetId()}.dll");
-                if (string.IsNullOrWhiteSpace(assemblyPath))
-                    continue;
-
-                try
-                {
-                    // Load assembly and consider only types that inherit from PackageHandlerBase
-                    // and are public.
-                    var assembly = Assembly.LoadFile(assemblyPath);
-
-                    foreach (PackageHandlerBase handler in InstantiateAllPackageHandlers(assembly))
-                    {
-                        // Register handler.
-                        result.PackageHandlers.Add(handler);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _log.UnhandledException(ex, LogLevel.Error);
-                    continue;
-                }
+                // Register all handlers
+                foreach (PackageHandlerBase handler in InstantiateAllPackageHandlers(assembly))
+                    result.PackageHandlers.Add(handler);
+            }
+            catch (Exception ex)
+            {
+                _log.UnhandledException(ex, LogLevel.Error);
+                return result;
             }
 
             return result;
@@ -198,25 +201,31 @@ namespace FluentStore.SDK.Plugins
                 using PackageArchiveReader reader = new(plugin);
                 NuspecReader nuspec = reader.NuspecReader;
                 pluginId = nuspec.GetId().ToString();
+                var identity = nuspec.GetIdentity();
 
                 WeakReferenceMessenger.Default.Send(new Messages.PluginInstallStartedMessage(pluginId));
 
-                var installed = await _proj.InstallPackageAsync(nuspec.GetIdentity(),
+                if (overwrite)
+                    await _proj.UninstallPackageAsync(identity, null, token);
+
+                var installed = await _proj.InstallPackageAsync(identity,
                     new(plugin, reader, "https://ipfs.askharoun.com"), null, token);
 
                 status = _proj.Entries[pluginId].Status;
                 if (status != PluginInstallStatus.AppRestartRequired)
                 {
-                    // App won't need to restart, we can finish the install now
-                    //archive.ExtractToDirectory(dir);
+                    // App doesn't need to restart, we can finish the install now
                     status = PluginInstallStatus.Completed;
+
+                    var result = LoadPlugin(pluginId);
+                    _packageService.PackageHandlers.AddRange(result.PackageHandlers);
                 }
                 else
                 {
-                    // App will need to restart, make sure the ZIP file is
+                    // App will need to restart, make sure the package is
                     // in the plugin folder so the call to InstallPendingPlugins
                     // picks it up and finishes the install.
-                    string pluginFileName = $"{pluginId}_{nuspec.GetVersion()}.zip";
+                    string pluginFileName = $"{pluginId}_{nuspec.GetVersion()}.nupkg";
                     using Stream stream = File.Open(Path.Combine(_settings.PluginDirectory, pluginFileName), FileMode.Create);
                     plugin.Position = 0;
                     plugin.CopyTo(stream);
@@ -288,27 +297,6 @@ namespace FluentStore.SDK.Plugins
                 // Register handler with the type name as its ID
                 yield return handler;
             }
-        }
-
-        /// <summary>
-        /// Determines if the specified version is compatible, loosely following
-        /// <see href="https://semver.org/">semantic versioning</see> rules.
-        /// </summary>
-        private static bool IsVersionCompatible(SemanticVersion curVer, SemanticVersion newVer)
-        {
-            // Doesn't make sense to compare null versions.
-            if (curVer == null || newVer == null)
-                return false;
-
-            // Major version 0 is for development. These releases
-            // need to have the same minor versions. Only the
-            // patch version can be different.
-            if (curVer.Major == 0 || newVer.Major == 0)
-                return curVer.Major == newVer.Major
-                    && curVer.Minor == newVer.Minor;
-
-            // Otherwise, only the major version needs to match.
-            return curVer.Major == newVer.Major;
         }
     }
 

@@ -13,11 +13,11 @@ namespace FluentStore.SDK
     {
         private readonly Fuse _fuse = new(threshold: 1.0, tokenize: true);
 
-        private IReadOnlySet<PackageHandlerBase> _PackageHandlers;
+        private ISet<PackageHandlerBase> _PackageHandlers;
         /// <summary>
         /// A cache of all valid package handlers.
         /// </summary>
-        public IReadOnlySet<PackageHandlerBase> PackageHandlers
+        public ISet<PackageHandlerBase> PackageHandlers
         {
             get => _PackageHandlers;
             set
