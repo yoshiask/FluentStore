@@ -5,16 +5,11 @@ using FluentStore.SDK.Helpers;
 using FluentStore.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NuGet.Configuration;
 using NuGet.Frameworks;
-using NuGet.PackageManagement;
 using NuGet.Packaging;
 using NuGet.ProjectManagement;
-using NuGet.ProjectManagement.Projects;
-using NuGet.Protocol;
-using NuGet.Protocol.Core.Types;
-using NuGet.Protocol.Plugins;
 using NuGet.Versioning;
+using OwlCore.ComponentModel;
 using OwlCore.Storage.SystemIO;
 using System;
 using System.Collections.Generic;
@@ -26,15 +21,21 @@ using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Plugins
 {
-    public class PluginLoader
+    public class PluginLoader : IAsyncInit
     {
         private static readonly NuGetFramework _targetFramework = NuGetFramework.Parse("net7.0-windows10.0.22000.0");
+
+        private readonly HashSet<string> _loadedAssemblies = new()
+        {
+            "NETStandard.Library",
+        };
 
         private readonly ISettingsService _settings;
         private readonly IPasswordVaultService _passwordVaultService;
         private readonly LoggerService _log;
         private readonly FluentStoreNuGetProject _proj;
-        private readonly INuGetProjectContext _projContext;
+
+        public bool IsInitialized { get; private set; }
 
         public PluginLoader(ISettingsService settings, IPasswordVaultService passwordVaultService, LoggerService log)
         {
@@ -42,7 +43,26 @@ namespace FluentStore.SDK.Plugins
             _passwordVaultService = passwordVaultService;
             _log = log;
             _proj = new(settings.PluginDirectory, _targetFramework);
-            _projContext = new FluentStoreProjectContext(_settings.PluginDirectory, _log);
+        }
+
+        public async Task InitAsync(CancellationToken token = default)
+        {
+            if (IsInitialized)
+                return;
+
+            await Task.Run(() =>
+            {
+                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    var assemblyName = assembly.GetName().Name;
+                    if (assemblyName is not null)
+                        _loadedAssemblies.Add(assemblyName);
+                }
+            }, token);
+
+            _proj.IgnoredDependencies = _loadedAssemblies;
+
+            IsInitialized = true;
         }
 
         /// <summary>

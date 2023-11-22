@@ -19,7 +19,6 @@ namespace FluentStore.SDK.Plugins;
 internal class FluentStoreNuGetProject : NuGetProject
 {
     private static readonly NuGetVersion _currentSdkVersion = new(typeof(PluginLoader).Assembly.GetName().Version);
-    private static readonly string[] IgnoredDependencies = new[] { "FluentStore.SDK" };
     const string StatusFileName = "status.csv";
 
     private readonly Dictionary<string, PluginEntry> _entries;
@@ -33,6 +32,8 @@ internal class FluentStoreNuGetProject : NuGetProject
     public NuGetFramework TargetFramework { get; }
 
     public IReadOnlyDictionary<string, PluginEntry> Entries => _entries;
+
+    public IReadOnlySet<string> IgnoredDependencies { get; set; } 
 
     public FluentStoreNuGetProject(string pluginRoot, NuGetFramework targetFramework, string name = "FluentStore")
     {
@@ -99,13 +100,33 @@ internal class FluentStoreNuGetProject : NuGetProject
 
     private async Task<(PluginInstallStatus status, NuGetFramework tfm)> InstallPackageCoreAsync(PackageIdentity packageIdentity, DownloadResourceResult downloadResourceResult, INuGetProjectContext nuGetProjectContext, string pluginFolder, bool isPlugin, CancellationToken token = default)
     {
-        var status = PluginInstallStatus.Failed;
+        var status = PluginInstallStatus.Completed;
         var reader = downloadResourceResult.PackageReader;
+        var nameProvider = DefaultFrameworkNameProvider.Instance;
+        var compatibilityProvider = DefaultCompatibilityProvider.Instance;
+        FrameworkReducer tfmReducer = new();
+
+        // Get target framework
+        var tfm = tfmReducer.GetNearest(TargetFramework, reader.GetSupportedFrameworks());
+        if (tfm is null)
+        {
+            // For some packages, the only supported framework that's compatible is .NET Standard,
+            // which doesn't seem to be included in reader.GetSupportedFrameworks().
+            var refFrameworks = reader.GetItems("ref").Select(g => g.TargetFramework);
+            tfm = tfmReducer.GetNearest(TargetFramework, refFrameworks);
+            
+            if (tfm is null)
+                throw new Exception($"{packageIdentity.Id} does not support {TargetFramework}");
+        }
+
+        // Create method to test if a given framework is compatible with the current target
+        bool IsGroupCompatible(IFrameworkSpecific candidate)
+        {
+            return compatibilityProvider.IsCompatible(tfm, candidate.TargetFramework);
+        }
 
         // Get list of dependencies
-        FrameworkReducer tfmReducer = new();
-        var tfm = tfmReducer.GetNearest(TargetFramework, reader.GetSupportedFrameworks());
-        var dependencies = reader.NuspecReader.GetDependencyGroups().FirstOrDefault(g => g.TargetFramework == tfm)?.Packages;
+        var dependencies = reader.NuspecReader.GetDependencyGroups().FirstOrDefault(IsGroupCompatible)?.Packages;
 
         if (isPlugin)
         {
@@ -114,10 +135,6 @@ internal class FluentStoreNuGetProject : NuGetProject
             if (dependencies is not null && !sdkDep.VersionRange.Satisfies(_currentSdkVersion))
                 throw new Exception($"{packageIdentity.Id} does not support Fluent Store SDK {_currentSdkVersion}: requires {sdkDep.VersionRange}");
         }
-
-        // Locate primary plugin DLL and direct deps
-        var items = reader.GetLibItems().FirstOrDefault(g => g.TargetFramework == tfm)?.Items
-            ?? throw new Exception($"{packageIdentity.Id} does not support this version of Fluent Store.");
 
         // Check if this package is newer than an already installed one
         bool attemptInstall = true;
@@ -143,48 +160,81 @@ internal class FluentStoreNuGetProject : NuGetProject
             Directory.CreateDirectory(pluginFolder);
 
             // Copy DLLs
-            reader.CopyFiles(pluginFolder, items.Append(reader.GetNuspecFile()), (src, _, stream) =>
-            {
-                var dst = Path.Combine(pluginFolder, Path.GetFileName(src));
-                using var file = File.OpenWrite(dst);
-                stream.CopyTo(file);
-                return dst;
-            }, NullLogger.Instance, token);
+            List<string> includedDlls = new();
 
-            // Copy any content/resources
-            var contentItems = reader.GetContentItems().FirstOrDefault(g => g.TargetFramework == tfm)?.Items;
-            if (contentItems is not null)
+            // Locate primary plugin DLL and direct deps
+            var libItems = reader.GetLibItems().FirstOrDefault(IsGroupCompatible)?.Items;
+            if (libItems is not null)
             {
-                reader.CopyFiles(pluginFolder, contentItems, (src, dst, stream) =>
+                reader.CopyFiles(pluginFolder, libItems.Append(reader.GetNuspecFile()), (src, _, stream) =>
                 {
-                    Directory.CreateDirectory(Path.GetDirectoryName(dst));
+                    var dst = Path.Combine(pluginFolder, Path.GetFileName(src));
                     using var file = File.OpenWrite(dst);
                     stream.CopyTo(file);
+                    includedDlls.Add(Path.GetFileNameWithoutExtension(src));
                     return dst;
                 }, NullLogger.Instance, token);
             }
 
-            // Download and install any NuGet references
-            var ignoredDeps = IgnoredDependencies.Concat(Entries.Keys).ToArray();
-            foreach (var dependency in dependencies.Where(d => !ignoredDeps.Contains(d.Id)))
+            // Copy any references
+            var refItems = reader.GetItems("ref").FirstOrDefault(IsGroupCompatible)?.Items;
+            if (refItems is not null)
             {
-                SourceRepository repository = Repository.Factory.GetCoreV3("https://api.nuget.org/v3/index.json");
-                FindPackageByIdResource resource = await repository.GetResourceAsync<FindPackageByIdResource>();
-
-                var allDepVersions = await resource.GetAllVersionsAsync(dependency.Id, _cache, NullLogger.Instance, token);
-
-                using MemoryStream depStream = new();
-                await resource.CopyNupkgToStreamAsync(dependency.Id, dependency.VersionRange.FindBestMatch(allDepVersions),
-                    depStream, _cache, NullLogger.Instance, token);
-
-                using PackageArchiveReader depReader = new(depStream);
-                DownloadResourceResult resourceResult = new(depStream, depReader, repository.PackageSource.Source);
-                await InstallPackageCoreAsync(depReader.GetIdentity(), resourceResult, nuGetProjectContext, pluginFolder, false, token);
+                reader.CopyFiles(pluginFolder, refItems, CopyPackageContent, NullLogger.Instance, token);
             }
 
-            status = PluginInstallStatus.Completed;
+            // Copy any content/resources
+            var contentItems = reader.GetContentItems().FirstOrDefault(IsGroupCompatible)?.Items;
+            if (contentItems is not null)
+            {
+                reader.CopyFiles(pluginFolder, contentItems, CopyPackageContent, NullLogger.Instance, token);
+            }
+
+            if (dependencies is not null)
+            {
+                // Figure out which dependencies don't need to be downloaded
+                var ignoredDeps = IgnoredDependencies
+                    .Concat(Entries.Keys)
+                    .Concat(includedDlls)
+                    .ToHashSet();
+
+                // Download and install any NuGet references
+                foreach (var dependency in dependencies.Where(d => !ignoredDeps.Contains(d.Id)))
+                {
+                    SourceRepository repository = Repository.Factory.GetCoreV3("https://api.nuget.org/v3/index.json");
+                    FindPackageByIdResource resource = await repository.GetResourceAsync<FindPackageByIdResource>();
+
+                    var allDepVersions = await resource.GetAllVersionsAsync(dependency.Id, _cache, NullLogger.Instance, token);
+                    if (!allDepVersions.Any())
+                        continue;
+
+                    using MemoryStream depStream = new();
+                    await resource.CopyNupkgToStreamAsync(dependency.Id, dependency.VersionRange.FindBestMatch(allDepVersions),
+                        depStream, _cache, NullLogger.Instance, token);
+
+                    using PackageArchiveReader depReader = new(depStream);
+                    DownloadResourceResult resourceResult = new(depStream, depReader, repository.PackageSource.Source);
+                    var (depStatus, _) = await InstallPackageCoreAsync(depReader.GetIdentity(),
+                        resourceResult, nuGetProjectContext, pluginFolder, false, token);
+
+                    if (depStatus < status)
+                        status = depStatus;
+                }
+            }
+            else
+            {
+
+            }
         }
 
         return (status, tfm);
+    }
+
+    private static string CopyPackageContent(string src, string dst, Stream stream)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(dst));
+        using var file = File.OpenWrite(dst);
+        stream.CopyTo(file);
+        return dst;
     }
 }

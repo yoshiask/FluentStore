@@ -78,6 +78,8 @@ namespace FluentStore
             var navService = Ioc.Default.GetRequiredService<INavigationService>();
             var pluginLoader = Ioc.Default.GetRequiredService<PluginLoader>();
 
+            await pluginLoader.InitAsync();
+
             ProtocolResult result = navService.ParseProtocol(e.Arguments, isFirstInstance: e.IsFirstInstance);
             log?.Log($"Parse protocol result: {result}");
 
