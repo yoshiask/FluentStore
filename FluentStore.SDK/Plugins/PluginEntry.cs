@@ -13,7 +13,7 @@ internal record struct PluginEntry(string Id, NuGetVersion Version, NuGetFramewo
 
     public static PluginEntry Parse(string text)
     {
-        var cells = text.Split(',', StringSplitOptions.TrimEntries);
+        var cells = text.Split('\t', StringSplitOptions.TrimEntries);
         return new(cells[0], NuGetVersion.Parse(cells[1]), NuGetFramework.Parse(cells[2]), Enum.Parse<PluginInstallStatus>(cells[^1]));
     }
 
@@ -21,5 +21,5 @@ internal record struct PluginEntry(string Id, NuGetVersion Version, NuGetFramewo
 
     public readonly PackageIdentity GetPackageIdentity() => new(Id, Version);
 
-    public override readonly string ToString() => string.Join(',', Id, Version, Framework, Status);
+    public override readonly string ToString() => string.Join('\t', Id, Version, Framework, Status);
 }

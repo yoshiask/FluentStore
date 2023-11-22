@@ -19,7 +19,7 @@ namespace FluentStore.SDK.Plugins;
 internal class FluentStoreNuGetProject : NuGetProject
 {
     private static readonly NuGetVersion _currentSdkVersion = new(typeof(PluginLoader).Assembly.GetName().Version);
-    const string StatusFileName = "status.csv";
+    const string StatusFileName = "status.tsv";
 
     private readonly Dictionary<string, PluginEntry> _entries;
     private readonly string _statusFilePath;
