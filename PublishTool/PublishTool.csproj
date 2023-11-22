@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -9,8 +9,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="CliWrap" Version="3.6.4" />
-      <PackageReference Include="Spectre.Console" Version="0.47.0" />
+        <PackageReference Include="CliWrap" Version="3.6.4" />
+        <PackageReference Include="Spectre.Console" Version="0.47.0" />
+        <PackageReference Include="Meziantou.Framework.CommandLine" Version="3.0.3" />
     </ItemGroup>
 
     <ItemGroup>

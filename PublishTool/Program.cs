@@ -1,73 +1,116 @@
 ﻿using CliWrap;
 using FluentStore.SDK.Models;
 using Spectre.Console;
-using System.IO.Compression;
 
 // List architectures
 string[] archs = new[] { "x64", "x86", "arm64" };
+
+var argParser = Meziantou.Framework.CommandLineParser.Current;
+bool verbose = argParser.HasArgument("v");
+bool saveLogs = argParser.HasArgument("-log");
+bool force = argParser.HasArgument("f") || argParser.HasArgument("-force");
 
 // Get folder containing plugin projects
 string curDir = Environment.CurrentDirectory;
 string targetFramework = Path.GetFileName(curDir);
 string sourcesDir = Path.GetFullPath(Path.Combine(curDir, @"..\..\..\..\..\Sources"));
-string zipOutDir = Path.Combine(sourcesDir, "output");
+string pluginOutDir = Path.Combine(sourcesDir, "output");
 
-Directory.CreateDirectory(zipOutDir);
+Directory.CreateDirectory(pluginOutDir);
 
-Console.WriteLine($"Searching for plugins in '{sourcesDir}'");
+List<string> errors = new();
 
-await AnsiConsole.Progress()
-    .StartAsync(async ctx =>
+await AnsiConsole.Status()
+    .StartAsync($"Searching for plugins in '{sourcesDir}'...", async (ctx) =>
     {
-        var pluginDirs = Directory.GetDirectories(sourcesDir).Where(d => d != zipOutDir);
-        await Parallel.ForEachAsync(pluginDirs, async (pluginSrcDir, token) =>
+        var pluginDirs = Directory.GetDirectories(sourcesDir).Where(d => d != pluginOutDir);
+        
+        foreach (var pluginSrcDir in pluginDirs)
         {
+            ctx.Status($"Preparing plugin project...");
+
             // Get build output directories
             var metadata = PluginMetadata.DeserializeFromFile(Path.Combine(pluginSrcDir, PluginMetadata.MetadataFileName));
 
-            var pluginProgress = ctx.AddTask($"{metadata.DisplayName} ({metadata.Id}, {metadata.PluginVersion})");
-            pluginProgress.MaxValue = archs.Length * 2;
-            pluginProgress.StartTask();
-
-            foreach (var arch in archs)
+            Rule header = new($"{metadata.DisplayName} [grey]({metadata.Id}, {metadata.PluginVersion})[/]")
             {
-                var rid = $"win-{arch}";
-                var pluginTarget = $"{metadata.Id}_{metadata.PluginVersion}_{arch}";
-                var pluginOutDir = Path.Combine(pluginSrcDir, "bin", "Debug", targetFramework, rid);
-                var zipPath = Path.Combine(zipOutDir, pluginTarget + ".zip");
+                Justification = Justify.Left,
+                Border = BoxBorder.Ascii,
+            };
+            AnsiConsole.Write(header);
 
-                if (File.Exists(zipPath))
-                {
-                    pluginProgress.Increment(2);
-                    continue;
-                }
+            var fileName = $"{metadata.Id}_{metadata.PluginVersion}";
+            var nupkgSrcPath = Path.Combine(pluginSrcDir, "bin", "Debug", $"{metadata.Id}.{metadata.PluginVersion.Major}.{metadata.PluginVersion.Minor}.{metadata.PluginVersion.Build}.nupkg");
+            var nupkgOutPath = Path.Combine(pluginOutDir, $"{fileName}.nupkg");
 
-                var buildResult = await Cli.Wrap("dotnet")
-                    .WithArguments(new[] { "build", "-r", rid, "--no-self-contained" })
-                    .WithWorkingDirectory(pluginSrcDir)
-                    .WithValidation(CommandResultValidation.None)
-                    .ExecuteAsync(token);
-                if (buildResult.ExitCode == 0)
-                    pluginProgress.Increment(1);
-                else
-                    continue;
 
-                File.Delete(zipPath);
-                ZipFile.CreateFromDirectory(pluginOutDir, zipPath);
-                
-                pluginProgress.Increment(1);
+            if (!force && File.Exists(nupkgOutPath))
+            {
+                AnsiConsole.MarkupLine("Skipping: Plugin package found in cache");
+                AnsiConsole.WriteLine();
+                continue;
             }
 
-            pluginProgress.StopTask();
-        }).ConfigureAwait(false);
+            ctx.Status($"Packing {header.Title}...");
+
+            PipeTarget buildLogOutPipe = PipeTarget.Null;
+            PipeTarget buildLogErrPipe = PipeTarget.Create(async (s, t) =>
+            {
+                StreamReader reader = new(s);
+                var text = await reader.ReadToEndAsync(t);
+                AnsiConsole.Markup("[red]" + text + "[/]");
+            });
+
+            if (verbose)
+            {
+                buildLogOutPipe = PipeTarget.Create(async (s, t) =>
+                {
+                    StreamReader reader = new(s);
+                    var text = await reader.ReadToEndAsync(t);
+                    AnsiConsole.Write(text);
+                });
+            }
+            if (saveLogs)
+            {
+                var buildLogOutPath = Path.Combine(pluginOutDir, $"{fileName}_out.txt");
+                var buildLogErrPath = Path.Combine(pluginOutDir, $"{fileName}_err.txt");
+
+                buildLogOutPipe = PipeTarget.Merge(buildLogOutPipe, PipeTarget.ToFile(buildLogOutPath));
+                buildLogErrPipe = PipeTarget.Merge(buildLogErrPipe, PipeTarget.ToFile(buildLogErrPath));
+            }
+
+            var buildResult = await Cli.Wrap("dotnet")
+                .WithArguments(new[] { "pack", "-c", "Debug" })
+                .WithWorkingDirectory(pluginSrcDir)
+                .WithValidation(CommandResultValidation.None)
+                .WithStandardOutputPipe(buildLogOutPipe)
+                .WithStandardErrorPipe(buildLogErrPipe)
+                .ExecuteAsync();
+            if (buildResult.ExitCode != 0)
+            {
+                AnsiConsole.MarkupLine($"[red]Failed to pack {metadata.Id} with exit code 0x{buildResult.ExitCode:X8}[/]");
+                continue;
+            }
+
+            File.Delete(nupkgOutPath);
+            File.Copy(nupkgSrcPath, nupkgOutPath);
+
+            AnsiConsole.MarkupLine($"[green]Successfully packed {metadata.Id} to '[link]{nupkgOutPath}[/]'[/]");
+            AnsiConsole.WriteLine();
+        }
     });
 
-WriteSuccess($"Finished packaging plugins to '{zipOutDir}'");
+AnsiConsole.MarkupLine($"[green]Finished packaging plugins to '[link]{pluginOutDir}[/]'[/]");
+
+foreach (var error in errors)
+{
+    AnsiConsole.WriteException(new Exception(error));
+}
 
 static void WriteSuccess(string message)
 {
     var foreColor = Console.ForegroundColor;
-    Console.ForegroundColor = ConsoleColor.Green;
-    Console.WriteLine(message);
-    Console.ForegroundColor = foreColor;
+    AnsiConsole.Foreground = ConsoleColor.Green;
+    AnsiConsole.MarkupLine(message);
+    AnsiConsole.Foreground = foreColor;
 }
