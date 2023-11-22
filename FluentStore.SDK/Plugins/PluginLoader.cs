@@ -62,6 +62,11 @@ namespace FluentStore.SDK.Plugins
 
             _proj.IgnoredDependencies = _loadedAssemblies;
 
+            // Make sure that the runtime looks for plugin dependencies
+            // in the plugin's folder.
+            AppDomain currentDomain = AppDomain.CurrentDomain;
+            currentDomain.AssemblyResolve += LoadFromSameFolder;
+
             IsInitialized = true;
         }
 
@@ -77,12 +82,7 @@ namespace FluentStore.SDK.Plugins
             if (!Directory.Exists(_settings.PluginDirectory))
                 return result;
 
-            // Make sure that the runtime looks for plugin dependencies
-            // in the plugin's folder.
-            AppDomain currentDomain = AppDomain.CurrentDomain;
-            currentDomain.AssemblyResolve += LoadFromSameFolder;
-
-            var installedPlugins = await _proj.GetInstalledPackagesAsync(default);
+            var installedPlugins = await _proj.GetInstalledPackagesAsync();
             foreach (var plugin in installedPlugins)
                 LoadPlugin(plugin.PackageIdentity.Id, result);
 
@@ -109,7 +109,10 @@ namespace FluentStore.SDK.Plugins
 
                 // Register all handlers
                 foreach (PackageHandlerBase handler in InstantiateAllPackageHandlers(assembly))
+                {
+                    _packageService.RegisterPackageHandler(handler);
                     result.PackageHandlers.Add(handler);
+            }
             }
             catch (Exception ex)
             {
