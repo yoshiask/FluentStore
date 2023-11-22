@@ -77,8 +77,9 @@ namespace FluentStore
 
         private void SuccessMessage_Recieved(object r, SuccessMessage m)
         {
-            // Don't show package fetched messages
-            if (m.Type == SuccessType.PackageFetchCompleted) return;
+            // Don't show package fetch or plguin messages
+            if (m.Type is SuccessType.PackageFetchCompleted or SuccessType.PluginDownloadCompleted or SuccessType.PluginInstallCompleted)
+                return;
 
             _ = DispatcherQueue.TryEnqueue(delegate
             {
