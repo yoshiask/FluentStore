@@ -78,11 +78,12 @@ internal class FluentStoreNuGetProject : NuGetProject
     public override async Task<bool> UninstallPackageAsync(PackageIdentity packageIdentity, INuGetProjectContext nuGetProjectContext, CancellationToken token)
     {
         // Delete all plugin files
-        Directory.Delete(packageIdentity.Id, true);
+        OwlCore.Flow.Catch(() => Directory.Delete(packageIdentity.Id, true));
 
         // Remove plugin from list of installed packages
         _entries.Remove(packageIdentity.Id);
         await FlushAsync(token);
+
         return true;
     }
 
