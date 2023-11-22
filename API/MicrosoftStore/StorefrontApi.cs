@@ -11,6 +11,9 @@ namespace Microsoft.Marketplace.Storefront.Contracts
 {
     public class StorefrontApi
     {
+        // What is this? Without it, most of the cards are missing
+        private const long DEVICE_VERSION_ID = 2814751249596416;
+
         /// <summary>
         /// Get all the page details for the given product.
         /// </summary>
@@ -61,16 +64,6 @@ namespace Microsoft.Marketplace.Storefront.Contracts
                 foreach (var review in reviewList.Reviews)
                     yield return review;
             } while (recievedItems < totalItems);
-        }
-
-        /// <summary>
-        /// Gets trending recommendation cards of home page.
-        /// </summary>
-        public async Task<ResponseItem<V4.CollectionDetail>> GetHomeRecommendations(int pageSize = 15, RequestOptions options = null)
-        {
-            return await GetStorefrontBase(options).AppendPathSegments("recommendations", "collections", "Collection", "TrendingHomeColl1")
-                .SetQueryParam("cardsEnabled", true)
-                .GetJsonAsync<ResponseItem<V4.CollectionDetail>>();
         }
 
         /// <summary>
@@ -138,9 +131,20 @@ namespace Microsoft.Marketplace.Storefront.Contracts
             return await GetStorefrontBase(options).AppendPathSegments("canvas", "collections")
                 .SetQueryParam("site", "Channels")
                 .SetQueryParam("collectionId", collectionId)
-                .SetQueryParam("deviceFamilyVersion", 2814751208898560)  // NOTE: What is this? Without it, most of the cards are missing
+                .SetQueryParam("deviceFamilyVersion", DEVICE_VERSION_ID)
                 .SetQueryParam("cardsEnabled", true)
                 .GetJsonAsync<ResponseItem<V4.CollectionDetail>>();
+        }
+
+        /// <summary>
+        /// Get all the details for the given collection of recommendations.
+        /// </summary>
+        public async Task<ResponseItem<V3.ProductList>> GetRecommendationCollection(string collectionId, RequestOptions options = null)
+        {
+            return await GetStorefrontBase(options).AppendPathSegments("recommendations", "collections", collectionId)
+                .SetQueryParam("deviceFamilyVersion", DEVICE_VERSION_ID)
+                .SetQueryParam("cardsEnabled", true)
+                .GetJsonAsync<ResponseItem<V3.ProductList>>();
         }
     }
 }
