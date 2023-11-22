@@ -17,9 +17,9 @@ internal record struct PluginEntry(string Id, NuGetVersion Version, NuGetFramewo
         return new(cells[0], NuGetVersion.Parse(cells[1]), NuGetFramework.Parse(cells[2]), Enum.Parse<PluginInstallStatus>(cells[^1]));
     }
 
-    public PackageReference ToPackageReference() => new(GetPackageIdentity(), Framework);
+    public readonly PackageReference ToPackageReference() => new(GetPackageIdentity(), Framework);
 
-    public PackageIdentity GetPackageIdentity() => new(Id, Version);
+    public readonly PackageIdentity GetPackageIdentity() => new(Id, Version);
 
-    public override string ToString() => string.Join(',', Id, Version, Framework, Status);
+    public override readonly string ToString() => string.Join(',', Id, Version, Framework, Status);
 }
