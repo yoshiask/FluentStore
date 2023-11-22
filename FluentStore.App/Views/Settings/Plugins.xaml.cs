@@ -45,6 +45,9 @@ namespace FluentStore.Views.Settings
         }
 
         #region Install plugin
+        private ContentDialog _pluginInstallDialog;
+        private TextBlock _pluginInstallBox;
+
         private async void InstallPluginButton_Click(object sender, RoutedEventArgs e)
         {
             Windows.Storage.Pickers.FileOpenPicker openPicker = new()
@@ -55,19 +58,54 @@ namespace FluentStore.Views.Settings
             // Initialize save picker for Win32
             WinRT.Interop.InitializeWithWindow.Initialize(openPicker, App.Current.Window.Handle);
 
-            openPicker.FileTypeFilter.Add(".zip");
             openPicker.FileTypeFilter.Add(".nupkg");
 
             var pluginFile = await openPicker.PickSingleFileAsync();
             if (pluginFile != null)
             {
                 WeakReferenceMessenger.Default.Register<ErrorMessage>(this, InstallPluginErrorMessage_Recieved);
+                WeakReferenceMessenger.Default.Register<WarningMessage>(this, InstallPluginWarningMessage_Recieved);
                 WeakReferenceMessenger.Default.Register<SuccessMessage>(this, InstallPluginSuccessMessage_Recieved);
 
-                var plugin = await pluginFile.OpenReadAsync();
-                var installStatus = await PluginLoader.InstallPlugin(plugin.AsStream(), true);
+                ProgressBar progressBar = new()
+                {
+                    IsIndeterminate = true,
+                };
+                _pluginInstallBox = new TextBlock
+                {
+                    Text = "Installing plugin, please wait...",
+                    TextWrapping = TextWrapping.Wrap,
+                    IsTextSelectionEnabled = true,
+                };
+                _pluginInstallDialog = new ContentDialog
+                {
+                    Title = "Plugin Manager",
+                    Content = new ScrollViewer
+                    {
+                        Content = new StackPanel
+                        {
+                            Children =
+                            {
+                                progressBar,
+                                _pluginInstallBox,
+                            }
+                        }
+                    },
+                    PrimaryButtonText = "OK",
+                    IsPrimaryButtonEnabled = false,
+                    IsSecondaryButtonEnabled = false,
+                    XamlRoot = this.XamlRoot,
+                };
+                _pluginInstallDialog.ShowAsync();
+
+                using var plugin = await pluginFile.OpenReadAsync();
+                await PluginLoader.InstallPlugin(plugin.AsStream(), true);
+
+                _pluginInstallDialog.IsPrimaryButtonEnabled = true;
+                progressBar.Visibility = Visibility.Collapsed;
 
                 WeakReferenceMessenger.Default.Unregister<ErrorMessage>(this);
+                WeakReferenceMessenger.Default.Unregister<WarningMessage>(this);
                 WeakReferenceMessenger.Default.Unregister<SuccessMessage>(this);
             }
         }
@@ -91,20 +129,26 @@ namespace FluentStore.Views.Settings
 
             _ = DispatcherQueue.TryEnqueue(delegate
             {
-                DefaultPluginsLog.Items.Add(logMessage);
+                _pluginInstallBox.Text = logMessage;
             });
         }
 
         private void InstallPluginSuccessMessage_Recieved(object recipient, SuccessMessage message)
         {
-            if (message.Type != SuccessType.PluginDownloadCompleted || message.Type != SuccessType.PluginInstallCompleted)
+            if (message.Type is not (SuccessType.PluginDownloadCompleted or SuccessType.PluginInstallCompleted))
                 return;
 
             _ = DispatcherQueue.TryEnqueue(delegate
             {
-                DefaultPluginProgressIndicator.ShowError = false;
-                DefaultPluginProgressIndicator.IsIndeterminate = true;
-                DefaultPluginsLog.Items.Add(message.Message);
+                _pluginInstallBox.Text = message.Message;
+            });
+        }
+
+        private void InstallPluginWarningMessage_Recieved(object recipient, WarningMessage message)
+        {
+            _ = DispatcherQueue.TryEnqueue(delegate
+            {
+                _pluginInstallBox.Text = message.Message;
             });
         }
         #endregion
