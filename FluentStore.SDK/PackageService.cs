@@ -13,43 +13,28 @@ namespace FluentStore.SDK
     {
         private readonly Fuse _fuse = new(threshold: 1.0, tokenize: true);
 
-        private ISet<PackageHandlerBase> _PackageHandlers;
+        private readonly HashSet<PackageHandlerBase> _packageHandlers = new();
         /// <summary>
         /// A cache of all valid package handlers.
         /// </summary>
-        public ISet<PackageHandlerBase> PackageHandlers
-        {
-            get => _PackageHandlers;
-            set
-            {
-                if (_PackageHandlers != null)
-                    CommunityToolkit.Diagnostics.ThrowHelper.ThrowInvalidOperationException($"Cannot set {nameof(PackageHandlers)} more than once.");
-                _PackageHandlers = value;
-            }
-        }
+        public IReadOnlySet<PackageHandlerBase> PackageHandlers => _packageHandlers;
 
-        private Dictionary<string, int> _NamespaceRegistry;
+        private readonly Dictionary<string, int> _namespaceRegistry = new();
         /// <summary>
         /// A mapping of known namespaces and the handlers that registered them.
         /// </summary>
-        public Dictionary<string, int> NamespaceRegistry
-        {
-            get
-            {
-                if (_NamespaceRegistry == null)
-                {
-                    _NamespaceRegistry = new();
-                    int i = 0;
-                    foreach (PackageHandlerBase handler in PackageHandlers)
-                    {
-                        foreach (string ns in handler.HandledNamespaces)
-                            _NamespaceRegistry.Add(ns, i);
-                        i++;
-                    }
-                }
+        public IReadOnlyDictionary<string, int> NamespaceRegistry => _namespaceRegistry;
 
-                return _NamespaceRegistry;
-            }
+        private int _nextFreePackageHandlerIndex = 0;
+
+        public void RegisterPackageHandler(PackageHandlerBase handler)
+        {
+            _packageHandlers.Add(handler);
+
+            foreach (string ns in handler.HandledNamespaces)
+                _namespaceRegistry.Add(ns, _nextFreePackageHandlerIndex);
+
+            _nextFreePackageHandlerIndex++;
         }
 
         /// <summary>
