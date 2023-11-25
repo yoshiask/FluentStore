@@ -68,7 +68,7 @@ namespace FluentStore.SDK.Downloads
 
         public static async Task<ZipArchiveFolder> CreateArchiveFromFolder(IFolder folder, IFile? archiveFile = null)
         {
-            // Create new archive in memory
+            // Create new archive in memory if a destination file wasn't provided
             Stream archiveStream = archiveFile is null
                 ? new MemoryStream()
                 : await archiveFile.OpenStreamAsync(FileAccess.ReadWrite);
