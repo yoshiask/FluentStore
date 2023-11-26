@@ -60,6 +60,11 @@ namespace FluentStore.SDK.Downloads
             // for URI specification
             (string scheme, string id) = GetSchemeAndPath(url);
 
+            // Remove fragments
+            int fragmentIdx = id.IndexOf('#');
+            if (fragmentIdx > 0)
+                id = id[0..fragmentIdx];
+
             if (scheme == "ipns")
                 return new IpnsFile($"/{scheme}/{id}", IpfsClient);
 
