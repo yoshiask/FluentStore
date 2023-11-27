@@ -18,8 +18,13 @@ namespace FluentStore.SDK.Plugins;
 
 internal class FluentStoreNuGetProject : NuGetProject
 {
-    private static readonly NuGetVersion _currentSdkVersion = new(typeof(PluginLoader).Assembly.GetName().Version);
+    private static readonly NuGetVersion _currentSdkVersion = new(typeof(PluginLoader).Assembly.GetName().Version!);
     const string StatusFileName = "status.tsv";
+
+    private static readonly SourceRepository _officialSource =
+        Repository.Factory.GetCoreV3("https://api.nuget.org/v3/index.json");
+    private static SourceRepository _fluentStoreSource;
+    private static SourceRepository[] _repositories = { GetFluentStoreSourceRepository(), _officialSource };
 
     private readonly Dictionary<string, PluginEntry> _entries;
     private readonly string _statusFilePath;
@@ -137,7 +142,7 @@ internal class FluentStoreNuGetProject : NuGetProject
         FrameworkReducer tfmReducer = new();
 
         // Get target framework
-        var tfm = tfmReducer.GetNearest(TargetFramework, reader.GetSupportedFrameworks());
+        var tfm = tfmReducer.GetNearest(TargetFramework, await reader.GetSupportedFrameworksAsync(token));
         if (tfm is null)
         {
             // For some packages, the only supported framework that's compatible is .NET Standard,
@@ -233,19 +238,38 @@ internal class FluentStoreNuGetProject : NuGetProject
                 // Download and install any NuGet references
                 foreach (var dependency in dependencies.Where(d => !ignoredDeps.Contains(d.Id)))
                 {
-                    SourceRepository repository = Repository.Factory.GetCoreV3("https://api.nuget.org/v3/index.json");
-                    FindPackageByIdResource resource = await repository.GetResourceAsync<FindPackageByIdResource>();
+                    NuGetVersion[] allDepVersions = null;
 
-                    var allDepVersions = await resource.GetAllVersionsAsync(dependency.Id, _cache, NullLogger.Instance, token);
-                    if (!allDepVersions.Any())
-                        continue;
+                    SourceRepository repo = null;
+                    FindPackageByIdResource resource = null;
+                    foreach (var r in _repositories)
+                    {
+                        try
+                        {
+                            repo = r;
+                            resource = await repo.GetResourceAsync<FindPackageByIdResource>(token);
+
+                            allDepVersions =
+                                (await resource.GetAllVersionsAsync(dependency.Id, _cache, NullLogger.Instance, token))
+                                .ToArray();
+                            if (allDepVersions.Any())
+                                break;
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+                    }
+
+                    if (repo is null || resource is null)
+                        throw new Exception($"Failed to find {dependency} in any NuGet feed.");
 
                     using MemoryStream depStream = new();
                     await resource.CopyNupkgToStreamAsync(dependency.Id, dependency.VersionRange.FindBestMatch(allDepVersions),
                         depStream, _cache, NullLogger.Instance, token);
 
                     using PackageArchiveReader depReader = new(depStream);
-                    DownloadResourceResult resourceResult = new(depStream, depReader, repository.PackageSource.Source);
+                    DownloadResourceResult resourceResult = new(depStream, depReader, repo.PackageSource.Source);
                     var (depStatus, _) = await InstallPackageCoreAsync(depReader.GetIdentity(),
                         resourceResult, nuGetProjectContext, pluginFolder, false, token);
 
@@ -268,5 +292,25 @@ internal class FluentStoreNuGetProject : NuGetProject
         using var file = File.OpenWrite(dst);
         stream.CopyTo(file);
         return dst;
+    }
+
+    private static SourceRepository GetFluentStoreSourceRepository()
+    {
+        if (_fluentStoreSource is null)
+        {
+            var providers = new Lazy<INuGetResourceProvider>[]
+            {
+                new(() => new AbstractStoragePackageSearchResourceV3Provider()),
+                new(() => new AbstractStorageFindPackageByIdResourceProvider()),
+                new(() => new AbstractStorageResourceProvider()),
+                new(() => new AbstractStorageServiceIndexResourceV3Provider()),
+            }.Concat(Repository.Provider.GetCoreV3());
+            
+            _fluentStoreSource = Repository.CreateSource(providers, "ipns://ipfs.askharoun.com/FluentStore/Plugins/NuGet/index.json");
+            
+            _fluentStoreSource.PackageSource.ProtocolVersion = 3;
+        }
+
+        return _fluentStoreSource;
     }
 }

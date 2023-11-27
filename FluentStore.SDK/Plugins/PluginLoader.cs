@@ -34,6 +34,7 @@ namespace FluentStore.SDK.Plugins
         private readonly IPasswordVaultService _passwordVaultService;
         private readonly LoggerService _log;
         private readonly FluentStoreNuGetProject _proj;
+        private readonly FluentStoreProjectContext _projCtx;
 
         public bool IsInitialized { get; private set; }
 
@@ -44,6 +45,7 @@ namespace FluentStore.SDK.Plugins
             _passwordVaultService = passwordVaultService;
             _log = log;
             _proj = new(settings.PluginDirectory, _targetFramework);
+            _projCtx = new(settings.PluginDirectory, _log);
         }
 
         public async Task InitAsync(CancellationToken token = default)
@@ -209,13 +211,10 @@ namespace FluentStore.SDK.Plugins
 
                 WeakReferenceMessenger.Default.Send(new Messages.PluginInstallStartedMessage(pluginId));
 
-                EmptyNuGetProjectContext projectContext = new()
-                {
-                    ActionType = overwrite ? NuGetActionType.Reinstall : NuGetActionType.Install,
-                };
+                _projCtx.ActionType = overwrite ? NuGetActionType.Reinstall : NuGetActionType.Install;
 
                 var installed = await _proj.InstallPackageAsync(identity,
-                    new(plugin, reader, "https://ipfs.askharoun.com"), projectContext, token);
+                    new(plugin, reader, string.Empty), _projCtx, token);
                 status = _proj.Entries[pluginId].Status;
 
                 if (status == PluginInstallStatus.NoAction)
