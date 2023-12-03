@@ -164,7 +164,7 @@ namespace FluentStore.Views.Settings
             DefaultPluginProgressIndicator.Visibility = Visibility.Visible;
             DefaultPluginsSetting.IsExpanded = true;
 
-            await PluginLoader.InstallDefaultPlugins(true, true);
+            await PluginLoader.InstallDefaultPlugins(true);
 
             WeakReferenceMessenger.Default.Unregister<ErrorMessage>(this);
             WeakReferenceMessenger.Default.Unregister<SuccessMessage>(this);

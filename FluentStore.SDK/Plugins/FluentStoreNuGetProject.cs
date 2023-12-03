@@ -24,7 +24,7 @@ internal class FluentStoreNuGetProject : NuGetProject
     private static readonly SourceRepository _officialSource =
         Repository.Factory.GetCoreV3("https://api.nuget.org/v3/index.json");
     private static SourceRepository _fluentStoreSource;
-    private static SourceRepository[] _repositories = { GetFluentStoreSourceRepository(), _officialSource };
+    private static readonly SourceRepository[] _repositories = { _officialSource, GetFluentStoreSourceRepository() };
 
     private readonly Dictionary<string, PluginEntry> _entries;
     private readonly string _statusFilePath;
@@ -66,6 +66,44 @@ internal class FluentStoreNuGetProject : NuGetProject
         }
     }
 
+    public async Task<DownloadResourceResult> DownloadPackageAsync(string packageId, VersionRange versionRange,
+        CancellationToken token = default)
+    {
+        NuGetVersion[] allDepVersions = null;
+        SourceRepository repo = null;
+        FindPackageByIdResource resource = null;
+        
+        // Search all available feeds for compatible versions
+        foreach (var r in _repositories)
+        {
+            try
+            {
+                repo = r;
+                resource = await repo.GetResourceAsync<FindPackageByIdResource>(token);
+
+                allDepVersions =
+                    (await resource.GetAllVersionsAsync(packageId, _cache, NullLogger.Instance, token))
+                    .ToArray();
+                if (!allDepVersions.Any())
+                    break;
+
+                MemoryStream depStream = new();
+                await resource.CopyNupkgToStreamAsync(packageId, versionRange.FindBestMatch(allDepVersions),
+                    depStream, _cache, NullLogger.Instance, token);
+
+                PackageArchiveReader depReader = new(depStream);
+                DownloadResourceResult resourceResult = new(depStream, depReader, repo.PackageSource.Source);
+                return resourceResult;
+            }
+            catch
+            {
+                continue;
+            }
+        }
+        
+        throw new Exception($"Failed to find {packageId} in any NuGet feed.");
+    }
+    
     public override async Task<bool> InstallPackageAsync(PackageIdentity packageIdentity, DownloadResourceResult downloadResourceResult, INuGetProjectContext nuGetProjectContext, CancellationToken token = default)
     {
         var pluginFolder = Path.Combine(PluginRoot, packageIdentity.Id);
@@ -198,6 +236,7 @@ internal class FluentStoreNuGetProject : NuGetProject
 
             // Copy DLLs
             List<string> includedDlls = new();
+            nuGetProjectContext.Log(MessageLevel.Debug, "Copying files for {0}...", packageIdentity.Id);
 
             // Locate primary plugin DLL and direct deps
             var libItems = reader.GetLibItems().FirstOrDefault(IsGroupCompatible)?.Items;
@@ -229,6 +268,8 @@ internal class FluentStoreNuGetProject : NuGetProject
 
             if (dependencies is not null)
             {
+                nuGetProjectContext.Log(MessageLevel.Debug, "Installing dependencies for {0}", packageIdentity.Id);
+                
                 // Figure out which dependencies don't need to be downloaded
                 var ignoredDeps = IgnoredDependencies
                     .Concat(Entries.Keys)
@@ -238,40 +279,12 @@ internal class FluentStoreNuGetProject : NuGetProject
                 // Download and install any NuGet references
                 foreach (var dependency in dependencies.Where(d => !ignoredDeps.Contains(d.Id)))
                 {
-                    NuGetVersion[] allDepVersions = null;
-
-                    SourceRepository repo = null;
-                    FindPackageByIdResource resource = null;
-                    foreach (var r in _repositories)
-                    {
-                        try
-                        {
-                            repo = r;
-                            resource = await repo.GetResourceAsync<FindPackageByIdResource>(token);
-
-                            allDepVersions =
-                                (await resource.GetAllVersionsAsync(dependency.Id, _cache, NullLogger.Instance, token))
-                                .ToArray();
-                            if (allDepVersions.Any())
-                                break;
-                        }
-                        catch
-                        {
-                            continue;
-                        }
-                    }
-
-                    if (repo is null || resource is null)
-                        throw new Exception($"Failed to find {dependency} in any NuGet feed.");
-
-                    using MemoryStream depStream = new();
-                    await resource.CopyNupkgToStreamAsync(dependency.Id, dependency.VersionRange.FindBestMatch(allDepVersions),
-                        depStream, _cache, NullLogger.Instance, token);
-
-                    using PackageArchiveReader depReader = new(depStream);
-                    DownloadResourceResult resourceResult = new(depStream, depReader, repo.PackageSource.Source);
-                    var (depStatus, _) = await InstallPackageCoreAsync(depReader.GetIdentity(),
-                        resourceResult, nuGetProjectContext, pluginFolder, false, token);
+                    nuGetProjectContext.Log(MessageLevel.Debug, "Downloading dependency {0}", dependency);
+                    var downloadResult = await DownloadPackageAsync(dependency.Id, dependency.VersionRange, token);
+                    
+                    nuGetProjectContext.Log(MessageLevel.Debug, "Installing dependency {0}", dependency);
+                    var (depStatus, _) = await InstallPackageCoreAsync(downloadResult.PackageReader.GetIdentity(),
+                        downloadResult, nuGetProjectContext, pluginFolder, false, token);
 
                     if (depStatus < status)
                         status = depStatus;
