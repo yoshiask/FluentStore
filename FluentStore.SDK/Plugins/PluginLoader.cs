@@ -17,6 +17,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using NuGet.Versioning;
 
 namespace FluentStore.SDK.Plugins
 {
@@ -75,9 +76,8 @@ namespace FluentStore.SDK.Plugins
 
         /// <summary>
         /// Attempts to load all plugins located in <see cref="ISettingsService.PluginDirectory"/>
-        /// and registers all loaded package handlers with the provided <paramref name="packageHandlers"/>.
+        /// and registers all loaded package handlers with the current <see cref="PackageService"/>.
         /// </summary>
-        /// <param name="packageHandlers">The dictionary to add loaded package handlers to.</param>
         public async Task<PluginLoadResult> LoadPlugins()
         {
             PluginLoadResult result = new();
@@ -129,51 +129,32 @@ namespace FluentStore.SDK.Plugins
         /// <summary>
         /// Downloads and installs each plugin from the list of URLS.
         /// </summary>
-        /// <param name="_settings">
-        /// The current application's settings.
-        /// </param>
-        /// <param name="pluginUrls">
-        /// Download links to the plugins to install.
+        /// <param name="pluginIds">
+        /// Package IDs of the plugins to install.
         /// </param>
         /// <param name="overwrite">
         /// Whether to force download or install, even if a plugin with the same ID
         /// is already installed.
         /// </param>
-        /// <param name="install">
-        /// Whether to install the downloaded plugins. Only use this option at the
-        /// start of app initialization, when no plugins are loaded yet.
-        /// </param>
-        public async Task InstallDefaultPlugins(IEnumerable<string> pluginUrls, bool install = true, bool overwrite = false)
+        public async Task InstallDefaultPlugins(IEnumerable<string> pluginIds, bool overwrite = false)
         {
-            SystemFolder pluginDirectory = new(Directory.CreateDirectory(_settings.PluginDirectory));
+            Directory.CreateDirectory(_settings.PluginDirectory);
 
-            Windows.Web.Http.HttpClient client = new();
-            foreach (string url in pluginUrls)
+            foreach (var pluginId in pluginIds)
             {
                 try
                 {
-                    // This seems funky, but this is because Firebase encodes the slashes
-                    // in the bucket path. This ensures we always get the last segment.
-                    Flurl.Url pluginUrl = new(Flurl.Url.Decode(url, false));
-                    string tempPluginId = Path.GetFileNameWithoutExtension(pluginUrl);
+                    WeakReferenceMessenger.Default.Send(new Messages.PluginDownloadProgressMessage(
+                        pluginId, 0, null));
 
-                    DataTransferProgress progress = new(prog =>
-                    {
-                        WeakReferenceMessenger.Default.Send(new Messages.PluginDownloadProgressMessage(
-                            tempPluginId, (ulong)prog.BytesDownloaded, (ulong)prog.TotalBytes));
-                    });
-
-                    var remotePluginFile = AbstractStorageHelper.GetFileFromUrl(pluginUrl);
-                    var pluginFile = await remotePluginFile.SaveLocally(pluginDirectory, progress, true);
-
-                    if (install)
-                        await InstallPlugin(await pluginFile.OpenStreamAsync(), overwrite);
+                    using var downloadedResource = await _proj.DownloadPackageAsync(pluginId, VersionRange.All);
+                    await InstallPlugin(downloadedResource.PackageStream, overwrite);
                 }
                 catch (Exception ex)
                 {
                     _log.UnhandledException(ex, LogLevel.Error);
                     WeakReferenceMessenger.Default.Send(new Messages.ErrorMessage(
-                        ex, url, Messages.ErrorType.PluginDownloadFailed));
+                        ex, pluginId, Messages.ErrorType.PluginDownloadFailed));
                 }
             }
         }
@@ -181,9 +162,6 @@ namespace FluentStore.SDK.Plugins
         /// <summary>
         /// Installs the provided plugin.
         /// </summary>
-        /// <param name="_settings">
-        /// The current application's settings.
-        /// </param>
         /// <param name="plugin">
         /// A <see cref="Stream"/> containing a zip archive of the plugin to install.
         /// </param>
@@ -250,9 +228,6 @@ namespace FluentStore.SDK.Plugins
         /// <summary>
         /// Installs any zipped plugins in the plugin directory.
         /// </summary>
-        /// <param name="_settings">
-        /// The current application's settings.
-        /// </param>
         public async Task InstallPendingPlugins()
         {
             if (!Directory.Exists(_settings.PluginDirectory))
