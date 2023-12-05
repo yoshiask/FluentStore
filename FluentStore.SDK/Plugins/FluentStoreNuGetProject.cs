@@ -16,15 +16,13 @@ using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Plugins;
 
-internal class FluentStoreNuGetProject : NuGetProject
+public class FluentStoreNuGetProject : NuGetProject
 {
     private static readonly NuGetVersion _currentSdkVersion = new(typeof(PluginLoader).Assembly.GetName().Version!);
     const string StatusFileName = "status.tsv";
 
     private static readonly SourceRepository _officialSource =
         Repository.Factory.GetCoreV3("https://api.nuget.org/v3/index.json");
-    private static SourceRepository _fluentStoreSource;
-    private static readonly SourceRepository[] _repositories = { _officialSource, GetFluentStoreSourceRepository() };
 
     private readonly Dictionary<string, PluginEntry> _entries;
     private readonly string _statusFilePath;
@@ -38,7 +36,9 @@ internal class FluentStoreNuGetProject : NuGetProject
 
     public IReadOnlyDictionary<string, PluginEntry> Entries => _entries;
 
-    public IReadOnlySet<string> IgnoredDependencies { get; set; } 
+    public IReadOnlySet<string> IgnoredDependencies { get; set; }
+
+    public List<SourceRepository> Repositories { get; } = new() { _officialSource };
 
     public FluentStoreNuGetProject(string pluginRoot, NuGetFramework targetFramework, string name = "FluentStore")
     {
@@ -66,6 +66,15 @@ internal class FluentStoreNuGetProject : NuGetProject
         }
     }
 
+    public void AddFeeds(IEnumerable<string> feeds)
+    {
+        foreach (var feed in feeds)
+        {
+            var source = CreateAbstractStorageSourceRepository(feed);
+            Repositories.Add(source);
+        }
+    }
+
     public async Task<DownloadResourceResult> DownloadPackageAsync(string packageId, VersionRange versionRange,
         CancellationToken token = default)
     {
@@ -74,7 +83,7 @@ internal class FluentStoreNuGetProject : NuGetProject
         FindPackageByIdResource resource = null;
         
         // Search all available feeds for compatible versions
-        foreach (var r in _repositories)
+        foreach (var r in Repositories)
         {
             try
             {
@@ -85,7 +94,7 @@ internal class FluentStoreNuGetProject : NuGetProject
                     (await resource.GetAllVersionsAsync(packageId, _cache, NullLogger.Instance, token))
                     .ToArray();
                 if (!allDepVersions.Any())
-                    break;
+                    continue;
 
                 MemoryStream depStream = new();
                 await resource.CopyNupkgToStreamAsync(packageId, versionRange.FindBestMatch(allDepVersions),
@@ -307,23 +316,18 @@ internal class FluentStoreNuGetProject : NuGetProject
         return dst;
     }
 
-    private static SourceRepository GetFluentStoreSourceRepository()
+    private static SourceRepository CreateAbstractStorageSourceRepository(string url)
     {
-        if (_fluentStoreSource is null)
+        var providers = new Lazy<INuGetResourceProvider>[]
         {
-            var providers = new Lazy<INuGetResourceProvider>[]
-            {
-                new(() => new AbstractStoragePackageSearchResourceV3Provider()),
-                new(() => new AbstractStorageFindPackageByIdResourceProvider()),
-                new(() => new AbstractStorageResourceProvider()),
-                new(() => new AbstractStorageServiceIndexResourceV3Provider()),
-            }.Concat(Repository.Provider.GetCoreV3());
+            new(() => new AbstractStoragePackageSearchResourceV3Provider()),
+            new(() => new AbstractStorageFindPackageByIdResourceProvider()),
+            new(() => new AbstractStorageResourceProvider()),
+            new(() => new AbstractStorageServiceIndexResourceV3Provider()),
+        }.Concat(Repository.Provider.GetCoreV3());
             
-            _fluentStoreSource = Repository.CreateSource(providers, "ipns://ipfs.askharoun.com/FluentStore/Plugins/NuGet/index.json");
-            
-            _fluentStoreSource.PackageSource.ProtocolVersion = 3;
-        }
-
-        return _fluentStoreSource;
+        var source = Repository.CreateSource(providers, url);
+        source.PackageSource.ProtocolVersion = 3;
+        return source;
     }
 }

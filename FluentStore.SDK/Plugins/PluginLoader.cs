@@ -34,10 +34,12 @@ namespace FluentStore.SDK.Plugins
         private readonly PackageService _packageService;
         private readonly IPasswordVaultService _passwordVaultService;
         private readonly LoggerService _log;
-        private readonly FluentStoreNuGetProject _proj;
         private readonly FluentStoreProjectContext _projCtx;
+        private readonly Dictionary<string, PluginLoadResult> _loadedPlugins = new();
 
         public bool IsInitialized { get; private set; }
+
+        public FluentStoreNuGetProject Project { get; init; }
 
         public PluginLoader(ISettingsService settings, PackageService packageService, IPasswordVaultService passwordVaultService, LoggerService log)
         {
@@ -45,8 +47,8 @@ namespace FluentStore.SDK.Plugins
             _packageService = packageService;
             _passwordVaultService = passwordVaultService;
             _log = log;
-            _proj = new(settings.PluginDirectory, _targetFramework);
             _projCtx = new(settings.PluginDirectory, _log);
+            Project = new(settings.PluginDirectory, _targetFramework);
         }
 
         public async Task InitAsync(CancellationToken token = default)
@@ -64,7 +66,7 @@ namespace FluentStore.SDK.Plugins
                 }
             }, token);
 
-            _proj.IgnoredDependencies = _loadedAssemblies;
+            Project.IgnoredDependencies = _loadedAssemblies;
 
             // Make sure that the runtime looks for plugin dependencies
             // in the plugin's folder.
@@ -78,23 +80,22 @@ namespace FluentStore.SDK.Plugins
         /// Attempts to load all plugins located in <see cref="ISettingsService.PluginDirectory"/>
         /// and registers all loaded package handlers with the current <see cref="PackageService"/>.
         /// </summary>
-        public async Task<PluginLoadResult> LoadPlugins()
+        public async Task LoadPlugins()
         {
-            PluginLoadResult result = new();
-
             if (!Directory.Exists(_settings.PluginDirectory))
-                return result;
+                return;
 
-            var installedPlugins = await _proj.GetInstalledPackagesAsync();
+            var installedPlugins = await Project.GetInstalledPackagesAsync();
             foreach (var plugin in installedPlugins)
-                LoadPlugin(plugin.PackageIdentity.Id, result);
-
-            return result;
+                LoadPlugin(plugin.PackageIdentity.Id);
         }
 
-        public PluginLoadResult LoadPlugin(string pluginId, PluginLoadResult? result = null)
+        public PluginLoadResult LoadPlugin(string pluginId)
         {
-            result ??= new();
+            if (_loadedPlugins.TryGetValue(pluginId, out var result))
+                return result;
+
+            result = new(pluginId);
 
             var pluginPackagePath = Path.Combine(_settings.PluginDirectory, pluginId, $"{pluginId}.nuspec");
             using Stream nuspecStream = new FileStream(pluginPackagePath, FileMode.Open);
@@ -109,6 +110,8 @@ namespace FluentStore.SDK.Plugins
             {
                 // Load assembly and consider only public types that inherit from PackageHandlerBase
                 var assembly = Assembly.LoadFile(assemblyPath);
+
+                _loadedPlugins.Add(pluginId, result);
 
                 // Register all handlers
                 foreach (PackageHandlerBase handler in InstantiateAllPackageHandlers(assembly))
@@ -147,7 +150,7 @@ namespace FluentStore.SDK.Plugins
                     WeakReferenceMessenger.Default.Send(new Messages.PluginDownloadProgressMessage(
                         pluginId, 0, null));
 
-                    using var downloadedResource = await _proj.DownloadPackageAsync(pluginId, VersionRange.All);
+                    using var downloadedResource = await Project.DownloadPackageAsync(pluginId, VersionRange.All);
                     await InstallPlugin(downloadedResource.PackageStream, overwrite);
                 }
                 catch (Exception ex)
@@ -191,9 +194,9 @@ namespace FluentStore.SDK.Plugins
 
                 _projCtx.ActionType = overwrite ? NuGetActionType.Reinstall : NuGetActionType.Install;
 
-                var installed = await _proj.InstallPackageAsync(identity,
+                var installed = await Project.InstallPackageAsync(identity,
                     new(plugin, reader, string.Empty), _projCtx, token);
-                status = _proj.Entries[pluginId].Status;
+                status = Project.Entries[pluginId].Status;
 
                 if (status == PluginInstallStatus.NoAction)
                 {
@@ -233,7 +236,7 @@ namespace FluentStore.SDK.Plugins
             if (!Directory.Exists(_settings.PluginDirectory))
                 return;
 
-            var pendingPlugins = _proj.Entries.Values
+            var pendingPlugins = Project.Entries.Values
                 .Where(e => e.Status is PluginInstallStatus.AppRestartRequired or PluginInstallStatus.SystemRestartRequired)
                 .ToArray();
 
@@ -282,12 +285,15 @@ namespace FluentStore.SDK.Plugins
 
     public class PluginLoadResult
     {
-        public PluginLoadResult() : this(new()) { }
+        public PluginLoadResult(string id) : this(id, new()) { }
 
-        public PluginLoadResult(HashSet<PackageHandlerBase> packageHandlers)
+        public PluginLoadResult(string id, HashSet<PackageHandlerBase> packageHandlers)
         {
+            Id = id;
             PackageHandlers = packageHandlers;
         }
+
+        public string Id { get; }
 
         public HashSet<PackageHandlerBase> PackageHandlers { get; }
     }

@@ -99,11 +99,10 @@ namespace FluentStoreAPI
             return document;
         }
 
-        public async Task<IEnumerable<string>> GetDefaultPlugins(Version appVersion, string arch)
+        public async Task<PluginDefaults> GetPluginDefaultsAsync()
         {
-            var document = await GetDocument(false, "plugins", "default");
-            var plugins = new DefaultPlugins(document);
-            return plugins.GetDefaultPluginsForVersion(appVersion, arch);
+            var document = await GetDocument(false, "defaults", "plugins");
+            return document.Transform<PluginDefaults>();
         }
     }
 }
