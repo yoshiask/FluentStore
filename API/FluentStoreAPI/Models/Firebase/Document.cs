@@ -65,7 +65,7 @@ namespace FluentStoreAPI.Models.Firebase
                 case "array":
                     var jarray = fieldToken["values"];
                     if (jarray != null && jarray.HasValues)
-                        fieldValue = jarray.Select(item => TransformField(item)).ToList();
+                        fieldValue = jarray.Select(TransformField).ToList();
                     else
                         fieldValue = null;
                     break;
@@ -102,7 +102,7 @@ namespace FluentStoreAPI.Models.Firebase
                         // Ignore generics, since TransformField will set
                         // all type parameters to object
                         var setter = tType.GetMethod("Set" + fieldName);
-                        setter.Invoke(result, new[] { fieldValue });
+                        setter?.Invoke(result, new[] { fieldValue });
                     }
                     else
                     {
@@ -123,13 +123,11 @@ namespace FluentStoreAPI.Models.Firebase
 
             // Set CreatedAt
             PropertyInfo createdAtProp = tType.GetProperty("CreatedAt", typeof(DateTimeOffset));
-            if (createdAtProp != null)
-                createdAtProp.SetValue(result, CreatedAt);
+            createdAtProp?.SetValue(result, CreatedAt);
 
             // Set UpdatedAt
             PropertyInfo updatedAtProp = tType.GetProperty("UpdatedAt", typeof(DateTimeOffset));
-            if (updatedAtProp != null)
-                updatedAtProp.SetValue(result, UpdatedAt);
+            updatedAtProp?.SetValue(result, UpdatedAt);
 
             return result;
         }

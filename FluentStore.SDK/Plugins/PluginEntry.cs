@@ -6,7 +6,7 @@ using System;
 
 namespace FluentStore.SDK.Plugins;
 
-internal record struct PluginEntry(string Id, NuGetVersion Version, NuGetFramework Framework, PluginInstallStatus Status)
+public record struct PluginEntry(string Id, NuGetVersion Version, NuGetFramework Framework, PluginInstallStatus Status)
 {
     public PluginEntry(PackageIdentity packageIdentity, NuGetFramework framework, PluginInstallStatus status)
         : this(packageIdentity.Id, packageIdentity.Version, framework, status) { }

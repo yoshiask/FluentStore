@@ -1,13 +1,13 @@
 ﻿using FluentStoreAPI.Models.Firebase;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace FluentStoreAPI.Models;
 
-public class DefaultPlugins
+public class PluginDefaults
 {
     public List<string> Packages { get; set; } = new();
+    public List<string> Feeds { get; set; } = new();
 
     /// <summary>
     /// Used by <see cref="Document"/> for deserialization
@@ -17,16 +17,11 @@ public class DefaultPlugins
         Packages = objItems.Cast<string>().ToList();
     }
 
-    public IEnumerable<string> GetDefaultPluginsForVersion(Version appVersion, string arch)
+    /// <summary>
+    /// Used by <see cref="Document"/> for deserialization
+    /// </summary>
+    public void SetFeeds(List<object> objItems)
     {
-        var curEntry = PluginLists.First();
-        foreach (var entry in PluginLists)
-        {
-            if (entry.Arch == arch
-                && entry.Version <= appVersion
-                && entry.Version >= curEntry.Version)
-                curEntry = entry;
-        }
-        return curEntry.Urls;
+        Feeds = objItems.Cast<string>().ToList();
     }
 }
