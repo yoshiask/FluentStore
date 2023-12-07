@@ -1,6 +1,5 @@
 ﻿using FluentStore.SDK.Models;
 using Flurl;
-using FuseSharp;
 using Garfoot.Utilities.FluentUrn;
 using System;
 using System.Collections.Generic;
@@ -11,8 +10,6 @@ namespace FluentStore.SDK
 {
     public class PackageService
     {
-        private readonly Fuse _fuse = new(threshold: 1.0, tokenize: true);
-
         private readonly HashSet<PackageHandlerBase> _packageHandlers = new();
         /// <summary>
         /// A cache of all valid package handlers.
@@ -86,7 +83,7 @@ namespace FluentStore.SDK
         /// <summary>
         /// Gets search suggestions for the given query from all package handlers.
         /// </summary>
-        public async Task<List<PackageBase>> GetSearchSuggestionsAsync(string query)
+        public async Task<IEnumerable<PackageBase>> GetSearchSuggestionsAsync(string query)
         {
             var packages = new List<PackageBase>();
             foreach (var handler in PackageHandlers)
@@ -104,7 +101,7 @@ namespace FluentStore.SDK
             }
 
             // Fuzzy search to resort by relevance
-            return SortPackages(query, packages).ToList();
+            return SortPackages(query, packages);
         }
 
         /// <summary>
@@ -239,8 +236,12 @@ namespace FluentStore.SDK
                 handler.IsEnabled = args.NewState;
         }
 
-        private IEnumerable<PackageBase> SortPackages(string query, IList<PackageBase> packages)
-            => _fuse.Search(query, packages).Select(r => packages[r.Index]);
+        private static IEnumerable<PackageBase> SortPackages(string query, IList<PackageBase> packages)
+        {
+            return FuzzySharp.Process
+                .ExtractSorted(query, packages.Select(p => p.Title))
+                .Select(r => packages[r.Index]);
+        }
 
         #region Account handling
 

@@ -8,11 +8,10 @@ using System.Threading.Tasks;
 using System.IO;
 using FluentStore.SDK.Attributes;
 using OwlCore.AbstractUI.Models;
-using FuseSharp;
 
 namespace FluentStore.SDK
 {
-    public abstract class PackageBase : ObservableObject, IEquatable<PackageBase>, IFuseable
+    public abstract class PackageBase : ObservableObject, IEquatable<PackageBase>
     {
         protected static readonly List<AbstractButton> _emptyCommandList = new(0);
 
@@ -259,17 +258,6 @@ namespace FluentStore.SDK
         {
             get => _Images;
             set => SetProperty(ref _Images, value);
-        }
-
-        public virtual IEnumerable<FuseProperty> Properties
-        {
-            get
-            {
-                if (Title is not null)
-                    yield return new(Title, 0.67);
-                if (DeveloperName is not null)
-                    yield return new(DeveloperName, 0.33);
-            }
         }
 
         public ImageBase AppIconCache;
