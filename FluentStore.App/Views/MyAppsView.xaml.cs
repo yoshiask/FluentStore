@@ -71,7 +71,7 @@ namespace FluentStore.Views
 
         private void FilterItem_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is not ToggleMenuFlyoutItem item || item.Tag is not int options)
+            if (sender is not ToggleMenuFlyoutItem item || item.Tag is not byte options)
                 return;
 
             var currentFilter = ViewModel.CurrentFilter;
