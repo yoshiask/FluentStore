@@ -6,48 +6,35 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using FluentStore.SDK;
 using FluentStore.Services;
-using Winstall;
-using Winstall.Models;
 using FluentStore.SDK.Helpers;
-using System.Linq;
+using System;
+using OwlCore.ComponentModel;
+using System.Threading;
 
 namespace FluentStore.Sources.WinGet
 {
-    public partial class WinGetHandler : PackageHandlerBase
+    public partial class WinGetProxyHandler : PackageHandlerBase, IAsyncInit
     {
-        private readonly WinstallApi _api = new();
-
         public const string NAMESPACE_WINGET = "winget";
-        public const string NAMESPACE_WINSTALL_PACK = "winstall-pack";
 
-        public WinGetHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
+        public WinGetProxyHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
         {
-
         }
 
         public override HashSet<string> HandledNamespaces => new()
         {
             NAMESPACE_WINGET,
-            NAMESPACE_WINSTALL_PACK,
         };
 
-        public override string DisplayName => "Winstall";
+        public override string DisplayName => "WinGet";
+
+        public bool IsInitialized { get; private set; }
+
+        internal IWinGetImplementation Implementation { get; private set; }
 
         public override async IAsyncEnumerable<PackageBase> GetFeaturedPackagesAsync()
         {
-            var index = await _api.GetIndexAsync();
-
-            foreach (PopularApp wgApp in index.Popular)
-                yield return new WinGetPackage(this, popApp: wgApp)
-                {
-                    Status = PackageStatus.BasicDetails
-                };
-
-            foreach (Pack wgPack in index.Recommended)
-                yield return new WinstallPack(this, wgPack)
-                {
-                    Status = PackageStatus.Details
-                };
+            yield break;
         }
 
         public override Task<PackageBase> GetPackage(Urn packageUrn, PackageStatus status = PackageStatus.Details)
@@ -58,65 +45,28 @@ namespace FluentStore.Sources.WinGet
             return GetPackage(ns, id, status);
         }
 
-        public async Task<PackageBase> GetPackage(string ns, string id, PackageStatus status = PackageStatus.Details)
+        public Task<PackageBase> GetPackage(string ns, string id, PackageStatus status = PackageStatus.Details)
         {
             if (ns == NAMESPACE_WINGET)
-            {
-                // WinGet package in the WPM Community Repo
-                var result = await _api.GetAppAsync(id);
-                WinGetPackage package = new(this, result.App)
-                {
-                    Status = PackageStatus.Details
-                };
+                return Implementation.GetPackage(id, this, status);
 
-                if (status.IsAtLeast(PackageStatus.Details))
-                {
-                    var locale = await CommunityRepo.GetDefaultLocaleAsync(id, result.App.LatestVersion);
-                    package.Update(locale);
-                    package.Status = PackageStatus.Details;
-                }
-
-                return package;
-            }
-            else if (ns == NAMESPACE_WINSTALL_PACK)
-            {
-                // Winstall Pack: https://winstall.app/packs
-                var result = await _api.GetPackAsync(id);
-                WinstallPack collection = new(this, result.Pack, result.Creator)
-                {
-                    Status = PackageStatus.Details
-                };
-
-                return collection;
-            }
-
-            return null;
+            return Task.FromResult<PackageBase>(null);
         }
 
         public override IAsyncEnumerable<PackageBase> GetSearchSuggestionsAsync(string query) => SearchAsync(query);
 
-        public override async IAsyncEnumerable<PackageBase> SearchAsync(string query)
-        {
-            var results = await _api.SearchAppsAsync(query);
-            foreach (var wgApp in results)
-                yield return new WinGetPackage(this, wgApp);
-        }
+        public override IAsyncEnumerable<PackageBase> SearchAsync(string query) => Implementation.SearchAsync(query, this);
 
         public override async IAsyncEnumerable<PackageBase> GetCollectionsAsync()
         {
-            var result = await _api.GetPacksAsync();
-            foreach (var p in result.Packs.Take(10))
-                yield return new WinstallPack(this, p)
-                {
-                    Status = PackageStatus.Details
-                };
+            yield break;
         }
 
         public override ImageBase GetImage()
         {
             return new FileImage
             {
-                Url = Constants.WINSTALL_HOST.AppendPathSegments("favicon.ico")
+                Url = "https://github.com/microsoft/winget-cli/blob/master/.github/images/WindowsPackageManager_Assets/ICO/PNG/_64.png?raw=true"
             };
         }
 
@@ -138,10 +88,14 @@ namespace FluentStore.Sources.WinGet
             if (m.Success)
             {
                 id = m.Groups["id"].Value;
+                goto success;
+            }
 
-                if (m.Groups["type"].Value.ToUpperInvariant() == "PACKS")
-                    ns = NAMESPACE_WINSTALL_PACK;
-
+            rx = WinGetRunRx();
+            m = rx.Match(url);
+            if (m.Success)
+            {
+                id = $"{m.Groups["pub"].Value}.{m.Groups["pack"].Value}";
                 goto success;
             }
 
@@ -156,18 +110,31 @@ namespace FluentStore.Sources.WinGet
             string path = package.Urn.NamespaceIdentifier switch
             {
                 NAMESPACE_WINGET => "apps",
-                NAMESPACE_WINSTALL_PACK => "packs",
-                _ => throw new System.ArgumentException()
+                _ => throw new ArgumentException()
             };
 
-            Url url = Constants.WINSTALL_HOST.AppendPathSegments(path, package.Urn.GetContent());
+            Url url = "https://winstall.app".AppendPathSegments(path, package.Urn.GetContent());
             return url;
         }
 
         [GeneratedRegex("^https:\\/\\/((www\\.)?github|raw\\.githubusercontent)\\.com\\/microsoft\\/winget-pkgs(\\/(blob|tree))?\\/master\\/manifests\\/[0-9a-z]\\/(?<packageId>[^\\/\\s]+)()", RegexOptions.IgnoreCase, "en-US")]
         private static partial Regex WinGetManifestRepoRx();
 
-        [GeneratedRegex("^https?://(www\\.)?winstall\\.app/(?<type>apps|packs)/(?<id>[^/\\s]+)\\??", RegexOptions.IgnoreCase, "en-US")]
+        [GeneratedRegex(@"^https?://(www\\.)?winget\.run/pkg/(?<pub>[\w\d]+)/(?<pack>.+)", RegexOptions.IgnoreCase, "en-US")]
+        private static partial Regex WinGetRunRx();
+
+        [GeneratedRegex("^https?://(www\\.)?winstall\\.app/apps/(?<id>[^/\\s]+)\\??", RegexOptions.IgnoreCase, "en-US")]
         private static partial Regex WinstallRx();
+
+        public async Task InitAsync(CancellationToken cancellationToken = default)
+        {
+            if (IsInitialized)
+                return;
+
+            Implementation = await Com.WinGetComHandler.TryCreateAsync();
+            Implementation ??= new Cli.WinGetCliHandler();
+
+            IsInitialized = true;
+        }
     }
 }
