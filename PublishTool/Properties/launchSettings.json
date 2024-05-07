@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PublishTool": {
+      "commandName": "Project",
+      "commandLineArgs": "--id=FluentStore.Sources.WinGet -f"
+    }
+  }
+}
