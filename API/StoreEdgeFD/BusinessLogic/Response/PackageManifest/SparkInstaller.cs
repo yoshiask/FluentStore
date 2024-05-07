@@ -1,8 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
-using Winstall.Enums;
-using Winstall.Models.Manifest;
-using Winstall.Models.Manifest.Enums;
+using WinGet.Sharp.Enums;
+using WinGet.Sharp.Models;
 
 namespace Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.PackageManifest
 {
@@ -33,7 +32,7 @@ namespace Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.Pa
             }
         }
 
-        public Installer ToWinstaller()
+        public Installer ToWinGet()
         {
             return new()
             {
