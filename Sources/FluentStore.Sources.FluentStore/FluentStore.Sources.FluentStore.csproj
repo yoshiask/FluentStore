@@ -8,10 +8,11 @@
         <ProjectReference Include="..\..\FluentStore.SDK\FluentStore.SDK.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-        <None Update="metadata.json">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-    </ItemGroup>
+    <PropertyGroup>
+        <Title>Fluent Store Social</Title>
+        <Version>0.4.0.1</Version>
+        <PackageVersion>$(Version)-alpha</PackageVersion>
+        <Description>Create and explore package collections from people around the world.</Description>
+    </PropertyGroup>
 
 </Project>

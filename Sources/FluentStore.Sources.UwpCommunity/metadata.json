@@ -1,7 +1,0 @@
-{
-    "Id": "FluentStore.Sources.UwpCommunity",
-    "DisplayName": "UWP Community",
-    "PluginVersion": "0.3.3.0",
-    "SdkVersion": "0.3.3.0",
-    "PluginAssembly": "FluentStore.Sources.UwpCommunity.dll"
-}

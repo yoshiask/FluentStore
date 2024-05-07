@@ -5,10 +5,10 @@
         <ProjectReference Include="..\..\FluentStore.SDK\FluentStore.SDK.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-        <None Update="metadata.json">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-    </ItemGroup>
+	<PropertyGroup>
+		<Title>GitHub</Title>
+		<Version>0.4.0.1</Version>
+		<PackageVersion>$(Version)-alpha</PackageVersion>
+	</PropertyGroup>
 
 </Project>

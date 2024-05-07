@@ -4,10 +4,11 @@
         <ProjectReference Include="..\..\FluentStore.SDK\FluentStore.SDK.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-        <None Update="metadata.json">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-    </ItemGroup>
+	<PropertyGroup>
+		<Title>UWP Community</Title>
+		<Version>0.4.0.1</Version>
+		<PackageVersion>$(Version)-alpha</PackageVersion>
+		<Description>Experience projects from the UWP Community, including the annual Launch event.</Description>
+	</PropertyGroup>
 
 </Project>

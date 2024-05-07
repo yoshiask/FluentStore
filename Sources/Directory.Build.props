@@ -26,7 +26,8 @@
         <FileVersion>$(Version)</FileVersion>
 
         <Authors>Joshua Askharoun</Authors>
-        <RepositoryUrl>https://github.com/yoshiask/FluentStore</RepositoryUrl>
+		<RepositoryUrl>https://github.com/yoshiask/FluentStore/tree/main/Sources/$(AssemblyName)</RepositoryUrl>
+		<PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
     </PropertyGroup>
 </Project>
 
