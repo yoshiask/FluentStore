@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
         <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
@@ -10,6 +10,7 @@
         <PackageReference Include="Flurl.Http" Version="4.0.2" />
         <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="Google.Apis.Firestore.v1" Version="1.68.0.3468" />
     </ItemGroup>
 
 </Project>

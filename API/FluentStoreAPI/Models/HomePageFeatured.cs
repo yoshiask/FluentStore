@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using Google.Apis.Firestore.v1.Data;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,15 +6,14 @@ namespace FluentStoreAPI.Models
 {
     public class HomePageFeatured
     {
-        [JsonProperty]
-        public List<string> Carousel { get; internal set; }
+        public HomePageFeatured() { }
 
-        /// <summary>
-        /// Used by <see cref="Document"/> for deserialization
-        /// </summary>
-        public void SetCarousel(List<object> objItems)
+        internal HomePageFeatured(Document d)
         {
-            Carousel = objItems.Cast<string>().ToList();
+            Carousel = d.Fields[nameof(Carousel)].ArrayValue.Values
+                .Select(v => v.StringValue).ToList();
         }
+
+        public List<string> Carousel { get; internal set; }
     }
 }

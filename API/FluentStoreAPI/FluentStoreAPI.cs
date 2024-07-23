@@ -2,9 +2,14 @@
 using FluentStoreAPI.Models.Firebase;
 using Flurl;
 using Flurl.Http;
+using Google.Apis.Firestore.v1;
+using Google.Apis.Firestore.v1.Data;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FluentStoreAPI
@@ -12,63 +17,36 @@ namespace FluentStoreAPI
     public partial class FluentStoreAPI
     {
         public const string STORAGE_BASE_URL = "https://firebasestorage.googleapis.com/v0/b/fluent-store.appspot.com/o/";
-        public const string FIRESTORE_BASE_URL = "https://firestore.googleapis.com/v1/projects/fluent-store/databases/(default)/documents/";
         private const string KEY = "AIzaSyCoINaQk7QdzPryW0oZHppWnboRRPk26fQ";
+        private const string NAME_PREFIX = "projects/fluent-store/databases/(default)/documents";
+
+        private readonly FirestoreService _firestore;
+
+        private ProjectsResource.DatabasesResource.DocumentsResource Documents => _firestore.Projects.Databases.Documents;
 
         public string Token { get; set; }
         public string RefreshToken { get; set; }
 
-        public FluentStoreAPI() { }
-        public FluentStoreAPI(string token, string refreshToken)
+        public FluentStoreAPI()
+        {
+            var firestoreInit = new Google.Apis.Services.BaseClientService.Initializer
+            {
+                ApiKey = KEY,
+                ApplicationName = "FluentStoreAPI",
+            };
+            _firestore = new(firestoreInit);
+        }
+
+        public FluentStoreAPI(string token, string refreshToken) : this()
         {
             Token = token;
             RefreshToken = refreshToken;
         }
 
-        static readonly Newtonsoft.Json.JsonSerializerSettings _json = new Newtonsoft.Json.JsonSerializerSettings()
+        public async Task<HomePageFeatured> GetHomePageFeaturedAsync(CancellationToken token = default)
         {
-            Error = (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs e) => 
-            {
-                if (e.CurrentObject is null)
-                {
-                    string log = $"Serialization on path {e.ErrorContext.Path} generated an exception {e.ErrorContext.Error.GetType().Name} with warning {e.ErrorContext.Error.Message}";
-#if DEBUG
-                    System.Diagnostics.Debugger.Break();
-                    System.Diagnostics.Debug.WriteLine(log);
-#else
-                    Console.WriteLine(log);
-#endif
-                }
-                else
-                {
-                    string log = $"Serialization on {e.CurrentObject.GetType().Name} had issues with path {e.ErrorContext.Path} and generated an exception {e.ErrorContext.Error.GetType().Name} with warning {e.ErrorContext.Error.Message}";
-#if DEBUG
-                    System.Diagnostics.Debugger.Break();
-                    System.Diagnostics.Debug.WriteLine(log);
-#else
-                    Console.WriteLine(log);
-#endif
-                }
-
-                e.ErrorContext.Handled = true;
-            },
-            DateFormatHandling = Newtonsoft.Json.DateFormatHandling.IsoDateFormat,
-            MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Ignore,
-            ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore,
-            NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
-            DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore,
-            ConstructorHandling = Newtonsoft.Json.ConstructorHandling.AllowNonPublicDefaultConstructor,
-        };
-        private async Task<TResult> ConvertToResult<TResult>(IFlurlResponse response)
-        {
-            var json = await response.GetStringAsync();
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<TResult>(json);
-        }
-
-        public async Task<HomePageFeatured> GetHomePageFeaturedAsync()
-        {
-            var document = await GetDocument(false, "featured", "home");
-            return document.Transform<HomePageFeatured>();
+            var document = await GetDocumentAsync(BuildName("featured", "home"), token);
+            return new(document);
         }
 
         public async Task<HomePageFeatured> GetHomePageFeaturedAsync(Version appVersion)
@@ -99,10 +77,10 @@ namespace FluentStoreAPI
             return document;
         }
 
-        public async Task<PluginDefaults> GetPluginDefaultsAsync()
+        public async Task<PluginDefaults> GetPluginDefaultsAsync(CancellationToken token = default)
         {
-            var document = await GetDocument(false, "defaults", "plugins");
-            return document.Transform<PluginDefaults>();
+            var document = await GetDocumentAsync(BuildName("defaults", "plugins"), token);
+            return new(document);
         }
     }
 }

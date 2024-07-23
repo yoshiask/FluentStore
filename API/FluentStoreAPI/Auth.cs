@@ -256,5 +256,11 @@ namespace FluentStoreAPI
             await GetIdentityTKBase().AppendPathSegment("accounts:delete")
                 .PostJsonAsync(new { idToken = Token });
         }
+
+        private async Task<TResult> ConvertToResult<TResult>(IFlurlResponse response)
+        {
+            var json = await response.GetStringAsync();
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<TResult>(json);
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using FluentStoreAPI.Models.Firebase;
+﻿using Google.Apis.Firestore.v1.Data;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,22 +6,16 @@ namespace FluentStoreAPI.Models;
 
 public class PluginDefaults
 {
-    public List<string> Packages { get; set; } = new();
-    public List<string> Feeds { get; set; } = new();
+    public PluginDefaults() { }
 
-    /// <summary>
-    /// Used by <see cref="Document"/> for deserialization
-    /// </summary>
-    public void SetPackages(List<object> objItems)
+    internal PluginDefaults(Document d)
     {
-        Packages = objItems.Cast<string>().ToList();
+        Feeds = d.Fields[nameof(Feeds)].ArrayValue.Values
+            .Select(v => v.StringValue).ToList();
+        Packages = d.Fields[nameof(Packages)].ArrayValue.Values
+            .Select(v => v.StringValue).ToList();
     }
 
-    /// <summary>
-    /// Used by <see cref="Document"/> for deserialization
-    /// </summary>
-    public void SetFeeds(List<object> objItems)
-    {
-        Feeds = objItems.Cast<string>().ToList();
-    }
+    public List<string> Packages { get; set; } = [];
+    public List<string> Feeds { get; set; } = [];
 }

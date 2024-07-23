@@ -1,8 +1,11 @@
 ﻿using FluentStoreAPI.Models;
 using Flurl;
 using Flurl.Http;
+using Google.Apis.Firestore.v1.Data;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FluentStoreAPI
@@ -18,35 +21,43 @@ namespace FluentStoreAPI
 
         public async Task<Profile> GetUserProfileAsync(string userId)
         {
-            var fbProfile = await GetFirestoreBase().AppendPathSegments("users", userId, "public", "profile")
-                .WithOAuthBearerToken(Token).GetJsonAsync<Newtonsoft.Json.Linq.JObject>();
-
-            return fbProfile.ToObject<Models.Firebase.Document>().Transform<Profile>();
+            var profile = await GetUserDocument(userId, "public", "profile");
+            return new(profile);
         }
 
         public async Task<bool> UpdateUserProfileAsync(string userId, Profile profile)
         {
-            return await UpdateUserDocument(userId, Models.Firebase.Document.Untransform(profile), "public", "profile");
+            return await UpdateUserDocument(userId, "public", "profile", profile);
         }
 
         public async Task<List<Collection>> GetCollectionsAsync(string userId)
         {
-            var documents = await GetUserBucket(userId, "collections");
-            var collections = new List<Collection>(documents.Count);
-            foreach (Models.Firebase.Document doc in documents)
+            var queryRequest = Documents.RunQuery(new RunQueryRequest()
             {
-                collections.Add(doc.Transform<Collection>());
-            }
-            return collections;
+                StructuredQuery = new()
+                {
+                    From = [new CollectionSelector() { CollectionId = "collections" }],
+                    //Where = new FieldFilter()
+                }
+            }, NAME_PREFIX + $"/users/{userId}");
+            var queryResults = await queryRequest.ExecuteAsync();
+
+            var request = Documents.ListDocuments(NAME_PREFIX, $"users/{userId}/collections");
+            request.AccessToken = Token;
+            var collections = await request.ExecuteAsync();
+
+            return collections.Documents
+                .Select(d => new Collection(d))
+                .ToList();
         }
 
         public async Task<Collection> GetCollectionAsync(string userId, string collectionId)
         {
             var document = await GetUserDocument(userId, "collections", collectionId);
-            return document.Transform<Collection>();
+            return new Collection(document);
         }
 
-        public async Task<bool> UpdateCollectionAsync(string userId, Collection collection)
+        public async Task<bool> UpdateCollectionAsync(string userId, Collection collection, CancellationToken token = default)
         {
             // Make sure collection has a unique ID
             if (collection.Id == Guid.Empty)
@@ -56,7 +67,7 @@ namespace FluentStoreAPI
             collection.AuthorId = userId;
 
             return await UpdateUserDocument(userId, "collections",
-                collection.Id.ToString(), Models.Firebase.Document.Untransform(collection));
+                collection.Id.ToString(), collection, token);
         }
 
         public async Task<bool> DeleteCollectionAsync(string userId, string collectionId)
