@@ -107,7 +107,7 @@ namespace FluentStoreAPI
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:sendOobCode")
                 .WithHeader("X-Firebase-Locale", CultureInfo.CurrentUICulture)
                 .PostJsonAsync(payload);
-            return (await response.GetJsonAsync()).email;
+            return (await response.GetJsonAsync<dynamic>()).email;
         }
 
         public async Task<PasswordResetPayload> VerifyPasswordResetAsync(string code)
@@ -237,7 +237,7 @@ namespace FluentStoreAPI
             var response = await GetIdentityTKBase().AppendPathSegment("accounts:sendOobCode")
                 .WithHeader("X-Firebase-Locale", CultureInfo.CurrentUICulture)
                 .PostJsonAsync(payload);
-            return (await response.GetJsonAsync()).email;
+            return (await response.GetJsonAsync<dynamic>()).email;
         }
 
         /// <summary>

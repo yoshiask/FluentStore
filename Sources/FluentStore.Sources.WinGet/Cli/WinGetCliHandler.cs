@@ -95,7 +95,7 @@ internal class WinGetCliHandler : IWinGetImplementation
         {
             WinGetId = cliPackage.Id,
             Title = cliPackage.Name,
-            Version = cliPackage.AvailableVersion,
+            Version = cliPackage.AvailableVersion.ToString(),
             Status = PackageStatus.BasicDetails
         };
 

@@ -3,12 +3,13 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
-		<LangVersion>latest</LangVersion>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Flurl.Http" Version="3.2.4" />
+        <PackageReference Include="Flurl.Http" Version="4.0.2" />
         <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
 
 </Project>
