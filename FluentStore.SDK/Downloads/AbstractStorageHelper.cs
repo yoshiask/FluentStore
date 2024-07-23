@@ -1,8 +1,8 @@
 ﻿using FluentStore.SDK.Helpers;
 using OwlCore.Kubo;
 using OwlCore.Storage;
-using OwlCore.Storage.Archive;
-using OwlCore.Storage.SystemIO;
+using OwlCore.Storage.System.IO;
+using OwlCore.Storage.System.IO.Compression;
 using System;
 using System.IO;
 using System.IO.Compression;

@@ -1,5 +1,5 @@
 ﻿using OwlCore.Storage;
-using OwlCore.Storage.SystemIO;
+using OwlCore.Storage.System.IO;
 using System;
 using System.IO;
 using System.Threading;
@@ -45,7 +45,7 @@ namespace FluentStore.SDK.Downloads
             if (localFile is null)
             {
                 progress.Report(null);
-                using var srcStream = await srcFile.OpenStreamAsync(cancellationToken: cancellationToken);
+                using var srcStream = await srcFile.OpenStreamAsync(FileAccess.Read, cancellationToken: cancellationToken);
                 using var dstStream = await dstFile.OpenStreamAsync(FileAccess.Write, cancellationToken: cancellationToken);
 
                 await srcStream.CopyToAsync(dstStream, progress, cancellationToken: cancellationToken);

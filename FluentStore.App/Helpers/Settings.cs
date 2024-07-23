@@ -4,7 +4,7 @@ using OwlCore.ComponentModel;
 using OwlCore.Diagnostics;
 using OwlCore.Services;
 using OwlCore.Storage;
-using OwlCore.Storage.SystemIO;
+using OwlCore.Storage.System.IO;
 using System;
 using System.IO;
 using Windows.ApplicationModel;

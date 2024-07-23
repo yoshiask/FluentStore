@@ -13,7 +13,7 @@ public class AbstractStorage
     public async Task Ipfs(string url)
     {
         var ipfsFile = AbstractStorageHelper.GetFileFromUrl(url);
-        var stream = await ipfsFile.OpenStreamAsync();
+        var stream = await ipfsFile.OpenStreamAsync(FileAccess.Read);
 
         MemoryStream memStream = new();
         stream.CopyTo(memStream);
