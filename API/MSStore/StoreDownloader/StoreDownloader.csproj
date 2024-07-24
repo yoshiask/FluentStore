@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\UUPMediaCreator\src\DownloadLib.NET\DownloadLib.NET.csproj" />
+        <ProjectReference Include="..\..\UUPMediaCreator\src\UnifiedUpdatePlatform.Services.WindowsUpdate.Downloads\UnifiedUpdatePlatform.Services.WindowsUpdate.Downloads.csproj" />
     </ItemGroup>
 
 </Project>
