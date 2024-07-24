@@ -3,4 +3,5 @@
 	url = https://github.com/yoshiask/StoreLib.git
 [submodule "API/UUPMediaCreator"]
 	path = API/UUPMediaCreator
-	url = https://github.com/gus33000/UUPMediaCreator.git
+	url = https://github.com/yoshiask/UUPMediaCreator
+	branch = fluent-store

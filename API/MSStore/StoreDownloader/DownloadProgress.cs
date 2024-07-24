@@ -1,7 +1,7 @@
-﻿using DownloadLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using UnifiedUpdatePlatform.Services.WindowsUpdate.Downloads;
 
 namespace StoreDownloader;
 

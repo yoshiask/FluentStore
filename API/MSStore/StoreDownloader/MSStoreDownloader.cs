@@ -1,12 +1,12 @@
 ﻿/// Courtesy of Gustave Monce-- https://github.com/gus33000
 
-using DownloadLib;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using UnifiedUpdatePlatform.Services.WindowsUpdate;
+using UnifiedUpdatePlatform.Services.WindowsUpdate.Downloads;
 
 namespace StoreDownloader
 {
