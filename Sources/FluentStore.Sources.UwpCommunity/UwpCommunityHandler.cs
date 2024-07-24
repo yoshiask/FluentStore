@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using FluentStore.SDK;
 using FluentStore.SDK.Helpers;
 using FluentStore.Services;
+using FluentStore.Sources.UwpCommunity.Models;
 
 namespace FluentStore.Sources.UwpCommunity
 {
@@ -42,7 +43,7 @@ namespace FluentStore.Sources.UwpCommunity
         {
             string launchYearStr = GetLastLaunchYear().ToString();
             var projects = (await BASE_URL.AppendPathSegments("projects", "launch", launchYearStr)
-                .GetJsonAsync()).projects;
+                .GetJsonAsync<dynamic>()).projects;
 
             foreach (dynamic project in projects)
             {
@@ -69,11 +70,11 @@ namespace FluentStore.Sources.UwpCommunity
             int projectId = int.Parse(projectIdStr);
 
             var request = BASE_URL.AppendPathSegments("projects");
-            var projects = await request.GetJsonListAsync();
-            dynamic project = projects.FirstOrDefault(p => p.id == projectId);
-            if (project == null)
+            var projects = await request.GetJsonAsync<List<Project>>();
+            var project = projects.FirstOrDefault(p => p.Id == projectId);
+            if (project is null)
             {
-                var NavService = Ioc.Default.GetRequiredService<INavigationService>();
+                //var NavService = Ioc.Default.GetRequiredService<INavigationService>();
                 throw SDK.Models.WebException.Create(404, $"No project with ID {projectId} is registered with the UWP Community.", request.ToString());
             }
 
@@ -87,7 +88,7 @@ namespace FluentStore.Sources.UwpCommunity
                 package.UpdateWithImages(images);
 
                 var collaborators = await BASE_URL.AppendPathSegments("projects", "collaborators")
-                    .SetQueryParam("projectId", projectIdStr).GetJsonAsync<List<dynamic>>();
+                    .SetQueryParam("projectId", projectIdStr).GetJsonAsync<List<Collaborator>>();
                 package.UpdateWithCollaborators(collaborators);
 
                 var features = await BASE_URL.AppendPathSegments("projects", "features")
@@ -102,7 +103,7 @@ namespace FluentStore.Sources.UwpCommunity
 
         public async Task<GenericPackageCollection<dynamic>> GetLaunchCollection(string year, PackageStatus status)
         {
-            dynamic projects = (await BASE_URL.AppendPathSegments("projects", "launch", year).GetJsonAsync()).projects;
+            var projects = (await BASE_URL.AppendPathSegments("projects", "launch", year).GetJsonAsync<LaunchEvent>()).Projects;
 
             GenericPackageCollection<dynamic> listPackage = new(this)
             {
@@ -140,7 +141,7 @@ namespace FluentStore.Sources.UwpCommunity
                 ImageType = ImageType.Hero
             });
 
-            foreach (dynamic project in projects)
+            foreach (var project in projects)
             {
                 UwpCommunityPackage package = new(this, project);
                 package.Status = PackageStatus.BasicDetails;
@@ -155,7 +156,11 @@ namespace FluentStore.Sources.UwpCommunity
         {
             int lastLaunchYear = GetLastLaunchYear();
             for (int launchYear = 2019; launchYear <= lastLaunchYear; launchYear++)
-                yield return await GetLaunchCollection(launchYear.ToString(), PackageStatus.BasicDetails);
+            {
+                var launchCollection = await GetLaunchCollection(launchYear.ToString(), PackageStatus.BasicDetails);
+                if (launchCollection.Items.Count > 0)
+                    yield return launchCollection;
+            }
         }
 
         public override ImageBase GetImage()

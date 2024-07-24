@@ -14,16 +14,17 @@ using FluentStore.SDK.Models;
 using FluentStore.SDK.Attributes;
 using FluentStore.SDK;
 using Flurl.Util;
+using FluentStore.Sources.UwpCommunity.Models;
 
 namespace FluentStore.Sources.UwpCommunity
 {
-    public class UwpCommunityPackage : PackageBase<dynamic>
+    public class UwpCommunityPackage : PackageBase<Project>
     {
         readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
         readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
-        public UwpCommunityPackage(PackageHandlerBase packageHandler, dynamic project = null, IEnumerable<string> images = null,
-            IEnumerable<dynamic> collaborators = null, IEnumerable<string> features = null) : base(packageHandler)
+        public UwpCommunityPackage(PackageHandlerBase packageHandler, Project project = null, IEnumerable<string> images = null,
+            IEnumerable<Collaborator> collaborators = null, IEnumerable<string> features = null) : base(packageHandler)
         {
             if (project != null)
                 UpdateWithProject(project);
@@ -35,48 +36,48 @@ namespace FluentStore.Sources.UwpCommunity
                 UpdateWithFeatures(features);
         }
 
-        public void UpdateWithProject(dynamic project)
+        public void UpdateWithProject(Project project)
         {
             Guard.IsNotNull(project, nameof(project));
             Model = project;
 
             // Set base properties
-            Title = project.appName;
-            Description = project.description;
-            ReleaseDate = project.createdAt;
+            Title = project.AppName;
+            Description = project.Description;
+            ReleaseDate = project.CreatedAt;
             Price = 0.0;
             DisplayPrice = "View";
 
-            if (project.externalLink is string externalLink)
+            if (project.ExternalLink is string externalLink)
                 Website = Link.Create(externalLink, ShortTitle + " website");
 
-            if (project.heroImage is string heroImage)
+            if (project.HeroImage is string heroImage)
                 Images.Add(new FileImage
                 {
                     Url = heroImage,
                     ImageType = ImageType.Hero
                 });
 
-            if (project.appIcon is string appIcon)
+            if (project.AppIcon is string appIcon)
                 Images.Add(new FileImage
                 {
                     Url = appIcon,
                     ImageType = ImageType.Logo,
-                    BackgroundColor = project.accentColor,
+                    BackgroundColor = project.AccentColor,
                 });
 
             // Set UWPC properties
-            ProjectId = (int)project.id;
+            ProjectId = project.Id;
 
-            if (project.downloadLink is string downloadLink)
+            if (project.DownloadLink is string downloadLink)
                 PackageUri = new(downloadLink);
 
-            if (project.githubLink is string githubLink)
+            if (project.GithubLink is string githubLink)
                 GithubLink = Link.Create(githubLink, ShortTitle + " on GitHub");
 
-            if (project.tags != null)
-                foreach (var tag in project.tags)
-                    Tags.Add(tag.name);
+            if (project.Tags != null)
+                foreach (var tag in project.Tags)
+                    Tags.Add(tag.Name);
 
             Urn = new(UwpCommunityHandler.NAMESPACE_PROJECT, new RawNamespaceSpecificString(ProjectId.ToInvariantString()));
         }
@@ -95,13 +96,13 @@ namespace FluentStore.Sources.UwpCommunity
             }
         }
 
-        public void UpdateWithCollaborators(IEnumerable<dynamic> collaborators)
+        public void UpdateWithCollaborators(IEnumerable<Collaborator> collaborators)
         {
             Guard.IsNotNull(collaborators, nameof(collaborators));
 
-            dynamic owner = collaborators.FirstOrDefault(c => c.isOwner == true);
+            var owner = collaborators.FirstOrDefault(c => c.IsOwner);
             if (owner != null)
-                DeveloperName = owner.name;
+                DeveloperName = owner.Name;
         }
 
         public void UpdateWithFeatures(IEnumerable<string> features)
