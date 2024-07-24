@@ -12,6 +12,7 @@ using FluentStore.Services;
 using FluentStore.SDK.Models;
 using FluentStore.SDK.Helpers;
 using OwlCore.Extensions;
+using System.Linq;
 
 namespace FluentStore.ViewModels
 {
@@ -19,7 +20,7 @@ namespace FluentStore.ViewModels
     {
         public HomeViewModel()
         {
-            LoadAllFeaturedCommand = new AsyncRelayCommand(LoadAllFeaturedAsync);
+            LoadAllFeaturedCommand = new AsyncRelayCommand(LoadAllFeaturedAsync, () => !HasNoPackageSources);
         }
 
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
@@ -88,6 +89,8 @@ namespace FluentStore.ViewModels
             }
             CarouselItems.CollectionChanged -= CarouselItems_CollectionChanged;
         }
+
+        public bool HasNoPackageSources => !PackageService.PackageHandlers.Any(p => p.IsEnabled);
 
         private IAsyncRelayCommand _LoadAllFeaturedCommand;
         public IAsyncRelayCommand LoadAllFeaturedCommand

@@ -25,6 +25,7 @@
             <RowDefinition Height="{x:Bind ViewModel.ShowCarousel, Converter={StaticResource BoolToHeightOrZero}, ConverterParameter=1, Mode=OneWay}"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+
         <tkcontrols:Carousel x:Name="FeaturedCarousel" ItemsSource="{x:Bind ViewModel.CarouselItems}"
                              SelectedIndex="{x:Bind ViewModel.SelectedCarouselItemIndex, Mode=TwoWay}"
                              SelectedItem="{x:Bind ViewModel.SelectedCarouselItem, Mode=TwoWay}"
@@ -102,6 +103,14 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
-        
+
+        <TextBlock Visibility="{x:Bind ViewModel.HasNoPackageSources, Converter={StaticResource BoolToVisibilityConverter}}"
+                   Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   TextAlignment="Center">
+            <Run FontSize="24">No packages sources were loaded</Run>
+            <LineBreak/>
+            <Run>Go to Settings > Plugins to manage plugins</Run>
+        </TextBlock>
+
     </Grid>
 </local:ViewBase>
