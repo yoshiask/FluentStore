@@ -9,6 +9,7 @@
         <AssemblyVersion>$(Version)</AssemblyVersion>
         <FileVersion>$(AssemblyVersion)</FileVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<IsPackable>true</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>

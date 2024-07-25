@@ -12,5 +12,12 @@
 
         <DefaultItemExcludes>$(DefaultItemExcludes);obj/**</DefaultItemExcludes>
     </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="NuGetizer" Version="1.2.2">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
 </Project>
 
