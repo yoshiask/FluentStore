@@ -16,7 +16,7 @@
         <PackageReference Include="Flurl.Http" Version="4.0.2" />
         <PackageReference Include="Garfoot.Utilities.FluentUrn" Version="1.2.1" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
-        <PackageReference Include="OwlCore" Version="0.5.0" />
+        <PackageReference Include="OwlCore" Version="0.6.0" />
     </ItemGroup>
 
 </Project>

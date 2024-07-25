@@ -52,7 +52,7 @@
         <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Layout" Version="7.1.2" />
         <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="2.0.9" />
         <PackageReference Include="PInvoke.User32" Version="0.7.124" />
-        <PackageReference Include="OwlCore" Version="0.5.0" />
+        <PackageReference Include="OwlCore" Version="0.6.0" />
         <PackageReference Include="Vanara.PInvoke.DwmApi" Version="4.0.2" />
         <PackageReference Include="WinUIEx" Version="2.3.3" />
 
