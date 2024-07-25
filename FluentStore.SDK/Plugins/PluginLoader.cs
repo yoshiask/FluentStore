@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
-using FluentStore.SDK.Downloads;
 using FluentStore.SDK.Helpers;
 using FluentStore.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +8,6 @@ using NuGet.Frameworks;
 using NuGet.Packaging;
 using NuGet.ProjectManagement;
 using OwlCore.ComponentModel;
-using OwlCore.Storage.SystemIO;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,24 +16,26 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using NuGet.Versioning;
+using System.Runtime.Loader;
+using NuGet.Packaging.Core;
 
 namespace FluentStore.SDK.Plugins
 {
     public class PluginLoader : IAsyncInit
     {
-        private static readonly NuGetFramework _targetFramework = NuGetFramework.Parse("net7.0-windows10.0.22000.0");
+        private static readonly NuGetFramework _targetFramework = NuGetFramework.Parse("net7.0-windows10.0.22621.0");
 
-        private readonly HashSet<string> _loadedAssemblies = new()
-        {
-            "NETStandard.Library",
-        };
+        private readonly HashSet<PackageIdentity> _loadedAssemblies =
+        [
+            new("NETStandard.Library", new NuGetVersion(2, 1, 0))
+        ];
 
         private readonly ISettingsService _settings;
         private readonly PackageService _packageService;
         private readonly IPasswordVaultService _passwordVaultService;
         private readonly LoggerService _log;
         private readonly FluentStoreProjectContext _projCtx;
-        private readonly Dictionary<string, PluginLoadResult> _loadedPlugins = new();
+        private readonly Dictionary<string, PluginLoadResult> _loadedPlugins = [];
 
         public bool IsInitialized { get; private set; }
 
@@ -60,9 +60,13 @@ namespace FluentStore.SDK.Plugins
             {
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    var assemblyName = assembly.GetName().Name;
+                    var assemblyInfo = assembly.GetName();
+                    var assemblyName = assemblyInfo.Name;
                     if (assemblyName is not null)
-                        _loadedAssemblies.Add(assemblyName);
+                    {
+                        PackageIdentity identity = new(assemblyName, new(assemblyInfo.Version));
+                        _loadedAssemblies.Add(identity);
+                    }
                 }
             }, token);
 
@@ -87,10 +91,10 @@ namespace FluentStore.SDK.Plugins
 
             var installedPlugins = await Project.GetInstalledPackagesAsync();
             foreach (var plugin in installedPlugins)
-                LoadPlugin(plugin.PackageIdentity.Id);
+                await LoadPlugin(plugin.PackageIdentity.Id);
         }
 
-        public PluginLoadResult LoadPlugin(string pluginId)
+        public async Task<PluginLoadResult> LoadPlugin(string pluginId)
         {
             if (_loadedPlugins.TryGetValue(pluginId, out var result))
                 return result;
@@ -109,12 +113,13 @@ namespace FluentStore.SDK.Plugins
             try
             {
                 // Load assembly and consider only public types that inherit from PackageHandlerBase
-                var assembly = Assembly.LoadFile(assemblyPath);
+                AssemblyLoadContext localPluginLoadContext = new($"PluginLoadContext_{pluginId}", true);
+                var assembly = localPluginLoadContext.LoadFromAssemblyPath(assemblyPath);
 
                 _loadedPlugins.Add(pluginId, result);
 
                 // Register all handlers
-                foreach (PackageHandlerBase handler in InstantiateAllPackageHandlers(assembly))
+                await foreach (PackageHandlerBase handler in InstantiateAllPackageHandlers(assembly))
                 {
                     _packageService.RegisterPackageHandler(handler);
                     result.PackageHandlers.Add(handler);
@@ -212,7 +217,7 @@ namespace FluentStore.SDK.Plugins
                 else
                 {
                     // Fully installed, load the plugin now
-                    LoadPlugin(pluginId);
+                    await LoadPlugin(pluginId);
 
                     WeakReferenceMessenger.Default.Send(
                         Messages.SuccessMessage.CreateForPluginInstallCompleted(pluginId));
@@ -251,31 +256,46 @@ namespace FluentStore.SDK.Plugins
             }
         }
 
-        private static Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)
+        private Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)
         {
-            var currentAssembly = args.RequestingAssembly ?? Assembly.GetExecutingAssembly();
-            string folderPath = Path.GetDirectoryName(currentAssembly.Location);
-            string assemblyFile = new AssemblyName(args.Name).Name + ".dll";
-            string assemblyPath = Path.Combine(folderPath, assemblyFile);
-            if (!File.Exists(assemblyPath)) return null;
-            Assembly assembly = Assembly.LoadFrom(assemblyPath);
+            Assembly assembly = null;
+
+            try
+            {
+                var currentAssembly = args.RequestingAssembly ?? Assembly.GetExecutingAssembly();
+                string folderPath = Path.GetDirectoryName(currentAssembly.Location);
+                string assemblyFile = new AssemblyName(args.Name).Name + ".dll";
+                string assemblyPath = Path.Combine(folderPath, assemblyFile);
+
+                if (File.Exists(assemblyPath))
+                    assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
+            }
+            catch (Exception ex)
+            {
+                _log.LogError(ex, null);
+            }
+
             return assembly;
         }
 
-        private IEnumerable<PackageHandlerBase> InstantiateAllPackageHandlers(Assembly pluginAssembly)
+        private async IAsyncEnumerable<PackageHandlerBase> InstantiateAllPackageHandlers(Assembly pluginAssembly)
         {
-            object[] ctorArgs = new object[] { _passwordVaultService };
+            object[] ctorArgs = [_passwordVaultService];
 
             foreach (Type type in pluginAssembly.GetTypes()
-                .Where(t => t.BaseType.IsAssignableTo(typeof(PackageHandlerBase)) && t.IsPublic))
+                .Where(t => t.IsPublic && t.BaseType is not null && t.BaseType.IsAssignableTo(typeof(PackageHandlerBase))))
             {
                 // Create a new instance of the handler
                 var handler = (PackageHandlerBase)ActivatorUtilities.CreateInstance(Ioc.Default, type);
-                if (handler == null)
+                if (handler is null)
                     continue;
 
                 // Enable or disable according to user settings
                 handler.IsEnabled = _settings.GetPackageHandlerEnabledState(type.Name);
+
+                // Initialize handler
+                if (handler is IAsyncInit needsInit)
+                    await needsInit.InitAsync();
 
                 // Register handler with the type name as its ID
                 yield return handler;

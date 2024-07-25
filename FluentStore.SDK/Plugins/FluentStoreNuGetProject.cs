@@ -36,9 +36,9 @@ public class FluentStoreNuGetProject : NuGetProject
 
     public IReadOnlyDictionary<string, PluginEntry> Entries => _entries;
 
-    public IReadOnlySet<string> IgnoredDependencies { get; set; }
+    public IReadOnlySet<PackageIdentity> IgnoredDependencies { get; set; }
 
-    public List<SourceRepository> Repositories { get; } = new() { _officialSource };
+    public List<SourceRepository> Repositories { get; } = [_officialSource];
 
     public FluentStoreNuGetProject(string pluginRoot, NuGetFramework targetFramework, string name = "FluentStore")
     {
@@ -51,7 +51,7 @@ public class FluentStoreNuGetProject : NuGetProject
         if (!File.Exists(_statusFilePath))
         {
             File.Create(_statusFilePath).Dispose();
-            _entries = new();
+            _entries = [];
         }
         else
         {
@@ -280,13 +280,13 @@ public class FluentStoreNuGetProject : NuGetProject
                 nuGetProjectContext.Log(MessageLevel.Debug, "Installing dependencies for {0}", packageIdentity.Id);
                 
                 // Figure out which dependencies don't need to be downloaded
-                var ignoredDeps = IgnoredDependencies
-                    .Concat(Entries.Keys)
-                    .Concat(includedDlls)
-                    .ToHashSet();
+                var installed = IgnoredDependencies
+                    .Concat(Entries.Select(p => p.Value.ToPackageIdentity()))
+                    .Concat(includedDlls.Select(d => new PackageIdentity(d, new(0, 0, 0))))
+                    .ToList();
 
                 // Download and install any NuGet references
-                foreach (var dependency in dependencies.Where(d => !ignoredDeps.Contains(d.Id)))
+                foreach (var dependency in dependencies.Where(d => !IsDependencyAlreadyFulfilled(installed, d)))
                 {
                     nuGetProjectContext.Log(MessageLevel.Debug, "Downloading dependency {0}", dependency);
                     var downloadResult = await DownloadPackageAsync(dependency.Id, dependency.VersionRange, token);
@@ -329,5 +329,10 @@ public class FluentStoreNuGetProject : NuGetProject
         var source = Repository.CreateSource(providers, url);
         source.PackageSource.ProtocolVersion = 3;
         return source;
+    }
+
+    private static bool IsDependencyAlreadyFulfilled(IEnumerable<PackageIdentity> installed, PackageDependency dep)
+    {
+        return installed.Any(package => package.Id == dep.Id && dep.VersionRange.Satisfies(package.Version));
     }
 }
