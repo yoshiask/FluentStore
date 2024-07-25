@@ -10,6 +10,7 @@
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         
         <GenerateLibraryLayout>true</GenerateLibraryLayout>
+        <IsPackable>true</IsPackable>
         
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     </PropertyGroup>
@@ -26,8 +27,8 @@
         <FileVersion>$(Version)</FileVersion>
 
         <Authors>Joshua Askharoun</Authors>
-		<RepositoryUrl>https://github.com/yoshiask/FluentStore/tree/main/Sources/$(AssemblyName)</RepositoryUrl>
-		<PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/yoshiask/FluentStore/tree/main/Sources/$(AssemblyName)</RepositoryUrl>
+        <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
     </PropertyGroup>
 </Project>
 
