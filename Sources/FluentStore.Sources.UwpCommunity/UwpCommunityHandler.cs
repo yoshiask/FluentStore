@@ -42,10 +42,10 @@ namespace FluentStore.Sources.UwpCommunity
         public override async IAsyncEnumerable<PackageBase> GetFeaturedPackagesAsync()
         {
             string launchYearStr = GetLastLaunchYear().ToString();
-            var projects = (await BASE_URL.AppendPathSegments("projects", "launch", launchYearStr)
-                .GetJsonAsync<dynamic>()).projects;
+            var launchEvent = await BASE_URL.AppendPathSegments("projects", "launch", launchYearStr)
+                .GetJsonAsync<LaunchEvent>();
 
-            foreach (dynamic project in projects)
+            foreach (var project in launchEvent.Projects)
             {
                 yield return new UwpCommunityPackage(this, project)
                 {
@@ -101,11 +101,11 @@ namespace FluentStore.Sources.UwpCommunity
             return package;
         }
 
-        public async Task<GenericPackageCollection<dynamic>> GetLaunchCollection(string year, PackageStatus status)
+        public async Task<GenericPackageCollection<LaunchEvent>> GetLaunchCollection(string year, PackageStatus status)
         {
-            var projects = (await BASE_URL.AppendPathSegments("projects", "launch", year).GetJsonAsync<LaunchEvent>()).Projects;
+            var launchEvent = await BASE_URL.AppendPathSegments("projects", "launch", year).GetJsonAsync<LaunchEvent>();
 
-            GenericPackageCollection<dynamic> listPackage = new(this)
+            GenericPackageCollection<LaunchEvent> listPackage = new(this)
             {
                 Urn = new(NAMESPACE_LAUNCH, new RawNamespaceSpecificString(year)),
                 Title = "Launch " + year,
@@ -123,6 +123,7 @@ namespace FluentStore.Sources.UwpCommunity
                     }
                 },
                 Status = PackageStatus.BasicDetails,
+                Model = launchEvent,
             };
 
             // Use showcase site when available
@@ -141,7 +142,7 @@ namespace FluentStore.Sources.UwpCommunity
                 ImageType = ImageType.Hero
             });
 
-            foreach (var project in projects)
+            foreach (var project in launchEvent.Projects)
             {
                 UwpCommunityPackage package = new(this, project);
                 package.Status = PackageStatus.BasicDetails;
