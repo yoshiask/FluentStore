@@ -22,7 +22,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Sources\FluentStore.Sources.WinGet\FluentStore.Sources.WinGet.csproj" />
+        <ProjectReference Include="..\..\API\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
+        <ProjectReference Include="..\..\Sources\FluentStore.Sources.WinGet\FluentStore.Sources.WinGet.csproj" />
     </ItemGroup>
 
 </Project>
