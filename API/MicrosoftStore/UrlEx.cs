@@ -1,12 +1,18 @@
 ﻿using Flurl;
 using Flurl.Http;
+using Flurl.Http.Newtonsoft;
 using System.Globalization;
 
 namespace Microsoft.Marketplace.Storefront.Contracts
 {
     internal static class UrlEx
     {
-        public static IFlurlRequest SetMarketAndLocale(this Url url, CultureInfo culture = null)
+        private static readonly IFlurlClient _client = FlurlHttp
+            .ConfigureClientForUrl(Constants.STOREFRONT_API_HOST)
+            .UseNewtonsoft(Constants.DefaultJsonSettings)
+            .Build();
+
+        public static IFlurlRequest SetMarketAndLocale(this IFlurlRequest url, CultureInfo culture = null)
         {
             if (culture == null)
                 culture = CultureInfo.CurrentUICulture;
@@ -19,8 +25,8 @@ namespace Microsoft.Marketplace.Storefront.Contracts
 
         public static IFlurlRequest GetStorefrontBase(RequestOptions options = default)
         {
-            IFlurlRequest baseRequest = new Url(Constants.STOREFRONT_API_HOST)
-                .AppendPathSegment("v" + options.Version.ToString("0.0", CultureInfo.GetCultureInfo("en-001")))
+            IFlurlRequest baseRequest = _client
+                .Request(Constants.STOREFRONT_API_HOST, "v" + options.Version.ToString("0.0", CultureInfo.GetCultureInfo("en-001")))
                 .SetMarketAndLocale(options.Culture)
                 .SetQueryParam("appVersion", Constants.APP_VERSION)
                 .SetQueryParam("deviceFamily", options.DeviceFamily)

@@ -19,10 +19,10 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         /// </summary>
         public async Task<ResponseItemList> GetPage(string productId, CatalogIdType idType, RequestOptions options = null)
         {
-            string json = await GetStorefrontBase(options).AppendPathSegments("pages", "pdp")
+            return await GetStorefrontBase(options).AppendPathSegments("pages", "pdp")
                 .SetQueryParam("productId", productId).SetQueryParam("idType", idType)
-                .GetStringAsync();
-            return JsonConvert.DeserializeObject<ResponseItemList>(json, DefaultJsonSettings);
+                .SetQueryParam("itemType", "Apps")
+                .GetJsonAsync<ResponseItemList>();
         }
 
         /// <summary>

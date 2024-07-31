@@ -8,6 +8,7 @@ namespace Microsoft.Marketplace.Storefront.Contracts.V3
         public string Title { get; set; }
         public bool HasThirdPartyIAPs { get; set; }
         public string AlgoName { get; set; }
+        public string AlgoValue { get; set; }
         public List<ProductSummary> Products { get; set; }
 
         // This is here because the API doesn't always use
