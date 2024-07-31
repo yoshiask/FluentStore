@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using static Microsoft.Marketplace.Storefront.Contracts.UrlEx;
 using static Microsoft.Marketplace.Storefront.Contracts.Constants;
-using Newtonsoft.Json;
 using Microsoft.Marketplace.Storefront.Contracts.Enums;
 using Microsoft.Marketplace.Storefront.Contracts.V1;
 using System.Collections.Generic;
@@ -30,9 +29,10 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         /// </summary>
         public async Task<ResponseItem<V3.ProductDetails>> GetProduct(string productId, CatalogIdType idType, RequestOptions options = null)
         {
-            return await GetStorefrontBase(options).AppendPathSegments("products", productId)
+            var response = await GetStorefrontBase(options).AppendPathSegments("products", productId)
                 .SetQueryParam("idType", idType)
-                .GetJsonAsync<ResponseItem<V3.ProductDetails>>();
+                .GetJsonAsync<ResponseItem>();
+            return response.Convert<V3.ProductDetails>();
         }
 
         /// <summary>
@@ -40,9 +40,10 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         /// </summary>
         public async Task<ResponseItem<V3.ReviewList>> GetProductReviews(string productId, int pageSize = 15, int skipItems = 0, RequestOptions options = null)
         {
-            return await GetStorefrontBase(options).AppendPathSegments("ratings", "product", productId)
+            var response = await GetStorefrontBase(options).AppendPathSegments("ratings", "product", productId)
                 .SetQueryParam("pageSize", pageSize).SetQueryParam("skipItems", skipItems)
-                .GetJsonAsync<ResponseItem<V3.ReviewList>>();
+                .GetJsonAsync<ResponseItem>();
+            return response.Convert<V3.ReviewList>();
         }
 
         /// <summary>
@@ -69,15 +70,13 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         /// <summary>
         /// Gets the cards displayed at the top of the Home page in the Microsoft Store Preview app.
         /// </summary>
-        public async Task<V3.ProductList> GetHomeSpotlight(int pageSize = 15, RequestOptions options = null)
+        public async Task<V4.CollectionDetail> GetHomeSpotlight(int pageSize = 15, RequestOptions options = null)
         {
-            var json = await GetStorefrontBase(options).AppendPathSegments("pages", "home")
+            var responses = await GetStorefrontBase(options).AppendPathSegments("pages", "home")
                 .SetQueryParam("cardsEnabled", true)
                 .SetQueryParam("placementId", 10837389)
-                .GetStringAsync();
-
-            var responses = JsonConvert.DeserializeObject<ResponseItemList>(json, DefaultJsonSettings);
-            return responses.GetPayload<V3.ProductList>();
+                .GetJsonAsync<ResponseItemList>();
+            return responses.GetPayload<V4.CollectionDetail>();
         }
 
         /// <summary>
@@ -85,10 +84,11 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         /// </summary>
         public async Task<ResponseItem<V9.SearchResponse>> Search(string query, string mediaType = "all", RequestOptions options = null)
         {
-            return await GetStorefrontBase(options).AppendPathSegments("search")
+            var response = await GetStorefrontBase(options).AppendPathSegments("search")
                 .SetQueryParam("query", query).SetQueryParam("mediaType", mediaType)
                 .SetQueryParam("cardsEnabled", true)
-                .GetJsonAsync<ResponseItem<V9.SearchResponse>>();
+                .GetJsonAsync<ResponseItem>();
+            return response.Convert<V9.SearchResponse>();
         }
 
         /// <summary>
@@ -96,8 +96,9 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         /// </summary>
         public async Task<ResponseItem<V9.SearchResponse>> NextSearchPage(V9.SearchResponse currentResponse)
         {
-            return await (STOREFRONT_API_HOST + currentResponse.NextUri)
-                .GetJsonAsync<ResponseItem<V9.SearchResponse>>();
+            var response = await (STOREFRONT_API_HOST + currentResponse.NextUri)
+                .GetJsonAsync<ResponseItem>();
+            return response.Convert<V9.SearchResponse>();
         }
 
         /// <summary>
@@ -105,9 +106,10 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         /// </summary>
         public async Task<ResponseItem<V3.AutoSuggestions>> GetSearchSuggestions(string query, RequestOptions options = null)
         {
-            return await GetStorefrontBase(options).AppendPathSegment("autosuggest")
+            var response = await GetStorefrontBase(options).AppendPathSegment("autosuggest")
                 .SetQueryParam("prefix", query)
-                .GetJsonAsync<ResponseItem<V3.AutoSuggestions>>();
+                .GetJsonAsync<ResponseItem>();
+            return response.Convert<V3.AutoSuggestions>();
         }
 
         /// <summary>
@@ -115,12 +117,13 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         /// </summary>
         public async Task<ResponseItem<V4.CollectionDetail>> GetCollections(int pageSize = 15, RequestOptions options = null)
         {
-            return await GetStorefrontBase(options).AppendPathSegments("canvas", "listofcollections")
+            var response = await GetStorefrontBase(options).AppendPathSegments("canvas", "listofcollections")
                 .SetQueryParam("cardsEnabled", true)
                 .SetQueryParam("pageSize", pageSize)
                 .SetQueryParam("site", "Channels")
                 .SetQueryParam("collectionId", "MerchandiserContent/Apps/Collection-C/CollectionCAppsPage")
-                .GetJsonAsync<ResponseItem<V4.CollectionDetail>>();
+                .GetJsonAsync<ResponseItem>();
+            return response.Convert<V4.CollectionDetail>();
         }
 
         /// <summary>
@@ -128,12 +131,13 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         /// </summary>
         public async Task<ResponseItem<V4.CollectionDetail>> GetCollection(string collectionId, RequestOptions options = null)
         {
-            return await GetStorefrontBase(options).AppendPathSegments("canvas", "collections")
+            var response = await GetStorefrontBase(options).AppendPathSegments("canvas", "collections")
                 .SetQueryParam("site", "Channels")
                 .SetQueryParam("collectionId", collectionId)
                 .SetQueryParam("deviceFamilyVersion", DEVICE_VERSION_ID)
                 .SetQueryParam("cardsEnabled", true)
-                .GetJsonAsync<ResponseItem<V4.CollectionDetail>>();
+                .GetJsonAsync<ResponseItem>();
+            return response.Convert<V4.CollectionDetail>();
         }
 
         /// <summary>
@@ -141,10 +145,11 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         /// </summary>
         public async Task<ResponseItem<V3.ProductList>> GetRecommendationCollection(string collectionId, RequestOptions options = null)
         {
-            return await GetStorefrontBase(options).AppendPathSegments("recommendations", "collections", collectionId)
+            var response = await GetStorefrontBase(options).AppendPathSegments("recommendations", "collections", collectionId)
                 .SetQueryParam("deviceFamilyVersion", DEVICE_VERSION_ID)
                 .SetQueryParam("cardsEnabled", true)
-                .GetJsonAsync<ResponseItem<V3.ProductList>>();
+                .GetJsonAsync<ResponseItem>();
+            return response.Convert<V3.ProductList>();
         }
     }
 }

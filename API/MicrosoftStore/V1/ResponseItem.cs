@@ -3,7 +3,14 @@ using System;
 
 namespace Microsoft.Marketplace.Storefront.Contracts.V1
 {
-    public class ResponseItem
+    public interface IResponseItem<out TPayload>
+    {
+        DateTimeOffset ExpiryUtc { get; }
+        string Path { get; }
+        TPayload Payload { get; }
+    }
+
+    public class ResponseItem : IResponseItem<object>
     {
         public string Path { get; set; }
         public DateTimeOffset ExpiryUtc { get; set; }
@@ -15,11 +22,11 @@ namespace Microsoft.Marketplace.Storefront.Contracts.V1
         }
     }
 
-    public class ResponseItem<TPayload>
+    public class ResponseItem<TPayload> : IResponseItem<TPayload>
     {
-        public string Path { get; set; }
-        public DateTimeOffset ExpiryUtc { get; set; }
-        public TPayload Payload { get; set; }
+        public string Path { get; }
+        public DateTimeOffset ExpiryUtc { get; }
+        public TPayload Payload { get; }
 
         public ResponseItem(ResponseItem item)
         {
@@ -27,7 +34,9 @@ namespace Microsoft.Marketplace.Storefront.Contracts.V1
             {
                 Path = item.Path;
                 ExpiryUtc = item.ExpiryUtc;
-                Payload = (item.Payload as JObject).ToObject<TPayload>();
+                Payload = (item.Payload is JObject json)
+                    ? json.ToObject<TPayload>()
+                    : (TPayload)item.Payload;
             }
         }
     }
