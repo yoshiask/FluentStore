@@ -87,9 +87,66 @@ internal class WinGetComHandler : IWinGetImplementation
             yield return CreateSDKPackage(packageHandler, matchResult.CatalogPackage);
     }
 
-    public Task<FileSystemInfo> DownloadAsync(WinGetPackage package, DirectoryInfo folder = null)
+    public async Task<FileSystemInfo> DownloadAsync(WinGetPackage package, DirectoryInfo folder = null)
     {
-        throw new NotImplementedException();
+        var catalogPackage = (CatalogPackage)package.Model;
+
+        // We have to create a dedicated folder because WinGet
+        // doesn't tell us the name of the file it downloaded
+        folder = folder is not null
+            ? folder.CreateSubdirectory(StorageHelper.PrepUrnForFile(package.Urn))
+            : StorageHelper.CreatePackageDownloadFolder(package.Urn);
+
+        var downloadOptions = WinGetFactory.CreateDownloadOptions();
+        downloadOptions.DownloadDirectory = folder.FullName;
+
+        var result = await _manager
+            .DownloadPackageAsync(catalogPackage, downloadOptions)
+            .AsTask(new Progress<PackageDownloadProgress>(DownloadProgress));
+
+        if (result.Status != DownloadResultStatus.Ok)
+        {
+            string statusMessage = result.Status switch
+            {
+                DownloadResultStatus.BlockedByPolicy => $"Installation of {package.Title} was blocked by an adminitrator policy.",
+                DownloadResultStatus.CatalogError => $"The {_catalog.Info.Name} catalog failed.",
+                DownloadResultStatus.InternalError => "An internal WinGet error occurred.",
+                DownloadResultStatus.InvalidOptions => "Invalid options were passed to WinGet. Please report this issue at https://github.com/yoshiask/FluentStore/issues.",
+                DownloadResultStatus.DownloadError => $"Could not download {package.Title}.",
+                DownloadResultStatus.ManifestError => $"{package.Title} provided an invalid manifest.",
+                DownloadResultStatus.NoApplicableInstallers => $"{package.Title} is not available for your system.",
+                DownloadResultStatus.PackageAgreementsNotAccepted => $"The agreements for {package.Title} have not been accepted.",
+                _ => $"An unknown error occurred: {result.Status}."
+            };
+
+            ErrorType errorType = result.Status switch
+            {
+                DownloadResultStatus.InvalidOptions or
+                DownloadResultStatus.ManifestError or
+                DownloadResultStatus.CatalogError => ErrorType.PackageFetchFailed,
+                _ => ErrorType.PackageDownloadFailed
+            };
+
+            Exception exception = new(statusMessage, result.ExtendedErrorCode);
+
+            WeakReferenceMessenger.Default.Send(new ErrorMessage(exception, package, errorType));
+        }
+
+        return folder;
+
+        void DownloadProgress(PackageDownloadProgress progress)
+        {
+            if (progress.State == PackageDownloadProgressState.Downloading)
+            {
+                WeakReferenceMessenger.Default.Send(
+                    new PackageDownloadProgressMessage(package, progress.BytesDownloaded, progress.BytesRequired));
+            }
+            else if (progress.State == PackageDownloadProgressState.Finished)
+            { 
+                WeakReferenceMessenger.Default.Send(
+                    SuccessMessage.CreateForPackageDownloadCompleted(package));
+            }
+        }
     }
 
     public async Task<bool> InstallAsync(WinGetPackage package)
@@ -144,6 +201,7 @@ internal class WinGetComHandler : IWinGetImplementation
             ErrorType errorType = result.Status switch
             {
                 InstallResultStatus.InvalidOptions or
+                InstallResultStatus.ManifestError or
                 InstallResultStatus.CatalogError => ErrorType.PackageFetchFailed,
 
                 InstallResultStatus.DownloadError => ErrorType.PackageDownloadFailed,
