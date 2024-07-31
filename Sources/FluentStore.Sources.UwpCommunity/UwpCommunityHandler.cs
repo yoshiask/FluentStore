@@ -196,9 +196,11 @@ namespace FluentStore.Sources.UwpCommunity
         {
             var now = DateTime.UtcNow;
             int launchYear = now.Year;
+
             if (now.Month < 9)
                 launchYear--;
-            return launchYear;
+
+            return Math.Clamp(launchYear, 2019, 2021);
         }
     }
 }
