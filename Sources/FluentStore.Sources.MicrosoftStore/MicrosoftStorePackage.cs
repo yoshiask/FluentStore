@@ -15,6 +15,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using UnifiedUpdatePlatform.Services.WindowsUpdate;
+using UnifiedUpdatePlatform.Services.WindowsUpdate.Downloads;
 
 namespace FluentStore.Sources.MicrosoftStore
 {
@@ -46,7 +47,7 @@ namespace FluentStore.Sources.MicrosoftStore
                 WeakReferenceMessenger.Default.Send(new SuccessMessage(null, this, SuccessType.PackageFetchCompleted));
 
                 // Set up progress handler
-                void DownloadProgress(DownloadLib.GeneralDownloadProgress progress)
+                void DownloadProgress(GeneralDownloadProgress progress)
                 {
                     var status = progress.DownloadedStatus[0];
                     WeakReferenceMessenger.Default.Send(

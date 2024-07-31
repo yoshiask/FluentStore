@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Diagnostics;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK;
 using FluentStore.SDK.Helpers;
@@ -9,7 +8,6 @@ using Microsoft.Marketplace.Storefront.Contracts.V3;
 using Microsoft.Marketplace.Storefront.Contracts.V8.One;
 using Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.PackageManifest;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,7 +21,7 @@ namespace FluentStore.Sources.MicrosoftStore
             Guard.IsTrue(IsWinGet);
         }
 
-        public void Update(PackageManifestVersion manifest)
+        public async Task Update(PackageManifestVersion manifest)
         {
             Guard.IsNotNull(manifest, nameof(manifest));
             Manifest = manifest;
@@ -35,7 +33,7 @@ namespace FluentStore.Sources.MicrosoftStore
             Type = installer.InstallerType.ToSDKInstallerType();
 
             var internalPackage = (WinGetPackage)InternalPackage;
-            internalPackage.Installer = installer.ToWinstaller();
+            //internalPackage.Installer = installer.ToWinGet();
             CopyProperties(ref internalPackage);
             InternalPackage = internalPackage;
         }
@@ -57,6 +55,11 @@ namespace FluentStore.Sources.MicrosoftStore
             return downloadFile;
         }
 
+        private async Task GetWinGetPackage(string id)
+        {
+
+        }
+
         private async Task PopulatePackageUri()
         {
             WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
@@ -75,10 +78,5 @@ namespace FluentStore.Sources.MicrosoftStore
                 WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, this, ErrorType.PackageFetchFailed));
             }
         }
-
-        protected override void PopulateInternalPackage(CardModel card) => PopulateInternalPackage();
-        protected override void PopulateInternalPackage(ProductDetails product) => PopulateInternalPackage();
-
-        private void PopulateInternalPackage() => InternalPackage ??= new WinGetPackage(PackageHandler);
     }
 }

@@ -148,7 +148,8 @@ namespace FluentStore.Sources.MicrosoftStore
 
         public override Url GetUrlFromPackage(PackageBase package)
         {
-            return "https://apps.microsoft.com/store/detail/" + package.Urn.GetContent<NamespaceSpecificString>().UnEscapedValue;
+            var id = package.Urn.GetContent<NamespaceSpecificString>().UnEscapedValue;
+            return $"https://apps.microsoft.com/store/detail/{id}";
         }
 
         public override async Task<ReviewSummary> GetReviewsAsync(PackageBase package)

@@ -89,10 +89,13 @@ namespace FluentStore.Sources.MicrosoftStore
                     Images.Add(new MicrosoftStoreImage(img));
 
             PopulateInternalPackage(card);
-            PackageBase internalPackage = InternalPackage;
-            Type = internalPackage.Type;
-            CopyProperties(ref internalPackage);
-            InternalPackage = internalPackage;
+            if (InternalPackage is not null)
+            {
+                PackageBase internalPackage = InternalPackage;
+                Type = internalPackage.Type;
+                CopyProperties(ref internalPackage);
+                InternalPackage = internalPackage;
+            }
         }
 
         public void Update(ProductSummary summary)
@@ -167,10 +170,13 @@ namespace FluentStore.Sources.MicrosoftStore
                     Images.Add(new MicrosoftStoreImage(img));
 
             PopulateInternalPackage(product);
-            PackageBase internalPackage = InternalPackage;
-            Type = internalPackage.Type;
-            CopyProperties(ref internalPackage);
-            InternalPackage = internalPackage;
+            if (InternalPackage is not null)
+            {
+                PackageBase internalPackage = InternalPackage;
+                Type = internalPackage.Type;
+                CopyProperties(ref internalPackage);
+                InternalPackage = internalPackage;
+            }
         }
 
         public void Update(RatingSummary ratingSummary)
@@ -211,9 +217,8 @@ namespace FluentStore.Sources.MicrosoftStore
             Guard.IsNotNull(msReviews, nameof(msReviews));
             Guard.IsNotNull(ReviewSummary, nameof(ReviewSummary));
 
-            ReviewSummary.Reviews ??= new List<SDK.Models.Review>();
-            await foreach (Microsoft.Marketplace.Storefront.Contracts.V3.Review msReview in msReviews)
-                ReviewSummary.Reviews.Append(ToReview(msReview));
+            var reviews = await msReviews.Select(ToReview).ToListAsync();
+            ReviewSummary.Reviews = ReviewSummary.Reviews.Concat(reviews);
         }
 
         private void UpdateUrn()
@@ -255,8 +260,8 @@ namespace FluentStore.Sources.MicrosoftStore
             return DownloadItem;
         }
 
-        protected abstract void PopulateInternalPackage(CardModel card);
-        protected abstract void PopulateInternalPackage(ProductDetails product);
+        protected virtual void PopulateInternalPackage(CardModel card) { }
+        protected virtual void PopulateInternalPackage(ProductDetails product) { }
 
         protected abstract Task<FileSystemInfo> InternalDownloadAsync(DirectoryInfo folder);
 
@@ -329,21 +334,21 @@ namespace FluentStore.Sources.MicrosoftStore
 
         public override async Task<bool> InstallAsync()
         {
-            if (InternalPackage != null)
+            if (InternalPackage is not null)
                 return await InternalPackage.InstallAsync();
             return false;
         }
 
         public override async Task<bool> CanLaunchAsync()
         {
-            if (InternalPackage != null)
+            if (InternalPackage is not null)
                 return await InternalPackage.CanLaunchAsync();
             return false;
         }
 
         public override async Task LaunchAsync()
         {
-            if (InternalPackage != null)
+            if (InternalPackage is not null)
                 await InternalPackage.LaunchAsync();
         }
 
