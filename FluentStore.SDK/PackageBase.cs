@@ -219,7 +219,7 @@ namespace FluentStore.SDK
             get => _Price;
             set => SetProperty(ref _Price, value);
         }
-        public bool HasPrice => Price >= 0;
+        public bool HasPrice => Price > 0;
 
         private string _DisplayPrice;
         public string DisplayPrice

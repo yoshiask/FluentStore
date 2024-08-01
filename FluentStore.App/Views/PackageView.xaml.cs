@@ -101,6 +101,11 @@ namespace FluentStore.Views
             {
                 WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Apps"));
 
+                // Show warning if package isn't free
+                if (ViewModel.Package.HasPrice)
+                    WeakReferenceMessenger.Default.Send<WarningMessage>(new($"{ViewModel.Package.ShortTitle} is not free. You may still be able to download or install the package, but a legitimate license is required.", ViewModel.Package));
+
+
                 bool canLaunch = false;
                 try
                 {
