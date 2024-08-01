@@ -42,10 +42,6 @@
             <controls:SettingsBlockControl.Icon>
                 <FontIcon Glyph="&#xECAA;" />
             </controls:SettingsBlockControl.Icon>
-            <controls:SettingsBlockControl.SettingsActionableElement>
-                <Button x:Name="ReinstallDefaultPluginsButton"
-                        Content="Reinstall..." Click="ReinstallDefaultPluginsButton_Click"/>
-            </controls:SettingsBlockControl.SettingsActionableElement>
             <controls:SettingsBlockControl.ExpandableContent>
                 <StackPanel Margin="8">
                     <TextBlock x:Name="DefaultPluginStatusBlock" HorizontalTextAlignment="Center">
@@ -70,11 +66,43 @@
             </controls:SettingsBlockControl.ExpandableContent>
         </controls:SettingsBlockControl>
 
-        <controls:SettingsBlockControl Title="Install a plugin" Icon="Add"
-                                       Description="Choose a ZIP archive to install as a plugin">
-            <controls:SettingsBlockControl.SettingsActionableElement>
-                <Button Content="Pick file..." Click="InstallPluginButton_Click"/>
-            </controls:SettingsBlockControl.SettingsActionableElement>
+        <controls:SettingsBlockControl Title="Install plugins" Icon="Add">
+            <controls:SettingsBlockControl.ExpandableContent>
+                <StackPanel>
+
+                    <controls:SettingsDisplayControl Title="From NuGet feed" Margin="14"
+                                                     Description="Choose plugins from an online NuGet feed">
+                        <controls:SettingsDisplayControl.Icon>
+                            <FontIcon Glyph="&#xEBD3;"/>
+                        </controls:SettingsDisplayControl.Icon>
+                        <controls:SettingsDisplayControl.SettingsActionableElement>
+                            <Button Content="Select feed..." />
+                        </controls:SettingsDisplayControl.SettingsActionableElement>
+                    </controls:SettingsDisplayControl>
+
+                    <controls:SettingsDisplayControl Title="From file" Margin="14"
+                                                     Description="Choose a NuGet package from your device to install as a plugin">
+                        <controls:SettingsDisplayControl.Icon>
+                            <FontIcon Glyph="&#xE8DA;"/>
+                        </controls:SettingsDisplayControl.Icon>
+                        <controls:SettingsDisplayControl.SettingsActionableElement>
+                            <Button Content="Pick file..." Click="InstallPluginButton_Click"/>
+                        </controls:SettingsDisplayControl.SettingsActionableElement>
+                    </controls:SettingsDisplayControl>
+
+                    <controls:SettingsDisplayControl Title="Default plugins" Margin="14"
+                                                     Description="Installs all default plugins for this release">
+                        <controls:SettingsDisplayControl.Icon>
+                            <FontIcon Glyph="&#xECAA;"/>
+                        </controls:SettingsDisplayControl.Icon>
+                        <controls:SettingsDisplayControl.SettingsActionableElement>
+                            <Button x:Name="ReinstallDefaultPluginsButton"
+                                    Content="Reinstall..." Click="ReinstallDefaultPluginsButton_Click" />
+                        </controls:SettingsDisplayControl.SettingsActionableElement>
+                    </controls:SettingsDisplayControl>
+
+                </StackPanel>
+            </controls:SettingsBlockControl.ExpandableContent>
         </controls:SettingsBlockControl>
 
         <controls:SettingsBlockControl Title="Package sources" Icon="Shop"
