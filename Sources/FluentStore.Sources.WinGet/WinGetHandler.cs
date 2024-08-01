@@ -21,10 +21,7 @@ namespace FluentStore.Sources.WinGet
         {
         }
 
-        public override HashSet<string> HandledNamespaces => new()
-        {
-            NAMESPACE_WINGET,
-        };
+        public override HashSet<string> HandledNamespaces => [NAMESPACE_WINGET];
 
         public override string DisplayName => "WinGet";
 
@@ -37,20 +34,22 @@ namespace FluentStore.Sources.WinGet
             yield break;
         }
 
-        public override Task<PackageBase> GetPackage(Urn packageUrn, PackageStatus status = PackageStatus.Details)
+        public override async Task<PackageBase> GetPackage(Urn packageUrn, PackageStatus status = PackageStatus.Details)
         {
             string ns = packageUrn.NamespaceIdentifier;
             string id = packageUrn.GetContent();
 
-            return GetPackage(ns, id, status);
+            return await GetPackage(ns, id, status);
         }
 
-        public Task<PackageBase> GetPackage(string ns, string id, PackageStatus status = PackageStatus.Details)
+        public async Task<PackageBase> GetPackage(string ns, string id, PackageStatus status = PackageStatus.Details)
         {
             if (ns == NAMESPACE_WINGET)
-                return Implementation.GetPackage(id, this, status);
+            {
+                return await Implementation.GetPackage(id, this, status);
+            }
 
-            return Task.FromResult<PackageBase>(null);
+            return null;
         }
 
         public override IAsyncEnumerable<PackageBase> GetSearchSuggestionsAsync(string query) => SearchAsync(query);

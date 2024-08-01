@@ -1,11 +1,17 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK;
+using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Messages;
+using FluentStore.SDK.Models;
 using Garfoot.Utilities.FluentUrn;
+using IdentityModel.OidcClient;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using WinGet.Sharp;
+using WinGet.Sharp.Models;
 
 namespace FluentStore.Sources.WinGet.Cli;
 
@@ -16,17 +22,23 @@ internal class WinGetCliHandler : IWinGetImplementation
     public async Task<PackageBase> GetPackage(string id, WinGetProxyHandler packageHandler, PackageStatus status = PackageStatus.Details)
     {
         var results = await _packageManager.SearchPackageAsync(id, true);
-        var result = results.FirstOrDefault();
+        var result = results.FirstOrDefault(IsNotWinGetId);
 
-        return result is not null
-            ? CreateSDKPackage(packageHandler, result)
-            : null;
+        if (result is null)
+            return null;
+
+        var package = CreateSDKPackage(packageHandler, result);
+
+        if (status.IsAtLeast(PackageStatus.Details))
+            await UpdateSDKPackage(package);
+
+        return package;
     }
 
     public async IAsyncEnumerable<PackageBase> SearchAsync(string query, WinGetProxyHandler packageHandler)
     {
         var results = await _packageManager.SearchPackageAsync(query);
-        foreach (var result in results)
+        foreach (var result in results.Where(IsNotWinGetId))
             yield return CreateSDKPackage(packageHandler, result);
     }
 
@@ -95,7 +107,7 @@ internal class WinGetCliHandler : IWinGetImplementation
         {
             WinGetId = cliPackage.Id,
             Title = cliPackage.Name,
-            Version = cliPackage.AvailableVersion.ToString(),
+            Version = cliPackage.AvailableVersionString,
             Status = PackageStatus.BasicDetails
         };
 
@@ -103,4 +115,27 @@ internal class WinGetCliHandler : IWinGetImplementation
 
         return sdkPackage;
     }
+
+    private static async Task UpdateSDKPackage(WinGetPackage package)
+    {
+        Locale locale;
+        try
+        {
+            locale = await CommunityRepo.GetLocaleAsync(package.WinGetId, package.Version, CultureInfo.CurrentUICulture);
+        }
+        catch (Flurl.Http.FlurlHttpException)
+        {
+            locale = await CommunityRepo.GetDefaultLocaleAsync(package.WinGetId, package.Version);
+        }
+
+        package.Description = locale.Description;
+        package.PublisherId = locale.PackageIdentifier.Split('.')[0];
+        package.DeveloperName = locale.Publisher ?? package.PublisherId;
+        package.Description = locale.Description ?? locale.ShortDescription;
+        package.Website = Link.Create(locale.PackageUrl, package.ShortTitle + " website");
+
+        package.Status = PackageStatus.Details;
+    }
+
+    private static bool IsNotWinGetId(WGetNET.WinGetPackage package) => !package.Id.StartsWith("XP");
 }
