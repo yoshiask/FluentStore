@@ -19,7 +19,7 @@ namespace Microsoft.Marketplace.Storefront.Contracts.V3
         public string AdditionalLicenseTerms { get; set; }
         public string AppWebsiteUrl { get; set; }
         public List<V2.ProductRating> ProductRatings { get; set; }
-        public List<string> PermissionsRequested { get; set; }
+        public List<string> PermissionsRequired { get; set; }
         public List<string> PackageAndDeviceCapabilities { get; set; }
         public string Version { get; set; }
         public DateTimeOffset LastUpdateDateUtc { get; set; }

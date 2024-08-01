@@ -160,7 +160,7 @@ namespace FluentStore.Sources.MicrosoftStore
                 foreach (SupportUri uri in product.SupportUris.Where(u => u.Uri != null))
                     SupportUrls.Add(new(uri.Uri, ShortTitle + " support"));
             Ratings = product.ProductRatings;
-            PermissionsRequested = product.PermissionsRequested;
+            PermissionsRequired = product.PermissionsRequired;
             PackageAndDeviceCapabilities = product.PackageAndDeviceCapabilities;
             AllowedPlatforms = product.AllowedPlatforms;
             WarningMessages = product.WarningMessages;
@@ -418,7 +418,7 @@ namespace FluentStore.Sources.MicrosoftStore
 
         private List<string> _PermissionsRequested = new();
         [DisplayAdditionalInformation("Permissions", "\uE8D7")]
-        public List<string> PermissionsRequested
+        public List<string> PermissionsRequired
         {
             get => _PermissionsRequested;
             set => SetProperty(ref _PermissionsRequested, value);
