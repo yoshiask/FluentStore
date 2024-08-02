@@ -107,7 +107,7 @@
         <TextBlock Visibility="{x:Bind ViewModel.HasNoPackageSources, Converter={StaticResource BoolToVisibilityConverter}}"
                    Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center"
                    TextAlignment="Center">
-            <Run FontSize="24">No packages sources were loaded</Run>
+            <Run FontSize="24">No package sources were loaded</Run>
             <LineBreak/>
             <Run>Go to Settings > Plugins to manage plugins</Run>
         </TextBlock>
