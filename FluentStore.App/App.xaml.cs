@@ -135,6 +135,15 @@ namespace FluentStore
                 // Update last launched version
                 Settings.Default.LastLaunchedVersion = Windows.ApplicationModel.Package.Current.Id.Version.ToVersion();
                 await Settings.Default.SaveAsync();
+
+                var nugetHandler = (PackageHandlerBase)ActivatorUtilities.CreateInstance(Ioc.Default, typeof(SDK.Plugins.Sources.NuGetPluginHandler));
+                nugetHandler.IsEnabled = true;
+                pkgSvc.RegisterPackageHandler(nugetHandler);
+
+                // Start IPFS local node
+                //var paths = Ioc.Default.GetRequiredService<ICommonPathManager>();
+                //using var bootstrapper = new OwlCore.Kubo.KuboBootstrapper(paths.GetAppDataDirectory().CreateSubdirectory("Kubo").FullName);
+                //await bootstrapper.StartAsync();
             }
             log?.Log($"Redirect activation?: {result.RedirectActivation}");
 

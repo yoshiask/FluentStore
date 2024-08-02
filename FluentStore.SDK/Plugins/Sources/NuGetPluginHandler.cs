@@ -1,0 +1,86 @@
+﻿using FluentStore.SDK.Helpers;
+using FluentStore.SDK.Images;
+using FluentStore.SDK.Plugins.NuGet;
+using FluentStore.Services;
+using Flurl;
+using Garfoot.Utilities.FluentUrn;
+using NuGet.Common;
+using NuGet.Packaging;
+using NuGet.Protocol.Core.Types;
+using NuGet.Versioning;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace FluentStore.SDK.Plugins.Sources
+{
+    public class NuGetPluginHandler(IPasswordVaultService passwordVaultService, PluginLoader pluginLoader) : PackageHandlerBase(passwordVaultService)
+    {
+        public const string NAMESPACE_NUGETPLUGIN = "nuget-plugin";
+        private const string DEFAULT_FEED = "ipns://ipfs.askharoun.com/FluentStore/Plugins/NuGet/index.json";
+
+        private readonly PluginLoader _pluginLoader = pluginLoader;
+        private readonly SourceRepository _repo = FluentStoreNuGetProject.CreateAbstractStorageSourceRepository(DEFAULT_FEED);
+        private readonly SourceCacheContext _cache = new();
+
+        public override HashSet<string> HandledNamespaces => [NAMESPACE_NUGETPLUGIN];
+
+        public override string DisplayName => "NuGet Plugins";
+
+        internal PluginLoader PluginLoader => _pluginLoader;
+
+        public override ImageBase GetImage()
+        {
+            return new FileImage("https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/NuGet_project_logo.svg/240px-NuGet_project_logo.svg.png")
+            {
+                ImageType = ImageType.Logo
+            };
+        }
+
+        public override async IAsyncEnumerable<PackageBase> GetFeaturedPackagesAsync()
+        {
+            var searchResource = await _repo.GetResourceAsync<PackageSearchResource>();
+            if (searchResource is null)
+                yield break;
+
+            var searchResults = await searchResource.SearchAsync(string.Empty, new SearchFilter(true), 0, 15, NullLogger.Instance, default);
+            foreach (var result in searchResults)
+            {
+                yield return new NuGetPluginPackage(this, result)
+                {
+                    Status = PackageStatus.Details
+                };
+            }
+        }
+
+        public override async Task<PackageBase> GetPackage(Urn packageUrn, PackageStatus targetStatus = PackageStatus.Details)
+        {
+            var findPackageResource = await _repo.GetResourceAsync<FindPackageByIdResource>();
+            if (findPackageResource is null)
+                return null;
+
+            var packageId = packageUrn.GetContent();
+
+            var allVersions = await findPackageResource.GetAllVersionsAsync(packageId, _cache, NullLogger.Instance, default);
+            var latestVersion = FluentStoreNuGetProject.SupportedSdkRange.FindBestMatch(allVersions);
+            if (latestVersion is null)
+                return null;
+
+            MemoryStream depStream = new();
+            await findPackageResource.CopyNupkgToStreamAsync(packageId, latestVersion, depStream, _cache, NullLogger.Instance, default);
+
+            using PackageArchiveReader depReader = new(depStream);
+            var nuspec = await depReader.GetNuspecReaderAsync(default);
+            return new NuGetPluginPackage(this, nuspec:  nuspec)
+            {
+                Status = PackageStatus.Details
+            };
+        }
+
+        public override Task<PackageBase> GetPackageFromUrl(Url url) => Task.FromResult<PackageBase>(null);
+
+        public override Url GetUrlFromPackage(PackageBase package) => null;
+    }
+}
