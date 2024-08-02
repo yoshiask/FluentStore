@@ -54,11 +54,11 @@ public static class Extensions
         var fsApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
         var defaults = await fsApi.GetPluginDefaultsAsync();
 
-        var defaultSource = pluginLoader.Project.Repositories.Pop();
+        var defaultRepo = pluginLoader.Project.Repositories.Pop();
         pluginLoader.Project.Repositories.Clear();
-        pluginLoader.Project.Repositories.Add(defaultSource);
+        pluginLoader.Project.Repositories.Add(defaultRepo);
         pluginLoader.Project.AddFeeds(defaults.Feeds);
 
-        await pluginLoader.InstallDefaultPlugins(defaults.Packages, overwrite);
+        await pluginLoader.InstallPlugins(defaults.Packages, overwrite);
     }
 }

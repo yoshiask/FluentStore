@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using NuGet.Versioning;
 using System.Runtime.Loader;
 using NuGet.Packaging.Core;
+using FluentStore.SDK.Plugins.NuGet;
 
 namespace FluentStore.SDK.Plugins
 {
@@ -135,7 +136,7 @@ namespace FluentStore.SDK.Plugins
         }
 
         /// <summary>
-        /// Downloads and installs each plugin from the list of URLS.
+        /// Downloads and installs each plugin from the current NuGet feeds.
         /// </summary>
         /// <param name="pluginIds">
         /// Package IDs of the plugins to install.
@@ -144,27 +145,37 @@ namespace FluentStore.SDK.Plugins
         /// Whether to force download or install, even if a plugin with the same ID
         /// is already installed.
         /// </param>
-        public async Task InstallDefaultPlugins(IEnumerable<string> pluginIds, bool overwrite = false)
+        public async Task InstallPlugins(IEnumerable<string> pluginIds, bool overwrite = false)
         {
             Directory.CreateDirectory(_settings.PluginDirectory);
 
             foreach (var pluginId in pluginIds)
             {
-                try
-                {
-                    WeakReferenceMessenger.Default.Send(new Messages.PluginDownloadProgressMessage(
-                        pluginId, 0, null));
-
-                    using var downloadedResource = await Project.DownloadPackageAsync(pluginId, VersionRange.All);
-                    await InstallPlugin(downloadedResource.PackageStream, overwrite);
-                }
-                catch (Exception ex)
-                {
-                    _log.UnhandledException(ex, LogLevel.Error);
-                    WeakReferenceMessenger.Default.Send(new Messages.ErrorMessage(
-                        ex, pluginId, Messages.ErrorType.PluginDownloadFailed));
-                }
+                await InstallPlugin(pluginId, overwrite);
             }
+        }
+
+        public async Task<bool> InstallPlugin(string pluginId, bool overwrite = false)
+        {
+            Directory.CreateDirectory(_settings.PluginDirectory);
+
+            try
+            {
+                WeakReferenceMessenger.Default.Send(new Messages.PluginDownloadProgressMessage(
+                    pluginId, 0, null));
+
+                using var downloadedResource = await Project.DownloadPackageAsync(pluginId, VersionRange.All);
+                await InstallPlugin(downloadedResource.PackageStream, overwrite);
+            }
+            catch (Exception ex)
+            {
+                _log.UnhandledException(ex, LogLevel.Error);
+                WeakReferenceMessenger.Default.Send(new Messages.ErrorMessage(
+                    ex, pluginId, Messages.ErrorType.PluginDownloadFailed));
+                return false;
+            }
+            
+            return true;
         }
 
         /// <summary>
