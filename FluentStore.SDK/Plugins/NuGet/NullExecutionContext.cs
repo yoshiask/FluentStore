@@ -1,7 +1,7 @@
 ﻿using NuGet.ProjectManagement;
 using System.Threading.Tasks;
 
-namespace FluentStore.SDK.Plugins;
+namespace FluentStore.SDK.Plugins.NuGet;
 
 internal class NullExecutionContext : ExecutionContext
 {

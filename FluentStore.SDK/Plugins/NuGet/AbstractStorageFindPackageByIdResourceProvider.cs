@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using OwlCore.Extensions;
 
-namespace FluentStore.SDK.Plugins;
+namespace FluentStore.SDK.Plugins.NuGet;
 
 // See NuGet.Protocol.HttpFileSystemBasedFindPackageByIdResourceProvider
 
@@ -25,7 +25,7 @@ public class AbstractStorageFindPackageByIdResourceProvider : ResourceProvider
             .GetServiceEntryUris(ServiceTypes.PackageBaseAddress)
             ?? source.PackageSource.TrySourceAsUri?.IntoList();
 
-        if (packageBaseAddress is {Count: > 0})
+        if (packageBaseAddress is { Count: > 0 })
         {
             (await source.GetResourceAsync<RepositorySignatureResource>(token))?.UpdateRepositorySignatureInfo();
             var sourceResource = await source.GetResourceAsync<AbstractStorageResource>(token);

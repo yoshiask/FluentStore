@@ -10,9 +10,8 @@ using Newtonsoft.Json;
 using NuGet.Common;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
-using OwlCore.Storage;
 
-namespace FluentStore.SDK.Plugins;
+namespace FluentStore.SDK.Plugins.NuGet;
 
 public class AbstractStoragePackageSearchResourceV3 : PackageSearchResource
 {
@@ -35,7 +34,7 @@ public class AbstractStoragePackageSearchResourceV3 : PackageSearchResource
         var index = await GetIndexAsync(token);
         return index.Data.Where(PackageFilter).Skip(skip).Take(take);
     }
-    
+
     private async Task<V3SearchResults> GetIndexAsync(CancellationToken token)
     {
         if (_index is null)
@@ -47,11 +46,11 @@ public class AbstractStoragePackageSearchResourceV3 : PackageSearchResource
             foreach (var endpoint in _endpoints)
             {
                 var file = AbstractStorageHelper.GetFileFromUrl(endpoint.ToString());
-                
+
                 await using var stream = await file.SafeOpenStreamAsync(token: token);
                 using var streamReader = new StreamReader(stream);
                 await using var jsonReader = new JsonTextReader(streamReader);
-                
+
                 var index = serializer.Deserialize<V3SearchResults>(jsonReader);
                 _index.TotalHits += index.TotalHits;
                 _index.Data.AddRange(index.Data);
@@ -100,7 +99,7 @@ internal class V3SearchResultsConverter : JsonConverter
             switch (reader.TokenType)
             {
                 case JsonToken.PropertyName:
-                    switch ((string) reader.Value)
+                    switch ((string)reader.Value)
                     {
                         case "totalHits":
                             if (long.TryParse(reader.ReadAsString(), out var totalHits))

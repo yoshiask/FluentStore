@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 using NuGet.Protocol;
 using NuGet.Versioning;
 
-namespace FluentStore.SDK.Plugins;
+namespace FluentStore.SDK.Plugins.NuGet;
 
 public class ServiceIndexIpnsResourceV3 : ServiceIndexResourceV3
 {
@@ -33,7 +33,7 @@ public class ServiceIndexIpnsResourceV3 : ServiceIndexResourceV3
         {
             if (!_index.TryGetValue(type, out var entries))
                 continue;
-            
+
             var compatible = GetBestVersionMatchForType(clientVersion, entries);
             if (compatible.Count > 0)
                 return compatible;
@@ -63,11 +63,11 @@ public class ServiceIndexIpnsResourceV3 : ServiceIndexResourceV3
             foreach (var resource in resources)
             {
                 var id = GetValues(resource["@id"]).SingleOrDefault();
-                
+
                 // Skip missing @ids
                 if (string.IsNullOrEmpty(id))
                     continue;
-                
+
                 // Convert gateway URLs to IPNS URIs
                 var schemeIdx = id.IndexOf("://", StringComparison.Ordinal);
                 Guard.IsGreaterThanOrEqualTo(schemeIdx, 0);

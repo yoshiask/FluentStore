@@ -9,8 +9,9 @@ using System.Xml.Linq;
 
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+using NuGetLogLevel = NuGet.Common.LogLevel;
 
-namespace FluentStore.SDK.Plugins;
+namespace FluentStore.SDK.Plugins.NuGet;
 
 internal class FluentStoreProjectContext : INuGetProjectContext
 {
@@ -60,16 +61,16 @@ internal class FluentStoreProjectContext : INuGetProjectContext
         throw new NotImplementedException();
     }
 
-    private LogLevel ToLogLevel(NuGet.Common.LogLevel level)
+    private LogLevel ToLogLevel(NuGetLogLevel level)
     {
         return level switch
         {
-            NuGet.Common.LogLevel.Debug => LogLevel.Trace,
-            NuGet.Common.LogLevel.Verbose => LogLevel.Debug,
-            NuGet.Common.LogLevel.Information or
-            NuGet.Common.LogLevel.Minimal => LogLevel.Information,
-            NuGet.Common.LogLevel.Warning => LogLevel.Warning,
-            NuGet.Common.LogLevel.Error => LogLevel.Error,
+            NuGetLogLevel.Debug => LogLevel.Trace,
+            NuGetLogLevel.Verbose => LogLevel.Debug,
+            NuGetLogLevel.Information or
+            NuGetLogLevel.Minimal => LogLevel.Information,
+            NuGetLogLevel.Warning => LogLevel.Warning,
+            NuGetLogLevel.Error => LogLevel.Error,
             _ => throw new ArgumentOutOfRangeException(nameof(level)),
         };
     }

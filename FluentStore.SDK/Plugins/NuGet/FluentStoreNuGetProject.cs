@@ -14,7 +14,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace FluentStore.SDK.Plugins;
+namespace FluentStore.SDK.Plugins.NuGet;
 
 public class FluentStoreNuGetProject : NuGetProject
 {
@@ -39,6 +39,10 @@ public class FluentStoreNuGetProject : NuGetProject
     public IReadOnlySet<PackageIdentity> IgnoredDependencies { get; set; }
 
     public List<SourceRepository> Repositories { get; } = [_officialSource];
+
+    public static NuGetVersion CurrentSdkVersion => _currentSdkVersion;
+
+    public static VersionRange SupportedSdkRange => new(CurrentSdkVersion, new FloatRange(NuGetVersionFloatBehavior.PrereleasePatch));
 
     public FluentStoreNuGetProject(string pluginRoot, NuGetFramework targetFramework, string name = "FluentStore")
     {
@@ -81,7 +85,7 @@ public class FluentStoreNuGetProject : NuGetProject
         NuGetVersion[] allDepVersions = null;
         SourceRepository repo = null;
         FindPackageByIdResource resource = null;
-        
+
         // Search all available feeds for compatible versions
         foreach (var r in Repositories)
         {
@@ -109,10 +113,10 @@ public class FluentStoreNuGetProject : NuGetProject
                 continue;
             }
         }
-        
+
         throw new Exception($"Failed to find {packageId} in any NuGet feed.");
     }
-    
+
     public override async Task<bool> InstallPackageAsync(PackageIdentity packageIdentity, DownloadResourceResult downloadResourceResult, INuGetProjectContext nuGetProjectContext, CancellationToken token = default)
     {
         var pluginFolder = Path.Combine(PluginRoot, packageIdentity.Id);
@@ -180,6 +184,21 @@ public class FluentStoreNuGetProject : NuGetProject
         await File.WriteAllLinesAsync(_statusFilePath, _entries.Values.Select(e => e.ToString()), token);
     }
 
+    public static SourceRepository CreateAbstractStorageSourceRepository(string url)
+    {
+        var providers = new Lazy<INuGetResourceProvider>[]
+        {
+            new(() => new AbstractStoragePackageSearchResourceV3Provider()),
+            new(() => new AbstractStorageFindPackageByIdResourceProvider()),
+            new(() => new AbstractStorageResourceProvider()),
+            new(() => new AbstractStorageServiceIndexResourceV3Provider()),
+        }.Concat(Repository.Provider.GetCoreV3());
+
+        var source = Repository.CreateSource(providers, url);
+        source.PackageSource.ProtocolVersion = 3;
+        return source;
+    }
+
     private async Task<(PluginInstallStatus status, NuGetFramework tfm)> InstallPackageCoreAsync(PackageIdentity packageIdentity, DownloadResourceResult downloadResourceResult, INuGetProjectContext nuGetProjectContext, string pluginFolder, bool isPlugin, CancellationToken token = default)
     {
         var status = PluginInstallStatus.Completed;
@@ -196,7 +215,7 @@ public class FluentStoreNuGetProject : NuGetProject
             // which doesn't seem to be included in reader.GetSupportedFrameworks().
             var refFrameworks = reader.GetItems("ref").Select(g => g.TargetFramework);
             tfm = tfmReducer.GetNearest(TargetFramework, refFrameworks);
-            
+
             if (tfm is null)
                 throw new Exception($"{packageIdentity.Id} does not support {TargetFramework}");
         }
@@ -214,8 +233,8 @@ public class FluentStoreNuGetProject : NuGetProject
         {
             // Ensure compatible SDK version
             var sdkDep = dependencies?.FirstOrDefault(d => d.Id == "FluentStore.SDK");
-            if (dependencies is not null && !sdkDep.VersionRange.Satisfies(_currentSdkVersion))
-                throw new Exception($"{packageIdentity.Id} does not support Fluent Store SDK {_currentSdkVersion}: requires {sdkDep.VersionRange}");
+            if (dependencies is not null && !sdkDep.VersionRange.Satisfies(CurrentSdkVersion))
+                throw new Exception($"{packageIdentity.Id} does not support Fluent Store SDK {CurrentSdkVersion}: requires {sdkDep.VersionRange}");
         }
 
         // Check if this package is newer than an already installed one
@@ -278,7 +297,7 @@ public class FluentStoreNuGetProject : NuGetProject
             if (dependencies is not null)
             {
                 nuGetProjectContext.Log(MessageLevel.Debug, "Installing dependencies for {0}", packageIdentity.Id);
-                
+
                 // Figure out which dependencies don't need to be downloaded
                 var installed = IgnoredDependencies
                     .Concat(Entries.Select(p => p.Value.ToPackageIdentity()))
@@ -290,7 +309,7 @@ public class FluentStoreNuGetProject : NuGetProject
                 {
                     nuGetProjectContext.Log(MessageLevel.Debug, "Downloading dependency {0}", dependency);
                     var downloadResult = await DownloadPackageAsync(dependency.Id, dependency.VersionRange, token);
-                    
+
                     nuGetProjectContext.Log(MessageLevel.Debug, "Installing dependency {0}", dependency);
                     var (depStatus, _) = await InstallPackageCoreAsync(downloadResult.PackageReader.GetIdentity(),
                         downloadResult, nuGetProjectContext, pluginFolder, false, token);
@@ -314,21 +333,6 @@ public class FluentStoreNuGetProject : NuGetProject
         using var file = File.OpenWrite(dst);
         stream.CopyTo(file);
         return dst;
-    }
-
-    private static SourceRepository CreateAbstractStorageSourceRepository(string url)
-    {
-        var providers = new Lazy<INuGetResourceProvider>[]
-        {
-            new(() => new AbstractStoragePackageSearchResourceV3Provider()),
-            new(() => new AbstractStorageFindPackageByIdResourceProvider()),
-            new(() => new AbstractStorageResourceProvider()),
-            new(() => new AbstractStorageServiceIndexResourceV3Provider()),
-        }.Concat(Repository.Provider.GetCoreV3());
-            
-        var source = Repository.CreateSource(providers, url);
-        source.PackageSource.ProtocolVersion = 3;
-        return source;
     }
 
     private static bool IsDependencyAlreadyFulfilled(IEnumerable<PackageIdentity> installed, PackageDependency dep)

@@ -3,7 +3,7 @@ using NuGet.ProjectManagement;
 using System.Collections.Generic;
 using System.IO;
 
-namespace FluentStore.SDK.Plugins;
+namespace FluentStore.SDK.Plugins.NuGet;
 
 internal class FluentStoreSourceControlManagerProvider : ISourceControlManagerProvider
 {

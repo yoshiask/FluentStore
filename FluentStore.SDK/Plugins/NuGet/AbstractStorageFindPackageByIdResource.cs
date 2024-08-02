@@ -18,13 +18,11 @@ using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
-using NuGet.Protocol.Events;
 using NuGet.Versioning;
 using OwlCore.ComponentModel;
 using OwlCore.Storage;
-using static Vanara.PInvoke.Kernel32;
 
-namespace FluentStore.SDK.Plugins;
+namespace FluentStore.SDK.Plugins.NuGet;
 
 /// <summary>
 /// A <see cref="FindPackageByIdResource" /> for all file systems that can be abstracted

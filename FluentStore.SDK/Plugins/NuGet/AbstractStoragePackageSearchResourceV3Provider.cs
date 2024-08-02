@@ -6,7 +6,7 @@ using NuGet.Protocol.Core.Types;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 
-namespace FluentStore.SDK.Plugins;
+namespace FluentStore.SDK.Plugins.NuGet;
 
 public class AbstractStoragePackageSearchResourceV3Provider : ResourceProvider
 {
@@ -23,7 +23,7 @@ public class AbstractStoragePackageSearchResourceV3Provider : ResourceProvider
         if (serviceIndex != null)
         {
             var endpoints = serviceIndex.GetServiceEntryUris(ServiceTypes.SearchQueryService);
-            
+
             curResource = new AbstractStoragePackageSearchResourceV3(endpoints);
         }
 
