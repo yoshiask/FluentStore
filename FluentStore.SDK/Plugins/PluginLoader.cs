@@ -102,12 +102,9 @@ namespace FluentStore.SDK.Plugins
 
             result = new(pluginId);
 
-            var pluginPackagePath = Path.Combine(_settings.PluginDirectory, pluginId, $"{pluginId}.nuspec");
-            using Stream nuspecStream = new FileStream(pluginPackagePath, FileMode.Open);
-            NuspecReader nuspec = new(nuspecStream);
 
             // Get path to primary DLL
-            string assemblyPath = Path.Combine(Path.GetDirectoryName(pluginPackagePath), $"{nuspec.GetId()}.dll");
+            var assemblyPath = Path.Combine(_settings.PluginDirectory, pluginId, $"{pluginId}.dll");
             if (string.IsNullOrWhiteSpace(assemblyPath))
                 return result;
 
