@@ -37,16 +37,9 @@ namespace FluentStore.SDK.Helpers
         }
 
         public static FileInfo GetPackageFile(Urn packageUrn, DirectoryInfo folder = null)
-            => OpenPackageFile(packageUrn, folder, FileMode.Open);
-
-        public static FileInfo CreatePackageFile(Urn packageUrn, DirectoryInfo folder = null)
-            => OpenPackageFile(packageUrn, folder, FileMode.Create);
-
-        public static FileInfo OpenPackageFile(Urn packageUrn, DirectoryInfo folder = null, FileMode mode = FileMode.Create)
         {
             Guard.IsNotNull(packageUrn, nameof(packageUrn));
-            if (folder == null)
-                folder = GetTempDirectory();
+            folder ??= GetTempDirectory();
 
             return new(Path.Combine(folder.FullName, PrepUrnForFile(packageUrn)));
         }
@@ -151,18 +144,14 @@ namespace FluentStore.SDK.Helpers
 
             // Use cached download if available
             DownloadCache cache = new(folder);
-            if (cache.TryGet(package.Urn, out var cacheEntry) && cacheEntry.HasValue && cacheEntry.Value.GetDownloadItem() is FileInfo cachedFile)
+            if (cache.TryGetFile(package.Urn, package.Version, out info))
             {
-                if (cacheEntry.Value.GetVersion() == package.Version)
-                {
-                    info = cachedFile;
-                    goto downloaded;
-                }
+                goto downloaded;
             }
             else
             {
                 // Create the location to download to
-                info = CreatePackageFile(package.Urn, folder);
+                info = GetPackageFile(package.Urn, folder);
                 stream = info.OpenWrite();
                 cache.Add(package.Urn, package.Version, info);
             }

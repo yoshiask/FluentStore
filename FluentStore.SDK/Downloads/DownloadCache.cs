@@ -195,5 +195,32 @@ namespace FluentStore.SDK.Downloads
 
             return entry != null;
         }
+
+        public bool TryGetFile(Urn urn, string version, [NotNullWhen(true)] out FileInfo file)
+        {
+            if (TryGet(urn, out var cacheEntry) && cacheEntry.HasValue && cacheEntry.Value.GetDownloadItem() is FileInfo cachedFile)
+            {
+                if (cacheEntry.Value.GetVersion() == version)
+                {
+                    file = cachedFile;
+                    return true;
+                }
+            }
+
+            file = null;
+            return false;
+        }
+
+        public bool TryOpenFile(Urn urn, string version, [NotNullWhen(true)] out FileStream stream)
+        {
+            if (TryGetFile(urn, version, out var file))
+            {
+                stream = file.OpenRead();
+                return true;
+            }
+
+            stream = null;
+            return false;
+        }
     }
 }
