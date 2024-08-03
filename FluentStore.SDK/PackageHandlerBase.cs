@@ -1,4 +1,5 @@
-﻿using FluentStore.SDK.AbstractUI.Models;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using FluentStore.SDK.AbstractUI.Models;
 using FluentStore.SDK.Images;
 using FluentStore.SDK.Models;
 using FluentStore.SDK.Users;
@@ -13,19 +14,18 @@ using System.Threading.Tasks;
 
 namespace FluentStore.SDK
 {
-    public abstract class PackageHandlerBase : IEqualityComparer<PackageHandlerBase>
+    /// <summary>
+    /// Initializes a new instance of <see cref="PackageHandlerBase"/>.
+    /// </summary>
+    /// <param name="passwordVaultService">
+    /// The <see cref="IPasswordVaultService"/> to be used when
+    /// instantiating a new <see cref="AccountHandlerBase"/>.
+    /// </param>
+    public abstract class PackageHandlerBase(IPasswordVaultService passwordVaultService) : IEqualityComparer<PackageHandlerBase>
     {
-        /// <summary>
-        /// Initializes a new instance of <see cref="PackageHandlerBase"/>.
-        /// </summary>
-        /// <param name="passwordVaultService">
-        /// The <see cref="IPasswordVaultService"/> to be used when
-        /// instantiating a new <see cref="AccountHandlerBase"/>.
-        /// </param>
-        public PackageHandlerBase(IPasswordVaultService passwordVaultService)
-        {
+        internal readonly ISettingsService _settings = Ioc.Default.GetService<ISettingsService>();
 
-        }
+        public string Id => GetType().Name;
 
         /// <summary>
         /// A list of all namespaces this handler can handle.
@@ -34,11 +34,6 @@ namespace FluentStore.SDK
         /// Namespaces cannot be shared across handlers.
         /// </remarks>
         public abstract HashSet<string> HandledNamespaces { get; }
-
-        /// <summary>
-        /// Whether this package handler is enabled.
-        /// </summary>
-        public bool IsEnabled { get; set; }
 
         private ImageBase _Image;
         /// <summary>
@@ -66,6 +61,18 @@ namespace FluentStore.SDK
         /// The display name of this handler.
         /// </summary>
         public abstract string DisplayName { get; }
+
+        public bool IsEnabled()
+        {
+            // If no settings service was provided, enable everything
+            if (_settings is null)
+                return true;
+
+            // If the user saved a preference, use it--
+            // otherwise, default to `enabled`
+            return !_settings.PackageHandlerEnabled.TryGetValue(Id, out var enabled)
+                || enabled;
+        }
 
         /// <summary>
         /// Gets an image that represents this handler.

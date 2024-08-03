@@ -6,6 +6,7 @@ using OwlCore.Services;
 using OwlCore.Storage;
 using OwlCore.Storage.System.IO;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Windows.ApplicationModel;
 
@@ -13,7 +14,6 @@ namespace FluentStore.Helpers
 {
     public class Settings : SettingsBase, ISettingsService
     {
-        private const string KEY_PackageHandlerEnabled = "PackageHandlerEnabled";
         private static Settings s_settings;
         private static readonly DefaultSettingValues s_defVals = new();
         private readonly ICommonPathManager m_pathManager;
@@ -56,6 +56,12 @@ namespace FluentStore.Helpers
             set => SetSetting(value);
         }
 
+        public Dictionary<string, bool> PackageHandlerEnabled
+        {
+            get => GetSetting(() => new Dictionary<string, bool>());
+            set => SetSetting(value);
+        }
+
         public bool IsDebug
         {
             get
@@ -77,20 +83,6 @@ namespace FluentStore.Helpers
             }
         }
 
-        public event EventHandler<PackageHandlerEnabledStateChangedEventArgs> PackageHandlerEnabledStateChanged;
-
-        public bool GetPackageHandlerEnabledState(string typeName)
-        {
-            return GetSetting(() => true, GetPackageHandlerEnabledKey(typeName));
-        }
-
-        public void SetPackageHandlerEnabledState(string typeName, bool enabled)
-        {
-            SetSetting(enabled, GetPackageHandlerEnabledKey(typeName));
-
-            PackageHandlerEnabledStateChanged?.Invoke(this, new(typeName, enabled));
-        }
-
         public AppUpdateStatus GetAppUpdateStatus()
         {
             if (LastLaunchedVersion == null)
@@ -106,8 +98,6 @@ namespace FluentStore.Helpers
 
             return AppUpdateStatus.None;
         }
-
-        private static string GetPackageHandlerEnabledKey(string typeName) => $"{KEY_PackageHandlerEnabled}_{typeName}";
 
         private static IModifiableFolder GetSettingsFolder(ICommonPathManager pathManager)
         {

@@ -1,5 +1,6 @@
 ﻿using OwlCore.Diagnostics;
 using System;
+using System.Collections.Generic;
 
 namespace FluentStore.Services
 {
@@ -15,17 +16,7 @@ namespace FluentStore.Services
 
         public LogLevel LoggingLevel { get; set; }
 
-        public event EventHandler<PackageHandlerEnabledStateChangedEventArgs> PackageHandlerEnabledStateChanged;
-
-        /// <summary>
-        /// Gets the enabled state of the specified package handler. Defaults to <c>true</c>.
-        /// </summary>
-        public bool GetPackageHandlerEnabledState(string typeName);
-
-        /// <summary>
-        /// Sets the enabled state of the specified package handler.
-        /// </summary>
-        public void SetPackageHandlerEnabledState(string typeName, bool enabled);
+        public Dictionary<string, bool> PackageHandlerEnabled { get; set; }
 
         /// <summary>
         /// Compares <see cref="LastLaunchedVersion"/> to the current app's version.

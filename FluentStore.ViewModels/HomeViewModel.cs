@@ -73,8 +73,6 @@ namespace FluentStore.ViewModels
                     Urn packageUrn = Urn.Parse(id);
                     var package = await PackageService.GetPackageAsync(packageUrn);
                     CarouselItems.Add(new PackageViewModel(package));
-                    //if (i == 0)
-                    //    SelectedCarouselItemIndex = i;
                 }
                 catch (System.Exception ex)
                 {
@@ -83,14 +81,10 @@ namespace FluentStore.ViewModels
                 }
             });
 
-            for (int i = 0; i < featured.Carousel.Count; i++)
-            {
-                
-            }
             CarouselItems.CollectionChanged -= CarouselItems_CollectionChanged;
         }
 
-        public bool HasNoPackageSources => !PackageService.PackageHandlers.Any(p => p.IsEnabled);
+        public bool HasNoPackageSources => !PackageService.GetEnabledPackageHandlers().Any();
 
         private IAsyncRelayCommand _LoadAllFeaturedCommand;
         public IAsyncRelayCommand LoadAllFeaturedCommand

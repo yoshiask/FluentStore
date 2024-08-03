@@ -123,7 +123,7 @@ namespace FluentStore.ViewModels
 
         public IEnumerable<PackageHandlerBase> GetPackageHandlersForNewCollections()
         {
-            return PackageService.PackageHandlers.Where(ph => ph.IsEnabled && ph.CanCreateCollection());
+            return PackageService.GetEnabledPackageHandlers().Where(ph => ph.CanCreateCollection());
         }
     }
 }

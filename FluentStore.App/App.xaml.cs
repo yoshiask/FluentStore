@@ -122,14 +122,12 @@ namespace FluentStore
                 }
 
                 // Load plugins and initialize package and account services
-                var pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
-                Settings.Default.PackageHandlerEnabledStateChanged += pkgSvc.UpdatePackageHandlerEnabledStates;
-
                 log?.Log($"Began loading plugins");
                 await pluginLoader.LoadPlugins();
                 log?.Log($"Finished loading plugins");
 
                 // Attempt to silently sign into any saved accounts
+                var pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
                 await pkgSvc.TrySlientSignInAsync();
 
                 // Update last launched version

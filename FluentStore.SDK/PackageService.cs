@@ -1,4 +1,5 @@
 ﻿using FluentStore.SDK.Models;
+using FluentStore.Services;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
 using System;
@@ -8,8 +9,10 @@ using System.Threading.Tasks;
 
 namespace FluentStore.SDK
 {
-    public class PackageService
+    public class PackageService(ISettingsService settings)
     {
+        private readonly ISettingsService _settings = settings;
+
         private readonly HashSet<PackageHandlerBase> _packageHandlers = new();
         /// <summary>
         /// A cache of all valid package handlers.
@@ -39,10 +42,8 @@ namespace FluentStore.SDK
         /// </summary>
         public async IAsyncEnumerable<HandlerPackageListPair> GetFeaturedPackagesAsync()
         {
-            foreach (var handler in PackageHandlers)
+            foreach (var handler in GetEnabledPackageHandlers())
             {
-                if (!handler.IsEnabled) continue;
-
                 List<PackageBase> results;
                 try
                 {
@@ -62,10 +63,8 @@ namespace FluentStore.SDK
         public async Task<IEnumerable<PackageBase>> SearchAsync(string query)
         {
             var packages = new List<PackageBase>();
-            foreach (var handler in PackageHandlers)
+            foreach (var handler in GetEnabledPackageHandlers())
             {
-                if (!handler.IsEnabled) continue;
-
                 List<PackageBase> results;
                 try
                 {
@@ -86,10 +85,8 @@ namespace FluentStore.SDK
         public async Task<IEnumerable<PackageBase>> GetSearchSuggestionsAsync(string query)
         {
             var packages = new List<PackageBase>();
-            foreach (var handler in PackageHandlers)
+            foreach (var handler in GetEnabledPackageHandlers())
             {
-                if (!handler.IsEnabled) continue;
-
                 List<PackageBase> results;
                 try
                 {
@@ -144,10 +141,8 @@ namespace FluentStore.SDK
         public async Task<PackageBase> GetPackageFromUrlAsync(Url url)
         {
             PackageBase package = null;
-            foreach (PackageHandlerBase handler in PackageHandlers)
+            foreach (var handler in GetEnabledPackageHandlers())
             {
-                if (!handler.IsEnabled) continue;
-
                 package = await handler.GetPackageFromUrl(url);
                 if (package != null)
                     break;
@@ -174,10 +169,8 @@ namespace FluentStore.SDK
         /// </remarks>
         public async IAsyncEnumerable<PackageBase> GetCollectionsAsync()
         {
-            foreach (var handler in PackageHandlers)
+            foreach (var handler in GetEnabledPackageHandlers())
             {
-                if (!handler.IsEnabled) continue;
-
                 IAsyncEnumerable<PackageBase> results;
                 try
                 {
@@ -199,7 +192,7 @@ namespace FluentStore.SDK
             if (NamespaceRegistry.TryGetValue(ns, out var handlerIdx))
             {
                 var handler = PackageHandlers.ElementAt(handlerIdx);
-                if (!handler.IsEnabled)
+                if (!handler.IsEnabled())
                     throw new InvalidOperationException($"The {handler.DisplayName} package handler is disabled. Please go to settings and re-enable it.");
                 return handler;
             }
@@ -230,12 +223,6 @@ namespace FluentStore.SDK
         /// </summary>
         public string GetHandlerDisplayName(string ns) => GetHandlerForNamespace(ns).DisplayName;
 
-        public void UpdatePackageHandlerEnabledStates(object _, Services.PackageHandlerEnabledStateChangedEventArgs args)
-        {
-            foreach (var handler in PackageHandlers.Where(ph => ph.GetType().Name == args.TypeName))
-                handler.IsEnabled = args.NewState;
-        }
-
         private static IEnumerable<PackageBase> SortPackages(string query, IList<PackageBase> packages)
         {
             return FuzzySharp.Process
@@ -251,9 +238,9 @@ namespace FluentStore.SDK
         /// </summary>
         public async Task TrySlientSignInAsync()
         {
-            foreach (var handler in PackageHandlers)
+            foreach (var handler in GetEnabledPackageHandlers())
             {
-                if (!handler.IsEnabled || handler.AccountHandler == null) continue;
+                if (handler.AccountHandler is null) continue;
 
                 await handler.AccountHandler.TrySilentSignInAsync();
             }
@@ -280,7 +267,9 @@ namespace FluentStore.SDK
         /// <exception cref="InvalidOperationException"/>
         public Users.AccountHandlerBase GetAccountHandler(string id)
         {
-            var handler = PackageHandlers.Select(ph => ph.AccountHandler).FirstOrDefault(ah => ah != null && ah.Id == id);
+            var handler = GetAccountHandlers(true)
+                .FirstOrDefault(ah => ah.Id == id);
+
             if (handler != null)
                 return handler;
 
@@ -295,11 +284,14 @@ namespace FluentStore.SDK
         /// </param>
         public IEnumerable<Users.AccountHandlerBase> GetAccountHandlers(bool includeDisabled = false)
         {
-            return PackageHandlers.Where(ph => ph.IsEnabled)
+            return GetEnabledPackageHandlers()
                 .Select(ph => ph.AccountHandler)
                 .Where(ah => ah != null && (ah.IsEnabled || includeDisabled));
         }
 
         #endregion
+
+        public IEnumerable<PackageHandlerBase> GetEnabledPackageHandlers() =>
+            PackageHandlers.Where(h => h.IsEnabled());
     }
 }

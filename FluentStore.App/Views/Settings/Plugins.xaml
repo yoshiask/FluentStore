@@ -127,7 +127,7 @@
                                                 ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
                                 <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}"
                                            Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                                <ToggleSwitch IsOn="{x:Bind IsEnabled}" Grid.Column="2" Margin="0,0,8,0"
+                                <ToggleSwitch IsOn="{x:Bind IsEnabled(), Mode=OneWay}" Grid.Column="2" Margin="0,0,8,0"
                                               Style="{ThemeResource ToggleSwitchRightStyle}"
                                               Toggled="PackageHandlerEnable_Toggled"/>
                             </Grid>

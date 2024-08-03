@@ -395,9 +395,6 @@ namespace FluentStore.SDK.Plugins
                 if (handler is null)
                     continue;
 
-                // Enable or disable according to user settings
-                handler.IsEnabled = _settings.GetPackageHandlerEnabledState(type.Name);
-
                 // Initialize handler
                 if (handler is IAsyncInit needsInit)
                     await needsInit.InitAsync();

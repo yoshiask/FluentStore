@@ -6,6 +6,7 @@ using FluentStore.SDK.Messages;
 using FluentStore.SDK.Plugins;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using System;
 using System.IO;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -27,9 +28,19 @@ namespace FluentStore.Views.Settings
 
         private void PackageHandlerEnable_Toggled(object sender, RoutedEventArgs e)
         {
-            if (sender is not ToggleSwitch ts) return;
+            bool enable;
+            if (sender is ToggleSwitch ts)
+                enable = ts.IsOn;
+            else if (sender is ToggleButton tb)
+                enable = tb.IsChecked ?? false;
+            else
+                return;
 
-            Helpers.Settings.Default.SetPackageHandlerEnabledState(ts.DataContext.GetType().Name, ts.IsOn);
+            var handler = (sender as FrameworkElement)?.DataContext as PackageHandlerBase;
+            if (handler is null)
+                return;
+
+            Helpers.Settings.Default.PackageHandlerEnabled[handler.Id] = enable;
         }
 
         private void OpenPluginDirButton_Click(object sender, RoutedEventArgs e)
