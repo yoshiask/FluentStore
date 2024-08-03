@@ -19,12 +19,16 @@ using NuGet.Versioning;
 using System.Runtime.Loader;
 using NuGet.Packaging.Core;
 using FluentStore.SDK.Plugins.NuGet;
+using NuGet.Protocol.Core.Types;
 
 namespace FluentStore.SDK.Plugins
 {
     public class PluginLoader : IAsyncInit
     {
+        private const string FLUENTSTORE_FEED = "ipns://ipfs.askharoun.com/FluentStore/Plugins/NuGet/index.json";
+
         private static readonly NuGetFramework _targetFramework = NuGetFramework.Parse("net7.0-windows10.0.22621.0");
+        private static readonly SourceRepository _fluentStoreRepo = FluentStoreNuGetProject.CreateAbstractStorageSourceRepository(FLUENTSTORE_FEED);
 
         private readonly HashSet<PackageIdentity> _loadedAssemblies =
         [
@@ -38,6 +42,8 @@ namespace FluentStore.SDK.Plugins
         private readonly FluentStoreProjectContext _projCtx;
         private readonly Dictionary<string, PluginLoadResult> _loadedPlugins = [];
 
+        public static SourceRepository FluentStoreRepo => _fluentStoreRepo;
+
         public bool IsInitialized { get; private set; }
 
         public FluentStoreNuGetProject Project { get; init; }
@@ -49,7 +55,9 @@ namespace FluentStore.SDK.Plugins
             _passwordVaultService = passwordVaultService;
             _log = log;
             _projCtx = new(settings.PluginDirectory, _log);
+
             Project = new(settings.PluginDirectory, _targetFramework);
+            Project.Repositories.Add(FluentStoreRepo);
         }
 
         public async Task InitAsync(CancellationToken token = default)
@@ -133,10 +141,44 @@ namespace FluentStore.SDK.Plugins
         }
 
         /// <summary>
+        /// Opens a stream for the provided plugin.
+        /// </summary>
+        /// <param name="pluginId">
+        /// The package ID of the plugin to install.
+        /// </param>
+        /// <returns>
+        /// A <see cref="DownloadResourceResult"/> containing a plugin stream and reader.
+        /// </returns>
+        public async Task<DownloadResourceResult> FetchPlugin(string pluginId, CancellationToken token = default)
+        {
+            try
+            {
+                WeakReferenceMessenger.Default.Send(new Messages.PluginDownloadProgressMessage(
+                    pluginId, 0, 1));
+
+                var supportedVersions = FluentStoreNuGetProject.SupportedSdkRange;
+                var downloadedResource = await Project.DownloadPackageAsync(pluginId, supportedVersions, token);
+
+                WeakReferenceMessenger.Default.Send(new Messages.PluginDownloadProgressMessage(
+                    pluginId, 1, 1));
+
+                return downloadedResource;
+            }
+            catch (Exception ex)
+            {
+                _log.UnhandledException(ex, LogLevel.Error);
+                WeakReferenceMessenger.Default.Send(new Messages.ErrorMessage(
+                    ex, pluginId, Messages.ErrorType.PluginDownloadFailed));
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Downloads and installs each plugin from the current NuGet feeds.
         /// </summary>
         /// <param name="pluginIds">
-        /// Package IDs of the plugins to install.
+        /// The package IDs of the plugins to install.
         /// </param>
         /// <param name="overwrite">
         /// Whether to force download or install, even if a plugin with the same ID
@@ -152,34 +194,45 @@ namespace FluentStore.SDK.Plugins
             }
         }
 
+        /// <summary>
+        /// Downloads and installs a plugin from the current NuGet feed.
+        /// </summary>
+        /// <param name="pluginId">
+        /// The package ID of the plugin to install.
+        /// </param>
+        /// <param name="overwrite">
+        /// Whether to force install, even if a plugin with the same ID
+        /// and newer version is already installed.
+        /// </param>
+        /// <returns>
+        /// Whether the plugin was installed successfully. <see langword="false"/> if the plugin
+        /// was already installed and <paramref name="overwrite"/> was <see langword="false"/>.
+        /// </returns>
         public async Task<bool> InstallPlugin(string pluginId, bool overwrite = false)
         {
-            Directory.CreateDirectory(_settings.PluginDirectory);
-
             try
             {
-                WeakReferenceMessenger.Default.Send(new Messages.PluginDownloadProgressMessage(
-                    pluginId, 0, null));
+                var downloadedResource = await FetchPlugin(pluginId);
 
-                using var downloadedResource = await Project.DownloadPackageAsync(pluginId, VersionRange.All);
-                await InstallPlugin(downloadedResource.PackageStream, overwrite);
+                WeakReferenceMessenger.Default.Send(new Messages.PluginInstallStartedMessage(pluginId));
+
+                var status = await InstallPlugin(downloadedResource, overwrite, true);
+                return status.IsGreaterThan(PluginInstallStatus.Failed);
             }
             catch (Exception ex)
             {
                 _log.UnhandledException(ex, LogLevel.Error);
                 WeakReferenceMessenger.Default.Send(new Messages.ErrorMessage(
-                    ex, pluginId, Messages.ErrorType.PluginDownloadFailed));
+                    ex, pluginId, Messages.ErrorType.PluginInstallFailed));
                 return false;
             }
-            
-            return true;
         }
 
         /// <summary>
         /// Installs the provided plugin.
         /// </summary>
         /// <param name="plugin">
-        /// A <see cref="Stream"/> containing a zip archive of the plugin to install.
+        /// A <see cref="Stream"/> containing a NuGet package containing the plugin to install.
         /// </param>
         /// <param name="overwrite">
         /// Whether to force install, even if a plugin with the same ID
@@ -191,15 +244,55 @@ namespace FluentStore.SDK.Plugins
         /// </returns>
         public async Task<PluginInstallStatus> InstallPlugin(Stream plugin, bool overwrite = false, CancellationToken token = default)
         {
-            string pluginId = "[UNKNOWN]";
-            PluginInstallStatus status = PluginInstallStatus.Failed;
-            Directory.CreateDirectory(_settings.PluginDirectory);
-
             try
             {
                 // Read package metadata
-                using PackageArchiveReader reader = new(plugin);
-                NuspecReader nuspec = reader.NuspecReader;
+                PackageArchiveReader reader = new(plugin);
+                DownloadResourceResult downloadItem = new(plugin, reader, string.Empty);
+
+                return await InstallPlugin(downloadItem, overwrite, true, token);
+            }
+            catch (Exception ex)
+            {
+                WeakReferenceMessenger.Default.Send(new Messages.ErrorMessage(
+                    ex, string.Empty, Messages.ErrorType.PluginInstallFailed));
+                return PluginInstallStatus.Failed;
+            }
+        }
+
+        /// <summary>
+        /// Installs the provided plugin.
+        /// </summary>
+        /// <param name="downloadItem">
+        /// A <see cref="DownloadResourceResult"/> of the plugin to install.
+        /// </param>
+        /// <param name="overwrite">
+        /// Whether to force install, even if a plugin with the same ID
+        /// and newer version is already installed.
+        /// </param>
+        /// <param name="dispose">
+        /// Whether to dispose of the provided <paramref name="downloadItem"/>.
+        /// </param>
+        /// <returns>
+        /// Whether the plugin was installed successfully. <see langword="false"/> if the plugin
+        /// was already installed and <paramref name="overwrite"/> was <see langword="false"/>.
+        /// </returns>
+        public async Task<PluginInstallStatus> InstallPlugin(DownloadResourceResult downloadItem, bool overwrite = false, bool dispose = true, CancellationToken token = default)
+        {
+            var pluginId = "[UNKNOWN]";
+            PluginInstallStatus status;
+
+            try
+            {
+                if (downloadItem.Status is not (DownloadResourceResultStatus.AvailableWithoutStream or DownloadResourceResultStatus.Available))
+                    throw new ArgumentException("The provided item failed to download", nameof(downloadItem));
+
+                Directory.CreateDirectory(_settings.PluginDirectory);
+
+                // Read package metadata
+                var reader = downloadItem.PackageReader;
+                var nuspec = reader.NuspecReader;
+
                 pluginId = nuspec.GetId().ToString();
                 var identity = nuspec.GetIdentity();
 
@@ -207,8 +300,7 @@ namespace FluentStore.SDK.Plugins
 
                 _projCtx.ActionType = overwrite ? NuGetActionType.Reinstall : NuGetActionType.Install;
 
-                var installed = await Project.InstallPackageAsync(identity,
-                    new(plugin, reader, string.Empty), _projCtx, token);
+                var installed = await Project.InstallPackageAsync(identity,downloadItem, _projCtx, token);
                 status = Project.Entries[pluginId].Status;
 
                 if (status == PluginInstallStatus.NoAction)
@@ -230,15 +322,20 @@ namespace FluentStore.SDK.Plugins
                     WeakReferenceMessenger.Default.Send(
                         Messages.SuccessMessage.CreateForPluginInstallCompleted(pluginId));
                 }
-
-                return status;
             }
             catch (Exception ex)
             {
                 WeakReferenceMessenger.Default.Send(new Messages.ErrorMessage(
                     ex, pluginId, Messages.ErrorType.PluginInstallFailed));
-                return PluginInstallStatus.Failed;
+                status = PluginInstallStatus.Failed;
             }
+            finally
+            {
+                if (dispose)
+                    downloadItem.Dispose();
+            }
+
+            return status;
         }
 
         /// <summary>

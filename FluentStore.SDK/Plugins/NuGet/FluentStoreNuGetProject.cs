@@ -79,24 +79,18 @@ public class FluentStoreNuGetProject : NuGetProject
         }
     }
 
-    public async Task<DownloadResourceResult> DownloadPackageAsync(string packageId, VersionRange versionRange,
-        CancellationToken token = default)
+    public async Task<DownloadResourceResult> DownloadPackageAsync(string packageId, VersionRange versionRange, CancellationToken token = default)
     {
-        NuGetVersion[] allDepVersions = null;
-        SourceRepository repo = null;
-        FindPackageByIdResource resource = null;
-
         // Search all available feeds for compatible versions
-        foreach (var r in Repositories)
+        foreach (var repo in Repositories)
         {
             try
             {
-                repo = r;
-                resource = await repo.GetResourceAsync<FindPackageByIdResource>(token);
+                var resource = await repo.GetResourceAsync<FindPackageByIdResource>(token);
 
-                allDepVersions =
-                    (await resource.GetAllVersionsAsync(packageId, _cache, NullLogger.Instance, token))
+                var allDepVersions = (await resource.GetAllVersionsAsync(packageId, _cache, NullLogger.Instance, token))
                     .ToArray();
+
                 if (!allDepVersions.Any())
                     continue;
 
@@ -308,7 +302,7 @@ public class FluentStoreNuGetProject : NuGetProject
                 foreach (var dependency in dependencies.Where(d => !IsDependencyAlreadyFulfilled(installed, d)))
                 {
                     nuGetProjectContext.Log(MessageLevel.Debug, "Downloading dependency {0}", dependency);
-                    var downloadResult = await DownloadPackageAsync(dependency.Id, dependency.VersionRange, token);
+                    var downloadResult = await DownloadPackageAsync(dependency.Id, dependency.VersionRange, token: token);
 
                     nuGetProjectContext.Log(MessageLevel.Debug, "Installing dependency {0}", dependency);
                     var (depStatus, _) = await InstallPackageCoreAsync(downloadResult.PackageReader.GetIdentity(),

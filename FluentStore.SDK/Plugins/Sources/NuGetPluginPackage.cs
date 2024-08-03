@@ -1,26 +1,28 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using FluentStore.SDK.Downloads;
+using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
-using Flurl.Util;
 using Garfoot.Utilities.FluentUrn;
 using NuGet.Packaging;
 using NuGet.Protocol.Core.Types;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Plugins.Sources;
 
 public partial class NuGetPluginPackage : PackageBase
 {
-    private Uri _iconUri = new("https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/NuGet_project_logo.svg/240px-NuGet_project_logo.svg.png");
     private readonly PluginLoader _pluginLoader;
+
+    private Uri _iconUri = new("https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/NuGet_project_logo.svg/240px-NuGet_project_logo.svg.png");
+    private DownloadResourceResult _downloadItem;
 
     [ObservableProperty]
     private string _nuGetId;
 
-    public NuGetPluginPackage(NuGetPluginHandler packageHandler, IPackageSearchMetadata searchMetadata = null, NuspecReader nuspec = null) : base(packageHandler)
+    public NuGetPluginPackage(NuGetPluginHandler packageHandler, IPackageSearchMetadata searchMetadata = null, NuspecReader nuspec = null, PackageReaderBase reader = null) : base(packageHandler)
     {
         _pluginLoader = packageHandler.PluginLoader;
 
@@ -28,6 +30,9 @@ public partial class NuGetPluginPackage : PackageBase
             Update(searchMetadata);
         if (nuspec is not null)
             Update(nuspec);
+
+        if (reader is not null)
+            _downloadItem = new(reader, "");
     }
 
     public override async Task<ImageBase> CacheAppIcon() => _iconUri is null ? null : new FileImage(_iconUri);
@@ -38,12 +43,41 @@ public partial class NuGetPluginPackage : PackageBase
 
     public override Task<bool> CanLaunchAsync() => Task.FromResult(false);
 
-    public override Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
+    public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
     {
-        throw new NotImplementedException();
+        DownloadCache cache = new(folder);
+
+        if (cache.TryGetFile(Urn, Version, out var file))
+        {
+            Status = PackageStatus.Downloaded;
+            return file;
+        }
+
+        var downloadItem = await GetResourceAsync();
+        var nupkgFile = StorageHelper.GetPackageFile(Urn, folder);
+
+        await downloadItem.PackageReader.CopyNupkgAsync(nupkgFile.FullName, default);
+        cache.Add(Urn, Version, nupkgFile);
+
+        Status = PackageStatus.Downloaded;
+        return nupkgFile;
     }
 
-    public override Task<bool> InstallAsync() => _pluginLoader.InstallPlugin(NuGetId, true);
+    public override async Task<bool> InstallAsync()
+    {
+        var downloadItem = await GetResourceAsync();
+        var status = await _pluginLoader.InstallPlugin(downloadItem, true);
+
+        DisposeResource();
+
+        if (status.IsGreaterThan(PluginInstallStatus.Failed))
+        {
+            Status = PackageStatus.Installed;
+            return true;
+        }
+
+        return false;
+    }
 
     public override Task LaunchAsync()
     {
@@ -63,11 +97,6 @@ public partial class NuGetPluginPackage : PackageBase
             _iconUri = searchMetadata.IconUrl;
     }
 
-    public void Update(IEnumerable<VersionInfo> versions)
-    {
-        Version = versions.OrderDescending().First().ToString();
-    }
-
     public void Update(NuspecReader nuspec)
     {
         NuGetId = nuspec.GetId();
@@ -83,5 +112,19 @@ public partial class NuGetPluginPackage : PackageBase
 
         if (string.IsNullOrEmpty(Title))
             Title = nuspec.GetId();
+    }
+
+    private async Task<DownloadResourceResult> GetResourceAsync()
+    {
+        if (_downloadItem is not null)
+            return _downloadItem;
+
+        return _downloadItem = await _pluginLoader.FetchPlugin(NuGetId);
+    }
+
+    private void DisposeResource()
+    {
+        _downloadItem?.Dispose();
+        _downloadItem = null;
     }
 }

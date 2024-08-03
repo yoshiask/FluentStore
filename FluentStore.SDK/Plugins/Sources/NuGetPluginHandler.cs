@@ -7,11 +7,8 @@ using Garfoot.Utilities.FluentUrn;
 using NuGet.Common;
 using NuGet.Packaging;
 using NuGet.Protocol.Core.Types;
-using NuGet.Versioning;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Plugins.Sources
@@ -19,10 +16,8 @@ namespace FluentStore.SDK.Plugins.Sources
     public class NuGetPluginHandler(IPasswordVaultService passwordVaultService, PluginLoader pluginLoader) : PackageHandlerBase(passwordVaultService)
     {
         public const string NAMESPACE_NUGETPLUGIN = "nuget-plugin";
-        private const string DEFAULT_FEED = "ipns://ipfs.askharoun.com/FluentStore/Plugins/NuGet/index.json";
 
         private readonly PluginLoader _pluginLoader = pluginLoader;
-        private readonly SourceRepository _repo = FluentStoreNuGetProject.CreateAbstractStorageSourceRepository(DEFAULT_FEED);
         private readonly SourceCacheContext _cache = new();
 
         public override HashSet<string> HandledNamespaces => [NAMESPACE_NUGETPLUGIN];
@@ -41,7 +36,7 @@ namespace FluentStore.SDK.Plugins.Sources
 
         public override async IAsyncEnumerable<PackageBase> GetFeaturedPackagesAsync()
         {
-            var searchResource = await _repo.GetResourceAsync<PackageSearchResource>();
+            var searchResource = await PluginLoader.FluentStoreRepo.GetResourceAsync<PackageSearchResource>();
             if (searchResource is null)
                 yield break;
 
@@ -57,7 +52,7 @@ namespace FluentStore.SDK.Plugins.Sources
 
         public override async Task<PackageBase> GetPackage(Urn packageUrn, PackageStatus targetStatus = PackageStatus.Details)
         {
-            var findPackageResource = await _repo.GetResourceAsync<FindPackageByIdResource>();
+            var findPackageResource = await PluginLoader.FluentStoreRepo.GetResourceAsync<FindPackageByIdResource>();
             if (findPackageResource is null)
                 return null;
 
