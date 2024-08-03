@@ -1,7 +1,6 @@
 ﻿using FluentStore.SDK.Models;
 using Garfoot.Utilities.FluentUrn;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace FluentStore.SDK.Helpers
@@ -14,15 +13,11 @@ namespace FluentStore.SDK.Helpers
             return new(packageVersion.Major, packageVersion.Minor, packageVersion.Build, packageVersion.Revision);
         }
 
-        public static bool IsAtLeast<TEnum>(this TEnum a, TEnum b) where TEnum : unmanaged, Enum
-        {
-            return a.AsUInt64() >= b.AsUInt64();
-        }
+        public static bool IsAtLeast<TEnum>(this TEnum a, TEnum b) where TEnum : unmanaged, Enum => a.AsUInt64() >= b.AsUInt64();
 
-        public static bool IsLessThan<TEnum>(this TEnum a, TEnum b) where TEnum : unmanaged, Enum
-        {
-            return a.AsUInt64() < b.AsUInt64();
-        }
+        public static bool IsGreaterThan<TEnum>(this TEnum a, TEnum b) where TEnum : unmanaged, Enum => a.AsUInt64() > b.AsUInt64();
+
+        public static bool IsLessThan<TEnum>(this TEnum a, TEnum b) where TEnum : unmanaged, Enum => a.AsUInt64() < b.AsUInt64();
 
         public static unsafe ulong AsUInt64<TEnum>(this TEnum item) where TEnum : unmanaged, Enum
         {
