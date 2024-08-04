@@ -69,7 +69,7 @@ namespace FluentStore.Helpers
 #if DEBUG
                 return true;
 #else
-				return false;
+                return false;
 #endif
             }
         }
