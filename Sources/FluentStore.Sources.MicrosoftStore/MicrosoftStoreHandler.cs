@@ -149,7 +149,7 @@ namespace FluentStore.Sources.MicrosoftStore
         public override Url GetUrlFromPackage(PackageBase package)
         {
             var id = package.Urn.GetContent<NamespaceSpecificString>().UnEscapedValue;
-            return $"https://apps.microsoft.com/store/detail/{id}";
+            return $"https://apps.microsoft.com/detail/{id}";
         }
 
         public override async Task<ReviewSummary> GetReviewsAsync(PackageBase package)
@@ -224,7 +224,7 @@ namespace FluentStore.Sources.MicrosoftStore
             return package;
         }
 
-        [GeneratedRegex(@"(?:https?:\/\/)?(?:(?:www\.)?microsoft\.com\/(?:(?<locale>[a-z]{2}-[a-z]{2})\/)?(?:store\/(?:apps|productId)|(?:p|store\/r)(?:\/.+)?)|apps\.microsoft\.com\/store\/detail(?:\/[\w-]+)?)\/(?<id>\w{12})", RegexOptions.IgnoreCase | RegexOptions.Singleline, "en-US")]
+        [GeneratedRegex(@"(?:https?:\/\/)?(?:(?:www\.)?microsoft\.com\/(?:(?<locale>[a-z]{2}-[a-z]{2})\/)?(?:store\/(?:apps|productId)|(?:p|store\/r)(?:\/.+)?)|apps\.microsoft\.com\/(?:store\/)?detail(?:\/[\w-]+)?)\/(?<id>\w{12})", RegexOptions.IgnoreCase | RegexOptions.Singleline, "en-US")]
         private static partial Regex MsStoreAppsRegex();
 
         [GeneratedRegex(@"^(?:https?:\/\/)?(?:www\.)?xbox\.com\/(?:(?<locale>[a-z]{2}-[a-z]{2})\/)?(?:games\/store)(?:\/.+)?\/(?<id>\w{12})")]
