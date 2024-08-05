@@ -82,7 +82,10 @@ namespace FluentStore.Views
                 WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
                 try
                 {
-                    ViewModel = new PackageViewModel(await PackageService.GetPackageFromUrlAsync(url));
+                    var packageFromUrl = await PackageService.GetPackageFromUrlAsync(url)
+                        ?? throw WebException.Create(404, $"The package at '{url}' could not be found", url);
+
+                    ViewModel = new PackageViewModel(packageFromUrl);
                 }
                 catch (WebException ex)
                 {

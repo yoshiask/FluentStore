@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using OwlCore.AbstractUI.ViewModels;
 using OwlCore.AbstractUI.Models;
+using CommunityToolkit.Diagnostics;
 
 namespace FluentStore.ViewModels
 {
@@ -25,6 +26,7 @@ namespace FluentStore.ViewModels
         }
         public PackageViewModel(PackageBase package) : this()
         {
+            Guard.IsNotNull(package);
             Package = package;
         }
 
