@@ -83,7 +83,7 @@ namespace FluentStore.Views
                 try
                 {
                     var packageFromUrl = await PackageService.GetPackageFromUrlAsync(url)
-                        ?? throw WebException.Create(404, $"The package at '{url}' could not be found", url);
+                        ?? throw WebException.Create(404, "The package could not be found", url);
 
                     ViewModel = new PackageViewModel(packageFromUrl);
                 }
