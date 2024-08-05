@@ -99,7 +99,7 @@ namespace FluentStore.ViewModels
         }
     }
 
-    public class AppViewModelBase : ObservableObject
+    public class AppViewModelBase : ObservableObject, IHasAccessibleDescription
     {
         public AppViewModelBase()
         {
@@ -144,6 +144,8 @@ namespace FluentStore.ViewModels
         public virtual async Task<bool> LaunchAsync() => false;
 
         public virtual bool ApplyFilter(MyAppsFilterOptions _) => false;
+
+        public virtual string ToAccessibleDescription() => DisplayName;
     }
 
     [Flags]

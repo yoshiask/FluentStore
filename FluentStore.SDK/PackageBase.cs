@@ -8,10 +8,11 @@ using System.Threading.Tasks;
 using System.IO;
 using FluentStore.SDK.Attributes;
 using OwlCore.AbstractUI.Models;
+using System.Text;
 
 namespace FluentStore.SDK
 {
-    public abstract class PackageBase : ObservableObject, IEquatable<PackageBase>
+    public abstract class PackageBase : ObservableObject, IEquatable<PackageBase>, IHasAccessibleDescription
     {
         protected static readonly List<AbstractButton> _emptyCommandList = new(0);
 
@@ -315,6 +316,14 @@ namespace FluentStore.SDK
             if (ScreenshotsCache == null)
                 ScreenshotsCache = await CacheScreenshots();
             return ScreenshotsCache;
+        }
+
+        public virtual string ToAccessibleDescription()
+        {
+            StringBuilder sb = new(ShortTitle ?? Title);
+            if (DeveloperName is not null)
+                sb.AppendFormat(" by {0}", DeveloperName);
+            return sb.ToString();
         }
     }
 

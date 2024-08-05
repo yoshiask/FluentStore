@@ -20,10 +20,11 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <DropDownButton x:Name="FilterButton" HorizontalAlignment="Right">
+        <DropDownButton x:Name="FilterButton" HorizontalAlignment="Right"
+                        AutomationProperties.Name="Filter">
             <StackPanel Orientation="Horizontal" Spacing="4">
                 <FontIcon Glyph="&#xE71C;"/>
-                <TextBlock Text="Filters"/>
+                <TextBlock Name="FilterButtonText" Text="Filters"/>
             </StackPanel>
 
             <DropDownButton.Flyout>
@@ -79,12 +80,12 @@
             </GridView.ItemContainerStyle>
             <GridView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:AppViewModel">
-                    <tkcontrols:ConstrainedBox AspectRatio="1">
+                    <tkcontrols:ConstrainedBox AspectRatio="1" AutomationProperties.Name="{x:Bind ToAccessibleDescription()}">
                         <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                             <Border Background="{ThemeResource SystemControlHighlightListMediumRevealBackgroundBrush}"/>
                             <Image Source="{x:Bind IconSource}"/>
                             <TextBlock Text="{x:Bind DisplayName}" FontSize="12" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
-                                   MaxLines="2" VerticalAlignment="Bottom" Padding="8"/>
+                                       MaxLines="2" VerticalAlignment="Bottom" Padding="8"/>
                         </Grid>
                     </tkcontrols:ConstrainedBox>
                 </DataTemplate>
