@@ -6,7 +6,7 @@ using System.Text;
 
 namespace FluentStore.SDK.Models
 {
-    public class Review : ObservableObject
+    public class Review : ObservableObject, IHasAccessibleDescription
     {
         private string _ReviewerName;
         public string ReviewerName
@@ -15,8 +15,8 @@ namespace FluentStore.SDK.Models
             set => SetProperty(ref _ReviewerName, value);
         }
 
-        private int _Rating;
-        public int Rating
+        private double _Rating;
+        public double Rating
         {
             get => _Rating;
             set => SetProperty(ref _Rating, value);
@@ -94,5 +94,21 @@ namespace FluentStore.SDK.Models
 
         public string SubmittedDateTimeToHumanizedString()
             => SubmittedDateTimeUtc.Humanize().ApplyCase(LetterCasing.Sentence);
+
+        public string ToAccessibleDescription()
+        {
+            StringBuilder sb = new("Review");
+
+            if (ReviewerName is not null)
+                sb.AppendFormat(" by '{0}'", ReviewerName);
+
+            if (Title is not null)
+                sb.AppendFormat(" titled '{0}'", Title);
+
+            if (ReviewText is not null)
+                sb.AppendFormat(" reads. {0}", ReviewText);
+
+            return sb.ToString();
+        }
     }
 }

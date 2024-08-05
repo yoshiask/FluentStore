@@ -359,7 +359,7 @@ namespace FluentStore.Sources.MicrosoftStore
                 Title = msReview.Title,
                 ReviewId = msReview.ReviewId.ToString(),
                 IsRevised = msReview.IsRevised,
-                Rating = (int)msReview.Rating,
+                Rating = msReview.Rating,
                 ReviewerName = msReview.ReviewerName,
                 ReviewText = msReview.ReviewText,
                 Locale = msReview.Locale,
