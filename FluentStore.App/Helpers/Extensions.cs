@@ -1,11 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
-using FluentStore.SDK.Helpers;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
 using System.Threading.Tasks;
-using Windows.ApplicationModel;
 using FluentStore.SDK.Plugins;
 using OwlCore.Extensions;
+using FluentStore.Services;
+using System;
 
 namespace FluentStore.Helpers;
 
@@ -24,41 +23,24 @@ public static class Extensions
 
     public static Visibility HideIfNull(this object obj) => obj is null ? Visibility.Collapsed : Visibility.Visible;
 
-    // Yoinked from https://stackoverflow.com/a/58091583/6232957
-    public static T FindControl<T>(this UIElement parent, string ControlName) where T : FrameworkElement
-    {
-        if (parent == null)
-            return null;
-
-        if (parent.GetType() == typeof(T) && ((T)parent).Name == ControlName)
-        {
-            return (T)parent;
-        }
-        T result = null;
-        int count = VisualTreeHelper.GetChildrenCount(parent);
-        for (int i = 0; i < count; i++)
-        {
-            UIElement child = (UIElement)VisualTreeHelper.GetChild(parent, i);
-
-            if (FindControl<T>(child, ControlName) != null)
-            {
-                result = FindControl<T>(child, ControlName);
-                break;
-            }
-        }
-        return result;
-    }
-
     public static async Task InstallDefaultPlugins(this PluginLoader pluginLoader, bool overwrite = false)
     {
-        var fsApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
-        var defaults = await fsApi.GetPluginDefaultsAsync();
+        try
+        {
+            var fsApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
+            var defaults = await fsApi.GetPluginDefaultsAsync();
 
-        var defaultRepo = pluginLoader.Project.Repositories.Pop();
-        pluginLoader.Project.Repositories.Clear();
-        pluginLoader.Project.Repositories.Add(defaultRepo);
-        pluginLoader.Project.AddFeeds(defaults.Feeds);
+            var defaultRepo = pluginLoader.Project.Repositories.Pop();
+            pluginLoader.Project.Repositories.Clear();
+            pluginLoader.Project.Repositories.Add(defaultRepo);
+            pluginLoader.Project.AddFeeds(defaults.Feeds);
 
-        await pluginLoader.InstallPlugins(defaults.Packages, overwrite);
+            await pluginLoader.InstallPlugins(defaults.Packages, overwrite);
+        }
+        catch (Exception ex)
+        {
+            var log = Ioc.Default.GetService<LoggerService>();
+            log?.Warn(ex, "Failed to load default plugins");
+        }
     }
 }
