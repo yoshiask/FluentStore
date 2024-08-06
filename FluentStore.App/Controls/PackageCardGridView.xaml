@@ -11,7 +11,8 @@
     d:DesignWidth="400">
 
     <GridView ItemsSource="{x:Bind Packages}" ItemTemplate="{StaticResource DefaultPackageCardTemplate}"
-              SelectionChanged="GridView_SelectionChanged" SelectedItem="{x:Bind SelectedPackage, Mode=TwoWay}" SelectionMode="Single"
+              IsItemClickEnabled="True" ItemClick="GridView_ItemClick"
+              SelectedItem="{x:Bind SelectedPackage, Mode=TwoWay}" SelectionMode="Single"
               HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="8"
               controls:ListViewBehaviour.FillBeforeWrap="True" controls:ListViewBehaviour.MinItemWidth="150">
 

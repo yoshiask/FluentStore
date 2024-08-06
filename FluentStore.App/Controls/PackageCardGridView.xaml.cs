@@ -48,18 +48,17 @@ namespace FluentStore.Controls
         public static readonly DependencyProperty ViewPackageCommandProperty = DependencyProperty.Register(
             nameof(ViewPackageCommand), typeof(ICommand), typeof(PackageCardGridView), new PropertyMetadata(null));
 
-        private async void GridView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void GridView_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (e.AddedItems.Count > 0)
-            {
-                var pvm = (PackageViewModel)e.AddedItems[0];
-                if (ViewPackageCommand != null && ViewPackageCommand.CanExecute(null))
-                    ViewPackageCommand.Execute(null);
-                else if (pvm.ViewPackageCommand != null && pvm.ViewPackageCommand.CanExecute(null))
-                    await pvm.ViewPackageCommand.ExecuteAsync(null);
-                else
-                    await pvm.ViewPackage();
-            }
+            if (e.ClickedItem is not PackageViewModel pvm)
+                return;
+
+            if (ViewPackageCommand != null && ViewPackageCommand.CanExecute(null))
+                ViewPackageCommand.Execute(null);
+            else if (pvm.ViewPackageCommand != null && pvm.ViewPackageCommand.CanExecute(null))
+                await pvm.ViewPackageCommand.ExecuteAsync(null);
+            else
+                await pvm.ViewPackage();
         }
     }
 }
