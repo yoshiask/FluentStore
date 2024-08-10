@@ -5,6 +5,7 @@ using FluentStore.SDK.Plugins;
 using OwlCore.Extensions;
 using FluentStore.Services;
 using System;
+using FluentStoreAPI.Models;
 
 namespace FluentStore.Helpers;
 
@@ -25,21 +26,39 @@ public static class Extensions
 
     public static async Task InstallDefaultPlugins(this PluginLoader pluginLoader, bool overwrite = false)
     {
+        var log = Ioc.Default.GetService<LoggerService>();
+        
         try
         {
-            var fsApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
-            var defaults = await fsApi.GetPluginDefaultsAsync();
+            PluginDefaults defaults = null;
 
-            var defaultRepo = pluginLoader.Project.Repositories.Pop();
-            pluginLoader.Project.Repositories.Clear();
-            pluginLoader.Project.Repositories.Add(defaultRepo);
-            pluginLoader.Project.AddFeeds(defaults.Feeds);
+            var fsApi = Ioc.Default.GetService<FluentStoreAPI.FluentStoreAPI>();
+            if (fsApi is not null)
+            {
+                try
+                {
+                    defaults = await fsApi.GetPluginDefaultsAsync();
+
+                    var defaultRepo = pluginLoader.Project.Repositories.Pop();
+                    pluginLoader.Project.Repositories.Clear();
+                    pluginLoader.Project.Repositories.Add(defaultRepo);
+                    pluginLoader.Project.AddFeeds(defaults.Feeds);
+                }
+                catch (Exception ex)
+                {
+                    log?.Warn(ex, "Failed to fetch information for default plugins");
+                }
+            }
+
+            defaults ??= new()
+            {
+                Packages = new() { "FluentStore.Sources.MicrosoftStore", "FluentStore.Sources.WinGet" }
+            };
 
             await pluginLoader.InstallPlugins(defaults.Packages, overwrite);
         }
         catch (Exception ex)
         {
-            var log = Ioc.Default.GetService<LoggerService>();
             log?.Warn(ex, "Failed to load default plugins");
         }
     }
