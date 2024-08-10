@@ -9,7 +9,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using FluentStore.SDK.Helpers;
-using FluentStore.SDK.Packages;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -19,7 +18,6 @@ namespace FluentStore.ViewModels
     {
         public MyCollectionsViewModel()
         {
-            ViewCollectionCommand = new AsyncRelayCommand(ViewCollectionAsync);
             LoadCollectionsCommand = new AsyncRelayCommand(LoadCollectionsAsync);
 
             WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Collections"));
@@ -80,7 +78,7 @@ namespace FluentStore.ViewModels
             }
             catch (Exception ex)
             {
-                WeakReferenceMessenger.Default.Send(new SDK.Messages.ErrorMessage(ex, SelectedCollection.Package));
+                WeakReferenceMessenger.Default.Send(new SDK.Messages.ErrorMessage(ex, SelectedCollection?.Package));
             }
 
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
