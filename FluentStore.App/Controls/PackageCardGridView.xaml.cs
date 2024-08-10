@@ -53,10 +53,10 @@ namespace FluentStore.Controls
             if (e.ClickedItem is not PackageViewModel pvm)
                 return;
 
-            if (ViewPackageCommand != null && ViewPackageCommand.CanExecute(null))
-                ViewPackageCommand.Execute(null);
-            else if (pvm.ViewPackageCommand != null && pvm.ViewPackageCommand.CanExecute(null))
-                await pvm.ViewPackageCommand.ExecuteAsync(null);
+            if (ViewPackageCommand != null && ViewPackageCommand.CanExecute(pvm))
+                ViewPackageCommand.Execute(pvm);
+            else if (pvm.ViewPackageCommand != null && pvm.ViewPackageCommand.CanExecute(pvm))
+                await pvm.ViewPackageCommand.ExecuteAsync(pvm);
             else
                 await pvm.ViewPackage();
         }
