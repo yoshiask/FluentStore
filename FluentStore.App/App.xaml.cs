@@ -216,6 +216,8 @@ namespace FluentStore
 
             // And send the notification
             ToastNotificationManager.CreateToastNotifier().Show(toastNotif);
+
+            Exit();
         }
 
         /// <summary>
