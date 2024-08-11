@@ -50,18 +50,18 @@ internal class FluentStoreProjectContext : INuGetProjectContext
         _log.Log(logLevel, message, args);
     }
 
-    public void Log(ILogMessage message) => _log.Log(ToLogLevel(message.Level), $"[{message.Time}] {message.FormatWithCode()}");
+    public void Log(ILogMessage message) => _log.Log(ToLogLevel(message.Level), "[{Timestamp}] {Code}: {Message}", message.Time, message.Code.GetName() ?? "", message.Message);
 
-    public void ReportError(string message) => _log.LogError(message);
+    public void ReportError(string message) => _log.LogError("{Message}", message);
 
-    public void ReportError(ILogMessage message) => _log.LogError(message.FormatWithCode());
+    public void ReportError(ILogMessage message) => _log.LogError("{Message}", message.FormatWithCode());
 
     public FileConflictAction ResolveFileConflict(string message)
     {
         throw new NotImplementedException();
     }
 
-    private LogLevel ToLogLevel(NuGetLogLevel level)
+    private static LogLevel ToLogLevel(NuGetLogLevel level)
     {
         return level switch
         {

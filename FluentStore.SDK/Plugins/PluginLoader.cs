@@ -156,8 +156,7 @@ namespace FluentStore.SDK.Plugins
                 WeakReferenceMessenger.Default.Send(new Messages.PluginDownloadProgressMessage(
                     pluginId, 0, 1));
 
-                var supportedVersions = FluentStoreNuGetProject.SupportedSdkRange;
-                var downloadedResource = await Project.DownloadPackageAsync(pluginId, supportedVersions, token);
+                var downloadedResource = await Project.DownloadPackageAsync(pluginId, token: token);
 
                 WeakReferenceMessenger.Default.Send(new Messages.PluginDownloadProgressMessage(
                     pluginId, 1, 1));
@@ -360,6 +359,8 @@ namespace FluentStore.SDK.Plugins
                     File.Delete(pluginPath);
             }
         }
+
+        public bool IsPluginInstalled(string pluginId) => _loadedPlugins.ContainsKey(pluginId);
 
         private Assembly LoadFromSameFolder(object sender, ResolveEventArgs args)
         {

@@ -79,8 +79,10 @@ public class FluentStoreNuGetProject : NuGetProject
         }
     }
 
-    public async Task<DownloadResourceResult> DownloadPackageAsync(string packageId, VersionRange versionRange, CancellationToken token = default)
+    public async Task<DownloadResourceResult> DownloadPackageAsync(string packageId, VersionRange versionRange = null, CancellationToken token = default)
     {
+        versionRange ??= SupportedSdkRange;
+
         // Search all available feeds for compatible versions
         foreach (var repo in Repositories)
         {

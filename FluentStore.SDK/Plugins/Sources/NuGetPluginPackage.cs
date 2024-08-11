@@ -91,10 +91,11 @@ public partial class NuGetPluginPackage : PackageBase
         Description = searchMetadata.Description;
         DeveloperName = searchMetadata.Authors;
         Version = searchMetadata.Identity.Version?.OriginalVersion;
-        Urn ??= new(NuGetPluginHandler.NAMESPACE_NUGETPLUGIN, new RawNamespaceSpecificString(NuGetId));
 
         if (searchMetadata.IconUrl is not null)
             _iconUri = searchMetadata.IconUrl;
+
+        Update();
     }
 
     public void Update(NuspecReader nuspec)
@@ -104,7 +105,6 @@ public partial class NuGetPluginPackage : PackageBase
         Description = nuspec.GetDescription();
         DeveloperName = nuspec.GetAuthors();
         Version = nuspec.GetVersion().ToString();
-        Urn ??= new(NuGetPluginHandler.NAMESPACE_NUGETPLUGIN, new RawNamespaceSpecificString(NuGetId));
 
         var iconUrl = nuspec.GetIconUrl();
         if (!string.IsNullOrEmpty(iconUrl))
@@ -112,6 +112,16 @@ public partial class NuGetPluginPackage : PackageBase
 
         if (string.IsNullOrEmpty(Title))
             Title = nuspec.GetId();
+
+        Update();
+    }
+
+    private void Update()
+    {
+        Urn ??= new(NuGetPluginHandler.NAMESPACE_NUGETPLUGIN, new RawNamespaceSpecificString(NuGetId));
+
+        if (_pluginLoader.IsPluginInstalled(NuGetId))
+            Status = PackageStatus.Installed;
     }
 
     private async Task<DownloadResourceResult> GetResourceAsync()
