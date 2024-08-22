@@ -5,10 +5,11 @@
         <ProjectReference Include="..\..\FluentStore.SDK\FluentStore.SDK.csproj" />
     </ItemGroup>
 
-	<PropertyGroup>
-		<Title>GitHub</Title>
-		<Version>0.4.0.1</Version>
-		<PackageVersion>$(Version)-alpha</PackageVersion>
-	</PropertyGroup>
+    <PropertyGroup>
+        <Title>GitHub</Title>
+        <Version>0.4.0.1</Version>
+        <PackageVersion>$(Version)-alpha</PackageVersion>
+        <Description>Provides support for viewing GitHub repositories as packages. Searching for GitHub repos is not supported, but downloading/installing packages from repos is.</Description>
+    </PropertyGroup>
 
 </Project>

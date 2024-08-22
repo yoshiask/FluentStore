@@ -18,7 +18,11 @@
         <NavigationView x:Name="NavView" PaneDisplayMode="Top"
                         IsBackButtonVisible="Visible" IsSettingsVisible="False"
                         IsBackEnabled="True" BackRequested="NavView_BackRequested"
-                        SelectionChanged="NavView_SelectionChanged">
+                        SelectionChanged="NavView_SelectionChanged" BorderThickness="0">
+            <NavigationView.Resources>
+                <Thickness x:Key="TopNavigationViewContentGridBorderThickness">0</Thickness>
+            </NavigationView.Resources>
+            
             <NavigationView.MenuItems>
                 <NavigationViewItem Content="General">
                     <NavigationViewItem.Icon>

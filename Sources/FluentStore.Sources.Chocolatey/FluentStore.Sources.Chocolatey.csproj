@@ -9,6 +9,7 @@
         <Title>Chocolatey</Title>
         <Version>0.4.0.1</Version>
         <PackageVersion>$(Version)-alpha</PackageVersion>
+        <Description>Provides support for the Chocolatey Community repository. Requires the Chocolatey CLI to be intalled.</Description>
     </PropertyGroup>
 
 </Project>

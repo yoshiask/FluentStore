@@ -29,6 +29,7 @@ namespace FluentStore.Views
         public SettingsView()
         {
             Loaded += SettingsView_Loaded;
+
             this.InitializeComponent();
 
             WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Settings"));

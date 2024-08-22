@@ -11,7 +11,12 @@
     x:DefaultBindMode="TwoWay"
     mc:Ignorable="d">
 
-    <StackPanel Spacing="4">
+    <Grid RowSpacing="4">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
         <controls:SettingsBlockControl Title="Plugin directory"
                                        Description="Choose where plugins are located on your computer">
@@ -37,106 +42,8 @@
             </controls:SettingsBlockControl.ExpandableContent>
         </controls:SettingsBlockControl>
 
-        <controls:SettingsBlockControl x:Name="DefaultPluginsSetting" Title="Default plugins"
-                                       Description="Download and install default plugins">
-            <controls:SettingsBlockControl.Icon>
-                <FontIcon Glyph="&#xECAA;" />
-            </controls:SettingsBlockControl.Icon>
-            <controls:SettingsBlockControl.ExpandableContent>
-                <StackPanel Margin="8">
-                    <TextBlock x:Name="DefaultPluginStatusBlock" HorizontalTextAlignment="Center">
-                        <Run Text="When you click 'Reinstall', progress will be shown here."/><LineBreak/>
-                        <Run Text="Use this option if the Home tab is blank, or a default plugin is not working correctly."/>
-                    </TextBlock>
-                    <ProgressBar x:Name="DefaultPluginProgressIndicator" Margin="0,12,0,0"
-                                 IsIndeterminate="True" Visibility="Collapsed"/>
-                    <ItemsControl x:Name="DefaultPluginsLog" Margin="0,12,0,0">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Spacing="8"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="x:String">
-                                <TextBlock Text="{x:Bind}" IsTextSelectionEnabled="True"/>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </controls:SettingsBlockControl.ExpandableContent>
-        </controls:SettingsBlockControl>
+        <controls:PackageManagerControl MinHeight="400" Grid.Row="1"/>
 
-        <controls:SettingsBlockControl Title="Install plugins" Icon="Add">
-            <controls:SettingsBlockControl.ExpandableContent>
-                <StackPanel>
-
-                    <controls:SettingsDisplayControl Title="From NuGet feed" Margin="14"
-                                                     Description="Choose plugins from an online NuGet feed">
-                        <controls:SettingsDisplayControl.Icon>
-                            <FontIcon Glyph="&#xEBD3;"/>
-                        </controls:SettingsDisplayControl.Icon>
-                        <controls:SettingsDisplayControl.SettingsActionableElement>
-                            <Button Content="Select feed..." />
-                        </controls:SettingsDisplayControl.SettingsActionableElement>
-                    </controls:SettingsDisplayControl>
-
-                    <controls:SettingsDisplayControl Title="From file" Margin="14"
-                                                     Description="Choose a NuGet package from your device to install as a plugin">
-                        <controls:SettingsDisplayControl.Icon>
-                            <FontIcon Glyph="&#xE8DA;"/>
-                        </controls:SettingsDisplayControl.Icon>
-                        <controls:SettingsDisplayControl.SettingsActionableElement>
-                            <Button Content="Pick file..." Click="InstallPluginButton_Click"/>
-                        </controls:SettingsDisplayControl.SettingsActionableElement>
-                    </controls:SettingsDisplayControl>
-
-                    <controls:SettingsDisplayControl Title="Default plugins" Margin="14"
-                                                     Description="Installs all default plugins for this release">
-                        <controls:SettingsDisplayControl.Icon>
-                            <FontIcon Glyph="&#xECAA;"/>
-                        </controls:SettingsDisplayControl.Icon>
-                        <controls:SettingsDisplayControl.SettingsActionableElement>
-                            <Button x:Name="ReinstallDefaultPluginsButton"
-                                    Content="Reinstall..." Click="ReinstallDefaultPluginsButton_Click" />
-                        </controls:SettingsDisplayControl.SettingsActionableElement>
-                    </controls:SettingsDisplayControl>
-
-                </StackPanel>
-            </controls:SettingsBlockControl.ExpandableContent>
-        </controls:SettingsBlockControl>
-
-        <controls:SettingsBlockControl Title="Package sources" Icon="Shop"
-                                       Description="View, enable, or disable available package handlers">
-            <controls:SettingsBlockControl.ExpandableContent>
-                <ItemsControl ItemsSource="{x:Bind PackageService.PackageHandlers, Mode=OneWay}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Spacing="8"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="sdk:PackageHandlerBase">
-                            <Grid ColumnSpacing="8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="48" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <ContentControl Content="{x:Bind Image, Mode=OneWay}"
-                                                ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
-                                <TextBlock Text="{x:Bind DisplayName, Mode=OneWay}"
-                                           Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left"/>
-                                <ToggleSwitch IsOn="{x:Bind IsEnabled(), Mode=OneWay}" Grid.Column="2" Margin="0,0,8,0"
-                                              Style="{ThemeResource ToggleSwitchRightStyle}"
-                                              Toggled="PackageHandlerEnable_Toggled"/>
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </controls:SettingsBlockControl.ExpandableContent>
-        </controls:SettingsBlockControl>
-
-    </StackPanel>
+    </Grid>
 
 </UserControl>
