@@ -110,7 +110,6 @@ namespace FluentStore.SDK.Plugins
 
             result = new(pluginId);
 
-
             // Get path to primary DLL
             var assemblyPath = Path.Combine(_settings.PluginDirectory, pluginId, $"{pluginId}.dll");
             if (string.IsNullOrWhiteSpace(assemblyPath))

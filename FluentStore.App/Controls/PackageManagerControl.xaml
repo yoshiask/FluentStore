@@ -58,7 +58,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <ListView x:Name="PackageListView" Grid.Row="0"
+        <ListView x:Name="PackageListView" Grid.Row="0" IsEnabled="{x:Bind ViewModel.IsManagerEnabled, Mode=OneWay}"
                   ItemsSource="{x:Bind ViewModel.Packages, Mode=OneWay}"
                   IsItemClickEnabled="True" ItemClick="PackageListView_ItemClick"
                   SelectionMode="Multiple" SelectionChanged="PackageListView_SelectionChanged">
@@ -96,9 +96,12 @@
         </Grid>
 
         <CommandBar Grid.Row="2" Grid.ColumnSpan="2" Margin="-14"
-                    DefaultLabelPosition="Right" OverflowButtonVisibility="Collapsed">
-            <AppBarButton Icon="Remove" Label="Uninstall"/>
-            <AppBarButton Icon="Add" Label="Install"/>
+                    DefaultLabelPosition="Right" OverflowButtonVisibility="Collapsed"
+                    IsEnabled="{x:Bind ViewModel.IsManagerEnabled, Mode=OneWay}">
+            <AppBarButton Icon="Remove" Label="Uninstall" ToolTipService.ToolTip="Uninstalls the selected plugins"
+                          Command="{x:Bind ViewModel.UninstallCommand}"/>
+            <AppBarButton Icon="Add" Label="Install" ToolTipService.ToolTip="Installs the selected plugins"
+                          Command="{x:Bind ViewModel.InstallCommand}"/>
         </CommandBar>
 
         <VisualStateManager.VisualStateGroups>

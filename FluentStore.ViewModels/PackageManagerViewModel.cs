@@ -40,6 +40,12 @@ public partial class PackageManagerViewModel : ObservableObject
     [ObservableProperty]
     private IAsyncRelayCommand _installCommand;
 
+    [ObservableProperty]
+    private IAsyncRelayCommand _uninstallCommand;
+
+    [ObservableProperty]
+    private bool _isManagerEnabled = true;
+
     public async Task LoadPackagesAsync(CancellationToken token = default)
     {
         WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
@@ -63,11 +69,24 @@ public partial class PackageManagerViewModel : ObservableObject
 
     public async Task InstallAsync(CancellationToken token = default)
     {
-        foreach (var package in SelectedPackages)
+        IsManagerEnabled = false;
+
+        foreach (var pvm in SelectedPackages)
         {
             token.ThrowIfCancellationRequested();
 
-            await package.InstallCommand.ExecuteAsync(null);
+            await pvm.Package.InstallAsync();
         }
+
+        IsManagerEnabled = true;
+    }
+
+    public async Task UninstallAsync(CancellationToken token = default)
+    {
+        IsManagerEnabled = false;
+
+        // TODO: Uninstall package
+
+        IsManagerEnabled = true;
     }
 }
