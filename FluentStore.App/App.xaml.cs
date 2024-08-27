@@ -124,7 +124,7 @@ namespace FluentStore
                     default:
                         // Always install pending plugins
                         log?.Log($"Began installing pending plugins");
-                        await pluginLoader.InstallPendingPlugins();
+                        await pluginLoader.HandlePendingOperations();
                         log?.Log($"Finished install pending plugins");
                         break;
                 }

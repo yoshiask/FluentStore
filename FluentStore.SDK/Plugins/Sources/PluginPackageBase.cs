@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,12 @@ public abstract partial class PluginPackageBase(PackageHandlerBase packageHandle
     public override Task LaunchAsync()
     {
         throw new NotImplementedException();
+    }
+
+    public virtual async Task<bool> UninstallAsync()
+    {
+        var status = await _pluginLoader.UninstallPlugin(Urn.GetContent());
+        return status.IsAtLeast(PluginInstallStatus.NoAction);
     }
 
     public virtual async Task<bool> IsUpdateAvailable(bool includePrerelease = false)

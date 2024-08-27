@@ -20,6 +20,7 @@ using System.Runtime.Loader;
 using NuGet.Packaging.Core;
 using FluentStore.SDK.Plugins.NuGet;
 using NuGet.Protocol.Core.Types;
+using SharpCompress.Common;
 
 namespace FluentStore.SDK.Plugins
 {
@@ -298,8 +299,8 @@ namespace FluentStore.SDK.Plugins
 
                 _projCtx.ActionType = overwrite ? NuGetActionType.Reinstall : NuGetActionType.Install;
 
-                var installed = await Project.InstallPackageAsync(identity,downloadItem, _projCtx, token);
-                status = Project.Entries[pluginId].Status;
+                var installed = await Project.InstallPackageAsync(identity, downloadItem, _projCtx, token);
+                status = Project.Entries[pluginId].InstallStatus;
 
                 if (status == PluginInstallStatus.NoAction)
                 {
@@ -336,19 +337,29 @@ namespace FluentStore.SDK.Plugins
             return status;
         }
 
+        public async Task<PluginInstallStatus> UninstallPlugin(string pluginId, CancellationToken token = default)
+        {
+            return await Project.UninstallPackageAsync(pluginId, _projCtx, token);
+        }
+
         /// <summary>
-        /// Installs any zipped plugins in the plugin directory.
+        /// Handles any plugin operations that could not be completed during the last session.
         /// </summary>
-        public async Task InstallPendingPlugins()
+        public async Task HandlePendingOperations()
         {
             if (!Directory.Exists(_settings.PluginDirectory))
                 return;
 
-            var pendingPlugins = Project.Entries.Values
-                .Where(e => e.Status is PluginInstallStatus.AppRestartRequired or PluginInstallStatus.SystemRestartRequired)
-                .ToArray();
+            var pendingUninstalls = Project.Entries.Values
+                .Where(e => e.UninstallStatus is PluginInstallStatus.AppRestartRequired or PluginInstallStatus.SystemRestartRequired);
+            foreach (var entry in pendingUninstalls)
+            {
+                await UninstallPlugin(entry.Id);
+            }
 
-            foreach (var entry in pendingPlugins)
+            var pendingInstalls = Project.Entries.Values
+                .Where(e => e.InstallStatus is PluginInstallStatus.AppRestartRequired or PluginInstallStatus.SystemRestartRequired);
+            foreach (var entry in pendingInstalls)
             {
                 var pluginPath = Path.Combine(_settings.PluginDirectory, $"{entry.ToPackageIdentity()}.nupkg");
                 using FileStream plugin = new(pluginPath, FileMode.Open);

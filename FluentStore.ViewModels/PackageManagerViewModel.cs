@@ -20,6 +20,7 @@ public partial class PackageManagerViewModel : ObservableObject
     {
         LoadPackagesCommand = new AsyncRelayCommand(LoadPackagesAsync);
         InstallCommand = new AsyncRelayCommand(InstallAsync);
+        UninstallCommand = new AsyncRelayCommand(UninstallAsync);
     }
 
     [ObservableProperty]
@@ -85,7 +86,13 @@ public partial class PackageManagerViewModel : ObservableObject
     {
         IsManagerEnabled = false;
 
-        // TODO: Uninstall package
+        foreach (var pvm in SelectedPackages)
+        {
+            token.ThrowIfCancellationRequested();
+
+            if (pvm.Package is PluginPackageBase plugin)
+                await plugin.UninstallAsync();
+        }
 
         IsManagerEnabled = true;
     }

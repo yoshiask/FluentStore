@@ -140,7 +140,7 @@ public class FluentStoreNuGetProject : NuGetProject
         }
 
         // Add plugin to list of installed packages
-        _entries[packageIdentity.Id] = new(packageIdentity, tfm, status);
+        _entries[packageIdentity.Id] = new(packageIdentity, tfm, status, PluginInstallStatus.NoAction);
         await FlushAsync(token);
 
         return status.IsAtLeast(PluginInstallStatus.AppRestartRequired);
@@ -148,30 +148,54 @@ public class FluentStoreNuGetProject : NuGetProject
 
     public override async Task<bool> UninstallPackageAsync(PackageIdentity packageIdentity, INuGetProjectContext nuGetProjectContext, CancellationToken token = default)
     {
+        var status = await UninstallPackageAsync(packageIdentity.Id, nuGetProjectContext, token);
+        return status.IsAtLeast(PluginInstallStatus.NoAction);
+    }
+
+    public async Task<PluginInstallStatus> UninstallPackageAsync(string packageId, INuGetProjectContext nuGetProjectContext, CancellationToken token = default)
+    {
+        PluginInstallStatus uninstallStatus = PluginInstallStatus.Failed;
+
         try
         {
             // Delete all plugin files
-            var pluginFolder = Path.Combine(PluginRoot, packageIdentity.Id);
+            var pluginFolder = Path.Combine(PluginRoot, packageId);
             Directory.Delete(pluginFolder, true);
+            uninstallStatus = PluginInstallStatus.Completed;
         }
-        catch (DirectoryNotFoundException) { }
+        catch (UnauthorizedAccessException)
+        {
+            uninstallStatus = PluginInstallStatus.AppRestartRequired;
+        }
+        catch (DirectoryNotFoundException)
+        {
+            uninstallStatus = PluginInstallStatus.NoAction;
+        }
         catch (Exception ex)
         {
             nuGetProjectContext?.ReportError(ex.ToString());
-            return false;
         }
 
-        // Remove plugin from list of installed packages
-        _entries.Remove(packageIdentity.Id);
-        await FlushAsync(token);
+        if (uninstallStatus is PluginInstallStatus.Completed)
+        {
+            // Remove plugin from list of installed packages
+            _entries.Remove(packageId);
+            await FlushAsync(token);
+        }
+        else if (_entries.TryGetValue(packageId, out var entry))
+        {
+            entry.UninstallStatus = uninstallStatus;
+            _entries[packageId] = entry;
+            await FlushAsync(token);
+        }
 
-        return true;
+        return uninstallStatus;
     }
 
     public override async Task<IEnumerable<PackageReference>> GetInstalledPackagesAsync(CancellationToken token = default)
     {
         return _entries.Values
-            .Where(e => e.Status == PluginInstallStatus.Completed)
+            .Where(e => e.InstallStatus == PluginInstallStatus.Completed)
             .Select(e => e.ToPackageReference());
     }
 
@@ -246,7 +270,7 @@ public class FluentStoreNuGetProject : NuGetProject
                     attemptInstall = false;
                 }
             }
-            else if (existingEntry.Status.IsAtLeast(PluginInstallStatus.AppRestartRequired))
+            else if (existingEntry.InstallStatus.IsAtLeast(PluginInstallStatus.AppRestartRequired))
             {
                 // This plugin has already been installed successfully
                 status = PluginInstallStatus.NoAction;
