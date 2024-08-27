@@ -80,7 +80,8 @@
             </ListView.ItemTemplate>
         </ListView>
 
-        <Grid x:Name="PackageDetailGrid" Padding="8,0,0,0" BorderThickness="1,0,0,0" BorderBrush="#20000000"
+        <Grid x:Name="PackageDetailGrid" Padding="16,0,0,0" Grid.Row="0" Grid.Column="1"
+              BorderThickness="1,0,0,0" BorderBrush="#20000000"
               x:Load="{x:Bind ViewModel.PackageToView, Mode=OneWay, Converter={StaticResource NullToFalseConverter}}"
               x:DefaultBindMode="OneWay">
             <Grid.RowDefinitions>
@@ -107,11 +108,8 @@
                         <AdaptiveTrigger MinWindowWidth="720" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
-                        <!--<Setter Target="ManagerGrid.Margin" Value="24"/>-->
                         <Setter Target="ManagerGrid.RowDefinitions[1].Height" Value="Auto"/>
                         <Setter Target="ManagerGrid.ColumnDefinitions[1].Width" Value="2*"/>
-                        <!--<Setter Target="PackageListView.Margin" Value="0 0 6 0"/>-->
-                        <!--<Setter Target="PackageDetailGrid.Margin" Value="6 0 0 0"/>-->
                         <Setter Target="PackageDetailGrid.(Grid.Column)" Value="1"/>
                         <Setter Target="PackageDetailGrid.(Grid.Row)" Value="0"/>
                         <Setter Target="PackageDetailGrid.Padding" Value="16,0,0,0"/>
@@ -123,9 +121,6 @@
                         <AdaptiveTrigger MinWindowWidth="0" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
-                        <!--<Setter Target="ManagerGrid.Margin" Value="12"/>-->
-                        <!--<Setter Target="PackageListView.Margin" Value="0 0 0 6"/>-->
-                        <!--<Setter Target="PackageDetailGrid.Margin" Value="0 6 0 0"/>-->
                         <Setter Target="ManagerGrid.RowDefinitions[1].Height" Value="*"/>
                         <Setter Target="ManagerGrid.ColumnDefinitions[1].Width" Value="Auto"/>
                         <Setter Target="PackageDetailGrid.(Grid.Column)" Value="0"/>
