@@ -8,6 +8,7 @@
     xmlns:viewmodels="using:FluentStore.ViewModels"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
+    xmlns:pluginSources="using:FluentStore.SDK.Plugins.Sources"
     mc:Ignorable="d">
 
     <interactivity:Interaction.Behaviors>
@@ -66,15 +67,15 @@
                 <TextBlock Text="Plugin Manager" Style="{StaticResource TextBlockGroupHeaderStyle}"/>
             </ListView.Header>
             <ListView.ItemTemplate>
-                <DataTemplate x:DataType="viewmodels:PackageViewModel">
+                <DataTemplate x:DataType="pluginSources:PluginPackageBase">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="{x:Bind Package.ShortTitle}" />
-                        <TextBlock Text="{x:Bind Package.Version}" Grid.Column="1" />
+                        <TextBlock Text="{x:Bind ShortTitle}" />
+                        <TextBlock Text="{x:Bind Version}" Grid.Column="1" />
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
@@ -90,9 +91,9 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             
-            <TextBlock Text="{x:Bind ViewModel.PackageToView.Package.Title}" Style="{StaticResource HeaderTextBlockStyle}"/>
-            <TextBlock Text="{x:Bind ViewModel.PackageToView.Package.DeveloperName}" Grid.Row="1"/>
-            <TextBlock Text="{x:Bind ViewModel.PackageToView.Package.Description}" Grid.Row="2"/>
+            <TextBlock Text="{x:Bind ViewModel.PackageToView.Title}" Style="{StaticResource HeaderTextBlockStyle}"/>
+            <TextBlock Text="{x:Bind ViewModel.PackageToView.DeveloperName}" Grid.Row="1"/>
+            <TextBlock Text="{x:Bind ViewModel.PackageToView.Description}" Grid.Row="2"/>
         </Grid>
 
         <CommandBar Grid.Row="2" Grid.ColumnSpan="2" Margin="-14"

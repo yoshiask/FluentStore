@@ -9,6 +9,7 @@ using FluentStore.ViewModels.Messages;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,13 +25,13 @@ public partial class PackageManagerViewModel : ObservableObject
     }
 
     [ObservableProperty]
-    private PackageViewModel _packageToView;
+    private PluginPackageBase _packageToView;
 
     [ObservableProperty]
-    private ObservableCollection<PackageViewModel> _selectedPackages = new();
+    private ObservableCollection<PluginPackageBase> _selectedPackages = new();
 
     [ObservableProperty]
-    private ObservableCollection<PackageViewModel> _packages = new();
+    private ObservableCollection<PluginPackageBase> _packages = new();
 
     [ObservableProperty]
     private PackageHandlerBase _handler;
@@ -57,7 +58,7 @@ public partial class PackageManagerViewModel : ObservableObject
 
             Packages.Clear();
 
-            await foreach (var package in Handler.GetFeaturedPackagesAsync())
+            await foreach (var package in Handler.GetFeaturedPackagesAsync().OfType<PluginPackageBase>())
                 Packages.Add(package);
         }
         catch (Exception ex)
@@ -72,11 +73,11 @@ public partial class PackageManagerViewModel : ObservableObject
     {
         IsManagerEnabled = false;
 
-        foreach (var pvm in SelectedPackages)
+        foreach (var package in SelectedPackages)
         {
             token.ThrowIfCancellationRequested();
 
-            await pvm.Package.InstallAsync();
+            await package.InstallAsync();
         }
 
         IsManagerEnabled = true;
@@ -86,12 +87,10 @@ public partial class PackageManagerViewModel : ObservableObject
     {
         IsManagerEnabled = false;
 
-        foreach (var pvm in SelectedPackages)
+        foreach (var plugin in SelectedPackages)
         {
             token.ThrowIfCancellationRequested();
-
-            if (pvm.Package is PluginPackageBase plugin)
-                await plugin.UninstallAsync();
+            await plugin.UninstallAsync();
         }
 
         IsManagerEnabled = true;
