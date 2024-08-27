@@ -28,6 +28,9 @@ namespace FluentStore.ViewModels
         {
             Guard.IsNotNull(package);
             Package = package;
+
+            InstallCommand = new AsyncRelayCommand(Package.InstallAsync, () => CanInstall);
+            DownloadCommand = new AsyncRelayCommand(async () => await Package.DownloadAsync());
         }
 
         private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
@@ -74,15 +77,15 @@ namespace FluentStore.ViewModels
             set => SetProperty(ref _ViewPackageCommand, value);
         }
 
-        private IAsyncRelayCommand<object> _DownloadCommand;
-        public IAsyncRelayCommand<object> DownloadCommand
+        private IAsyncRelayCommand _DownloadCommand;
+        public IAsyncRelayCommand DownloadCommand
         {
             get => _DownloadCommand;
             set => SetProperty(ref _DownloadCommand, value);
         }
 
-        private IAsyncRelayCommand<object> _InstallCommand;
-        public IAsyncRelayCommand<object> InstallCommand
+        private IAsyncRelayCommand _InstallCommand;
+        public IAsyncRelayCommand InstallCommand
         {
             get => _InstallCommand;
             set => SetProperty(ref _InstallCommand, value);
