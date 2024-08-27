@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK.Downloads;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
+using FluentStore.SDK.Messages;
 using Garfoot.Utilities.FluentUrn;
 using NuGet.Packaging;
 using NuGet.Protocol.Core.Types;
@@ -55,13 +56,35 @@ public partial class NuGetPluginPackage : PluginPackageBase
 
     public override async Task<bool> InstallAsync()
     {
-        var downloadItem = await GetResourceAsync();
-        var status = await _pluginLoader.InstallPlugin(downloadItem, true);
+        DownloadResourceResult downloadItem;
+        try
+        {
+            WeakReferenceMessenger.Default.Send(new PackageDownloadStartedMessage(this));
+            downloadItem = await GetResourceAsync();
+            WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPluginDownloadCompleted(NuGetId));
+        }
+        catch (Exception ex)
+        {
+            WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, this, ErrorType.PluginDownloadFailed));
+            return false;
+        }
+
+        PluginInstallStatus status = PluginInstallStatus.Failed;
+        try
+        {
+            WeakReferenceMessenger.Default.Send(new PackageInstallStartedMessage(this));
+            status = await _pluginLoader.InstallPlugin(downloadItem, true);
+        }
+        catch (Exception ex)
+        {
+            WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, this, ErrorType.PluginInstallFailed));
+        }
 
         DisposeResource();
 
         if (status.IsGreaterThan(PluginInstallStatus.Failed))
         {
+            WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPluginInstallCompleted(NuGetId));
             Status = PackageStatus.Installed;
             return true;
         }
