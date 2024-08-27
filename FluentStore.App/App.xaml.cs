@@ -8,6 +8,7 @@ using FluentStore.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
+using OwlCore.Kubo;
 using System;
 using System.Threading.Tasks;
 using Windows.UI.Notifications;
@@ -24,6 +25,7 @@ namespace FluentStore
     {
         private readonly SingleInstanceDesktopApp _singleInstanceApp;
         private LoggerService _log;
+        private KuboBootstrapper _kuboBootstrapper;
 
         public const string AppName = "Fluent Store";
 
@@ -60,6 +62,12 @@ namespace FluentStore
 
             _singleInstanceApp = new SingleInstanceDesktopApp("FluentStoreBeta");
             _singleInstanceApp.Launched += OnSingleInstanceLaunched;
+        }
+
+        public void Shutdown()
+        {
+            _kuboBootstrapper?.Dispose();
+            Exit();
         }
 
         /// <summary>
@@ -135,9 +143,15 @@ namespace FluentStore
                 await Settings.Default.SaveAsync();
 
                 // Start IPFS local node
-                //var paths = Ioc.Default.GetRequiredService<ICommonPathManager>();
-                //using var bootstrapper = new OwlCore.Kubo.KuboBootstrapper(paths.GetAppDataDirectory().CreateSubdirectory("Kubo").FullName);
-                //await bootstrapper.StartAsync();
+                var paths = Ioc.Default.GetRequiredService<ICommonPathManager>();
+                _kuboBootstrapper = new KuboBootstrapper(paths.GetAppDataDirectory().CreateSubdirectory("Kubo").FullName)
+                {
+                    // TODO: Allow user to define parameters for IPFS node
+                    RoutingMode = DhtRoutingMode.DhtClient,
+                    LaunchConflictMode = BootstrapLaunchConflictMode.Relaunch,
+                };
+                await _kuboBootstrapper.StartAsync();
+                SDK.Downloads.AbstractStorageHelper.IpfsClient = _kuboBootstrapper.Client;
             }
             log?.Log($"Redirect activation?: {result.RedirectActivation}");
 
@@ -217,7 +231,7 @@ namespace FluentStore
             // And send the notification
             ToastNotificationManager.CreateToastNotifier().Show(toastNotif);
 
-            Exit();
+            Shutdown();
         }
 
         /// <summary>

@@ -25,6 +25,8 @@ namespace FluentStore
             this.InitializeComponent();
 
             m_hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+
+            Closed += MainWindow_Closed;
             
             var navService = CommunityToolkit.Mvvm.DependencyInjection.Ioc.Default.GetService<Services.INavigationService>();
             if (navService != null)
@@ -60,6 +62,8 @@ namespace FluentStore
                 }
             }
         }
+
+        private void MainWindow_Closed(object sender, WindowEventArgs args) => App.Current.Shutdown();
 
         public IntPtr Handle => m_hwnd;
 
