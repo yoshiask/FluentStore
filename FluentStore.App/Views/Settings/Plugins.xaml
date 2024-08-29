@@ -6,14 +6,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:FluentStore.Controls"
-    xmlns:sdk="using:FluentStore.SDK"
     xmlns:helpers="using:FluentStore.Helpers"
     x:DefaultBindMode="TwoWay"
     mc:Ignorable="d">
 
     <Grid RowSpacing="4">
-
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
@@ -42,7 +41,17 @@
             </controls:SettingsBlockControl.ExpandableContent>
         </controls:SettingsBlockControl>
 
-        <controls:PackageManagerControl MinHeight="400" Grid.Row="1"/>
+        <controls:SettingsDisplayControl Title="Install from file" Grid.Row="1"
+                                         Description="Choose a NuGet package from your device to install as a plugin">
+            <controls:SettingsDisplayControl.Icon>
+                <FontIcon Glyph="&#xE8DA;"/>
+            </controls:SettingsDisplayControl.Icon>
+            <controls:SettingsDisplayControl.SettingsActionableElement>
+                <Button Content="Pick file..." Click="InstallPluginButton_Click"/>
+            </controls:SettingsDisplayControl.SettingsActionableElement>
+        </controls:SettingsDisplayControl>
+
+        <controls:PackageManagerControl MinHeight="400" Grid.Row="2"/>
 
     </Grid>
 
