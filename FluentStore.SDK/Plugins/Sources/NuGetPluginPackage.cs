@@ -129,7 +129,12 @@ public partial class NuGetPluginPackage : PluginPackageBase
     private void Update()
     {
         Urn ??= new(NuGetPluginHandler.NAMESPACE_NUGETPLUGIN, new RawNamespaceSpecificString(NuGetId));
-        IsInstalled = _pluginLoader.IsPluginInstalled(NuGetId);
+
+        if (_pluginLoader.Project.Entries.TryGetValue(NuGetId, out var pluginEntry))
+        {
+            IsInstalled = true;
+            InstalledVersion = pluginEntry.Version.ToFullString();
+        }
     }
 
     private async Task<DownloadResourceResult> GetResourceAsync()

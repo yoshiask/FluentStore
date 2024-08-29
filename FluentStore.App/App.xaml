@@ -9,9 +9,11 @@
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
                     <SolidColorBrush x:Key="SuccessBrush" Color="#10893E"/>
+                    <SolidColorBrush x:Key="InfoBrush" Color="#1E3581"/>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
                     <SolidColorBrush x:Key="SuccessBrush" Color="#00CC6A"/>
+                    <SolidColorBrush x:Key="InfoBrush" Color="#4C9CD6"/>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
             

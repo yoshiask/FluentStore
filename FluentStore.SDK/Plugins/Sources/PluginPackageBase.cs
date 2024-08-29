@@ -13,13 +13,7 @@ public abstract partial class PluginPackageBase(PackageHandlerBase packageHandle
     protected readonly PluginLoader _pluginLoader = pluginLoader;
 
     [ObservableProperty]
-    private global::NuGet.Versioning.NuGetVersion _currentVersion;
-
-    [ObservableProperty]
-    private global::NuGet.Versioning.NuGetVersion _latestStableVersion;
-
-    [ObservableProperty]
-    private global::NuGet.Versioning.NuGetVersion _latestPrereleaseVersion;
+    private string _installedVersion;
 
     public override Task<ImageBase> CacheAppIcon() => Task.FromResult<ImageBase>(TextImage.CreateFromName(ShortTitle ?? Title));
 
@@ -42,13 +36,13 @@ public abstract partial class PluginPackageBase(PackageHandlerBase packageHandle
 
     public virtual bool IsUpdateAvailable(bool includePrerelease = false)
     {
-        // There isn't anything installed to update
-        if (CurrentVersion is null)
+        if (InstalledVersion is null)
             return false;
 
-        return
-            (includePrerelease && LatestPrereleaseVersion is not null && LatestPrereleaseVersion > CurrentVersion)
-            || (LatestStableVersion > CurrentVersion);
+        var installed = global::NuGet.Versioning.NuGetVersion.Parse(InstalledVersion);
+        var latest = global::NuGet.Versioning.NuGetVersion.Parse(Version);
+
+        return latest > installed;
     }
 
     public virtual ImageBase GetStatusImage()
