@@ -14,13 +14,8 @@ namespace FluentStore.SDK.Packages
     /// For example, Fluent Store's <c>CollectionPackage</c> inherits this class
     /// and <c>UwpCommunityPackage</c> uses it to represent Launch events.
     /// </summary>
-    public class GenericPackageCollection<TModel> : PackageBase<TModel>, IPackageCollection
+    public class GenericPackageCollection<TModel>(PackageHandlerBase packageHandler) : PackageBase<TModel>(packageHandler), IPackageCollection
     {
-        public GenericPackageCollection(PackageHandlerBase packageHandler) : base(packageHandler)
-        {
-
-        }
-
         public override Task<ImageBase> CacheAppIcon()
         {
             return Task.FromResult(Images.FirstOrDefault(i => i.ImageType == ImageType.Logo));
@@ -36,10 +31,19 @@ namespace FluentStore.SDK.Packages
             return Task.FromResult(Images.Where(i => i.ImageType == ImageType.Screenshot).ToList());
         }
 
+        public override async Task<bool> CanDownloadAsync()
+        {
+            // TODO: Should this fail if any packages are inaccessible?
+            bool canDownload = true;
+            foreach (PackageBase package in Items)
+                canDownload &= await package.CanDownloadAsync();
+
+            return canDownload;
+        }
+
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
-            if (folder == null)
-                folder = StorageHelper.CreatePackageDownloadFolder(Urn);
+            folder ??= StorageHelper.CreatePackageDownloadFolder(Urn);
             DownloadItem = folder;
 
             bool success = true;

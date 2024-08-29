@@ -122,19 +122,17 @@ namespace FluentStore.SDK.Helpers
                 if (!result.IsRegistered)
                 {
                     WeakReferenceMessenger.Default.Send(new ErrorMessage(result.ExtendedErrorCode, package, ErrorType.PackageInstallFailed));
-                    package.Status = PackageStatus.Downloaded;
                 }
                 else
                 {
                     WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageInstallCompleted(package));
-                    package.Status = PackageStatus.Installed;
+                    package.IsInstalled = true;
                 }
                 return result.IsRegistered;
             }
             catch (Exception ex)
             {
                 WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, package, ErrorType.PackageInstallFailed));
-                package.Status = PackageStatus.Downloaded;
                 return false;
             }
         }

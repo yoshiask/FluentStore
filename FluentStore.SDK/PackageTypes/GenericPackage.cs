@@ -13,21 +13,18 @@ namespace FluentStore.SDK.Packages
     /// Provides a default implementation of <see cref="PackageBase"/> that can be used
     /// by packages that do not have accessible installers.
     /// </summary>
-    public class GenericPackage<TModel> : PackageBase<TModel>
+    public class GenericPackage<TModel>(PackageHandlerBase packageHandler) : PackageBase<TModel>(packageHandler)
     {
-        public GenericPackage(PackageHandlerBase packageHandler) : base(packageHandler)
-        {
-
-        }
-
         public override Task<bool> CanLaunchAsync() => Task.FromResult(false);
+
+        public override Task<bool> CanDownloadAsync() => Task.FromResult(PackageUri is not null);
 
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
             await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
 
             // Check for success
-            if (Status.IsLessThan(PackageStatus.Downloaded))
+            if (!IsDownloaded)
                 return null;
 
             if (PackageUri != null && DownloadItem is FileInfo file)
@@ -57,7 +54,7 @@ namespace FluentStore.SDK.Packages
             // won't be run silently, but it's better than an error.
 
             // Make sure installer is downloaded
-            Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
+            Guard.IsTrue(IsDownloaded);
 
             bool success = false;
             Models.InstallerType typeReduced = Type.Reduce();
@@ -71,7 +68,7 @@ namespace FluentStore.SDK.Packages
             }
 
             if (success)
-                Status = PackageStatus.Installed;
+                IsInstalled = true;
             return success;
         }
 

@@ -69,7 +69,7 @@ namespace FluentStore.SDK
 
         /// <summary>
         /// When overridden in a derived class, gets a value indicating whether <see cref="GetCannotBeInstalledReason"/>
-        /// and <see cref="CanBeInstalled"/> requires the package to be downloaded first.
+        /// and <see cref="CanInstallAsync"/> requires the package to be downloaded first.
         /// </summary>
         public virtual bool RequiresDownloadForCompatCheck => false;
 
@@ -82,9 +82,11 @@ namespace FluentStore.SDK
         /// <summary>
         /// Determines if this package can be installed on this system.
         /// </summary>
-        public async Task<bool> CanBeInstalled() => await GetCannotBeInstalledReason() == null;
+        public async Task<bool> CanInstallAsync() => await GetCannotBeInstalledReason() == null;
 
         public abstract Task<bool> InstallAsync();
+
+        public abstract Task<bool> CanDownloadAsync();
 
         public abstract Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null);
 
@@ -134,6 +136,13 @@ namespace FluentStore.SDK
 
         [ObservableProperty]
         private PackageStatus _status = PackageStatus.Unknown;
+
+        [ObservableProperty]
+        private bool _isDownloaded;
+
+        // TODO: Have some mechanism to determine whether updates are available
+        [ObservableProperty]
+        private bool _isInstalled;
 
         [ObservableProperty]
         private FileSystemInfo _downloadItem;
@@ -307,20 +316,5 @@ namespace FluentStore.SDK
         /// Suitable for PackageView.
         /// </summary>
         Details,
-
-        /// <summary>
-        /// The package is ready to be downloaded.
-        /// </summary>
-        DownloadReady,
-
-        /// <summary>
-        /// The package has been successfully downloaded, and <see cref="PackageBase.DownloadItem"/> has been populated.
-        /// </summary>
-        Downloaded,
-
-        /// <summary>
-        /// The package has been successfully installed.
-        /// </summary>
-        Installed,
     }
 }

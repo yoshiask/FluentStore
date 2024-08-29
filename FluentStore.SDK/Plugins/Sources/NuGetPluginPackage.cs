@@ -34,13 +34,15 @@ public partial class NuGetPluginPackage : PluginPackageBase
 
     public override async Task<ImageBase> CacheAppIcon() => _iconUri is null ? null : new FileImage(_iconUri);
 
+    public override async Task<bool> CanDownloadAsync() => Urn is not null && Version is not null;
+
     public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
     {
         DownloadCache cache = new(folder);
 
         if (cache.TryGetFile(Urn, Version, out var file))
         {
-            Status = PackageStatus.Downloaded;
+            IsDownloaded = true;
             return file;
         }
 
@@ -50,7 +52,7 @@ public partial class NuGetPluginPackage : PluginPackageBase
         await downloadItem.PackageReader.CopyNupkgAsync(nupkgFile.FullName, default);
         cache.Add(Urn, Version, nupkgFile);
 
-        Status = PackageStatus.Downloaded;
+        IsDownloaded = true;
         return nupkgFile;
     }
 
@@ -85,7 +87,7 @@ public partial class NuGetPluginPackage : PluginPackageBase
         if (status.IsGreaterThan(PluginInstallStatus.Failed))
         {
             WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPluginInstallCompleted(NuGetId));
-            Status = PackageStatus.Installed;
+            IsInstalled = true;
             return true;
         }
 
@@ -127,9 +129,7 @@ public partial class NuGetPluginPackage : PluginPackageBase
     private void Update()
     {
         Urn ??= new(NuGetPluginHandler.NAMESPACE_NUGETPLUGIN, new RawNamespaceSpecificString(NuGetId));
-
-        if (_pluginLoader.IsPluginInstalled(NuGetId))
-            Status = PackageStatus.Installed;
+        IsInstalled = _pluginLoader.IsPluginInstalled(NuGetId);
     }
 
     private async Task<DownloadResourceResult> GetResourceAsync()

@@ -189,7 +189,6 @@ namespace FluentStore.SDK.Helpers
             catch (Exception ex)
             {
                 WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, package, ErrorType.PackageDownloadFailed));
-                package.Status = PackageStatus.DownloadReady;
                 stream?.Dispose();  // Make sure file is closed, or it will fail to remove from the cache
                 cache.Remove(package.Urn);
                 return;
@@ -197,7 +196,7 @@ namespace FluentStore.SDK.Helpers
 
         downloaded:
             package.DownloadItem = info;
-            package.Status = PackageStatus.Downloaded;
+            package.IsDownloaded = true;
         }
 
         public static DirectoryInfo ExtractArchiveToDirectory(FileInfo archiveFile, bool overwrite)

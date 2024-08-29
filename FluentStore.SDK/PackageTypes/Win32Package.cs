@@ -1,6 +1,5 @@
 ﻿using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
-using CommunityToolkit.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,18 +7,15 @@ using System.IO;
 
 namespace FluentStore.SDK.Packages
 {
-    public class Win32Package<TModel> : PackageBase<TModel>
+    public class Win32Package<TModel>(PackageHandlerBase packageHandler) : PackageBase<TModel>(packageHandler)
     {
-        public Win32Package(PackageHandlerBase packageHandler) : base(packageHandler)
-        {
-
-        }
-
         public override async Task<bool> CanLaunchAsync()
         {
             // TODO: How to check if an unpackaged app is installed?
             return false;
         }
+
+        public override Task<bool> CanDownloadAsync() => Task.FromResult(false);
 
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
@@ -44,11 +40,12 @@ namespace FluentStore.SDK.Packages
         public override async Task<bool> InstallAsync()
         {
             // Make sure installer is downloaded
-            Guard.IsEqualTo((int)Status, (int)PackageStatus.Downloaded, nameof(Status));
+            if (!IsDownloaded)
+                await DownloadAsync();
 
             if (await Win32Helper.Install(this))
             {
-                Status = PackageStatus.Installed;
+                IsInstalled = true;
                 return true;
             }
             else

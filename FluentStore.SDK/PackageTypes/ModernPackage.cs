@@ -9,13 +9,8 @@ using System.IO;
 
 namespace FluentStore.SDK.Packages
 {
-    public class ModernPackage<TModel> : GenericPackage<TModel>
+    public class ModernPackage<TModel>(PackageHandlerBase packageHandler) : GenericPackage<TModel>(packageHandler)
     {
-        public ModernPackage(PackageHandlerBase packageHandler) : base(packageHandler)
-        {
-
-        }
-
         public override bool Equals(PackageBase other)
         {
             if (other is ModernPackage<TModel> mpackage)
@@ -32,7 +27,9 @@ namespace FluentStore.SDK.Packages
         public override bool RequiresDownloadForCompatCheck => true;
         public override async Task<string> GetCannotBeInstalledReason()
         {
-            Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
+            if (!IsDownloaded)
+                await DownloadAsync();
+
             using var stream = ((FileInfo)DownloadItem).OpenRead();
             return PackagedInstallerHelper.GetCannotBeInstalledReason(stream, Type.HasFlag(InstallerType.Bundle));
         }
@@ -53,8 +50,8 @@ namespace FluentStore.SDK.Packages
 
         public override async Task<bool> InstallAsync()
         {
-            // Make sure installer is downloaded
-            Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
+            if (!IsDownloaded)
+                await DownloadAsync();
             return await PackagedInstallerHelper.Install(this);
         }
 
@@ -71,7 +68,8 @@ namespace FluentStore.SDK.Packages
         /// <returns>The file extension that corresponds with the determined <see cref="InstallerType"/>.</returns>
         public async Task<string> GetInstallerType()
         {
-            Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
+            if (!IsDownloaded)
+                await DownloadAsync();
 
             if (Type == InstallerType.Unknown)
             {
@@ -85,7 +83,9 @@ namespace FluentStore.SDK.Packages
         {
             try
             {
-                Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
+                if (!IsDownloaded)
+                    await DownloadAsync();
+
                 using var stream = ((FileInfo)DownloadItem).OpenRead();
                 return PackagedInstallerHelper.GetAppIcon(stream, Type.HasFlag(InstallerType.Bundle));
             }
