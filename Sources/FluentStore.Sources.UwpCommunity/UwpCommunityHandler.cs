@@ -94,8 +94,6 @@ namespace FluentStore.Sources.UwpCommunity
                 var features = await BASE_URL.AppendPathSegments("projects", "features")
                     .SetQueryParam("projectId", projectIdStr).GetJsonAsync<List<string>>();
                 package.UpdateWithFeatures(features);
-
-                package.Status = PackageStatus.DownloadReady;
             }
 
             return package;
@@ -149,7 +147,6 @@ namespace FluentStore.Sources.UwpCommunity
                 listPackage.Items.Add(package);
             }
 
-            listPackage.Status = PackageStatus.DownloadReady;
             return listPackage;
         }
 

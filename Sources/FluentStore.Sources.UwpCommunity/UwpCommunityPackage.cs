@@ -120,6 +120,18 @@ namespace FluentStore.Sources.UwpCommunity
                 return false;
         }
 
+        public override async Task<bool> CanDownloadAsync()
+        {
+            if (PackageUri is null)
+                return false;
+
+            LinkedPackage = await PackageService.GetPackageFromUrlAsync(PackageUri);
+            if (LinkedPackage is null)
+                return false;
+
+            return await LinkedPackage.CanDownloadAsync();
+        }
+
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
             if (PackageUri == null)
@@ -130,7 +142,7 @@ namespace FluentStore.Sources.UwpCommunity
                 return null;
             }
 
-            LinkedPackage = await PackageService.GetPackageFromUrlAsync(PackageUri);
+            LinkedPackage ??= await PackageService.GetPackageFromUrlAsync(PackageUri);
             if (LinkedPackage != null)
             {
                 DownloadItem = await LinkedPackage.DownloadAsync(folder);
@@ -139,8 +151,8 @@ namespace FluentStore.Sources.UwpCommunity
             }
             else
             {
-                Status = await NavigationService.OpenInBrowser(PackageUri)
-                    ? PackageStatus.Downloaded : PackageStatus.DownloadReady;
+                if (await NavigationService.OpenInBrowser(PackageUri))
+                    IsDownloaded = true;
                 return null;
             }
         }

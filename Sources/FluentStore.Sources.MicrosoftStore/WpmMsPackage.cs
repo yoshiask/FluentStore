@@ -21,7 +21,7 @@ namespace FluentStore.Sources.MicrosoftStore
             Guard.IsTrue(IsWinGet);
         }
 
-        public async Task Update(PackageManifestVersion manifest)
+        public void Update(PackageManifestVersion manifest)
         {
             Guard.IsNotNull(manifest, nameof(manifest));
             Manifest = manifest;
@@ -38,11 +38,13 @@ namespace FluentStore.Sources.MicrosoftStore
             InternalPackage = internalPackage;
         }
 
+        public override async Task<bool> CanDownloadAsync() => await GetPackageUri() is not null;
+
         protected override async Task<FileSystemInfo> InternalDownloadAsync(DirectoryInfo folder)
         {
             // Find the package URI
-            await PopulatePackageUri();
-            if (Status.IsLessThan(PackageStatus.DownloadReady))
+            await GetPackageUri();
+            if (PackageUri is null)
                 return null;
 
             // Download package
@@ -55,28 +57,31 @@ namespace FluentStore.Sources.MicrosoftStore
             return downloadFile;
         }
 
-        private async Task GetWinGetPackage(string id)
+        private async Task<Uri> GetPackageUri()
         {
+            if (PackageUri is not null)
+                return PackageUri;
 
-        }
-
-        private async Task PopulatePackageUri()
-        {
             WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
             try
             {
                 var culture = System.Globalization.CultureInfo.CurrentUICulture;
 
                 var api = ((MicrosoftStoreHandler)PackageHandler).StoreEdgeFDApi;
-                Update((await api.GetPackageManifest(StoreId)).Data.Versions[0]);
+                var manifest = await api.GetPackageManifest(StoreId);
+
+                Update(manifest.Data.Versions[0]);
 
                 WeakReferenceMessenger.Default.Send(new SuccessMessage(null, this, SuccessType.PackageFetchCompleted));
-                Status = InternalPackage.Status = PackageStatus.DownloadReady;
+
+                return PackageUri;
             }
             catch (Exception ex)
             {
                 WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, this, ErrorType.PackageFetchFailed));
             }
+
+            return null;
         }
     }
 }

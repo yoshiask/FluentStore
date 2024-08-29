@@ -42,6 +42,8 @@ internal class WinGetCliHandler : IWinGetImplementation
             yield return CreateSDKPackage(packageHandler, result);
     }
 
+    public Task<bool> CanDownloadAsync(WinGetPackage package) => Task.FromResult(package.WinGetId is not null);
+
     public async Task<FileSystemInfo> DownloadAsync(WinGetPackage package, DirectoryInfo folder)
     {
         WeakReferenceMessenger.Default.Send(new PackageDownloadStartedMessage(package));

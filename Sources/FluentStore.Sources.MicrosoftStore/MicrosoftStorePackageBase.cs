@@ -16,9 +16,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.System.Profile;
 using System.IO;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.PackageManifest;
-using StoreDownloader;
 using FluentStore.SDK;
 using FluentStore.SDK.Packages;
 using FluentStore.Sources.WinGet;
@@ -253,7 +251,7 @@ namespace FluentStore.Sources.MicrosoftStore
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
             DownloadItem = await InternalDownloadAsync(folder);
-            if (Status.IsLessThan(PackageStatus.Downloaded))
+            if (!IsDownloaded)
                 return null;
 
             WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageDownloadCompleted(this));

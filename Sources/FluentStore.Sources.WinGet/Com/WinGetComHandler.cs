@@ -87,6 +87,8 @@ internal class WinGetComHandler : IWinGetImplementation
             yield return CreateSDKPackage(packageHandler, matchResult.CatalogPackage);
     }
 
+    public Task<bool> CanDownloadAsync(WinGetPackage package) => Task.FromResult(package.Model is CatalogPackage);
+
     public async Task<FileSystemInfo> DownloadAsync(WinGetPackage package, DirectoryInfo folder = null)
     {
         var catalogPackage = (CatalogPackage)package.Model;

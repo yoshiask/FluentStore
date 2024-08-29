@@ -26,12 +26,15 @@ namespace FluentStore.Sources.MicrosoftStore
             Guard.IsFalse(IsWinGet);
         }
 
+        public override Task<bool> CanDownloadAsync() =>
+            Task.FromResult(Model?.Skus.FirstOrDefault()?.FulfillmentData?.WuCategoryId is not null);
+
         protected async Task<FileSystemInfo> InternalDownloadAsync(DirectoryInfo folder, bool downloadEverything)
         {
             try
             {
                 // Get system and package info
-                string[] categoryIds = new[] { Model.Skus[0].FulfillmentData.WuCategoryId };
+                string[] categoryIds = [Model.Skus[0].FulfillmentData.WuCategoryId];
                 var sysInfo = Handlers.MicrosoftStore.Win32Helper.GetSystemInfo();
                 folder ??= StorageHelper.GetTempDirectory().CreateSubdirectory(StorageHelper.PrepUrnForFile(Urn));
 
@@ -60,7 +63,7 @@ namespace FluentStore.Sources.MicrosoftStore
                     downloadAll: downloadEverything);
                 if (files == null || files.Length == 0)
                     throw new Exception("Failed to download pacakges using WindowsUpdateLib");
-                Status = InternalPackage.Status = PackageStatus.Downloaded;
+                IsDownloaded = InternalPackage.IsDownloaded = true;
 
                 if (downloadEverything)
                 {

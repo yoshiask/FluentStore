@@ -11,6 +11,8 @@ internal interface IWinGetImplementation
 
     public IAsyncEnumerable<PackageBase> SearchAsync(string query, WinGetProxyHandler packageHandler);
 
+    public Task<bool> CanDownloadAsync(WinGetPackage package);
+
     public Task<FileSystemInfo> DownloadAsync(WinGetPackage package, DirectoryInfo folder = null);
 
     public Task<bool> InstallAsync(WinGetPackage package);

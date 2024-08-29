@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Diagnostics;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK;
 using FluentStore.SDK.Attributes;
@@ -18,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace FluentStore.Sources.GitHub
 {
-    internal class GitHubPackage : PackageBase<Repository>
+    public partial class GitHubPackage : PackageBase<Repository>
     {
         private readonly Dictionary<Architecture, string[]> architecture_strings = new()
         {
@@ -41,7 +42,7 @@ namespace FluentStore.Sources.GitHub
                 new[] { "arm64", "aarch64" }
             },
         };
-        private readonly char[] separator_chars = { ' ', '_', '-', '+', '@', '!', '.' };
+        private readonly char[] separator_chars = [' ', '_', '-', '+', '@', '!', '.'];
 
         public GitHubPackage(PackageHandlerBase packageHandler, Repository repo = null, IReadOnlyList<Release> releases = null)
             : base(packageHandler)
@@ -83,6 +84,8 @@ namespace FluentStore.Sources.GitHub
         public override Task<List<ImageBase>> CacheScreenshots() => Task.FromResult(new List<ImageBase>());
 
         public override Task<bool> CanLaunchAsync() => Task.FromResult(false);
+
+        public override Task<bool> CanDownloadAsync() => Task.FromResult(Model is not null);
 
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
@@ -155,7 +158,7 @@ namespace FluentStore.Sources.GitHub
                 await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
 
                 // Check for success
-                if (Status.IsLessThan(PackageStatus.Downloaded))
+                if (!IsDownloaded)
                     return null;
 
                 if (PackageUri != null && DownloadItem is FileInfo file)
@@ -168,14 +171,15 @@ namespace FluentStore.Sources.GitHub
             }
 
             Type = InstallerTypes.FromExtension(DownloadItem.Extension[1..]);
-            Status = PackageStatus.Downloaded;
+            IsDownloaded = true;
             return DownloadItem;
         }
 
         public override async Task<bool> InstallAsync()
         {
-            // Make sure installer is downloaded
-            Guard.IsTrue(Status.IsAtLeast(PackageStatus.Downloaded), nameof(Status));
+            if (!IsDownloaded)
+                await DownloadAsync();
+
             bool success = false;
 
             try
@@ -226,7 +230,8 @@ namespace FluentStore.Sources.GitHub
             }
 
             if (success)
-                Status = PackageStatus.Installed;
+                IsInstalled = true;
+
             return success;
         }
 
@@ -293,11 +298,7 @@ namespace FluentStore.Sources.GitHub
             set => SetProperty(ref _Links, value);
         }
 
-        private IReadOnlyList<Release> _Releases;
-        public IReadOnlyList<Release> Releases
-        {
-            get => _Releases;
-            set => SetProperty(ref _Releases, value);
-        }
+        [ObservableProperty]
+        private IReadOnlyList<Release> _releases;
     }
 }

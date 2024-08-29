@@ -21,6 +21,8 @@ namespace FluentStore.Sources.WinGet
             Model = model;
         }
 
+        public override Task<bool> CanDownloadAsync() => _winget.CanDownloadAsync(this);
+
         public override Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
             if (!Status.IsAtLeast(PackageStatus.BasicDetails))
@@ -47,7 +49,8 @@ namespace FluentStore.Sources.WinGet
             bool isSuccess = await _winget.InstallAsync(this);
 
             if (isSuccess)
-                Status = PackageStatus.Installed;
+                IsInstalled = true;
+
             return isSuccess;
         }
 
