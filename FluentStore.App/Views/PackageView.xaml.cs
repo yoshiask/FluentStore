@@ -108,19 +108,20 @@ namespace FluentStore.Views
                 if (ViewModel.Package.HasPrice)
                     WeakReferenceMessenger.Default.Send<WarningMessage>(new($"{ViewModel.Package.ShortTitle} is not free. You may still be able to download or install the package, but a legitimate license is required.", ViewModel.Package));
 
-
-                bool canLaunch = false;
-                try
-                {
-                    canLaunch = await ViewModel.Package.CanLaunchAsync();
-                }
-                catch (Exception ex)
-                {
-                    var logger = Ioc.Default.GetRequiredService<LoggerService>();
-                    logger.UnhandledException(ex, Microsoft.Extensions.Logging.LogLevel.Error);
-                }
+                var canLaunch = await SDK.Helpers.Extensions.WithCatch(ViewModel.Package.CanLaunchAsync, OnExcpetion);
                 if (canLaunch)
+                {
                     UpdateInstallButtonToLaunch();
+                }
+                else
+                {
+                    var canDownload = await SDK.Helpers.Extensions.WithCatch(ViewModel.Package.CanDownloadAsync, OnExcpetion);
+                    if (!canDownload)
+                    {
+                        // If we can't launch or download the package, disable the button entirely
+                        InstallButton.IsEnabled = false;
+                    }
+                }
 
                 // Show additional commands
                 foreach (var button in ViewModel.GetAdditionalCommands())
@@ -214,10 +215,10 @@ namespace FluentStore.Views
                 RegisterPackageServiceMessages();
                 ViewModel.IsInstalling = true;
 
-                if (ViewModel.Package.Status.IsLessThan(PackageStatus.Downloaded))
+                if (!ViewModel.Package.IsDownloaded)
                     await ViewModel.Package.DownloadAsync(PathManager.GetTempDirectory());
 
-                if (ViewModel.Package.Status.IsAtLeast(PackageStatus.Downloaded))
+                if (ViewModel.Package.IsDownloaded)
                 {
                     bool installed = await ViewModel.Package.InstallAsync();
                     if (installed && await ViewModel.Package.CanLaunchAsync())
@@ -474,12 +475,12 @@ namespace FluentStore.Views
 
                             case SuccessType.PackageDownloadCompleted:
                                 // Don't ask the user to save the downloaded item if they
-                                // asking to install it automatically.
+                                // chose to install the package.
                                 if (!ViewModel.IsInstalling)
                                 {
                                     PackageHelper.HandlePackageDownloadCompletedToast(m, progressToast);
 
-                                    if (p.DownloadItem != null && p.Status.IsAtLeast(PackageStatus.Downloaded))
+                                    if (p.DownloadItem != null)
                                     {
                                         if (p.DownloadItem is FileInfo file)
                                         {
@@ -651,6 +652,12 @@ namespace FluentStore.Views
         private void ScrollDetailsButton_Click(object sender, RoutedEventArgs e)
         {
             MainDetailsPanel.StartBringIntoView();
+        }
+
+        private void OnExcpetion(Exception ex)
+        {
+            var logger = Ioc.Default.GetRequiredService<LoggerService>();
+            logger.UnhandledException(ex, Microsoft.Extensions.Logging.LogLevel.Error);
         }
     }
 }

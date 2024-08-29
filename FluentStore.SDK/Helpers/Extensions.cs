@@ -2,12 +2,13 @@
 using Garfoot.Utilities.FluentUrn;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Helpers
 {
     public static class Extensions
     {
-
         public static Version ToVersion(this Windows.ApplicationModel.PackageVersion packageVersion)
         {
             return new(packageVersion.Major, packageVersion.Minor, packageVersion.Build, packageVersion.Revision);
@@ -72,6 +73,19 @@ namespace FluentStore.SDK.Helpers
                 return platWindows;
             else
                 return WindowsPlatform.Unknown;
+        }
+
+        public static async Task<TResult> WithCatch<TResult>(this Func<Task<TResult>> task, Action<Exception> exHandler)
+        {
+            try
+            {
+                return await task();
+            }
+            catch (Exception ex)
+            {
+                exHandler(ex);
+                return default;
+            }
         }
     }
 }
