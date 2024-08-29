@@ -71,11 +71,18 @@
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
+                            <ColumnDefinition Width="32"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="{x:Bind ShortTitle}" />
-                        <TextBlock Text="{x:Bind Version}" Grid.Column="1" />
+                        <TextBlock Text="{x:Bind ShortTitle}" Grid.Column="0" VerticalAlignment="Center" />
+                        <TextBlock Text="{x:Bind Version}" Grid.Column="2" VerticalAlignment="Center" />
+
+                        <ContentControl Content="{x:Bind GetStatusImage()}"
+                                        Grid.Column="1" MaxHeight="32"
+                                        HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                                        HorizontalAlignment="Right" VerticalAlignment="Stretch"
+                                        ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

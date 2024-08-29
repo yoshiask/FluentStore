@@ -1,22 +1,15 @@
-﻿using System.Linq;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Linq;
 
 namespace FluentStore.SDK.Images
 {
-    public class TextImage : ImageBase
+    public partial class TextImage : ImageBase
     {
-        private string _Text;
-        public string Text
-        {
-            get => _Text;
-            set => SetProperty(ref _Text, value);
-        }
+        [ObservableProperty]
+        private string _text;
 
-        private string _FontFamily = "Segoe UI";
-        public string FontFamily
-        {
-            get => _FontFamily;
-            set => SetProperty(ref _FontFamily, value);
-        }
+        [ObservableProperty]
+        private string _fontFamily = "Segoe UI";
 
         public static TextImage CreateFromName(string name, ImageType imageType = ImageType.Unspecified)
         {
@@ -35,7 +28,7 @@ namespace FluentStore.SDK.Images
                     if (word.All(c => !char.IsLetter(c) || char.IsUpper(c)))
                         text += word;
                     else
-                        text += word.First(c => char.IsLetterOrDigit(c));
+                        text += word.First(char.IsLetterOrDigit);
                 }
 
                 if (words.Length == 3 || words.Length == 4)
@@ -55,7 +48,7 @@ namespace FluentStore.SDK.Images
                 goto done;
             }
 
-            text = name.Substring(0, 1);
+            text = name[..1];
             for (int i = 1; i < noVowels.Length; i++)
             {
                 char c = noVowels[i];
@@ -74,6 +67,6 @@ namespace FluentStore.SDK.Images
             };
         }
 
-        public override string ToString() => "Text";
+        public override string ToString() => Text;
     }
 }

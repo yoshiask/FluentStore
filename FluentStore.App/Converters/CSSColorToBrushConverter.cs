@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CommunityToolkit.WinUI.Helpers;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
 using Windows.UI;
@@ -94,14 +95,31 @@ namespace FluentStore.Converters
                     default: throw new FormatException("The string passed in the cssString argument is not a recognized Color format.");
                 }
             }
-            else if (NamedCSSColors.ContainsKey(cssString))
+            else if (NamedCSSColors.TryGetValue(cssString, out string namedCssValue))
             {
-                return ParseCSSColorAsDrawingColor(NamedCSSColors[cssString]);
+                return ParseCSSColorAsDrawingColor(namedCssValue);
             }
-            else
+
+            if (cssString.StartsWith("rsrc."))
             {
-                return System.Drawing.Color.Transparent;
+                int argb = 0;
+                var resourceName = cssString[5..];
+
+                if (App.Current.Resources.TryGetValue(resourceName + "Brush", out var resourceA)
+                    && resourceA is SolidColorBrush brush)
+                {
+                    argb = brush.Color.ToInt();
+                }
+                else if (App.Current.Resources.TryGetValue(resourceName + "Color", out var resourceB)
+                    && resourceB is Color color)
+                {
+                    argb = color.ToInt();
+                }
+
+                return System.Drawing.Color.FromArgb(argb);
             }
+            
+            return System.Drawing.Color.Transparent;
         }
 
         public static Color ParseCSSColorAsWinUIColor(string cssString)

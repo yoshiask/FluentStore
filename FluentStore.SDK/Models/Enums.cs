@@ -41,4 +41,12 @@
         Holographic = (1 << 10),
         IoT = (1 << 11)
     }
+
+    public static class SharedColors
+    {
+        public const string Success = "rsrc.Success";
+        public const string Info = "rsrc.Info";
+        public const string Warning = "rsrc.Warning";
+        public const string Error = "rsrc.Error";
+    }
 }

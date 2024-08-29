@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
+using FluentStore.SDK.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -39,7 +40,7 @@ public abstract partial class PluginPackageBase(PackageHandlerBase packageHandle
         return status.IsAtLeast(PluginInstallStatus.NoAction);
     }
 
-    public virtual async Task<bool> IsUpdateAvailable(bool includePrerelease = false)
+    public virtual bool IsUpdateAvailable(bool includePrerelease = false)
     {
         // There isn't anything installed to update
         if (CurrentVersion is null)
@@ -48,5 +49,31 @@ public abstract partial class PluginPackageBase(PackageHandlerBase packageHandle
         return
             (includePrerelease && LatestPrereleaseVersion is not null && LatestPrereleaseVersion > CurrentVersion)
             || (LatestStableVersion > CurrentVersion);
+    }
+
+    public virtual ImageBase GetStatusImage()
+    {
+        // TODO: We don't really want the backend model to handle
+        // UI stuff like this. Probably better to use a status enum,
+        // maybe with flags.
+        TextImage icon = new()
+        {
+            FontFamily = "Segoe MDL2 Assets",
+        };
+        
+        if (IsUpdateAvailable())
+        {
+            icon.Text = "\uECC5";
+            icon.ForegroundColor = SharedColors.Info;
+        }
+        else if (IsInstalled)
+        {
+            icon.Text = "\uE73E";
+            icon.ForegroundColor = SharedColors.Success;
+        }
+
+        // TODO: Add status icons for plugins that are out-of-date
+
+        return icon;
     }
 }
