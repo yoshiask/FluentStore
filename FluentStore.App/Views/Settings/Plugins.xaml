@@ -41,15 +41,15 @@
             </controls:SettingsBlockControl.ExpandableContent>
         </controls:SettingsBlockControl>
 
-        <controls:SettingsDisplayControl Title="Install from file" Grid.Row="1"
+        <controls:SettingsBlockControl Title="Install from file" Grid.Row="1"
                                          Description="Choose a NuGet package from your device to install as a plugin">
-            <controls:SettingsDisplayControl.Icon>
+            <controls:SettingsBlockControl.Icon>
                 <FontIcon Glyph="&#xE8DA;"/>
-            </controls:SettingsDisplayControl.Icon>
-            <controls:SettingsDisplayControl.SettingsActionableElement>
+            </controls:SettingsBlockControl.Icon>
+            <controls:SettingsBlockControl.SettingsActionableElement>
                 <Button Content="Pick file..." Click="InstallPluginButton_Click"/>
-            </controls:SettingsDisplayControl.SettingsActionableElement>
-        </controls:SettingsDisplayControl>
+            </controls:SettingsBlockControl.SettingsActionableElement>
+        </controls:SettingsBlockControl>
 
         <controls:PackageManagerControl MinHeight="400" Grid.Row="2"/>
 
