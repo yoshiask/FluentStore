@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Diagnostics;
-using FluentStore.SDK.Helpers;
+﻿using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
 using System;
 using System.Collections.Generic;
@@ -54,7 +53,8 @@ namespace FluentStore.SDK.Packages
             // won't be run silently, but it's better than an error.
 
             // Make sure installer is downloaded
-            Guard.IsTrue(IsDownloaded);
+            if (!IsDownloaded)
+                await DownloadAsync();
 
             bool success = false;
             Models.InstallerType typeReduced = Type.Reduce();
