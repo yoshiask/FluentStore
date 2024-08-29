@@ -12,7 +12,7 @@ using System.Text;
 
 namespace FluentStore.SDK
 {
-    public abstract class PackageBase : ObservableObject, IEquatable<PackageBase>, IHasAccessibleDescription
+    public abstract partial class PackageBase : ObservableObject, IEquatable<PackageBase>, IHasAccessibleDescription
     {
         protected static readonly List<AbstractButton> _emptyCommandList = new(0);
 
@@ -132,54 +132,26 @@ namespace FluentStore.SDK
             set => SetProperty(ref _Model, value);
         }
 
-        private PackageStatus _Status = PackageStatus.Unknown;
-        public PackageStatus Status
-        {
-            get => _Status;
-            set => SetProperty(ref _Status, value);
-        }
+        [ObservableProperty]
+        private PackageStatus _status = PackageStatus.Unknown;
 
-        private FileSystemInfo _DownloadItem;
-        public FileSystemInfo DownloadItem
-        {
-            get => _DownloadItem;
-            set => SetProperty(ref _DownloadItem, value);
-        }
+        [ObservableProperty]
+        private FileSystemInfo _downloadItem;
 
-        private InstallerType _Type;
-        public InstallerType Type
-        {
-            get => _Type;
-            set => SetProperty(ref _Type, value);
-        }
+        [ObservableProperty]
+        private InstallerType _type;
 
-        private Uri _PackageUri;
-        public Uri PackageUri
-        {
-            get => _PackageUri;
-            set => SetProperty(ref _PackageUri, value);
-        }
+        [ObservableProperty]
+        private Uri _packageUri;
 
-        private string _Title;
-        public string Title
-        {
-            get => _Title;
-            set => SetProperty(ref _Title, value);
-        }
+        [ObservableProperty]
+        private string _title;
 
-        private string _PublisherId;
-        public string PublisherId
-        {
-            get => _PublisherId;
-            set => SetProperty(ref _PublisherId, value);
-        }
+        [ObservableProperty]
+        private string _publisherId;
 
-        private string _DeveloperName;
-        public string DeveloperName
-        {
-            get => _DeveloperName;
-            set => SetProperty(ref _DeveloperName, value);
-        }
+        [ObservableProperty]
+        private string _developerName;
 
         /// <summary>
         /// The date this specific package was released.
@@ -192,49 +164,29 @@ namespace FluentStore.SDK
             set => SetProperty(ref _ReleaseDate, value);
         }
 
-        private string _Description;
-        public string Description
-        {
-            get => _Description;
-            set => SetProperty(ref _Description, value);
-        }
+        [ObservableProperty]
+        private string _description;
 
-        private string _Version;
-        public string Version
-        {
-            get => _Version;
-            set => SetProperty(ref _Version, value);
-        }
+        [ObservableProperty]
+        private string _version;
 
-        private ReviewSummary _ReviewSummary;
-        public ReviewSummary ReviewSummary
-        {
-            get => _ReviewSummary;
-            set => SetProperty(ref _ReviewSummary, value);
-        }
+        [ObservableProperty]
+        private ReviewSummary _reviewSummary;
         public bool HasReviewSummary => ReviewSummary != null;
 
-        private double _Price = -1;
-        public double Price
-        {
-            get => _Price;
-            set => SetProperty(ref _Price, value);
-        }
+        [ObservableProperty]
+        private double _price = -1;
         public bool HasPrice => Price > 0;
 
-        private string _DisplayPrice;
-        public string DisplayPrice
-        {
-            get => _DisplayPrice;
-            set => SetProperty(ref _DisplayPrice, value);
-        }
+        [ObservableProperty]
+        private string _displayPrice;
         public bool HasDisplayPrice => DisplayPrice != null;
 
-        private string _ShortTitle;
+        private string _shortTitle;
         public string ShortTitle
         {
-            get => string.IsNullOrEmpty(_ShortTitle) ? Title : _ShortTitle;
-            set => _ShortTitle = value;
+            get => string.IsNullOrEmpty(_shortTitle) ? Title : _shortTitle;
+            set => _shortTitle = value;
         }
 
         private Link _Website;
@@ -254,12 +206,8 @@ namespace FluentStore.SDK
             set => SetProperty(ref _PrivacyUri, value);
         }
 
-        private List<ImageBase> _Images = new();
-        public List<ImageBase> Images
-        {
-            get => _Images;
-            set => SetProperty(ref _Images, value);
-        }
+        [ObservableProperty]
+        private List<ImageBase> _images = [];
 
         public ImageBase AppIconCache;
         /// <summary>
