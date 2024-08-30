@@ -42,11 +42,28 @@
         IoT = (1 << 11)
     }
 
-    public static class SharedColors
+    public static class SharedResources
     {
-        public const string Success = "rsrc.Success";
-        public const string Info = "rsrc.Info";
-        public const string Warning = "rsrc.Warning";
-        public const string Error = "rsrc.Error";
+        public const string SuccessColor = "rsrc.SuccessColor";
+        public const string InfoColor = "rsrc.InfoColor";
+        public const string WarningColor = "rsrc.WarningColor";
+        public const string ErrorColor = "rsrc.ErrorColor";
+        public const string SymbolFont = "rsrc.SymbolThemeFontFamily";
+
+        public static bool TryGetName(string value, out string name)
+        {
+            name = null;
+
+            if (value is null)
+                return false;
+
+            if (value.StartsWith("rsrc."))
+            {
+                name = value[5..];
+                return true;
+            }
+
+            return false;
+        }
     }
 }

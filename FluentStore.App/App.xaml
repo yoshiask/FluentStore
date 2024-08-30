@@ -8,12 +8,16 @@
             
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
-                    <SolidColorBrush x:Key="SuccessBrush" Color="#10893E"/>
-                    <SolidColorBrush x:Key="InfoBrush" Color="#1E3581"/>
+                    <Color x:Key="SuccessColor">#10893E</Color>
+                    <Color x:Key="InfoColor">#1E3581</Color>
+                    <Color x:Key="WarningColor">#DA3B01</Color>
+                    <Color x:Key="ErrorColor">#E60000</Color>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
-                    <SolidColorBrush x:Key="SuccessBrush" Color="#00CC6A"/>
-                    <SolidColorBrush x:Key="InfoBrush" Color="#4C9CD6"/>
+                    <Color x:Key="SuccessColor">#00CC6A</Color>
+                    <Color x:Key="InfoColor">#4C9CD6</Color>
+                    <Color x:Key="WarningColor">#FFB900</Color>
+                    <Color x:Key="ErrorColor">#FF4343</Color>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
             

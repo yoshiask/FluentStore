@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CommunityToolkit.WinUI.Helpers;
+using FluentStore.SDK.Models;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
 using Windows.UI;
@@ -100,22 +101,11 @@ namespace FluentStore.Converters
                 return ParseCSSColorAsDrawingColor(namedCssValue);
             }
 
-            if (cssString.StartsWith("rsrc."))
+            if (SharedResources.TryGetName(cssString, out var resourceName)
+                && App.Current.Resources.TryGetValue(resourceName, out var resourceB)
+                && resourceB is Color color)
             {
-                int argb = 0;
-                var resourceName = cssString[5..];
-
-                if (App.Current.Resources.TryGetValue(resourceName + "Brush", out var resourceA)
-                    && resourceA is SolidColorBrush brush)
-                {
-                    argb = brush.Color.ToInt();
-                }
-                else if (App.Current.Resources.TryGetValue(resourceName + "Color", out var resourceB)
-                    && resourceB is Color color)
-                {
-                    argb = color.ToInt();
-                }
-
+                int argb = color.ToInt();
                 return System.Drawing.Color.FromArgb(argb);
             }
             
