@@ -66,8 +66,6 @@ public abstract partial class PluginPackageBase(PackageHandlerBase packageHandle
             icon.ForegroundColor = SharedResources.SuccessColor;
         }
 
-        // TODO: Add status icons for plugins that are out-of-date
-
         return icon;
     }
 }

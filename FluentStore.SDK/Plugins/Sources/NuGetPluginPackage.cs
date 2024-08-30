@@ -4,6 +4,7 @@ using FluentStore.SDK.Downloads;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
 using FluentStore.SDK.Messages;
+using FluentStore.SDK.Models;
 using Garfoot.Utilities.FluentUrn;
 using NuGet.Packaging;
 using NuGet.Protocol.Core.Types;
@@ -92,6 +93,24 @@ public partial class NuGetPluginPackage : PluginPackageBase
         }
 
         return false;
+    }
+
+    public override ImageBase GetStatusImage()
+    {
+        if (_pluginLoader.Project.Entries.TryGetValue(NuGetId, out var entry)
+            && !_pluginLoader.Project.CheckCompatibility(entry.Framework, entry.SdkVersion))
+        {
+            // Installed plugin version is not compatible with this version of the SDK
+            TextImage icon = new()
+            {
+                FontFamily = SharedResources.SymbolFont,
+                Text = "\uE7BA",
+                ForegroundColor = SharedResources.WarningColor,
+            };
+            return icon;
+        }
+
+        return base.GetStatusImage();
     }
 
     public void Update(IPackageSearchMetadata searchMetadata)
