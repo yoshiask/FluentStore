@@ -118,6 +118,7 @@ public class FluentStoreNuGetProject : NuGetProject
         var pluginFolder = Path.Combine(PluginRoot, packageIdentity.Id);
         PluginInstallStatus status = PluginInstallStatus.Completed;
         NuGetFramework tfm = NuGetFramework.UnsupportedFramework;
+        VersionRange sdkVersion = VersionRange.None;
 
         if (nuGetProjectContext?.ActionType == NuGetActionType.Reinstall)
         {
@@ -135,12 +136,12 @@ public class FluentStoreNuGetProject : NuGetProject
 
         if (status == PluginInstallStatus.Completed)
         {
-            (status, tfm) = await InstallPackageCoreAsync(packageIdentity, downloadResourceResult,
+            (status, tfm, sdkVersion) = await InstallPackageCoreAsync(packageIdentity, downloadResourceResult,
                 nuGetProjectContext, pluginFolder, true, token);
         }
 
         // Add plugin to list of installed packages
-        _entries[packageIdentity.Id] = new(packageIdentity, tfm, status, PluginInstallStatus.NoAction);
+        _entries[packageIdentity.Id] = new(packageIdentity, tfm, status, PluginInstallStatus.NoAction, sdkVersion);
         await FlushAsync(token);
 
         return status.IsAtLeast(PluginInstallStatus.AppRestartRequired);
@@ -219,16 +220,13 @@ public class FluentStoreNuGetProject : NuGetProject
         return source;
     }
 
-    private async Task<(PluginInstallStatus status, NuGetFramework tfm)> InstallPackageCoreAsync(PackageIdentity packageIdentity, DownloadResourceResult downloadResourceResult, INuGetProjectContext nuGetProjectContext, string pluginFolder, bool isPlugin, CancellationToken token = default)
+    public (NuGetFramework tfm, IEnumerable<PackageDependency> deps, PackageDependency sdkDep) GetCompatibleDependencies(PackageReaderBase reader)
     {
-        var status = PluginInstallStatus.Completed;
-        var reader = downloadResourceResult.PackageReader;
-        var nameProvider = DefaultFrameworkNameProvider.Instance;
-        var compatibilityProvider = DefaultCompatibilityProvider.Instance;
+        var id = reader.GetIdentity().Id;
         FrameworkReducer tfmReducer = new();
 
         // Get target framework
-        var tfm = tfmReducer.GetNearest(TargetFramework, await reader.GetSupportedFrameworksAsync(token));
+        var tfm = tfmReducer.GetNearest(TargetFramework, reader.GetSupportedFrameworks());
         if (tfm is null)
         {
             // For some packages, the only supported framework that's compatible is .NET Standard,
@@ -237,25 +235,50 @@ public class FluentStoreNuGetProject : NuGetProject
             tfm = tfmReducer.GetNearest(TargetFramework, refFrameworks);
 
             if (tfm is null)
-                throw new Exception($"{packageIdentity.Id} does not support {TargetFramework}");
-        }
-
-        // Create method to test if a given framework is compatible with the current target
-        bool IsGroupCompatible(IFrameworkSpecific candidate)
-        {
-            return compatibilityProvider.IsCompatible(tfm, candidate.TargetFramework);
+                throw new Exception($"{id} does not support {TargetFramework}");
         }
 
         // Get list of dependencies
-        var dependencies = reader.NuspecReader.GetDependencyGroups().FirstOrDefault(IsGroupCompatible)?.Packages;
+        var deps = GetDependencies(reader, tfm);
 
-        if (isPlugin)
+        // Ensure compatible SDK version
+        var sdkDep = deps?.FirstOrDefault(d => d.Id == "FluentStore.SDK");
+        if (sdkDep is not null && deps is not null && !sdkDep.VersionRange.Satisfies(CurrentSdkVersion))
+            throw new Exception($"{id} does not support Fluent Store SDK {CurrentSdkVersion}: requires {sdkDep.VersionRange}");
+
+        return (tfm, deps, sdkDep);
+    }
+
+    public bool CheckCompatibility(PackageReaderBase reader)
+    {
+        try
         {
-            // Ensure compatible SDK version
-            var sdkDep = dependencies?.FirstOrDefault(d => d.Id == "FluentStore.SDK");
-            if (dependencies is not null && !sdkDep.VersionRange.Satisfies(CurrentSdkVersion))
-                throw new Exception($"{packageIdentity.Id} does not support Fluent Store SDK {CurrentSdkVersion}: requires {sdkDep.VersionRange}");
+            _ = GetCompatibleDependencies(reader);
+            return true;
         }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public bool CheckCompatibility(NuGetFramework tfm, VersionRange sdkVersion, IFrameworkCompatibilityProvider compat = null)
+    {
+        compat ??= DefaultCompatibilityProvider.Instance;
+        return compat.IsCompatible(tfm, TargetFramework) && sdkVersion.Satisfies(CurrentSdkVersion);
+    }
+
+    private async Task<(PluginInstallStatus status, NuGetFramework tfm, VersionRange sdkVersion)> InstallPackageCoreAsync(PackageIdentity packageIdentity, DownloadResourceResult downloadResourceResult, INuGetProjectContext nuGetProjectContext, string pluginFolder, bool isPlugin, CancellationToken token = default)
+    {
+        var status = PluginInstallStatus.Completed;
+        var reader = downloadResourceResult.PackageReader;
+        var nameProvider = DefaultFrameworkNameProvider.Instance;
+        FrameworkReducer tfmReducer = new();
+
+        var (tfm, dependencies, sdkDependency) = GetCompatibleDependencies(reader);
+        
+        if (sdkDependency is null && isPlugin)
+            throw new Exception($"{packageIdentity.Id} is not a Fluent Store plugin.");
 
         // Check if this package is newer than an already installed one
         bool attemptInstall = true;
@@ -287,7 +310,7 @@ public class FluentStoreNuGetProject : NuGetProject
             nuGetProjectContext.Log(MessageLevel.Debug, "Copying files for {0}...", packageIdentity.Id);
 
             // Locate primary plugin DLL and direct deps
-            var libItems = reader.GetLibItems().FirstOrDefault(IsGroupCompatible)?.Items;
+            var libItems = GetFirstCompatibleItems(reader.GetLibItems(), tfm);
             if (libItems is not null)
             {
                 reader.CopyFiles(pluginFolder, libItems.Append(reader.GetNuspecFile()), (src, _, stream) =>
@@ -301,14 +324,14 @@ public class FluentStoreNuGetProject : NuGetProject
             }
 
             // Copy any references
-            var refItems = reader.GetItems("ref").FirstOrDefault(IsGroupCompatible)?.Items;
+            var refItems = GetFirstCompatibleItems(reader.GetItems("ref"), tfm);
             if (refItems is not null)
             {
                 reader.CopyFiles(pluginFolder, refItems, CopyPackageContent, NullLogger.Instance, token);
             }
 
             // Copy any content/resources
-            var contentItems = reader.GetContentItems().FirstOrDefault(IsGroupCompatible)?.Items;
+            var contentItems = GetFirstCompatibleItems(reader.GetContentItems(), tfm);
             if (contentItems is not null)
             {
                 reader.CopyFiles(pluginFolder, contentItems, CopyPackageContent, NullLogger.Instance, token);
@@ -331,7 +354,7 @@ public class FluentStoreNuGetProject : NuGetProject
                     var downloadResult = await DownloadPackageAsync(dependency.Id, dependency.VersionRange, token: token);
 
                     nuGetProjectContext.Log(MessageLevel.Debug, "Installing dependency {0}", dependency);
-                    var (depStatus, _) = await InstallPackageCoreAsync(downloadResult.PackageReader.GetIdentity(),
+                    var (depStatus, _, _) = await InstallPackageCoreAsync(downloadResult.PackageReader.GetIdentity(),
                         downloadResult, nuGetProjectContext, pluginFolder, false, token);
 
                     if (depStatus < status)
@@ -344,7 +367,7 @@ public class FluentStoreNuGetProject : NuGetProject
             }
         }
 
-        return (status, tfm);
+        return (status, tfm, sdkDependency.VersionRange);
     }
 
     private static string CopyPackageContent(string src, string dst, Stream stream)
@@ -358,5 +381,35 @@ public class FluentStoreNuGetProject : NuGetProject
     private static bool IsDependencyAlreadyFulfilled(IEnumerable<PackageIdentity> installed, PackageDependency dep)
     {
         return installed.Any(package => package.Id == dep.Id && dep.VersionRange.Satisfies(package.Version));
+    }
+
+    private static IEnumerable<PackageDependency> GetDependencies(PackageReaderBase reader, NuGetFramework tfm)
+    {
+        var group = reader.NuspecReader
+            .GetDependencyGroups()
+            .FirstOrDefault(IsGroupCompatibleFilter(tfm))
+            as PackageDependencyGroup;
+        return group?.Packages;
+    }
+
+    private static IEnumerable<string> GetFirstCompatibleItems(IEnumerable<FrameworkSpecificGroup> groups, NuGetFramework tfm)
+    {
+        var isGroupCompatible = IsGroupCompatibleFilter(tfm);
+        var frameworkGroups = groups.FirstOrDefault(isGroupCompatible) as FrameworkSpecificGroup;
+        return frameworkGroups?.Items;
+    }
+
+    /// <summary>
+    /// Tests whether a given framework is compatible with the current target.
+    /// </summary>
+    /// <param name="candidate"></param>
+    /// <returns></returns>
+    private static Func<IFrameworkSpecific, bool> IsGroupCompatibleFilter(NuGetFramework tfm)
+    {
+        return (IFrameworkSpecific candidate) =>
+        {
+            var compatibilityProvider = DefaultCompatibilityProvider.Instance;
+            return compatibilityProvider.IsCompatible(tfm, candidate.TargetFramework);
+        };
     }
 }
