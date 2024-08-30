@@ -52,18 +52,18 @@ public abstract partial class PluginPackageBase(PackageHandlerBase packageHandle
         // maybe with flags.
         TextImage icon = new()
         {
-            FontFamily = "Segoe MDL2 Assets",
+            FontFamily = SharedResources.SymbolFont,
         };
         
         if (IsUpdateAvailable())
         {
             icon.Text = "\uECC5";
-            icon.ForegroundColor = SharedColors.Info;
+            icon.ForegroundColor = SharedResources.InfoColor;
         }
         else if (IsInstalled)
         {
             icon.Text = "\uE73E";
-            icon.ForegroundColor = SharedColors.Success;
+            icon.ForegroundColor = SharedResources.SuccessColor;
         }
 
         // TODO: Add status icons for plugins that are out-of-date
