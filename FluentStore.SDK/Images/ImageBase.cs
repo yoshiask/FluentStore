@@ -2,44 +2,27 @@
 
 namespace FluentStore.SDK.Images
 {
-    public class ImageBase : ObservableObject
+    public partial class ImageBase : ObservableObject
     {
-        private ImageType _ImageType;
-        public ImageType ImageType
-        {
-            get => _ImageType;
-            set => SetProperty(ref _ImageType, value);
-        }
+        [ObservableProperty]
+        private ImageType _imageType;
 
-        private int _Height;
-        public int Height
-        {
-            get => _Height;
-            set => SetProperty(ref _Height, value);
-        }
+        [ObservableProperty]
+        private int _height;
 
-        private int _Width;
-        public int Width
-        {
-            get => _Width;
-            set => SetProperty(ref _Width, value);
-        }
+        [ObservableProperty]
+        private int _width;
 
-        private string _BackgroundColor;
-        public string BackgroundColor
-        {
-            get => _BackgroundColor;
-            set => SetProperty(ref _BackgroundColor, value);
-        }
+        [ObservableProperty]
+        private string _backgroundColor;
 
-        private string _ForegroundColor;
-        public string ForegroundColor
-        {
-            get => _ForegroundColor;
-            set => SetProperty(ref _ForegroundColor, value);
-        }
+        [ObservableProperty]
+        private string _foregroundColor;
 
-        public override string ToString() => string.Empty;
+        [ObservableProperty]
+        private string _caption;
+
+        public override string ToString() => Caption;
     }
 
     public enum ImageType

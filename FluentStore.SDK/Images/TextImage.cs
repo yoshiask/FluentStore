@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using FluentStore.SDK.Models;
 using System.Linq;
 
 namespace FluentStore.SDK.Images
@@ -9,7 +10,7 @@ namespace FluentStore.SDK.Images
         private string _text;
 
         [ObservableProperty]
-        private string _fontFamily = "Segoe UI";
+        private string _fontFamily = SharedResources.TextFont;
 
         public static TextImage CreateFromName(string name, ImageType imageType = ImageType.Unspecified)
         {
@@ -67,6 +68,6 @@ namespace FluentStore.SDK.Images
             };
         }
 
-        public override string ToString() => Text;
+        public override string ToString() => Caption ?? Text;
     }
 }

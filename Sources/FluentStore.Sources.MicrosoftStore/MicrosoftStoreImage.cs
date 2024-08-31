@@ -32,14 +32,5 @@ namespace FluentStore.Sources.MicrosoftStore
             get => _ImagePositionInfo;
             set => SetProperty(ref _ImagePositionInfo, value);
         }
-
-        private string _Caption;
-        public string Caption
-        {
-            get => _Caption;
-            set => SetProperty(ref _Caption, value);
-        }
-
-        public override string ToString() => Caption;
     }
 }
