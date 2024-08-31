@@ -49,6 +49,7 @@
         public const string WarningColor = "rsrc.WarningColor";
         public const string ErrorColor = "rsrc.ErrorColor";
         public const string SymbolFont = "rsrc.SymbolThemeFontFamily";
+        public const string TextFont = "rsrc.XamlAutoFontFamily";
 
         public static bool TryGetName(string value, out string name)
         {
