@@ -78,7 +78,7 @@
                         <TextBlock Text="{x:Bind ShortTitle}" Grid.Column="0" VerticalAlignment="Center" />
                         <TextBlock Text="{x:Bind Version}" Grid.Column="2" VerticalAlignment="Center" />
 
-                        <ContentControl Content="{x:Bind GetStatusImage()}"
+                        <ContentControl Content="{x:Bind StatusImage}"
                                         Grid.Column="1" MaxHeight="32"
                                         HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
                                         HorizontalAlignment="Right" VerticalAlignment="Stretch"
@@ -89,18 +89,35 @@
         </ListView>
 
         <Grid x:Name="PackageDetailGrid" Padding="16,0,0,0" Grid.Row="0" Grid.Column="1"
-              BorderThickness="1,0,0,0" BorderBrush="#20000000"
+              BorderThickness="1,0,0,0" BorderBrush="{ThemeResource SystemControlTransientBorderBrush}"
               x:Load="{x:Bind ViewModel.PackageToView, Mode=OneWay, Converter={StaticResource NullToFalseConverter}}"
               x:DefaultBindMode="OneWay">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            
-            <TextBlock Text="{x:Bind ViewModel.PackageToView.Title}" Style="{StaticResource HeaderTextBlockStyle}"/>
+
+            <TextBlock Text="{x:Bind ViewModel.PackageToView.Title}" FontSize="30" FontWeight="Bold"/>
             <TextBlock Text="{x:Bind ViewModel.PackageToView.DeveloperName}" Grid.Row="1"/>
-            <TextBlock Text="{x:Bind ViewModel.PackageToView.Description}" Grid.Row="2"/>
+
+            <Grid Grid.Row="2" ColumnSpacing="4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <ContentControl Content="{x:Bind ViewModel.PackageToView.StatusImage}" MaxHeight="32"
+                                HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                                HorizontalAlignment="Right" VerticalAlignment="Stretch"
+                                ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
+                <TextBlock Text="{x:Bind ViewModel.PackageToView.StatusImage.Caption}"
+                           Grid.Column="1" VerticalAlignment="Center"
+                           Foreground="{x:Bind ViewModel.PackageToView.StatusImage.ForegroundColor, Converter={StaticResource CSSColorToBrushConverter}}"
+                           Visibility="{x:Bind ViewModel.PackageToView.StatusImage, Converter={StaticResource NullToFalseConverter}}"/>
+            </Grid>
+            
+            <TextBlock Text="{x:Bind ViewModel.PackageToView.Description}" Grid.Row="3"/>
         </Grid>
 
         <CommandBar Grid.Row="2" Grid.ColumnSpan="2" Margin="-14"
