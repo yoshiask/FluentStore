@@ -10,7 +10,7 @@
 
     <PropertyGroup>
         <Title>Fluent Store Social</Title>
-        <Version>0.4.0.1</Version>
+        <Version>$(FluentStoreMajorMinorVersion).0.2</Version>
         <PackageVersion>$(Version)-alpha</PackageVersion>
         <Description>Create and explore package collections from people around the world.</Description>
     </PropertyGroup>

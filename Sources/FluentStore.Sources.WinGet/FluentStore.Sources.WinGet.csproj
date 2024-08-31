@@ -8,7 +8,7 @@
 
     <PropertyGroup>
         <Title>WinGet Community</Title>
-        <Version>0.4.0.1</Version>
+        <Version>$(FluentStoreMajorMinorVersion).0.2</Version>
         <PackageVersion>$(Version)-alpha</PackageVersion>
         <Description>Search and install packages from the WinGet Community Repository. Requires the WinGet CLI.</Description>
     </PropertyGroup>

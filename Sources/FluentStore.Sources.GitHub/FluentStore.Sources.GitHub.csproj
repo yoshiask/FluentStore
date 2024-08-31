@@ -7,9 +7,9 @@
 
     <PropertyGroup>
         <Title>GitHub</Title>
-        <Version>0.4.0.1</Version>
+        <Version>$(FluentStoreMajorMinorVersion).0.2</Version>
         <PackageVersion>$(Version)-alpha</PackageVersion>
-        <Description>Provides support for viewing GitHub repositories as packages. Searching for GitHub repos is not supported, but downloading/installing packages from repos is.</Description>
+        <Description>Provides support for viewing GitHub repositories as packages. Downloading and installing may be supported for some repositories. Searching for is not supported.</Description>
     </PropertyGroup>
 
 </Project>

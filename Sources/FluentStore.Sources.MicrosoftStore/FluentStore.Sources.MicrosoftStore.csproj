@@ -13,9 +13,9 @@
 
     <PropertyGroup>
         <Title>Microsoft Store</Title>
-        <Version>0.4.0.1</Version>
+        <Version>$(FluentStoreMajorMinorVersion).0.2</Version>
         <PackageVersion>$(Version)-alpha</PackageVersion>
-        <Description>Access apps in the Microsoft Store </Description>
+        <Description>Download or install apps and collections from the Microsoft Store. Movies, arcade, and some games may not be supported.</Description>
     </PropertyGroup>
 
 </Project>
