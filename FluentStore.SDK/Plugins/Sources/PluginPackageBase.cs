@@ -11,9 +11,12 @@ namespace FluentStore.SDK.Plugins.Sources;
 public abstract partial class PluginPackageBase(PackageHandlerBase packageHandler, PluginLoader pluginLoader) : PackageBase(packageHandler)
 {
     protected readonly PluginLoader _pluginLoader = pluginLoader;
+    private ImageBase _statusImage;
 
     [ObservableProperty]
     private string _installedVersion;
+
+    public ImageBase StatusImage => _statusImage ??= GetStatusImage();
 
     public override Task<ImageBase> CacheAppIcon() => Task.FromResult<ImageBase>(TextImage.CreateFromName(ShortTitle ?? Title));
 
@@ -59,11 +62,13 @@ public abstract partial class PluginPackageBase(PackageHandlerBase packageHandle
         {
             icon.Text = "\uECC5";
             icon.ForegroundColor = SharedResources.InfoColor;
+            icon.Caption = "An update is available.";
         }
         else if (IsInstalled)
         {
             icon.Text = "\uE73E";
             icon.ForegroundColor = SharedResources.SuccessColor;
+            icon.Caption = $"Version {InstalledVersion} is installed.";
         }
 
         return icon;

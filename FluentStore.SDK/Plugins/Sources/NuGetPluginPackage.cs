@@ -100,12 +100,12 @@ public partial class NuGetPluginPackage : PluginPackageBase
         if (_pluginLoader.Project.Entries.TryGetValue(NuGetId, out var entry)
             && !_pluginLoader.Project.CheckCompatibility(entry.Framework, entry.SdkVersion))
         {
-            // Installed plugin version is not compatible with this version of the SDK
             TextImage icon = new()
             {
                 FontFamily = SharedResources.SymbolFont,
                 Text = "\uE7BA",
                 ForegroundColor = SharedResources.WarningColor,
+                Caption = "Installed plugin is not compatible with this release of Fluent Store.",
             };
             return icon;
         }
