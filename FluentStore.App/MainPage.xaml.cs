@@ -172,15 +172,15 @@ namespace FluentStore
                 return;
             }
 
-            if (args.SelectedItem is not NavigationViewItem navItem) return;
+            if (args.SelectedItem is not NavigationViewItem navItem)
+                return;
 
             PageInfo pageInfo = NavService.Pages.Find(navItem.Tag.Equals);
-            if (pageInfo == null) goto navigate;
+            if (pageInfo is not null)
+                page = pageInfo.PageType;
 
-            page = pageInfo.PageType;
-
-        navigate:
-            NavService.Navigate(page);
+            if (!NavService.IsNavigating)
+                NavService.Navigate(page);
         }
 
         private void Page_SizeChanged(object sender, SizeChangedEventArgs e)

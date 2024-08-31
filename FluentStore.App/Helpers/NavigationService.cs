@@ -63,7 +63,9 @@ namespace FluentStore.Services
         public override void Navigate(Type page, object parameter = null)
         {
             Guard.IsNotNull(page, nameof(page));
+            IsNavigating = true;
             CurrentFrame.Navigate(page, parameter);
+            IsNavigating = false;
         }
 
         public override void Navigate(object parameter)
@@ -77,14 +79,22 @@ namespace FluentStore.Services
 
         public override void NavigateBack()
         {
-            if (CurrentFrame.CanGoBack)
-                CurrentFrame.NavigateBack();
+            if (!CurrentFrame.CanGoBack)
+                return;
+
+            IsNavigating = true;
+            CurrentFrame.NavigateBack();
+            IsNavigating = false;
         }
 
         public override void NavigateForward()
         {
-            if (CurrentFrame.CanGoForward)
-                CurrentFrame.NavigateForward();
+            if (!CurrentFrame.CanGoForward)
+                return;
+
+            IsNavigating = true;
+            CurrentFrame.NavigateForward();
+            IsNavigating = false;
         }
 
         public override void AppNavigate(Type page, object parameter = null)

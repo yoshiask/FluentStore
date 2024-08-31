@@ -23,10 +23,14 @@ namespace FluentStore.Controls
 
         public void Navigate(UIElement newContent, object parameter = null, Type sourceType = null)
         {
-            var oldContent = Content;
-            m_navStack.Push(oldContent);
-            if (TryGetContent(out var oldAppContent))
-                oldAppContent.OnNavigatedFrom(parameter);
+            var oldContent = (UIElement)Content;
+            System.Diagnostics.Debug.WriteLineIf(newContent == oldContent, "tried to navigate to the same page");
+            if (oldContent is not null)
+            {
+                m_navStack.Push(oldContent);
+                if (TryGetContent(out var oldAppContent))
+                    oldAppContent.OnNavigatedFrom(parameter);
+            }
 
             Content = newContent;
             if (TryGetContent(out var newAppContent))

@@ -18,6 +18,8 @@ namespace FluentStore.Services
 
         public List<PageInfo> Pages { get; protected set; }
 
+        public bool IsNavigating { get; protected set; }
+
         public abstract void Navigate(Type page, object parameter);
 
         public void Navigate(string page, object parameter)
