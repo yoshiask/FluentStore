@@ -3,7 +3,6 @@ using NuGet.Packaging.Core;
 using NuGet.Packaging;
 using NuGet.Versioning;
 using System;
-using FluentStore.SDK.Plugins.NuGet;
 
 namespace FluentStore.SDK.Plugins;
 
@@ -33,5 +32,5 @@ public record struct PluginEntry(string Id, NuGetVersion Version, NuGetFramework
 
     public readonly PackageIdentity ToPackageIdentity() => new(Id, Version);
 
-    public override readonly string ToString() => string.Join('\t', Id, Version, Framework, InstallStatus, UninstallStatus);
+    public override readonly string ToString() => string.Join('\t', Id, Version, Framework, InstallStatus, UninstallStatus, SdkVersion);
 }
