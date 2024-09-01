@@ -13,10 +13,24 @@ public abstract partial class PluginPackageBase(PackageHandlerBase packageHandle
     protected readonly PluginLoader _pluginLoader = pluginLoader;
     private ImageBase _statusImage;
 
+    protected bool _cachedStatusImage;
+
     [ObservableProperty]
     private string _installedVersion;
 
-    public ImageBase StatusImage => _statusImage ??= GetStatusImage();
+    public ImageBase StatusImage
+    {
+        get
+        {
+            if (_cachedStatusImage)
+                return _statusImage;
+
+            _statusImage = GetStatusImage();
+            _cachedStatusImage = true;
+
+            return _statusImage;
+        }
+    }
 
     public override Task<ImageBase> CacheAppIcon() => Task.FromResult<ImageBase>(TextImage.CreateFromName(ShortTitle ?? Title));
 
@@ -53,24 +67,28 @@ public abstract partial class PluginPackageBase(PackageHandlerBase packageHandle
         // TODO: We don't really want the backend model to handle
         // UI stuff like this. Probably better to use a status enum,
         // maybe with flags.
-        TextImage icon = new()
-        {
-            FontFamily = SharedResources.SymbolFont,
-        };
         
         if (IsUpdateAvailable())
         {
-            icon.Text = "\uECC5";
-            icon.ForegroundColor = SharedResources.InfoColor;
-            icon.Caption = "An update is available.";
+            return new TextImage
+            {
+                FontFamily = SharedResources.SymbolFont,
+                Text = "\uECC5",
+                ForegroundColor = SharedResources.InfoColor,
+                Caption = "An update is available.",
+            };
         }
         else if (IsInstalled)
         {
-            icon.Text = "\uE73E";
-            icon.ForegroundColor = SharedResources.SuccessColor;
-            icon.Caption = $"Version {InstalledVersion} is installed.";
+            return new TextImage
+            {
+                FontFamily = SharedResources.SymbolFont,
+                Text = "\uE73E",
+                ForegroundColor = SharedResources.SuccessColor,
+                Caption = $"Version {InstalledVersion} is installed.",
+            };
         }
 
-        return icon;
+        return null;
     }
 }
