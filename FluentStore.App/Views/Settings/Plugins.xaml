@@ -42,7 +42,7 @@
         </controls:SettingsBlockControl>
 
         <controls:SettingsBlockControl Title="Install from file" Grid.Row="1"
-                                         Description="Choose a NuGet package from your device to install as a plugin">
+                                       Description="Choose a NuGet package from your device to install as a plugin">
             <controls:SettingsBlockControl.Icon>
                 <FontIcon Glyph="&#xE8DA;"/>
             </controls:SettingsBlockControl.Icon>

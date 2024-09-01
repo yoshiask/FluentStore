@@ -20,7 +20,6 @@ using System.Runtime.Loader;
 using NuGet.Packaging.Core;
 using FluentStore.SDK.Plugins.NuGet;
 using NuGet.Protocol.Core.Types;
-using SharpCompress.Common;
 
 namespace FluentStore.SDK.Plugins
 {
@@ -283,7 +282,7 @@ namespace FluentStore.SDK.Plugins
 
             try
             {
-                if (downloadItem.Status is not (DownloadResourceResultStatus.AvailableWithoutStream or DownloadResourceResultStatus.Available))
+                if (downloadItem?.Status is not (DownloadResourceResultStatus.AvailableWithoutStream or DownloadResourceResultStatus.Available))
                     throw new ArgumentException("The provided item failed to download", nameof(downloadItem));
 
                 Directory.CreateDirectory(_settings.PluginDirectory);
@@ -351,14 +350,16 @@ namespace FluentStore.SDK.Plugins
                 return;
 
             var pendingUninstalls = Project.Entries.Values
-                .Where(e => e.UninstallStatus is PluginInstallStatus.AppRestartRequired or PluginInstallStatus.SystemRestartRequired);
+                .Where(e => e.UninstallStatus is PluginInstallStatus.AppRestartRequired or PluginInstallStatus.SystemRestartRequired)
+                .ToList();
             foreach (var entry in pendingUninstalls)
             {
                 await UninstallPlugin(entry.Id);
             }
 
             var pendingInstalls = Project.Entries.Values
-                .Where(e => e.InstallStatus is PluginInstallStatus.AppRestartRequired or PluginInstallStatus.SystemRestartRequired);
+                .Where(e => e.InstallStatus is PluginInstallStatus.AppRestartRequired or PluginInstallStatus.SystemRestartRequired)
+                .ToList();
             foreach (var entry in pendingInstalls)
             {
                 var pluginPath = Path.Combine(_settings.PluginDirectory, $"{entry.ToPackageIdentity()}.nupkg");

@@ -48,6 +48,12 @@ public partial class NuGetPluginPackage : PluginPackageBase
         }
 
         var downloadItem = await GetResourceAsync();
+        if (downloadItem is null)
+        {
+            IsDownloaded = false;
+            return null;
+        }
+
         var nupkgFile = StorageHelper.GetPackageFile(Urn, folder);
 
         await downloadItem.PackageReader.CopyNupkgAsync(nupkgFile.FullName, default);
@@ -105,7 +111,7 @@ public partial class NuGetPluginPackage : PluginPackageBase
                 FontFamily = SharedResources.SymbolFont,
                 Text = "\uE7BA",
                 ForegroundColor = SharedResources.WarningColor,
-                Caption = "Installed plugin is not compatible with this release of Fluent Store.",
+                Caption = $"Version {entry.Version} is installed and is not compatible with this release of Fluent Store.",
             };
             return icon;
         }
@@ -160,8 +166,7 @@ public partial class NuGetPluginPackage : PluginPackageBase
     {
         if (_downloadItem is not null)
             return _downloadItem;
-
-        return _downloadItem = await _pluginLoader.FetchPlugin(NuGetId);
+        return _downloadItem = await _pluginLoader.Project.DownloadPackageAsync(NuGetId);
     }
 
     private void DisposeResource()

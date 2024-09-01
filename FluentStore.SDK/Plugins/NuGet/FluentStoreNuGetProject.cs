@@ -122,12 +122,12 @@ public class FluentStoreNuGetProject : NuGetProject
 
         if (nuGetProjectContext?.ActionType == NuGetActionType.Reinstall)
         {
-            var uninstalled = await UninstallPackageAsync(packageIdentity, nuGetProjectContext, token);
-            if (!uninstalled)
+            var uninstallStatus = await UninstallPackageAsync(packageIdentity.Id, nuGetProjectContext, token);
+            if (uninstallStatus is PluginInstallStatus.AppRestartRequired or PluginInstallStatus.SystemRestartRequired)
             {
                 // App will need to restart, make sure the package is
                 // in the plugin folder so we can pick it up next time.
-                status = PluginInstallStatus.AppRestartRequired;
+                status = uninstallStatus;
 
                 string pluginFilePath = Path.Combine(PluginRoot, $"{packageIdentity}.nupkg");
                 await downloadResourceResult.PackageReader.CopyNupkgAsync(pluginFilePath, token);
@@ -171,6 +171,10 @@ public class FluentStoreNuGetProject : NuGetProject
         catch (DirectoryNotFoundException)
         {
             uninstallStatus = PluginInstallStatus.NoAction;
+        }
+        catch (IOException)
+        {
+            uninstallStatus = PluginInstallStatus.AppRestartRequired;
         }
         catch (Exception ex)
         {
@@ -367,7 +371,7 @@ public class FluentStoreNuGetProject : NuGetProject
             }
         }
 
-        return (status, tfm, sdkDependency.VersionRange);
+        return (status, tfm, sdkDependency?.VersionRange);
     }
 
     private static string CopyPackageContent(string src, string dst, Stream stream)
