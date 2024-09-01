@@ -23,13 +23,18 @@ namespace FluentStore.Sources.WinGet
 
         public override Task<bool> CanDownloadAsync() => _winget.CanDownloadAsync(this);
 
-        public override Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
+        public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
             if (!Status.IsAtLeast(PackageStatus.BasicDetails))
                 return null;
 
             folder ??= StorageHelper.GetTempDirectory().CreateSubdirectory(StorageHelper.PrepUrnForFile(Urn));
-            return _winget.DownloadAsync(this, folder);
+
+            DownloadItem = await _winget.DownloadAsync(this, folder);
+            if (DownloadItem is not null)
+                IsDownloaded = true;
+
+            return DownloadItem;
         }
 
         public override Task<ImageBase> CacheAppIcon() => Task.FromResult<ImageBase>(TextImage.CreateFromName(Title));
