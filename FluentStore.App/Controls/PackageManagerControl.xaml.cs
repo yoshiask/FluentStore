@@ -1,3 +1,4 @@
+using FluentStore.SDK;
 using FluentStore.SDK.Plugins.Sources;
 using FluentStore.ViewModels;
 using Microsoft.UI.Xaml.Controls;
@@ -23,8 +24,16 @@ public sealed partial class PackageManagerControl : UserControl
             ViewModel.SelectedPackages.Add(package);
     }
 
-    private void PackageListView_ItemClick(object sender, ItemClickEventArgs e)
+    private async void PackageListView_ItemClick(object sender, ItemClickEventArgs e)
     {
         ViewModel.PackageToView = e.ClickedItem as PluginPackageBase;
+
+        if (ViewModel.PackageToView?.Status != PackageStatus.Details)
+        {
+            var urn = ViewModel.PackageToView?.Urn;
+            ViewModel.PackageToView = await ViewModel.Handler.GetPackage(urn) as PluginPackageBase;
+        }
+
+        ViewModel.PackageViewModel = new PackageViewModel(ViewModel.PackageToView);
     }
 }

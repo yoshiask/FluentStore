@@ -27,6 +27,10 @@ public partial class PackageManagerViewModel : ObservableObject
     [ObservableProperty]
     private PluginPackageBase _packageToView;
 
+    // TODO: Combine with PackageToView once PackageBase supports everything PluginPackageBase does.
+    [ObservableProperty]
+    private PackageViewModel _packageViewModel;
+
     [ObservableProperty]
     private ObservableCollection<PluginPackageBase> _selectedPackages = new();
 

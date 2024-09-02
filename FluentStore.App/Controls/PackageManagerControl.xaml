@@ -9,6 +9,7 @@
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:pluginSources="using:FluentStore.SDK.Plugins.Sources"
+    xmlns:attributes="using:FluentStore.SDK.Attributes"
     mc:Ignorable="d">
 
     <interactivity:Interaction.Behaviors>
@@ -96,6 +97,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
@@ -117,7 +119,32 @@
                            Foreground="{x:Bind ViewModel.PackageToView.StatusImage.ForegroundColor, Converter={StaticResource CSSColorToBrushConverter}}"/>
             </Grid>
             
-            <TextBlock Text="{x:Bind ViewModel.PackageToView.Description}" Grid.Row="3"/>
+            <TextBlock Text="{x:Bind ViewModel.PackageToView.Description}"
+                       TextWrapping="WrapWholeWords" Grid.Row="3"/>
+
+            <!-- Source-specific details -->
+            <!-- All properties marked with DisplayAttribute are shown here -->
+            <ItemsControl x:Name="DisplayPropertiesControl" Grid.Row="4" Margin="0,12,0,0"
+                          ItemsSource="{x:Bind ViewModel.PackageViewModel.DisplayProperties}"
+                          Visibility="{x:Bind ViewModel.PackageViewModel.DisplayProperties, Converter={StaticResource CollectionVisibilityConverter}}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="attributes:DisplayInfo">
+                        <StackPanel HorizontalAlignment="Stretch">
+                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="{x:Bind Title}" />
+                            <ContentControl x:Name="ContentPresenterWithSelector"
+                                            Content="{x:Bind Value, Converter={StaticResource PackageDisplayConverter}}"
+                                            DataContext="{x:Bind Value, Converter={StaticResource PackageDisplayConverter}}"
+                                            ContentTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"
+                                            HorizontalContentAlignment="Stretch"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Grid>
 
         <CommandBar Grid.Row="2" Grid.ColumnSpan="2" Margin="-14"

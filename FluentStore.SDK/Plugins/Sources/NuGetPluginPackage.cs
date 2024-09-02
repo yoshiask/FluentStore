@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.SDK.Attributes;
 using FluentStore.SDK.Downloads;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
@@ -9,7 +10,9 @@ using Garfoot.Utilities.FluentUrn;
 using NuGet.Packaging;
 using NuGet.Protocol.Core.Types;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Plugins.Sources;
@@ -22,15 +25,22 @@ public partial class NuGetPluginPackage : PluginPackageBase
     [ObservableProperty]
     private string _nuGetId;
 
+    private IEnumerable<string> _dependencies;
+    [Display]
+    public IEnumerable<string> Dependencies
+    {
+        get => _dependencies;
+        set => SetProperty(ref _dependencies, value);
+    }
+
     public NuGetPluginPackage(NuGetPluginHandler packageHandler, IPackageSearchMetadata searchMetadata = null, NuspecReader nuspec = null, PackageReaderBase reader = null) : base(packageHandler, packageHandler.PluginLoader)
     {
         if (searchMetadata is not null)
             Update(searchMetadata);
         if (nuspec is not null)
             Update(nuspec);
-
         if (reader is not null)
-            _downloadItem = new(reader, "");
+            Update(reader);
     }
 
     public override async Task<ImageBase> CacheAppIcon() => _iconUri is null ? null : new FileImage(_iconUri);
@@ -130,6 +140,12 @@ public partial class NuGetPluginPackage : PluginPackageBase
         if (searchMetadata.IconUrl is not null)
             _iconUri = searchMetadata.IconUrl;
 
+
+        // Fetch dependencies for display
+        Dependencies = _pluginLoader.Project
+            .GetDependencies(searchMetadata.DependencySets)?
+            .Select(d => d.ToString());
+
         Update();
     }
 
@@ -147,6 +163,18 @@ public partial class NuGetPluginPackage : PluginPackageBase
 
         if (string.IsNullOrEmpty(Title))
             Title = nuspec.GetId();
+
+        Update();
+    }
+
+    private void Update(PackageReaderBase reader)
+    {
+        // Fetch dependencies for display
+        Dependencies = _pluginLoader.Project
+            .GetDependencies(reader.GetPackageDependencies())?
+            .Select(d => $"{d.Id} {d.VersionRange.ToShortString()}");
+
+        _downloadItem = new(reader, "");
 
         Update();
     }

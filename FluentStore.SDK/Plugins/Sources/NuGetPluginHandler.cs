@@ -45,7 +45,7 @@ namespace FluentStore.SDK.Plugins.Sources
             {
                 yield return new NuGetPluginPackage(this, result)
                 {
-                    Status = PackageStatus.Details
+                    Status = PackageStatus.BasicDetails
                 };
             }
         }
@@ -63,12 +63,12 @@ namespace FluentStore.SDK.Plugins.Sources
             if (latestVersion is null)
                 return null;
 
-            MemoryStream depStream = new();
-            await findPackageResource.CopyNupkgToStreamAsync(packageId, latestVersion, depStream, _cache, NullLogger.Instance, default);
+            MemoryStream nupkgStream = new();
+            await findPackageResource.CopyNupkgToStreamAsync(packageId, latestVersion, nupkgStream, _cache, NullLogger.Instance, default);
 
-            using PackageArchiveReader depReader = new(depStream);
-            var nuspec = await depReader.GetNuspecReaderAsync(default);
-            return new NuGetPluginPackage(this, nuspec:  nuspec)
+            PackageArchiveReader nupkgReader = new(nupkgStream);
+            var nuspec = await nupkgReader.GetNuspecReaderAsync(default);
+            return new NuGetPluginPackage(this, nuspec: nuspec, reader: nupkgReader)
             {
                 Status = PackageStatus.Details
             };
