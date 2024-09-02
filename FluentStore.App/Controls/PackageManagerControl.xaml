@@ -150,6 +150,8 @@
         <CommandBar Grid.Row="2" Grid.ColumnSpan="2" Margin="-14"
                     DefaultLabelPosition="Right" OverflowButtonVisibility="Collapsed"
                     IsEnabled="{x:Bind ViewModel.IsManagerEnabled, Mode=OneWay}">
+            <AppBarButton Icon="Refresh" Label="Refresh" ToolTipService.ToolTip="Reloads the list of available plugins"
+                          Command="{x:Bind ViewModel.LoadPackagesCommand}"/>
             <AppBarButton Icon="Remove" Label="Uninstall" ToolTipService.ToolTip="Uninstalls the selected plugins"
                           Command="{x:Bind ViewModel.UninstallCommand}"/>
             <AppBarButton Icon="Add" Label="Install" ToolTipService.ToolTip="Installs the selected plugins"
