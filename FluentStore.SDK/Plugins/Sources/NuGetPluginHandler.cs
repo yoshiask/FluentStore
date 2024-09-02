@@ -1,6 +1,5 @@
 ﻿using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
-using FluentStore.SDK.Plugins.NuGet;
 using FluentStore.Services;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
@@ -9,6 +8,7 @@ using NuGet.Packaging;
 using NuGet.Protocol.Core.Types;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FluentStore.SDK.Plugins.Sources
@@ -59,7 +59,7 @@ namespace FluentStore.SDK.Plugins.Sources
             var packageId = packageUrn.GetContent();
 
             var allVersions = await findPackageResource.GetAllVersionsAsync(packageId, _cache, NullLogger.Instance, default);
-            var latestVersion = FluentStoreNuGetProject.SupportedSdkRange.FindBestMatch(allVersions);
+            var latestVersion = allVersions.OrderDescending().FirstOrDefault();
             if (latestVersion is null)
                 return null;
 

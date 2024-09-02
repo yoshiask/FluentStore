@@ -107,7 +107,7 @@ namespace FluentStore.SDK
         public virtual bool Equals(PackageBase other) => this.Urn?.EscapedValue == other?.Urn?.EscapedValue
             && this.Status == other?.Status;
 
-        public override bool Equals(object obj) => obj is PackageBase other ? this.Equals(other) : false;
+        public override bool Equals(object obj) => obj is PackageBase other && Equals(other);
 
         public static bool operator ==(PackageBase lhs, PackageBase rhs)
         {
@@ -117,8 +117,7 @@ namespace FluentStore.SDK
             return lhs.Equals(rhs);
         }
 
-        public static bool operator !=(PackageBase lhs, PackageBase rhs)
-            => (lhs is null ^ rhs is null) && !lhs.Equals(rhs);
+        public static bool operator !=(PackageBase lhs, PackageBase rhs) => !(lhs == rhs);
 
         public override int GetHashCode() => Urn.GetHashCode();
 
