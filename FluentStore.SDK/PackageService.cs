@@ -9,23 +9,21 @@ using System.Threading.Tasks;
 
 namespace FluentStore.SDK
 {
-    public class PackageService(ISettingsService settings)
+    public class PackageService
     {
-        private readonly ISettingsService _settings = settings;
+        private readonly HashSet<PackageHandlerBase> _packageHandlers = [];
+        private readonly Dictionary<string, int> _namespaceRegistry = [];
+        private int _nextFreePackageHandlerIndex = 0;
 
-        private readonly HashSet<PackageHandlerBase> _packageHandlers = new();
         /// <summary>
         /// A cache of all valid package handlers.
         /// </summary>
         public IReadOnlySet<PackageHandlerBase> PackageHandlers => _packageHandlers;
 
-        private readonly Dictionary<string, int> _namespaceRegistry = new();
         /// <summary>
         /// A mapping of known namespaces and the handlers that registered them.
         /// </summary>
         public IReadOnlyDictionary<string, int> NamespaceRegistry => _namespaceRegistry;
-
-        private int _nextFreePackageHandlerIndex = 0;
 
         public void RegisterPackageHandler(PackageHandlerBase handler)
         {
