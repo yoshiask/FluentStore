@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Diagnostics;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -22,6 +23,7 @@ public partial class PackageManagerViewModel : ObservableObject
         LoadPackagesCommand = new AsyncRelayCommand(LoadPackagesAsync);
         InstallCommand = new AsyncRelayCommand(InstallAsync);
         UninstallCommand = new AsyncRelayCommand(UninstallAsync);
+        ViewCommand = new AsyncRelayCommand<PluginPackageBase>(ViewAsync);
     }
 
     [ObservableProperty]
@@ -48,6 +50,9 @@ public partial class PackageManagerViewModel : ObservableObject
 
     [ObservableProperty]
     private IAsyncRelayCommand _uninstallCommand;
+
+    [ObservableProperty]
+    private IAsyncRelayCommand _viewCommand;
 
     [ObservableProperty]
     private bool _isManagerEnabled = true;
@@ -99,5 +104,24 @@ public partial class PackageManagerViewModel : ObservableObject
         }
 
         IsManagerEnabled = true;
+    }
+
+    public async Task ViewAsync(PluginPackageBase package, CancellationToken token = default)
+    {
+        Guard.IsNotNull(package);
+
+        if (package.Status != PackageStatus.Details)
+        {
+            var index = Packages.IndexOf(package);
+
+            var urn = package.Urn;
+            PackageToView = await Handler.GetPackage(urn) as PluginPackageBase;
+        }
+        else
+        {
+            PackageToView = package;
+        }
+
+        PackageViewModel = new(PackageToView);
     }
 }
