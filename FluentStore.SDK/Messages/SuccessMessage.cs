@@ -32,6 +32,11 @@
         {
             return new($"Installed {pluginId} plugin", pluginId, SuccessType.PluginInstallCompleted);
         }
+
+        public static SuccessMessage CreateForPluginUninstallCompleted(string pluginId)
+        {
+            return new($"Uninstalled {pluginId} plugin", pluginId, SuccessType.PluginUninstallCompleted);
+        }
     }
 
     public enum SuccessType
@@ -44,5 +49,6 @@
 
         PluginDownloadCompleted,
         PluginInstallCompleted,
+        PluginUninstallCompleted,
     }
 }

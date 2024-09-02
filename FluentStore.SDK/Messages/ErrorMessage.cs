@@ -31,5 +31,6 @@ namespace FluentStore.SDK.Messages
 
         PluginDownloadFailed,
         PluginInstallFailed,
+        PluginUninstallFailed,
     }
 }

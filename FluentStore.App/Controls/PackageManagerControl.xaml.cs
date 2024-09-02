@@ -9,7 +9,9 @@ using System.Linq;
 
 namespace FluentStore.Controls;
 
-public sealed partial class PackageManagerControl : UserControl
+public sealed partial class PackageManagerControl : UserControl,
+    IRecipient<ErrorMessage>, IRecipient<WarningMessage>, IRecipient<SuccessMessage>,
+    IRecipient<PluginDownloadProgressMessage>, IRecipient<PluginInstallStartedMessage>, IRecipient<PluginUninstallStartedMessage>
 {
     private ContentDialog _pluginInstallDialog;
     private TextBlock _pluginInstallBox;
@@ -20,7 +22,10 @@ public sealed partial class PackageManagerControl : UserControl
         this.InitializeComponent();
 
         if (ViewModel?.InstallCommand is not null)
-            ViewModel.InstallCommand.PropertyChanged += InstallCommand_PropertyChanged;
+            ViewModel.InstallCommand.PropertyChanged += PluginCommand_PropertyChanged;
+
+        if (ViewModel?.UninstallCommand is not null)
+            ViewModel.UninstallCommand.PropertyChanged += PluginCommand_PropertyChanged;
     }
 
     public PackageManagerViewModel ViewModel { get; } = new();
@@ -37,16 +42,14 @@ public sealed partial class PackageManagerControl : UserControl
     private async void PackageListView_ItemClick(object sender, ItemClickEventArgs e) =>
         await ViewModel.ViewCommand.ExecuteAsync(e.ClickedItem as PluginPackageBase);
 
-    private void InstallCommand_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+    private void PluginCommand_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(IAsyncRelayCommand.IsRunning) || sender is not IAsyncRelayCommand command)
             return;
 
         if (command.IsRunning)
         {
-            WeakReferenceMessenger.Default.Register<ErrorMessage>(this, InstallPluginErrorMessage_Recieved);
-            WeakReferenceMessenger.Default.Register<WarningMessage>(this, InstallPluginWarningMessage_Recieved);
-            WeakReferenceMessenger.Default.Register<SuccessMessage>(this, InstallPluginSuccessMessage_Recieved);
+            WeakReferenceMessenger.Default.RegisterAll(this);
 
             _pluginProgressBar = new()
             {
@@ -54,7 +57,7 @@ public sealed partial class PackageManagerControl : UserControl
             };
             _pluginInstallBox = new TextBlock
             {
-                Text = "Installing plugin, please wait...",
+                Text = "Getting ready...",
                 TextWrapping = TextWrapping.Wrap,
                 IsTextSelectionEnabled = true,
             };
@@ -84,13 +87,11 @@ public sealed partial class PackageManagerControl : UserControl
             _pluginInstallDialog.IsPrimaryButtonEnabled = true;
             _pluginProgressBar.Visibility = Visibility.Collapsed;
 
-            WeakReferenceMessenger.Default.Unregister<ErrorMessage>(this);
-            WeakReferenceMessenger.Default.Unregister<WarningMessage>(this);
-            WeakReferenceMessenger.Default.Unregister<SuccessMessage>(this);
+            WeakReferenceMessenger.Default.UnregisterAll(this);
         }
     }
 
-    private void InstallPluginErrorMessage_Recieved(object recipient, ErrorMessage message)
+    public void Receive(ErrorMessage message)
     {
         string logMessage;
         switch (message.Type)
@@ -101,34 +102,55 @@ public sealed partial class PackageManagerControl : UserControl
             case ErrorType.PluginInstallFailed:
                 logMessage = "Error installing ";
                 break;
+            case ErrorType.PluginUninstallFailed:
+                logMessage = "Error uninstalling ";
+                break;
             default:
                 return;
         }
 
         logMessage += $"{message.Context}:\r\n{message.Exception}";
-
-        _ = DispatcherQueue.TryEnqueue(delegate
-        {
-            _pluginInstallBox.Text = logMessage;
-        });
+        SetInstallBoxText(logMessage);
     }
 
-    private void InstallPluginSuccessMessage_Recieved(object recipient, SuccessMessage message)
+    public void Receive(WarningMessage message) => SetInstallBoxText(message.Message);
+
+    public void Receive(SuccessMessage message)
     {
-        if (message.Type is not (SuccessType.PluginDownloadCompleted or SuccessType.PluginInstallCompleted))
+        if (message.Type is not (SuccessType.PluginDownloadCompleted or SuccessType.PluginInstallCompleted or SuccessType.PluginUninstallCompleted))
             return;
 
-        _ = DispatcherQueue.TryEnqueue(delegate
+        SetInstallBoxText(message.Message);
+    }
+
+    public void Receive(PluginDownloadProgressMessage message)
+    {
+        DispatcherQueue.TryEnqueue(() =>
         {
-            _pluginInstallBox.Text = message.Message;
+            _pluginInstallBox.Text = $"Downloading {message.PluginId}...";
+            
+            if (message.Total is not null or 0)
+                _pluginProgressBar.Value = message.Downloaded / message.Total.Value;
         });
     }
 
-    private void InstallPluginWarningMessage_Recieved(object recipient, WarningMessage message)
+    public void Receive(PluginInstallStartedMessage message)
     {
-        _ = DispatcherQueue.TryEnqueue(delegate
+        DispatcherQueue.TryEnqueue(() =>
         {
-            _pluginInstallBox.Text = message.Message;
+            _pluginInstallBox.Text = $"Installing {message.PluginId}...";
+            _pluginProgressBar.IsIndeterminate = true;
         });
     }
+
+    public void Receive(PluginUninstallStartedMessage message)
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            _pluginInstallBox.Text = $"Uninstalling {message.PluginId}...";
+            _pluginProgressBar.IsIndeterminate = true;
+        });
+    }
+
+    private void SetInstallBoxText(string text) => DispatcherQueue.TryEnqueue(() => _pluginInstallBox.Text = text);
 }

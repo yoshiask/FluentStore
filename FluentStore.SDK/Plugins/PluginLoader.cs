@@ -338,7 +338,37 @@ namespace FluentStore.SDK.Plugins
 
         public async Task<PluginInstallStatus> UninstallPlugin(string pluginId, CancellationToken token = default)
         {
-            return await Project.UninstallPackageAsync(pluginId, _projCtx, token);
+            PluginInstallStatus status;
+
+            try
+            {
+                status = await Project.UninstallPackageAsync(pluginId, _projCtx, token);
+
+                if (status == PluginInstallStatus.NoAction)
+                {
+                    WeakReferenceMessenger.Default.Send(
+                        new Messages.WarningMessage($"No action was taken because {pluginId} is not installed", pluginId));
+                }
+                else if (status == PluginInstallStatus.AppRestartRequired)
+                {
+                    WeakReferenceMessenger.Default.Send(new Messages.SuccessMessage(
+                        $"{pluginId} will be uninstalled the next time Fluent Store starts.",
+                        pluginId, Messages.SuccessType.PluginUninstallCompleted));
+                }
+                else
+                {
+                    WeakReferenceMessenger.Default.Send(
+                        Messages.SuccessMessage.CreateForPluginUninstallCompleted(pluginId));
+                }
+            }
+            catch (Exception ex)
+            {
+                status = PluginInstallStatus.Failed;
+                WeakReferenceMessenger.Default.Send(new Messages.ErrorMessage(
+                    ex, pluginId, Messages.ErrorType.PluginUninstallFailed));
+            }
+
+            return status;
         }
 
         /// <summary>

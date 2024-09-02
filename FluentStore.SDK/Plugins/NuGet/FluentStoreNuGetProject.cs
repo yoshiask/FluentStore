@@ -179,6 +179,7 @@ public class FluentStoreNuGetProject : NuGetProject
         catch (Exception ex)
         {
             nuGetProjectContext?.ReportError(ex.ToString());
+            throw;
         }
 
         if (uninstallStatus is PluginInstallStatus.Completed)
