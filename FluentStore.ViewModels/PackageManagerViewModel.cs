@@ -55,6 +55,7 @@ public partial class PackageManagerViewModel : ObservableObject
     public async Task LoadPackagesAsync(CancellationToken token = default)
     {
         WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
+        IsManagerEnabled = false;
 
         try
         {
@@ -70,6 +71,7 @@ public partial class PackageManagerViewModel : ObservableObject
             WeakReferenceMessenger.Default.Send(new ErrorMessage(ex));
         }
 
+        IsManagerEnabled = true;
         WeakReferenceMessenger.Default.Send(new PageLoadingMessage(false));
     }
 
@@ -80,7 +82,6 @@ public partial class PackageManagerViewModel : ObservableObject
         foreach (var package in SelectedPackages)
         {
             token.ThrowIfCancellationRequested();
-
             await package.InstallAsync();
         }
 

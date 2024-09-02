@@ -156,6 +156,18 @@
                           Command="{x:Bind ViewModel.InstallCommand}"/>
         </CommandBar>
 
+        <StackPanel x:Name="LoadingIndicator"
+                    x:Load="{x:Bind ViewModel.LoadPackagesCommand.IsRunning, Mode=OneWay}"
+                    Grid.ColumnSpan="2" Grid.RowSpan="2" Spacing="8"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center">
+                <Run FontSize="24">Fetching plugins...</Run>
+                <LineBreak/>
+                <Run>Please wait while we get a list of available plugins</Run>
+            </TextBlock>
+            <ProgressBar IsIndeterminate="True"/>
+        </StackPanel>
+
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
                 <VisualState x:Name="WideState">
