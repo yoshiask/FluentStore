@@ -243,7 +243,7 @@ public class FluentStoreNuGetProject : NuGetProject
         }
 
         // Get list of dependencies
-        var deps = GetDependencies(reader, tfm);
+        var deps = GetDependencies(reader.GetPackageDependencies(), tfm);
 
         // Ensure compatible SDK version
         var sdkDep = deps?.FirstOrDefault(d => d.Id == "FluentStore.SDK");
@@ -270,6 +270,22 @@ public class FluentStoreNuGetProject : NuGetProject
     {
         compat ??= DefaultCompatibilityProvider.Instance;
         return compat.IsCompatible(tfm, TargetFramework) && sdkVersion.Satisfies(CurrentSdkVersion);
+    }
+
+    public IEnumerable<PackageDependency> GetDependencies(IEnumerable<PackageDependencyGroup> dependencyGroups)
+    {
+        FrameworkReducer tfmReducer = new();
+        var supportedTfms = dependencyGroups.Select(s => s.TargetFramework);
+        var tfm = tfmReducer.GetNearest(TargetFramework, supportedTfms);
+        return GetDependencies(dependencyGroups, tfm);
+    }
+
+    public static IEnumerable<PackageDependency> GetDependencies(IEnumerable<PackageDependencyGroup> dependencyGroups, NuGetFramework tfm)
+    {
+        var group = dependencyGroups
+            .FirstOrDefault(IsGroupCompatibleFilter(tfm))
+            as PackageDependencyGroup;
+        return group?.Packages;
     }
 
     private async Task<(PluginInstallStatus status, NuGetFramework tfm, VersionRange sdkVersion)> InstallPackageCoreAsync(PackageIdentity packageIdentity, DownloadResourceResult downloadResourceResult, INuGetProjectContext nuGetProjectContext, string pluginFolder, bool isPlugin, CancellationToken token = default)
@@ -385,15 +401,6 @@ public class FluentStoreNuGetProject : NuGetProject
     private static bool IsDependencyAlreadyFulfilled(IEnumerable<PackageIdentity> installed, PackageDependency dep)
     {
         return installed.Any(package => package.Id == dep.Id && dep.VersionRange.Satisfies(package.Version));
-    }
-
-    private static IEnumerable<PackageDependency> GetDependencies(PackageReaderBase reader, NuGetFramework tfm)
-    {
-        var group = reader.NuspecReader
-            .GetDependencyGroups()
-            .FirstOrDefault(IsGroupCompatibleFilter(tfm))
-            as PackageDependencyGroup;
-        return group?.Packages;
     }
 
     private static IEnumerable<string> GetFirstCompatibleItems(IEnumerable<FrameworkSpecificGroup> groups, NuGetFramework tfm)
