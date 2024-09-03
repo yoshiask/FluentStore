@@ -26,6 +26,12 @@ namespace FluentStore.Helpers
             s_settings = this;
         }
 
+        public bool IsOobeCompleted
+        {
+            get => GetSetting(s_defVals.IsOobeCompleted);
+            set => SetSetting(value);
+        }
+
         public string ExclusionFilter
         {
             get => GetSetting(s_defVals.ExclusionFilter);

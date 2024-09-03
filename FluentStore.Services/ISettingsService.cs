@@ -6,6 +6,8 @@ namespace FluentStore.Services
 {
     public interface ISettingsService
     {
+        public bool IsOobeCompleted { get; set; }
+
         public string ExclusionFilter { get; set; }
 
         public bool UseExclusionFilter { get; set; }
@@ -27,6 +29,8 @@ namespace FluentStore.Services
     public class DefaultSettingValues
     {
         public DefaultSettingValues() { }
+
+        public virtual bool IsOobeCompleted() => false;
 
         public virtual string ExclusionFilter() => @"(?i)(guide|manual|tutorial)(?-i)";
 
@@ -69,17 +73,5 @@ namespace FluentStore.Services
         /// A previous version of the app has been installed.
         /// </summary>
         Downgraded,
-    }
-
-    public class PackageHandlerEnabledStateChangedEventArgs : EventArgs
-    {
-        public string TypeName { get; }
-        public bool NewState { get; }
-
-        public PackageHandlerEnabledStateChangedEventArgs(string typeName, bool newState)
-        {
-            TypeName = typeName;
-            NewState = newState;
-        }
     }
 }

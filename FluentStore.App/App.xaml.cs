@@ -111,6 +111,19 @@ namespace FluentStore
 
                 await Settings.Default.LoadAsync();
 
+                // Start OOBE if not configured
+                if (!Settings.Default.IsOobeCompleted)
+                {
+                    var setupWizard = new Views.StartupWizard();
+                    Window.WindowContent.Navigate(setupWizard);
+
+                    // Wait for OOBE to complete
+                    await OwlCore.Flow.EventAsTask(
+                        h => setupWizard.SetupCompleted += h,
+                        h => setupWizard.SetupCompleted -= h,
+                        CancellationToken.None);
+                }
+
                 // Check if app was updated
                 switch (Settings.Default.GetAppUpdateStatus())
                 {
