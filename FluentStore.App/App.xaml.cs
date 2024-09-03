@@ -49,6 +49,8 @@ namespace FluentStore
         {
             this.InitializeComponent();
 
+            AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
+
             // Set up error reporting handlers
             AppDomain.CurrentDomain.FirstChanceException += (sender, e) => _log?.UnhandledException(e.Exception, LogLevel.Error);
             AppDomain.CurrentDomain.UnhandledException += (sender, e)
@@ -64,7 +66,7 @@ namespace FluentStore
             _singleInstanceApp.Launched += OnSingleInstanceLaunched;
         }
 
-        public void Shutdown()
+        private void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
             _kuboBootstrapper?.Dispose();
             Exit();
