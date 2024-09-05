@@ -8,7 +8,6 @@ using FluentStore.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
-using OwlCore.Kubo;
 using System;
 using System.Threading.Tasks;
 using Windows.UI.Notifications;
@@ -25,7 +24,6 @@ namespace FluentStore
     {
         private readonly SingleInstanceDesktopApp _singleInstanceApp;
         private LoggerService _log;
-        private KuboBootstrapper _kuboBootstrapper;
 
         public const string AppName = "Fluent Store";
 
@@ -68,7 +66,7 @@ namespace FluentStore
 
         private void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
-            _kuboBootstrapper?.Dispose();
+            Ioc.Default.GetService<IIpfsService>()?.Dispose();
             Exit();
         }
 
@@ -158,20 +156,8 @@ namespace FluentStore
                 await Settings.Default.SaveAsync();
 
                 // Start IPFS local node
-                var paths = Ioc.Default.GetRequiredService<ICommonPathManager>();
-                var kuboDir = paths.GetAppDataDirectory().CreateSubdirectory("Kubo");
-                var kuboRepoDir = kuboDir.CreateSubdirectory("repo");
-                var kuboBinDir = kuboDir.CreateSubdirectory("bin");
-                _kuboBootstrapper = new KuboBootstrapper(kuboRepoDir.FullName)
-                {
-                    // TODO: Allow user to define parameters for IPFS node
-                    RoutingMode = Settings.Default.RehostOnIpfs ? DhtRoutingMode.Auto : DhtRoutingMode.AutoClient,
-                    GatewayUri = new($"localhost:{Settings.Default.IpfsApiPort}"),
-                    LaunchConflictMode = BootstrapLaunchConflictMode.Relaunch,
-                    BinaryWorkingFolder = new(kuboBinDir),
-                };
-                await _kuboBootstrapper.StartAsync();
-                SDK.Downloads.AbstractStorageHelper.IpfsClient = _kuboBootstrapper.Client;
+                var ipfsService = Ioc.Default.GetRequiredService<IIpfsService>();
+                SDK.Downloads.AbstractStorageHelper.IpfsClient = ipfsService.Client;
             }
             log?.Log($"Redirect activation?: {result.RedirectActivation}");
 
@@ -287,6 +273,7 @@ namespace FluentStore
 
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
+            services.AddSingleton<IIpfsService, IpfsService>();
             services.AddSingleton<Microsoft.Marketplace.Storefront.Contracts.StorefrontApi>();
             services.AddSingleton<FluentStoreAPI.FluentStoreAPI>();
             services.AddSingleton<PackageService>();
