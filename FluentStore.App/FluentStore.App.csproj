@@ -42,10 +42,11 @@
 
     <!-- References -->
     <ItemGroup>
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.4.231008000" />
-        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.2428" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240802000" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1" />
         <PackageReference Include="Garfoot.Utilities.FluentUrn" Version="1.2.1" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+        <PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.1.240821" />
         <PackageReference Include="CommunityToolkit.WinUI.Notifications" Version="7.1.2" />
         <PackageReference Include="CommunityToolkit.WinUI.UI.Animations" Version="7.1.2" />
         <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.2" />
@@ -66,12 +67,25 @@
     <!-- XAML pages -->
     <ItemGroup>
         <None Remove="Controls\PackageManagerControl.xaml" />
+        <None Remove="Controls\PackagePicker.xaml" />
         <None Remove="Themes\NavigationFrame.xaml" />
         <None Remove="Views\Auth\AccountsView.xaml" />
+        <None Remove="Views\Oobe\IpfsClient.xaml" />
+        <None Remove="Views\Oobe\Plugins.xaml" />
+        <None Remove="Views\Oobe\Welcome.xaml" />
         <None Remove="Views\Settings\General.xaml" />
         <None Remove="Views\Settings\Info.xaml" />
         <None Remove="Views\Settings\Plugins.xaml" />
         <None Remove="Views\SplashScreen.xaml" />
+        <Page Update="Controls\PackagePicker.xaml">
+          <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Views\Oobe\Plugins.xaml">
+          <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="Views\Oobe\IpfsClient.xaml">
+          <Generator>MSBuild:Compile</Generator>
+        </Page>
         <Page Update="Controls\PackageManagerControl.xaml">
           <Generator>MSBuild:Compile</Generator>
         </Page>
@@ -94,6 +108,11 @@
         <Page Update="Themes\NavigationFrame.xaml">
             <Generator>MSBuild:Compile</Generator>
         </Page>
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Views\Oobe\Welcome.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
     </ItemGroup>
 
 </Project>
