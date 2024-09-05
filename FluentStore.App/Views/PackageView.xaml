@@ -77,7 +77,7 @@
 
                         <TextBlock x:Name="TitleBlock"
                                    Text="{x:Bind ViewModel.Package.Title}" ToolTipService.ToolTip="{x:Bind ViewModel.Package.Title}"
-                                   HorizontalAlignment="Left" FontSize="30" FontWeight="Bold" d:Text="Fluent Store"
+                                   HorizontalAlignment="Left" FontSize="24" FontWeight="Bold" d:Text="Fluent Store"
                                    TextTrimming="CharacterEllipsis" TextWrapping="Wrap" HorizontalTextAlignment="Left" MaxLines="2"
                                    Grid.Row="1" Grid.Column="1" VerticalAlignment="Bottom"/>
                         
