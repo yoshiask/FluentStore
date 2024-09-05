@@ -18,6 +18,12 @@ namespace FluentStore.Services
 
         public LogLevel LoggingLevel { get; set; }
 
+        public int IpfsApiPort { get; set; }
+
+        public int IpfsGatewayPort { get; set; }
+
+        public bool RehostOnIpfs { get; set; }
+
         public Dictionary<string, bool> PackageHandlerEnabled { get; set; }
 
         /// <summary>
@@ -31,6 +37,12 @@ namespace FluentStore.Services
         public DefaultSettingValues() { }
 
         public virtual bool IsOobeCompleted() => false;
+
+        public virtual int IpfsApiPort() => 5001;
+
+        public virtual int IpfsGatewayPort() => 8080;
+
+        public virtual bool RehostOnIpfs() => true;
 
         public virtual string ExclusionFilter() => @"(?i)(guide|manual|tutorial)(?-i)";
 

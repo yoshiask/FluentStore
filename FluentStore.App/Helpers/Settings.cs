@@ -68,6 +68,24 @@ namespace FluentStore.Helpers
             set => SetSetting(value);
         }
 
+        public int IpfsApiPort
+        {
+            get => GetSetting(s_defVals.IpfsApiPort);
+            set => SetSetting(value);
+        }
+
+        public int IpfsGatewayPort
+        {
+            get => GetSetting(s_defVals.IpfsGatewayPort);
+            set => SetSetting(value);
+        }
+
+        public bool RehostOnIpfs
+        {
+            get => GetSetting(s_defVals.RehostOnIpfs);
+            set => SetSetting(value);
+        }
+
         public bool IsDebug
         {
             get

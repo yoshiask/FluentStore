@@ -123,7 +123,7 @@ namespace FluentStore
                     await OwlCore.Flow.EventAsTask(
                         h => setupWizard.SetupCompleted += h,
                         h => setupWizard.SetupCompleted -= h,
-                        CancellationToken.None);
+                        System.Threading.CancellationToken.None);
                 }
 
                 // Check if app was updated
@@ -159,11 +159,16 @@ namespace FluentStore
 
                 // Start IPFS local node
                 var paths = Ioc.Default.GetRequiredService<ICommonPathManager>();
-                _kuboBootstrapper = new KuboBootstrapper(paths.GetAppDataDirectory().CreateSubdirectory("Kubo").FullName)
+                var kuboDir = paths.GetAppDataDirectory().CreateSubdirectory("Kubo");
+                var kuboRepoDir = kuboDir.CreateSubdirectory("repo");
+                var kuboBinDir = kuboDir.CreateSubdirectory("bin");
+                _kuboBootstrapper = new KuboBootstrapper(kuboRepoDir.FullName)
                 {
                     // TODO: Allow user to define parameters for IPFS node
-                    RoutingMode = DhtRoutingMode.DhtClient,
+                    RoutingMode = Settings.Default.RehostOnIpfs ? DhtRoutingMode.Auto : DhtRoutingMode.AutoClient,
+                    GatewayUri = new($"localhost:{Settings.Default.IpfsApiPort}"),
                     LaunchConflictMode = BootstrapLaunchConflictMode.Relaunch,
+                    BinaryWorkingFolder = new(kuboBinDir),
                 };
                 await _kuboBootstrapper.StartAsync();
                 SDK.Downloads.AbstractStorageHelper.IpfsClient = _kuboBootstrapper.Client;
@@ -246,7 +251,7 @@ namespace FluentStore
             // And send the notification
             ToastNotificationManager.CreateToastNotifier().Show(toastNotif);
 
-            Shutdown();
+            Exit();
         }
 
         /// <summary>
