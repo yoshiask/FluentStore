@@ -5,16 +5,14 @@
     xmlns:views="using:FluentStore.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:tkWinUI="using:CommunityToolkit.WinUI"
-    xmlns:tkMedia="using:CommunityToolkit.WinUI.Media"
     mc:Ignorable="d">
 
     <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-        <Image Source="ms-appx:///Assets/HeroBackground.png" Opacity="0.50"
-               VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Stretch="Fill"/>
+        <!--<Image Source="ms-appx:///Assets/HeroBackground.png" Opacity="0.50"
+               VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Stretch="Fill"/>-->
 
         <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-              MaxWidth="700" MaxHeight="500" Background="{ThemeResource LayerFillColorDefaultBrush}"
+              MaxWidth="800" MaxHeight="500" Background="{ThemeResource LayerFillColorDefaultBrush}"
               CornerRadius="4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -22,24 +20,33 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Text="Welcome to Fluent Store" Margin="16,8,8,8"
-                       TextWrapping="WrapWholeWords" FontSize="40" FontWeight="Bold"/>
+            <StackPanel Orientation="Horizontal" Margin="8" Spacing="8">
+                <Viewbox Height="48" Width="48" VerticalAlignment="Center">
+                    <ContentControl x:Name="IconPresenter" />
+                </Viewbox>
+                <TextBlock x:Name="TitleBlock" VerticalAlignment="Center"
+                           TextWrapping="WrapWholeWords" FontSize="24" FontWeight="Bold"/>
+            </StackPanel>
 
-            <ContentControl x:Name="OobePresenter" Grid.Row="1" Background="#50000000"
-                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-                <ContentControl.ContentTransitions>
-                    <TransitionCollection>
-                        <EntranceThemeTransition />
-                    </TransitionCollection>
-                </ContentControl.ContentTransitions>
-            </ContentControl>
+            <ScrollViewer Grid.Row="1">
+                <ContentControl x:Name="OobePresenter" Padding="8" Background="#50000000"
+                                HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                    <ContentControl.ContentTransitions>
+                        <TransitionCollection>
+                            <EntranceThemeTransition />
+                        </TransitionCollection>
+                    </ContentControl.ContentTransitions>
+                </ContentControl>
+            </ScrollViewer>
 
             <StackPanel Padding="8" Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right">
-                <Button ToolTipService.ToolTip="Previous" AutomationProperties.Name="Previous"
+                <Button x:Name="PreviousButton" Command="{x:Bind PreviousCommand}"
+                        ToolTipService.ToolTip="Previous" AutomationProperties.Name="Previous"
                         CornerRadius="2,0,0,2">
                     <FontIcon Glyph="&#xE76B;"/>
                 </Button>
-                <Button ToolTipService.ToolTip="Next" AutomationProperties.Name="Next"
+                <Button x:Name="NextButton" Command="{x:Bind NextCommand}"
+                        ToolTipService.ToolTip="Next" AutomationProperties.Name="Next"
                         CornerRadius="0,2,2,0" Style="{ThemeResource AccentButtonStyle}">
                     <FontIcon Glyph="&#xE76C;"/>
                 </Button>

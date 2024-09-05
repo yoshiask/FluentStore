@@ -1,0 +1,63 @@
+<local:WizardPageBase
+    x:Class="FluentStore.Views.Oobe.IpfsClient"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FluentStore.Views.Oobe"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:FluentStore.Controls"
+    mc:Ignorable="d">
+
+    <StackPanel>
+        <controls:SettingsBlockControl Title="What is IFPS?"
+                                       Description="A distributed web protocol, the peer-to-peer equivalent of HTTP">
+            <controls:SettingsBlockControl.Icon>
+                <SymbolIcon Symbol="Globe" />
+            </controls:SettingsBlockControl.Icon>
+            
+            <Button Content="View docs" Click="ViewDocsButton_Click"/>
+            
+            <controls:SettingsBlockControl.ExpandableContent>
+                <TextBlock Padding="8" TextWrapping="WrapWholeWords" MaxWidth="400">
+                    <Run>HTTP retrieves content using a location (an IP address), while IPFS uses a unique content identifier generated from the content itself (the CID).</Run>
+                    <LineBreak/><LineBreak/>
+                    <Run>Files can be accessed even if the original source is offline or censored, as long as someone has the data.</Run>
+                    <LineBreak/><LineBreak/>
+                    <Run>IPFS enables real-time communication between devices, without the need for an internet connection or a server.</Run>
+                    <LineBreak/><LineBreak/>
+                    <Run>Like HTTPS, IPFS is a protocol with many implementations. This app uses Kubo, the original and most widely used IPFS implementation.</Run>
+                    <LineBreak/><LineBreak/>
+                    <Run>Fluent Store uses IPFS to host and distribute certain content, such as plugin installers.</Run>
+                </TextBlock>
+            </controls:SettingsBlockControl.ExpandableContent>
+        </controls:SettingsBlockControl>
+
+        <controls:SettingsBlockControl Title="API Port"
+                                       Description="The port used to communicate with IPFS. If not already running on this port, we'll download Kubo and bootstrap it on this port for you.">
+            <controls:SettingsBlockControl.Icon>
+                <FontIcon Glyph="&#xEDA3;"/>
+            </controls:SettingsBlockControl.Icon>
+            
+            <NumberBox Value="{x:Bind _settings.IpfsApiPort, Mode=TwoWay}"/>
+        </controls:SettingsBlockControl>
+
+        <controls:SettingsBlockControl Title="Gateway Port"
+                                       Description="The port to use for the gateway. If you have a local node already running and don't want to use it, make sure this is different.">
+            <controls:SettingsBlockControl.Icon>
+                <FontIcon Glyph="&#xEDA3;"/>
+            </controls:SettingsBlockControl.Icon>
+
+            <NumberBox Value="{x:Bind _settings.IpfsGatewayPort, Mode=TwoWay}"/>
+        </controls:SettingsBlockControl>
+
+        <controls:SettingsBlockControl Title="Re-host plugins to other peers"
+                                       Description="Your PC may send parts of recently downloaded plugins to other computers on your local network or the internet. Your personal data is not stored or shared.">
+            <controls:SettingsBlockControl.Icon>
+                <FontIcon Glyph="&#xE968;"/>
+            </controls:SettingsBlockControl.Icon>
+
+            <ToggleSwitch IsOn="{x:Bind _settings.RehostOnIpfs, Mode=TwoWay}" Style="{ThemeResource ToggleSwitchRightStyle}"/>
+        </controls:SettingsBlockControl>
+    </StackPanel>
+    
+</local:WizardPageBase>

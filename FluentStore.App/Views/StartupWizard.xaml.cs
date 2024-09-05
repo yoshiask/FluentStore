@@ -1,4 +1,8 @@
+using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Input;
 using FluentStore.Services;
+using FluentStore.Views.Oobe;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -23,17 +27,64 @@ public sealed partial class StartupWizard : ViewBase
     {
         this.InitializeComponent();
 
+        NextCommand = new RelayCommand(NextPage);
+        PreviousCommand = new RelayCommand(PreviousPage);
+
         Pages = new()
         {
-            new("Welcome to Fluent Store", "Let's get you set up.", new ImageIcon { Source = new BitmapImage(new("ms-appx:///Assets/Square71x71Logo.png")) })
+            new("Welcome to Fluent Store", "", new ImageIcon { Source = new BitmapImage(new("ms-appx:///Assets/StoreLogo.png")) })
+            {
+                PageType = typeof(Oobe.Welcome)
+            },
+            new("Configure IPFS", "", new ImageIcon { Source = new BitmapImage(new("https://raw.githubusercontent.com/ipfs-inactive/logo/master/raster-generated/ipfs-logo-128-ice.png")) })
+            {
+                PageType = typeof(Oobe.IpfsClient)
+            },
+            new("Install Plugins", "", new SymbolIcon(Symbol.AllApps) { Margin = new(8) })
+            {
+                PageType = typeof(Oobe.Plugins)
+            },
         };
-        SelectedPage = Pages[0];
+
+        UpdatePage();
     }
+
+    public IRelayCommand NextCommand { get; }
+    public IRelayCommand PreviousCommand { get; }
 
     public List<PageInfo> Pages { get; }
 
-    public PageInfo SelectedPage { get; set; }
+    public PageInfo SelectedPage
+    {
+        get => Pages[SelectedPageIndex];
+        set => Pages[SelectedPageIndex] = value;
+    }
 
+    public int SelectedPageIndex { get; set; }
 
     public event EventHandler SetupCompleted;
+
+    private void NextPage()
+    {
+        SelectedPageIndex++;
+        UpdatePage();
+    }
+
+    private void PreviousPage()
+    {
+        SelectedPageIndex--;
+        UpdatePage();
+    }
+
+    private void UpdatePage()
+    {
+        NextButton.IsEnabled = SelectedPageIndex < Pages.Count - 1;
+        PreviousButton.IsEnabled = SelectedPageIndex > 0;
+
+        TitleBlock.Text = SelectedPage.Title;
+        IconPresenter.Content = SelectedPage.Icon;
+
+        var page = (WizardPageBase)ActivatorUtilities.CreateInstance(Ioc.Default, SelectedPage.PageType);
+        OobePresenter.Content = page;
+    }
 }
