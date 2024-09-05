@@ -7,8 +7,13 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid>
-        <TextBlock Text="TODO: Populate welcome"/>
-    </Grid>
+    <TextBlock TextWrapping="WrapWholeWords">
+        <Run Text="Thank you for installing Fluent Store!" FontSize="20" FontWeight="SemiBold"/>
+        <LineBreak/><LineBreak/><Run Text="Before you get started, we need to set up a few things."/>
+        <LineBreak/><LineBreak/><Run Text="Click the blue arrow in the bottom right to continue to the first step."/>
+        <LineBreak/><Run Text="You can click the back arrow to return to the previous step."/>
+        <LineBreak/><Run Text="All options can be changed later."/>
+        <LineBreak/><LineBreak/><Run Text="You'll need an internet connection."/>
+    </TextBlock>
 
 </local:WizardPageBase>
