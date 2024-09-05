@@ -5,13 +5,13 @@
     xmlns:local="using:FluentStore"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:winex="using:WinUIEx" xmlns:controls="using:FluentStore.Controls"
+    xmlns:winex="using:WinUIEx"
+    xmlns:controls="using:FluentStore.Controls"
     mc:Ignorable="d">
 
-    <winex:WindowEx.Backdrop>
-        <winex:MicaSystemBackdrop DarkLuminosityOpacity=".70" DarkTintOpacity=".80" DarkTintColor="Black" DarkFallbackColor="Black"
-                                  LightLuminosityOpacity=".50" LightTintOpacity=".25" LightTintColor="White" />
-    </winex:WindowEx.Backdrop>
+    <winex:WindowEx.SystemBackdrop>
+        <MicaBackdrop Kind="Base"/>
+    </winex:WindowEx.SystemBackdrop>
 
     <Grid>
         <Grid.RowDefinitions>
