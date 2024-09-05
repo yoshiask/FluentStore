@@ -30,17 +30,13 @@ public sealed partial class PackageManagerControl : UserControl,
 
     public PackageManagerViewModel ViewModel { get; } = new();
 
-    private void PackageListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    public object Header
     {
-        foreach (var package in e.RemovedItems.Cast<PluginPackageBase>())
-            ViewModel.SelectedPackages.Remove(package);
-
-        foreach (var package in e.AddedItems.Cast<PluginPackageBase>())
-            ViewModel.SelectedPackages.Add(package);
+        get => GetValue(HeaderProperty);
+        set => SetValue(HeaderProperty, value);
     }
-
-    private async void PackageListView_ItemClick(object sender, ItemClickEventArgs e) =>
-        await ViewModel.ViewCommand.ExecuteAsync(e.ClickedItem as PluginPackageBase);
+    public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register(
+        nameof(Header), typeof(object), typeof(PackageManagerControl), new PropertyMetadata(null));
 
     private void PluginCommand_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     {

@@ -8,8 +8,6 @@
     xmlns:viewmodels="using:FluentStore.ViewModels"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
-    xmlns:pluginSources="using:FluentStore.SDK.Plugins.Sources"
-    xmlns:attributes="using:FluentStore.SDK.Attributes"
     mc:Ignorable="d">
 
     <interactivity:Interaction.Behaviors>
@@ -48,104 +46,19 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid x:Name="ManagerGrid" Style="{StaticResource GridSettingsBlockStyle}"
+    <Grid Style="{StaticResource GridSettingsBlockStyle}"
           RowSpacing="4" ColumnSpacing="4">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition/>
             <RowDefinition/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <ListView x:Name="PackageListView" Grid.Row="0" IsEnabled="{x:Bind ViewModel.IsManagerEnabled, Mode=OneWay}"
-                  ItemsSource="{x:Bind ViewModel.Packages, Mode=OneWay}"
-                  IsItemClickEnabled="True" ItemClick="PackageListView_ItemClick"
-                  SelectionMode="Multiple" SelectionChanged="PackageListView_SelectionChanged">
-            <ListView.Header>
+        <local:PackagePicker x:Name="PackagePicker" SelectionMode="Multiple"
+                             x:Load="{x:Bind ViewModel.LoadPackagesCommand.IsRunning, Mode=OneWay, Converter={StaticResource NotBoolConverter}}">
+            <local:PackagePicker.Header>
                 <TextBlock Text="Plugin Manager" Style="{StaticResource TextBlockGroupHeaderStyle}"/>
-            </ListView.Header>
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="pluginSources:PluginPackageBase">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition Width="32"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock Text="{x:Bind ShortTitle}" Grid.Column="0" VerticalAlignment="Center" />
-                        <TextBlock Text="{x:Bind Version}" Grid.Column="2" VerticalAlignment="Center" />
-
-                        <ContentControl Content="{x:Bind StatusImage}"
-                                        Grid.Column="1" MaxHeight="32"
-                                        HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                                        HorizontalAlignment="Right" VerticalAlignment="Stretch"
-                                        ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
-                    </Grid>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-
-        <Grid x:Name="PackageDetailGrid" Padding="16,0,0,0" Grid.Row="0" Grid.Column="1"
-              BorderThickness="1,0,0,0" BorderBrush="{ThemeResource SystemControlTransientBorderBrush}"
-              x:Load="{x:Bind ViewModel.PackageToView, Mode=OneWay, Converter={StaticResource NullToFalseConverter}}"
-              x:DefaultBindMode="OneWay">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <TextBlock Text="{x:Bind ViewModel.PackageToView.Title}" FontSize="30" FontWeight="Bold"/>
-            <TextBlock Text="{x:Bind ViewModel.PackageToView.DeveloperName}" Grid.Row="1"/>
-
-            <Grid x:Name="PackageStatusGrid" Grid.Row="2" ColumnSpacing="4"
-                  x:Load="{x:Bind ViewModel.PackageToView.StatusImage, Converter={StaticResource NullToFalseConverter}}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <ContentControl Content="{x:Bind ViewModel.PackageToView.StatusImage}" MaxHeight="32"
-                                HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                                HorizontalAlignment="Right" VerticalAlignment="Stretch"
-                                ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
-                <TextBlock Grid.Column="1" VerticalAlignment="Center"
-                           Text="{x:Bind ViewModel.PackageToView.StatusImage.Caption}"
-                           Foreground="{x:Bind ViewModel.PackageToView.StatusImage.ForegroundColor, Converter={StaticResource CSSColorToBrushConverter}}"/>
-            </Grid>
-            
-            <TextBlock Text="{x:Bind ViewModel.PackageToView.Description}"
-                       TextWrapping="WrapWholeWords" Grid.Row="3"/>
-
-            <!-- Source-specific details -->
-            <!-- All properties marked with DisplayAttribute are shown here -->
-            <ItemsControl x:Name="DisplayPropertiesControl" Grid.Row="4" Margin="0,12,0,0"
-                          ItemsSource="{x:Bind ViewModel.PackageViewModel.DisplayProperties}"
-                          Visibility="{x:Bind ViewModel.PackageViewModel.DisplayProperties, Converter={StaticResource CollectionVisibilityConverter}}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="attributes:DisplayInfo">
-                        <StackPanel HorizontalAlignment="Stretch">
-                            <TextBlock Style="{ThemeResource NavigationViewItemHeaderTextStyle}" Text="{x:Bind Title}" />
-                            <ContentControl x:Name="ContentPresenterWithSelector"
-                                            Content="{x:Bind Value, Converter={StaticResource PackageDisplayConverter}}"
-                                            DataContext="{x:Bind Value, Converter={StaticResource PackageDisplayConverter}}"
-                                            ContentTemplateSelector="{StaticResource DefaultDisplayTemplateSelector}"
-                                            HorizontalContentAlignment="Stretch"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </Grid>
+            </local:PackagePicker.Header>
+        </local:PackagePicker>
 
         <CommandBar Grid.Row="2" Grid.ColumnSpan="2" Margin="-14"
                     DefaultLabelPosition="Right" OverflowButtonVisibility="Collapsed"
@@ -179,6 +92,12 @@
                     <VisualState.Setters>
                         <Setter Target="ManagerGrid.RowDefinitions[1].Height" Value="Auto"/>
                         <Setter Target="ManagerGrid.ColumnDefinitions[1].Width" Value="2*"/>
+                        <Setter Target="DetailGridSplitter.HorizontalAlignment" Value="Left"/>
+                        <Setter Target="DetailGridSplitter.VerticalAlignment" Value="Stretch"/>
+                        <Setter Target="DetailGridSplitter.Width" Value="16"/>
+                        <Setter Target="DetailGridSplitter.Height" Value="Auto"/>
+                        <Setter Target="DetailGridSplitter.(Grid.Column)" Value="1"/>
+                        <Setter Target="DetailGridSplitter.(Grid.Row)" Value="0"/>
                         <Setter Target="PackageDetailGrid.(Grid.Column)" Value="1"/>
                         <Setter Target="PackageDetailGrid.(Grid.Row)" Value="0"/>
                         <Setter Target="PackageDetailGrid.Padding" Value="16,0,0,0"/>
@@ -192,6 +111,12 @@
                     <VisualState.Setters>
                         <Setter Target="ManagerGrid.RowDefinitions[1].Height" Value="*"/>
                         <Setter Target="ManagerGrid.ColumnDefinitions[1].Width" Value="Auto"/>
+                        <Setter Target="DetailGridSplitter.HorizontalAlignment" Value="Stretch"/>
+                        <Setter Target="DetailGridSplitter.VerticalAlignment" Value="Top"/>
+                        <Setter Target="DetailGridSplitter.Width" Value="Auto"/>
+                        <Setter Target="DetailGridSplitter.Height" Value="16"/>
+                        <Setter Target="DetailGridSplitter.(Grid.Column)" Value="0"/>
+                        <Setter Target="DetailGridSplitter.(Grid.Row)" Value="1"/>
                         <Setter Target="PackageDetailGrid.(Grid.Column)" Value="0"/>
                         <Setter Target="PackageDetailGrid.(Grid.Row)" Value="1"/>
                         <Setter Target="PackageDetailGrid.Padding" Value="0,8,0,0"/>
