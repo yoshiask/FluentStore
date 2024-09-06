@@ -1,17 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using FluentStore.Services;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -33,6 +20,18 @@ namespace FluentStore.Views.Oobe
             _settings = settings;
 
             this.InitializeComponent();
+            Unloaded += IpfsClient_Unloaded;
+        }
+
+        private async void IpfsClient_Unloaded(object sender, RoutedEventArgs e)
+        {
+            Unloaded -= IpfsClient_Unloaded;
+
+            if (_settings is Helpers.Settings settings)
+            {
+                // Ensure user's settings are saved
+                await settings.SaveAsync();
+            }
         }
 
         private async void ViewDocsButton_Click(object sender, RoutedEventArgs e)

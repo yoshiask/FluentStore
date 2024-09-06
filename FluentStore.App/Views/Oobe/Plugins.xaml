@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <local:WizardPageBase
     x:Class="FluentStore.Views.Oobe.Plugins"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -9,8 +8,7 @@
     xmlns:controls="using:FluentStore.Controls"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:core="using:Microsoft.Xaml.Interactions.Core"
-    mc:Ignorable="d"
-    CanAdvance="{x:Bind ViewModel.SelectedPackages, Mode=OneWay, Converter={StaticResource EmptyCollectionToFalseConverter}}">
+    mc:Ignorable="d">
 
     <interactivity:Interaction.Behaviors>
         <core:EventTriggerBehavior EventName="Loading">

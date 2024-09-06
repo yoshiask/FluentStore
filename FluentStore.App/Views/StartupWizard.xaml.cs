@@ -5,24 +5,16 @@ using FluentStore.Views.Oobe;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
-using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 
 namespace FluentStore.Views;
 
 public sealed partial class StartupWizard : ViewBase
 {
+    private WizardPageBase _page;
+
     public StartupWizard()
     {
         this.InitializeComponent();
@@ -34,15 +26,19 @@ public sealed partial class StartupWizard : ViewBase
         {
             new("Welcome to Fluent Store", "", new ImageIcon { Source = new BitmapImage(new("ms-appx:///Assets/StoreLogo.png")) })
             {
-                PageType = typeof(Oobe.Welcome)
+                PageType = typeof(Welcome)
             },
             new("Configure IPFS", "", new ImageIcon { Source = new BitmapImage(new("https://raw.githubusercontent.com/ipfs-inactive/logo/master/raster-generated/ipfs-logo-128-ice.png")) })
             {
-                PageType = typeof(Oobe.IpfsClient)
+                PageType = typeof(IpfsClient)
+            },
+            new("Configure IPFS", "", new ImageIcon { Source = new BitmapImage(new("https://raw.githubusercontent.com/ipfs-inactive/logo/master/raster-generated/ipfs-logo-128-ice.png")) })
+            {
+                PageType = typeof(IpfsTest)
             },
             new("Install Plugins", "", new SymbolIcon(Symbol.AllApps) { Margin = new(8) })
             {
-                PageType = typeof(Oobe.Plugins)
+                PageType = typeof(Plugins)
             },
         };
 
@@ -54,7 +50,7 @@ public sealed partial class StartupWizard : ViewBase
 
     public List<PageInfo> Pages { get; }
 
-    public PageInfo SelectedPage
+    public PageInfo SelectedPageInfo
     {
         get => Pages[SelectedPageIndex];
         set => Pages[SelectedPageIndex] = value;
@@ -78,13 +74,27 @@ public sealed partial class StartupWizard : ViewBase
 
     private void UpdatePage()
     {
-        NextButton.IsEnabled = SelectedPageIndex < Pages.Count - 1;
+        if (SelectedPageIndex >= Pages.Count)
+        {
+            SetupCompleted?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
+        NextButton.IsEnabled = false;
         PreviousButton.IsEnabled = SelectedPageIndex > 0;
 
-        TitleBlock.Text = SelectedPage.Title;
-        IconPresenter.Content = SelectedPage.Icon;
+        TitleBlock.Text = SelectedPageInfo.Title;
+        IconPresenter.Content = SelectedPageInfo.Icon;
 
-        var page = (WizardPageBase)ActivatorUtilities.CreateInstance(Ioc.Default, SelectedPage.PageType);
-        OobePresenter.Content = page;
+        _page = (WizardPageBase)ActivatorUtilities.CreateInstance(Ioc.Default, SelectedPageInfo.PageType);
+        OobePresenter.Content = _page;
+        NextButton.IsEnabled = _page.CanAdvance;
+
+        _page.RegisterPropertyChangedCallback(WizardPageBase.CanAdvanceProperty, OnCanAdvanceChanged);
+    }
+
+    private void OnCanAdvanceChanged(DependencyObject sender, DependencyProperty dp)
+    {
+        NextButton.IsEnabled = _page.CanAdvance;
     }
 }

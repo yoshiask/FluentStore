@@ -27,8 +27,16 @@ namespace FluentStore.Views.Oobe
         public Plugins()
         {
             this.InitializeComponent();
+
+            CanAdvance = false;
+            ViewModel.SelectedPackages.CollectionChanged += SelectedPackages_CollectionChanged;
         }
 
         public PackageManagerViewModel ViewModel { get; } = new();
+
+        private void SelectedPackages_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            CanAdvance = ViewModel.SelectedPackages.Count > 0;
+        }
     }
 }
