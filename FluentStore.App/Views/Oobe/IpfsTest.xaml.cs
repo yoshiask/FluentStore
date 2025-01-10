@@ -17,6 +17,8 @@ using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Text;
 using OwlCore.Kubo;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using System.Threading;
+using System.Threading.Tasks;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -29,6 +31,7 @@ namespace FluentStore.Views.Oobe
     public sealed partial class IpfsTest : WizardPageBase
     {
         private readonly IIpfsService _ipfsService;
+        private CancellationTokenSource _cts;
         
         public IpfsTest(IIpfsService ipfsService)
         {
@@ -36,74 +39,84 @@ namespace FluentStore.Views.Oobe
 
             CanAdvance = false;
             Loaded += IpfsTest_Loaded;
+            Unloaded += IpfsTest_Unloaded;
 
             this.InitializeComponent();
         }
 
-        private async void IpfsTest_Loaded(object sender, RoutedEventArgs e)
+        private void IpfsTest_Unloaded(object sender, RoutedEventArgs e)
         {
-            try
+            _cts?.Cancel();
+        }
+
+        private void IpfsTest_Loaded(object sender, RoutedEventArgs e)
+        {
+            Task.Run(async () =>
             {
-                await _ipfsService.BootstrapAsync(Ioc.Default);
-
-                var cid = Ipfs.Cid.Decode("QmZtmD2qt6fJot32nabSP3CUjicnypEBz7bHVDhPQt9aAy");
-                var client = _ipfsService.Client;
-
-                IpfsFile testFile = new(cid, client);
-                using var stream = await testFile.OpenStreamAsync();
-
-                var buffer = new byte[1024];
-                var bytesRead = await stream.ReadAsync(buffer);
-                var testString = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                if (testString != "version 1 of my text\n")
-                    throw new Exception("Connected to IPFS, but test file was invalid. Please check your IPFS configuration.");
-
-                CanAdvance = true;
-
-                CenterPanel.Children.Clear();
-                CenterPanel.Children.Add(new TextBlock
+                try
                 {
-                    HorizontalTextAlignment = TextAlignment.Center,
-                    Inlines =
+                    _cts = new();
+
+                    await _ipfsService.BootstrapAsync(Ioc.Default, _cts.Token);
+                    await _ipfsService.TestAsync(_cts.Token);
+
+                    // Config is valid, save the settings
+                    if (Ioc.Default.GetService<ISettingsService>() is Helpers.Settings settings)
+                        await settings.SaveAsync();
+
+                    DispatcherQueue.TryEnqueue(() =>
                     {
-                        new Run
+                        CanAdvance = true;
+
+                        CenterPanel.Children.Clear();
+                        CenterPanel.Children.Add(new TextBlock
                         {
-                            Text = "Successfully connected to IPFS!",
-                            FontSize = 20,
-                            FontWeight = FontWeights.SemiBold
-                        },
-                        new LineBreak(),
-                        new LineBreak(),
-                        new Run
+                            HorizontalTextAlignment = TextAlignment.Center,
+                            Inlines =
                         {
-                            Text = "Please continue to choose your plugins."
-                        },
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                CenterPanel.Children.Clear();
-                CenterPanel.Children.Add(new TextBlock
+                            new Run
+                            {
+                                Text = "Successfully connected to IPFS!",
+                                FontSize = 20,
+                                FontWeight = FontWeights.SemiBold
+                            },
+                            new LineBreak(),
+                            new LineBreak(),
+                            new Run
+                            {
+                                Text = "Please continue to choose your plugins."
+                            },
+                        }
+                        });
+                    });
+                }
+                catch (Exception ex)
                 {
-                    HorizontalTextAlignment = TextAlignment.Center,
-                    Inlines =
+                    DispatcherQueue.TryEnqueue(() =>
                     {
-                        new Run
+                        CenterPanel.Children.Clear();
+                        CenterPanel.Children.Add(new TextBlock
                         {
-                            Text = "Failed to connect to IPFS",
-                            FontSize = 20,
-                            FontWeight = FontWeights.SemiBold
-                        },
-                        new LineBreak(),
-                        new LineBreak(),
-                        new Run
-                        {
-                            Text = ex.Message
-                        },
-                    }
-                });
-            }
+                            HorizontalTextAlignment = TextAlignment.Center,
+                            Inlines =
+                            {
+                                new Run
+                                {
+                                    Text = "Failed to connect to IPFS",
+                                    FontSize = 20,
+                                    FontWeight = FontWeights.SemiBold
+                                },
+                                new LineBreak(),
+                                new LineBreak(),
+                                new Run
+                                {
+                                    Text = ex.Message
+                                },
+                            }
+                        });
+                    });
+                }
+            });
         }
     }
 }

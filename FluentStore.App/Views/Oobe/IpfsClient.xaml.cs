@@ -20,18 +20,6 @@ namespace FluentStore.Views.Oobe
             _settings = settings;
 
             this.InitializeComponent();
-            Unloaded += IpfsClient_Unloaded;
-        }
-
-        private async void IpfsClient_Unloaded(object sender, RoutedEventArgs e)
-        {
-            Unloaded -= IpfsClient_Unloaded;
-
-            if (_settings is Helpers.Settings settings)
-            {
-                // Ensure user's settings are saved
-                await settings.SaveAsync();
-            }
         }
 
         private async void ViewDocsButton_Click(object sender, RoutedEventArgs e)
