@@ -119,7 +119,7 @@ public class IpfsService : IIpfsService
         }
         catch (Exception ex)
         {
-            throw new Exception("Connected to IPFS, but was unable to reach ipfs.askharoun.com. Please notify the maintainers.", ex)
+            throw new Exception("Connected to IPFS, but was unable to reach ipfs.askharoun.com. Please notify the maintainers.", ex);
         }
     }
 
