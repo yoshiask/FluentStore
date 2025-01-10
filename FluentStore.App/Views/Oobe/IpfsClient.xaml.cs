@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using FluentStore.Services;
+using FluentStore.Helpers;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -14,7 +15,8 @@ namespace FluentStore.Views.Oobe
         private readonly INavigationService _navigationService;
         private readonly ISettingsService _settings;
 
-        public IpfsClient(INavigationService navigationService, ISettingsService settings)
+        public IpfsClient(StartupWizardViewModel wizard,
+            INavigationService navigationService, ISettingsService settings) : base(wizard)
         {
             _navigationService = navigationService;
             _settings = settings;

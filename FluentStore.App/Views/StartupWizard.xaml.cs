@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
+using FluentStore.Helpers;
 using FluentStore.Services;
 using FluentStore.Views.Oobe;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,7 @@ namespace FluentStore.Views;
 
 public sealed partial class StartupWizard : ViewBase
 {
+    private readonly StartupWizardViewModel _viewModel = new();
     private WizardPageBase _page;
 
     public StartupWizard()
@@ -36,9 +38,13 @@ public sealed partial class StartupWizard : ViewBase
             {
                 PageType = typeof(IpfsTest)
             },
-            new("Install Plugins", "", new SymbolIcon(Symbol.AllApps) { Margin = new(8) })
+            new("Pick Plugins", "", new SymbolIcon(Symbol.AllApps) { Margin = new(8) })
             {
                 PageType = typeof(Plugins)
+            },
+            new("Install Plugins", "", new SymbolIcon(Symbol.AllApps) { Margin = new(8) })
+            {
+                PageType = typeof(InstallPlugins)
             },
         };
 
@@ -62,6 +68,8 @@ public sealed partial class StartupWizard : ViewBase
 
     private void NextPage()
     {
+        _page?.OnNavigatingFrom();
+
         SelectedPageIndex++;
         UpdatePage();
     }
@@ -86,7 +94,7 @@ public sealed partial class StartupWizard : ViewBase
         TitleBlock.Text = SelectedPageInfo.Title;
         IconPresenter.Content = SelectedPageInfo.Icon;
 
-        _page = (WizardPageBase)ActivatorUtilities.CreateInstance(Ioc.Default, SelectedPageInfo.PageType);
+        _page = (WizardPageBase)ActivatorUtilities.CreateInstance(Ioc.Default, SelectedPageInfo.PageType, _viewModel);
         OobePresenter.Content = _page;
         NextButton.IsEnabled = _page.CanAdvance;
 

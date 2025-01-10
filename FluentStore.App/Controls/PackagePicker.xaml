@@ -24,8 +24,7 @@
         <ListView x:Name="PackageListView" Grid.Row="0" IsEnabled="{x:Bind ViewModel.IsManagerEnabled, Mode=OneWay}"
                   ItemsSource="{x:Bind ViewModel.Packages, Mode=OneWay}"
                   IsItemClickEnabled="True" ItemClick="PackageListView_ItemClick"
-                  SelectionMode="Single" SelectionChanged="PackageListView_SelectionChanged"
-                  Header="{x:Bind Header, Mode=OneWay}">
+                  SelectionMode="Single" Header="{x:Bind Header, Mode=OneWay}">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="pluginSources:PluginPackageBase">
                     <Grid>

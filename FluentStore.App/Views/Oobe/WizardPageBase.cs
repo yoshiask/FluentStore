@@ -1,15 +1,18 @@
-﻿using Microsoft.UI.Xaml;
+﻿using FluentStore.Helpers;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FluentStore.Views.Oobe;
 
 public abstract class WizardPageBase : UserControl
 {
+    public WizardPageBase(StartupWizardViewModel viewModel)
+    {
+        Wizard = viewModel;
+    }
+
+    protected StartupWizardViewModel Wizard { get; }
+
     public bool CanAdvance
     {
         get => (bool)GetValue(CanAdvanceProperty);
@@ -17,4 +20,6 @@ public abstract class WizardPageBase : UserControl
     }
     public static readonly DependencyProperty CanAdvanceProperty = DependencyProperty.Register(
         nameof(CanAdvance), typeof(bool), typeof(WizardPageBase), new PropertyMetadata(true));
+
+    public virtual void OnNavigatingFrom() { }
 }
