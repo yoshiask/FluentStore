@@ -80,8 +80,11 @@ public sealed partial class PackageManagerControl : UserControl,
         }
         else
         {
-            _pluginInstallDialog.IsPrimaryButtonEnabled = true;
-            _pluginProgressBar.Visibility = Visibility.Collapsed;
+            if (_pluginInstallDialog is not null)
+                _pluginInstallDialog.IsPrimaryButtonEnabled = true;
+
+            if(_pluginProgressBar is not null)
+                _pluginProgressBar.Visibility = Visibility.Collapsed;
 
             WeakReferenceMessenger.Default.UnregisterAll(this);
         }

@@ -21,8 +21,8 @@ public partial class PackageManagerViewModel : ObservableObject
     public PackageManagerViewModel()
     {
         LoadPackagesCommand = new AsyncRelayCommand(LoadPackagesAsync);
-        InstallCommand = new AsyncRelayCommand(InstallAsync);
-        UninstallCommand = new AsyncRelayCommand(UninstallAsync);
+        InstallCommand = new AsyncRelayCommand(InstallAsync, AnyPackagesSelected);
+        UninstallCommand = new AsyncRelayCommand(UninstallAsync, AnyPackagesSelected);
         ViewCommand = new AsyncRelayCommand<PluginPackageBase>(ViewAsync);
     }
 
@@ -124,4 +124,6 @@ public partial class PackageManagerViewModel : ObservableObject
 
         PackageViewModel = new(PackageToView);
     }
+
+    private bool AnyPackagesSelected() => SelectedPackages.Count > 0;
 }
