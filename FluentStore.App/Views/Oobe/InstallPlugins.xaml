@@ -10,8 +10,16 @@
     mc:Ignorable="d"
     Loaded="InstallPluginsPage_Loaded">
 
-    <Grid>
-        <ItemsControl ItemsSource="{x:Bind Plugins}">
+    <Grid RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <ProgressBar VerticalAlignment="Top" HorizontalAlignment="Stretch" IsIndeterminate="True"
+                     Visibility="{x:Bind CanAdvance, Converter={StaticResource NotBoolToVisibilityConverter}, Mode=OneWay}"/>
+        
+        <ItemsControl ItemsSource="{x:Bind Plugins}" Grid.Row="1">
             <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="local:_PluginWizardInstallInfo">
                     <Grid ColumnSpacing="12" Margin="6">
@@ -23,25 +31,25 @@
                         <tkcontrols:SwitchPresenter Value="{x:Bind Status, Mode=OneWay}">
                             <tkcontrols:Case IsDefault="True">
                                 <tkcontrols:Case.Content>
-                                    <FontIcon Glyph="&#xF141;" Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}" />
+                                    <FontIcon Glyph="&#xF141;" Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}" ToolTipService.ToolTip="Pending" />
                                 </tkcontrols:Case.Content>
                             </tkcontrols:Case>
 
                             <tkcontrols:Case Value="{x:Bind local:_PluginWizardStatus.Installing}">
                                 <tkcontrols:Case.Content>
-                                    <FontIcon Glyph="&#xE916;" Foreground="{ThemeResource InfoColor}" />
+                                    <FontIcon Glyph="&#xE916;" Foreground="{ThemeResource InfoColor}" ToolTipService.ToolTip="Installing" />
                                 </tkcontrols:Case.Content>
                             </tkcontrols:Case>
 
                             <tkcontrols:Case Value="{x:Bind local:_PluginWizardStatus.Installed}">
                                 <tkcontrols:Case.Content>
-                                    <FontIcon Glyph="&#xEC61;" Foreground="{ThemeResource SuccessColor}" />
+                                    <FontIcon Glyph="&#xEC61;" Foreground="{ThemeResource SuccessColor}" ToolTipService.ToolTip="Installed" />
                                 </tkcontrols:Case.Content>
                             </tkcontrols:Case>
 
                             <tkcontrols:Case Value="{x:Bind local:_PluginWizardStatus.Failed}">
                                 <tkcontrols:Case.Content>
-                                    <FontIcon Glyph="&#xEA39;" Foreground="{ThemeResource ErrorColor}" />
+                                    <FontIcon Glyph="&#xEA39;" Foreground="{ThemeResource ErrorColor}" ToolTipService.ToolTip="Errored" />
                                 </tkcontrols:Case.Content>
                             </tkcontrols:Case>
                         </tkcontrols:SwitchPresenter>

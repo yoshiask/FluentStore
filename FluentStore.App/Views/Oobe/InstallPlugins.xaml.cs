@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using FluentStore.Helpers;
 using FluentStore.SDK.Plugins.Sources;
+using FluentStore.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -24,10 +25,16 @@ namespace FluentStore.Views.Oobe
 {
     public sealed partial class InstallPlugins : WizardPageBase
     {
+        private readonly ISettingsService _settings;
+
         private IReadOnlyList<_PluginWizardInstallInfo> Plugins { get; }
 
-        public InstallPlugins(StartupWizardViewModel wizard) : base(wizard)
+        public InstallPlugins(StartupWizardViewModel wizard, ISettingsService settings) : base(wizard)
         {
+            _settings = settings;
+
+            CanAdvance = false;
+
             Plugins = wizard.PluginsToInstall
                 .Select(package => new _PluginWizardInstallInfo
                 {
@@ -50,6 +57,9 @@ namespace FluentStore.Views.Oobe
                     ? _PluginWizardStatus.Installed
                     : _PluginWizardStatus.Failed;
             }
+
+            _settings.IsOobeCompleted = true;
+            CanAdvance = true;
         }
     }
 

@@ -1,4 +1,6 @@
 using FluentStore.Helpers;
+using FluentStore.SDK.Plugins;
+using FluentStore.SDK.Plugins.NuGet;
 using FluentStore.ViewModels;
 using System.Linq;
 
@@ -13,20 +15,30 @@ namespace FluentStore.Views.Oobe
     public sealed partial class Plugins : WizardPageBase
     {
         private readonly StartupWizardViewModel _wizard;
+        private readonly FluentStoreNuGetProject _nugetProject;
 
-        public Plugins(StartupWizardViewModel wizard) : base(wizard)
+        public Plugins(StartupWizardViewModel wizard, PluginLoader pluginLoader) : base(wizard)
         {
             this.InitializeComponent();
 
-            CanAdvance = false;
+            _nugetProject = pluginLoader.Project;
+            ViewModel = new();
+
+            UpdateCanAdvance();
             ViewModel.SelectedPackages.CollectionChanged += SelectedPackages_CollectionChanged;
         }
 
-        public PackageManagerViewModel ViewModel { get; } = new();
+        public PackageManagerViewModel ViewModel { get; }
 
         private void SelectedPackages_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            CanAdvance = ViewModel.SelectedPackages.Count > 0;
+            UpdateCanAdvance();
+        }
+
+        private void UpdateCanAdvance()
+        {
+            CanAdvance = ViewModel.SelectedPackages.Count > 0
+                || _nugetProject.Entries.Values.Where(p => p.InstallStatus == PluginInstallStatus.Completed).Any();
         }
 
         public override void OnNavigatingFrom()
