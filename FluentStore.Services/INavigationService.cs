@@ -83,15 +83,16 @@ namespace FluentStore.Services
 
         public ProtocolResult ParseProtocol(Url ptcl, bool isFirstInstance)
         {
-            ProtocolResult result = new()
+            ProtocolResult defaultResult = new()
             {
-                Page = ResolveType("Auth.AccountsView"),
+                Page = ResolveType("HomeView"),
                 Parameter = null,
             };
-            ProtocolResult defaultResult = result;
 
             if (ptcl == null || string.IsNullOrWhiteSpace(ptcl.Path))
                 return defaultResult;
+
+            ProtocolResult result = new();
 
             try
             {
@@ -181,12 +182,14 @@ namespace FluentStore.Services
         }
     }
 
-    public class ProtocolResult
+    public struct ProtocolResult
     {
-        public Type Page { get; set; }
-        public object Parameter { get; set; }
-        public bool RedirectActivation { get; set; } = false;
+        public Type Page;
 
-        public override string ToString() => $"{Page.Name} '{Parameter}'";
+        public object Parameter;
+
+        public bool RedirectActivation;
+
+        public override readonly string ToString() => $"{Page.Name} '{Parameter}'";
     }
 }

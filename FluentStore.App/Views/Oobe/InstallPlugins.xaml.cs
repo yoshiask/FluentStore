@@ -58,7 +58,6 @@ namespace FluentStore.Views.Oobe
                     : _PluginWizardStatus.Failed;
             }
 
-            _settings.IsOobeCompleted = true;
             CanAdvance = true;
         }
     }

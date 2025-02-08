@@ -67,6 +67,8 @@ namespace FluentStore
         private void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
             Ioc.Default.GetService<IIpfsService>()?.Dispose();
+            Ioc.Default.GetService<LoggerService>()?.Dispose();
+
             Exit();
         }
 
@@ -85,14 +87,20 @@ namespace FluentStore
             var log = Ioc.Default.GetService<LoggerService>();
             var navService = Ioc.Default.GetRequiredService<INavigationService>();
             var pluginLoader = Ioc.Default.GetRequiredService<PluginLoader>();
+            var appStartupService = Ioc.Default.GetRequiredService<AppStartupInfo>();
 
             await pluginLoader.InitAsync();
 
-            ProtocolResult result = navService.ParseProtocol(e.Arguments, isFirstInstance: e.IsFirstInstance);
+            ProtocolResult result = navService.ParseProtocol(e.Arguments, e.IsFirstInstance);
             log?.Log($"Parse protocol result: {result}");
+
+            appStartupService.LaunchResult = result;
+            appStartupService.IsFirstLaunch = e.IsFirstLaunch;
+            appStartupService.IsFirstInstance = e.IsFirstInstance;
 
             log?.Log($"Is first instance?: {e.IsFirstInstance}");
             log?.Log($"Is first launch?: {e.IsFirstLaunch}");
+            log?.Log($"Redirect activation?: {result.RedirectActivation}");
             log?.Log($"Single-instance launch args: {e.Arguments}");
 
             if (e.IsFirstLaunch)
@@ -116,13 +124,32 @@ namespace FluentStore
                 {
                     var setupWizard = new Views.StartupWizard();
                     Window.WindowContent.Navigate(setupWizard);
+                    setupWizard.SetupCompleted += OnOobeCompleted;
 
-                    // Wait for OOBE to complete
-                    await OwlCore.Flow.EventAsTask(
-                        h => setupWizard.SetupCompleted += h,
-                        h => setupWizard.SetupCompleted -= h,
-                        System.Threading.CancellationToken.None);
+                    return;
                 }
+            }
+
+            await CompleteAppInitialization();
+        }
+
+        private async void OnOobeCompleted(object sender, EventArgs e)
+        {
+            Settings.Default.IsOobeCompleted = true;
+            await Settings.Default.SaveAsync();
+
+            await CompleteAppInitialization();
+        }
+
+        private async Task CompleteAppInitialization()
+        {
+            var log = Ioc.Default.GetService<LoggerService>();
+            var appStartupService = Ioc.Default.GetRequiredService<AppStartupInfo>();
+            var navService = Ioc.Default.GetRequiredService<NavigationService>();
+
+            if (appStartupService.IsFirstLaunch)
+            {
+                var pluginLoader = Ioc.Default.GetRequiredService<PluginLoader>();
 
                 // Check if app was updated
                 switch (Settings.Default.GetAppUpdateStatus())
@@ -159,11 +186,10 @@ namespace FluentStore
                 var ipfsService = Ioc.Default.GetRequiredService<IIpfsService>();
                 SDK.Downloads.AbstractStorageHelper.IpfsClient = ipfsService.Client;
             }
-            log?.Log($"Redirect activation?: {result.RedirectActivation}");
 
-            if (!result.RedirectActivation || e.IsFirstInstance)
+            if (!appStartupService.LaunchResult.RedirectActivation || appStartupService.IsFirstInstance)
             {
-                log?.Log($"Navigating to {result.Page}");
+                log?.Log($"Navigating to {appStartupService.LaunchResult.Page}");
 
                 // Make sure to run on UI thread
                 Current.Window.DispatcherQueue.TryEnqueue(() =>
@@ -173,8 +199,7 @@ namespace FluentStore
                     // Make sure users can't navigate back to
                     // a null page or the splash screen
                     Window.WindowContent.ClearNavigationStack();
-
-                    navService.Navigate(result.Page, result.Parameter);
+                    navService.Navigate(appStartupService.LaunchResult.Page, appStartupService.LaunchResult.Parameter);
                 });
             }
         }
@@ -246,6 +271,8 @@ namespace FluentStore
         private IServiceProvider ConfigureServices()
         {
             var services = new ServiceCollection();
+
+            services.AddSingleton<AppStartupInfo>();
 
             PackagedPathManager pathManager = new();
             services.AddSingleton<ICommonPathManager>(pathManager);
