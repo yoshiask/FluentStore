@@ -17,9 +17,11 @@ public interface IIpfsService : IDisposable, INotifyPropertyChanged
 
     bool IsRunning { get; }
 
+    Task ConnectOrBootstrapAsync(ISettingsService settings, ICommonPathManager paths, CancellationToken token = default);
+
     Task BootstrapAsync(ISettingsService settings, ICommonPathManager paths, CancellationToken token = default);
 
-    Task<bool> TestAsync(CancellationToken token = default);
+    Task TestAsync(CancellationToken token = default);
 
     void Stop();
 }
@@ -56,6 +58,22 @@ public class IpfsService : IIpfsService
 
     public event PropertyChangedEventHandler PropertyChanged;
 
+    public async Task ConnectOrBootstrapAsync(ISettingsService settings, ICommonPathManager paths, CancellationToken token = default)
+    {
+        var apiPort = settings.IpfsApiPort;
+        var existingClient = await TryConnectAsync(apiPort, token);
+
+        if (existingClient is null)
+        {
+            await BootstrapAsync(settings, paths, token);
+        }
+        else
+        {
+            Client = existingClient;
+            IsRunning = true;
+        }
+    }
+
     public async Task BootstrapAsync(ISettingsService settings, ICommonPathManager paths, CancellationToken token = default)
     {
         var kuboDir = paths.GetAppDataDirectory().CreateSubdirectory("Kubo");
@@ -66,32 +84,24 @@ public class IpfsService : IIpfsService
         
         _bootstrapper = new KuboBootstrapper(kuboRepoDir.FullName)
         {
-            RoutingMode = settings.RehostOnIpfs ? DhtRoutingMode.Auto : DhtRoutingMode.AutoClient,
-            GatewayUri = new($"http://127.0.0.1:{settings.IpfsGatewayPort}"),
-            ApiUri = new($"http://127.0.0.1:{settings.IpfsApiPort}"),
-            LaunchConflictMode = BootstrapLaunchConflictMode.Relaunch,
+            RoutingMode         = settings.RehostOnIpfs ? DhtRoutingMode.Auto : DhtRoutingMode.AutoClient,
+            GatewayUri          = GetLocalUri(settings.IpfsGatewayPort),
+            ApiUri              = GetLocalUri(settings.IpfsApiPort),
+            LaunchConflictMode  = BootstrapLaunchConflictMode.Relaunch,
             BinaryWorkingFolder = new(kuboBinDir),
         };
 
         await _bootstrapper.StartAsync(token);
 
         // Add peers that are known to reliably serve Fluent Store content
-        IEnumerable<MultiAddress> knownPeers =
-        [
-            $"/ip4/{IPv4_ASKHAROUNCOM}/tcp/4001/p2p/{NODE_ID_ASKHAROUNCOM}",
-            $"/ip4/{IPv4_ASKHAROUNCOM}/udp/4001/quic/p2p/{NODE_ID_ASKHAROUNCOM}",
-            $"/ip6/{IPv6_ASKHAROUNCOM}/tcp/4001/p2p/{NODE_ID_ASKHAROUNCOM}",
-            $"/ip6/{IPv6_ASKHAROUNCOM}/udp/4001/quic/p2p/{NODE_ID_ASKHAROUNCOM}",
-        ];
-
-        foreach (var peer in knownPeers)
+        foreach (var peer in GetKnownPeers())
             _bootstrapper.Client.TrustedPeers.Add(peer);
 
         Client = _bootstrapper.Client;
         IsRunning = true;
     }
 
-    public async Task<bool> TestAsync(CancellationToken token = default)
+    public async Task TestAsync(CancellationToken token = default)
     {
         // Random file to check general connection
         var cid = Cid.Decode("QmZtmD2qt6fJot32nabSP3CUjicnypEBz7bHVDhPQt9aAy");
@@ -103,7 +113,7 @@ public class IpfsService : IIpfsService
 #if NETCOREAPP2_1_OR_GREATER
                 await stream.ReadAsync(buffer, token);
 #else
-                await stream.ReadAsync(buffer, 0, buffer.Length);
+                await stream.ReadAsync(buffer, 0, buffer.Length, token);
 #endif
 
             var testString = System.Text.Encoding.UTF8.GetString(buffer, 0, bytesRead);
@@ -115,7 +125,9 @@ public class IpfsService : IIpfsService
         IpnsFolder testFolder = new("/ipns/ipfs.askharoun.com", Client);
         try
         {
-            return await testFolder.GetItemsAsync(cancellationToken: token).AnyAsync(token);
+            await testFolder
+                .GetItemsAsync(cancellationToken: token)
+                .AnyAsync(token);
         }
         catch (Exception ex)
         {
@@ -131,6 +143,36 @@ public class IpfsService : IIpfsService
     }
 
     public void Dispose() => Stop();
+
+    public static IEnumerable<MultiAddress> GetKnownPeers()
+    {
+        return [
+            $"/ip4/{IPv4_ASKHAROUNCOM}/tcp/4001/p2p/{NODE_ID_ASKHAROUNCOM}",
+            $"/ip4/{IPv4_ASKHAROUNCOM}/udp/4001/quic/p2p/{NODE_ID_ASKHAROUNCOM}",
+            $"/ip6/{IPv6_ASKHAROUNCOM}/tcp/4001/p2p/{NODE_ID_ASKHAROUNCOM}",
+            $"/ip6/{IPv6_ASKHAROUNCOM}/udp/4001/quic/p2p/{NODE_ID_ASKHAROUNCOM}",
+        ];
+    }
+
+    private static Uri GetLocalUri(int port) => new($"http://127.0.0.1:{port}");
+
+    public static async Task<IpfsClient> TryConnectAsync(int port, CancellationToken token = default)
+    {
+        var client = new IpfsClient
+        {
+            ApiUri = GetLocalUri(port),
+        };
+
+        try
+        {
+            var peer = await client.IdAsync(cancel: token);
+            return client;
+        }
+        catch
+        {
+            return null;
+        }
+    }
 }
 
 public static class IIpfsServiceExtensions
@@ -140,5 +182,12 @@ public static class IIpfsServiceExtensions
         var settings = services.GetRequiredService<ISettingsService>();
         var paths = services.GetRequiredService<ICommonPathManager>();
         await ipfsService.BootstrapAsync(settings, paths, token);
+    }
+
+    public static async Task ConnectOrBootstrapAsync(this IIpfsService ipfsService, IServiceProvider services, CancellationToken token = default)
+    {
+        var settings = services.GetRequiredService<ISettingsService>();
+        var paths = services.GetRequiredService<ICommonPathManager>();
+        await ipfsService.ConnectOrBootstrapAsync(settings, paths, token);
     }
 }

@@ -8,6 +8,8 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentStore.Helpers;
+using OwlCore.ComponentModel;
+using FluentStore.SDK.Downloads;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -46,12 +48,15 @@ namespace FluentStore.Views.Oobe
                 {
                     _cts = new();
 
-                    await _ipfsService.BootstrapAsync(Ioc.Default, _cts.Token);
+                    await _ipfsService.ConnectOrBootstrapAsync(Ioc.Default, _cts.Token);
                     await _ipfsService.TestAsync(_cts.Token);
 
                     // Config is valid, save the settings
-                    if (Ioc.Default.GetService<ISettingsService>() is Helpers.Settings settings)
+                    if (Ioc.Default.GetService<ISettingsService>() is SettingsBase settings)
                         await settings.SaveAsync();
+
+                    // Ensure that the OC.Storage helpers use the configured client
+                    AbstractStorageHelper.IpfsClient = _ipfsService.Client;
 
                     DispatcherQueue.TryEnqueue(() =>
                     {

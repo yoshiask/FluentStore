@@ -154,23 +154,9 @@ namespace FluentStore
             {
                 var pluginLoader = Ioc.Default.GetRequiredService<PluginLoader>();
 
-                // Check if app was updated
-                switch (Settings.Default.GetAppUpdateStatus())
-                {
-                    case AppUpdateStatus.NewlyInstalled:
-                        // Download and install default plugins
-                        log?.Log($"Began installing default plugins");
-                        await pluginLoader.InstallDefaultPlugins();
-                        log?.Log($"Finished installing plugins");
-                        break;
-
-                    default:
-                        // Always install pending plugins
-                        log?.Log($"Began installing pending plugins");
-                        await pluginLoader.HandlePendingOperations();
-                        log?.Log($"Finished install pending plugins");
-                        break;
-                }
+                log?.Log($"Began installing pending plugins");
+                await pluginLoader.HandlePendingOperations();
+                log?.Log($"Finished install pending plugins");
 
                 // Load plugins and initialize package and account services
                 log?.Log($"Began loading plugins");
@@ -185,9 +171,13 @@ namespace FluentStore
                 Settings.Default.LastLaunchedVersion = Windows.ApplicationModel.Package.Current.Id.Version.ToVersion();
                 await Settings.Default.SaveAsync();
 
-                // Start IPFS local node
+                // Connect to IPFS node
                 var ipfsService = Ioc.Default.GetRequiredService<IIpfsService>();
-                SDK.Downloads.AbstractStorageHelper.IpfsClient = ipfsService.Client;
+                if (!ipfsService.IsRunning)
+                {
+                    SDK.Downloads.AbstractStorageHelper.IpfsClient = ipfsService.Client;
+                    await ipfsService.ConnectOrBootstrapAsync(Ioc.Default);
+                }
             }
 
             if (!appStartupService.LaunchResult.RedirectActivation || appStartupService.IsFirstInstance)

@@ -14,9 +14,9 @@
             <controls:SettingsBlockControl.Icon>
                 <SymbolIcon Symbol="Globe" />
             </controls:SettingsBlockControl.Icon>
-            
+
             <Button Content="View docs" Click="ViewDocsButton_Click"/>
-            
+
             <controls:SettingsBlockControl.ExpandableContent>
                 <TextBlock Padding="8" TextWrapping="WrapWholeWords" MaxWidth="500">
                     <Run>HTTP retrieves content using a location (an IP address), while IPFS uses a unique content identifier generated from the content itself (the CID).</Run>
