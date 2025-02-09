@@ -122,10 +122,13 @@ namespace FluentStore
                 // Start OOBE if not configured
                 if (!Settings.Default.IsOobeCompleted)
                 {
-                    var setupWizard = new Views.StartupWizard();
-                    Window.WindowContent.Navigate(setupWizard);
-                    setupWizard.SetupCompleted += OnOobeCompleted;
+                    Window.DispatcherQueue.TryEnqueue(() =>
+                    {
+                        var setupWizard = new Views.StartupWizard();
+                        setupWizard.SetupCompleted += OnOobeCompleted;
 
+                        Window.WindowContent.Navigate(setupWizard);
+                    });
                     return;
                 }
             }
