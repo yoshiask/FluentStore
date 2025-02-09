@@ -10,7 +10,7 @@ namespace FluentStore.Views.Settings
 {
     public sealed partial class Info : UserControl
     {
-        private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
+        private readonly NavigationServiceBase NavigationService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
         private readonly ICommonPathManager CommonPathManager = Ioc.Default.GetRequiredService<ICommonPathManager>();
 
         public Info()

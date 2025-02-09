@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace FluentStore.Services
 {
-    public abstract class INavigationService
+    public abstract class NavigationServiceBase
     {
         private readonly ICommonPathManager _pathManager;
 
-        public INavigationService(ICommonPathManager pathManager)
+        public NavigationServiceBase(ICommonPathManager pathManager)
         {
             _pathManager = pathManager;
         }

@@ -58,7 +58,7 @@ namespace FluentStore.ViewModels
             Query = query;
         }
 
-        private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
+        private readonly NavigationServiceBase NavService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
         private readonly ISettingsService Settings = Ioc.Default.GetRequiredService<ISettingsService>();
 

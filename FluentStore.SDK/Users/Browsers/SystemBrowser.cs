@@ -17,7 +17,7 @@ namespace FluentStore.SDK.Users.Browsers
             inFlightRequest?.TrySetCanceled(cancellationToken);
             inFlightRequest = new TaskCompletionSource<BrowserResult>();
 
-            INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
+            NavigationServiceBase navService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
             navService.OpenInBrowser(options.StartUrl);
 
             return inFlightRequest.Task;

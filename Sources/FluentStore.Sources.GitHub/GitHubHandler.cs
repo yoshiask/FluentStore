@@ -4,6 +4,7 @@ using FluentStore.SDK.Images;
 using FluentStore.Services;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
+using Microsoft.Extensions.Logging;
 using Octokit;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,9 +18,9 @@ namespace FluentStore.Sources.GitHub
         private static readonly Users.CredentialStore _credentialStore = new();
         private static readonly GitHubClient _client = new(new ProductHeaderValue("fluent-store"), _credentialStore);
 
-        public GitHubHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
+        public GitHubHandler(IPasswordVaultService passwordVaultService, ILogger log) : base(passwordVaultService)
         {
-            AccountHandler = new Users.GitHubAccountHandler(_client, _credentialStore, passwordVaultService);
+            AccountHandler = new Users.GitHubAccountHandler(_client, _credentialStore, passwordVaultService, log);
         }
 
         public override HashSet<string> HandledNamespaces => new()

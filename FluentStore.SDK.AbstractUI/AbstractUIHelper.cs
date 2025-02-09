@@ -27,7 +27,7 @@ namespace FluentStore.SDK.AbstractUI
             return form;
         }
 
-        public static AbstractForm CreateOpenInBrowserForm(string formId, string formBody, Flurl.Url url, INavigationService navService)
+        public static AbstractForm CreateOpenInBrowserForm(string formId, string formBody, Flurl.Url url, NavigationServiceBase navService)
         {
             return CreateSingleButtonForm(formId, formBody, "Open in browser",
                 async (sender, e) => await navService.OpenInBrowser(url));

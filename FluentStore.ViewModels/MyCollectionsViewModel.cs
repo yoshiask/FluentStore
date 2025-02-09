@@ -23,7 +23,7 @@ namespace FluentStore.ViewModels
             WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("Collections"));
         }
 
-        private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
+        private readonly NavigationServiceBase NavService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
         private ObservableCollection<PackageViewModel> _collections = new();

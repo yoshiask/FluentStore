@@ -9,7 +9,7 @@ using NavigationViewItem = Microsoft.UI.Xaml.Controls.NavigationViewItem;
 
 namespace FluentStore.Services
 {
-    public class NavigationService : INavigationService
+    public class NavigationService : NavigationServiceBase
     {
         private IntPtr m_hwnd;
 

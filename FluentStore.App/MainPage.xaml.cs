@@ -21,7 +21,7 @@ namespace FluentStore
     /// </summary>
     public sealed partial class MainPage : UserControl, IAppContent
     {
-        private readonly NavigationService NavService = Ioc.Default.GetService<INavigationService>() as NavigationService;
+        private readonly NavigationService NavService = Ioc.Default.GetService<NavigationServiceBase>() as NavigationService;
         
         public ShellViewModel ViewModel
         {

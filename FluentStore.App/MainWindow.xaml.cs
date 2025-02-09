@@ -24,7 +24,7 @@ namespace FluentStore
 
             m_hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             
-            var navService = CommunityToolkit.Mvvm.DependencyInjection.Ioc.Default.GetService<Services.INavigationService>();
+            var navService = CommunityToolkit.Mvvm.DependencyInjection.Ioc.Default.GetService<Services.NavigationServiceBase>();
             if (navService != null)
             {
                 navService.SetMainWindowHandle(m_hwnd);

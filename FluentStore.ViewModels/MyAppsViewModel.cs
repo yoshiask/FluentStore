@@ -23,7 +23,7 @@ namespace FluentStore.ViewModels
             WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("My Apps"));
         }
 
-        private readonly INavigationService NavService = Ioc.Default.GetRequiredService<INavigationService>();
+        private readonly NavigationServiceBase NavService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
         private AdvancedCollectionView _Apps;

@@ -124,7 +124,7 @@ namespace FluentStore.SDK.Users
                     RefreshClient();
                     _state = await _client.PrepareLoginAsync();
 
-                    INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
+                    NavigationServiceBase navService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
                     await navService.OpenInBrowser(_state.StartUrl);
                 });
         }
@@ -134,7 +134,7 @@ namespace FluentStore.SDK.Users
             return AbstractUIHelper.CreateSingleButtonForm("SignUpCollection", "Click the button below to sign up in your browser.", "Sign up",
                 async (sender, e) =>
                 {
-                    INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
+                    NavigationServiceBase navService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
                     await navService.OpenInBrowser(SignUpUrl);
                 });
         }

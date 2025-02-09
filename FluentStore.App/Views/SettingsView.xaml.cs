@@ -17,7 +17,7 @@ namespace FluentStore.Views
     /// </summary>
     public sealed partial class SettingsView : ViewBase
     {
-        private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
+        private readonly NavigationServiceBase NavigationService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
 
         private readonly Dictionary<Type, object> _pages = new()
         {

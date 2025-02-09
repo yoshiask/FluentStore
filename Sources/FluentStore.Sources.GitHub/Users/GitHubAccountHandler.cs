@@ -5,6 +5,7 @@ using FluentStore.SDK.AbstractUI.Models;
 using FluentStore.SDK.Users;
 using FluentStore.Services;
 using Flurl;
+using Microsoft.Extensions.Logging;
 using Octokit;
 using OwlCore.AbstractUI.Models;
 using System;
@@ -13,21 +14,13 @@ using System.Threading.Tasks;
 
 namespace FluentStore.Sources.GitHub.Users
 {
-    public class GitHubAccountHandler : AccountHandlerBase<GitHubAccount>
+    public class GitHubAccountHandler(GitHubClient client, CredentialStore credentialStore, IPasswordVaultService passwordVaultService, ILogger log)
+        : AccountHandlerBase<GitHubAccount>(passwordVaultService)
     {
         private const string ABSUI_ID_NAMEBOX = "nameBox";
         private const string ABSUI_ID_BIOBOX = "bioBox";
         private const string ABSUI_ID_COMPANYBOX = "companyBox";
         private const string ABSUI_ID_LOCATIONBOX = "locationBox";
-        private readonly CredentialStore _credentialStore;
-        private readonly GitHubClient _client;
-
-        public GitHubAccountHandler(GitHubClient client, CredentialStore credentialStore, IPasswordVaultService passwordVaultService)
-            : base(passwordVaultService)
-        {
-            _client = client;
-            _credentialStore = credentialStore;
-        }
 
         public override string Id => "gh-user";
 
@@ -35,14 +28,11 @@ namespace FluentStore.Sources.GitHub.Users
 
         private string Token { get; set; }
 
-        private readonly string[] _scopes = new[]
-        {
-            "read:user", "user:email", "repo",
-        };
+        private readonly string[] _scopes = ["read:user", "user:email", "repo"];
 
         protected override async Task<SDK.Users.Account> UpdateCurrentUser()
         {
-            var user = await _client.User.Current();
+            var user = await client.User.Current();
             return new GitHubAccount(user);
         }
 
@@ -54,7 +44,7 @@ namespace FluentStore.Sources.GitHub.Users
             {
                 Token = token;
 
-                _credentialStore.Token = Token;
+                credentialStore.Token = Token;
                 CurrentUser = await UpdateCurrentUser();
 
                 SaveCredential(Token);
@@ -63,9 +53,7 @@ namespace FluentStore.Sources.GitHub.Users
             }
             catch (Exception ex)
             {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(ex.Message);
-#endif
+                log.Log(LogLevel.Error, ex, "Failed to sign in to GitHub");
 
                 Token = null;
                 IsLoggedIn = false;
@@ -76,7 +64,7 @@ namespace FluentStore.Sources.GitHub.Users
 
         public override Task SignOutAsync()
         {
-            _credentialStore.Token = null;
+            credentialStore.Token = null;
 
             RemoveCredential(Token);
 
@@ -93,7 +81,7 @@ namespace FluentStore.Sources.GitHub.Users
                 ThrowHelper.ThrowInvalidOperationException("No OAuth code was supplied.");
 
             Octokit.OauthTokenRequest request = new(Secrets.GH_CLIENTID, Secrets.GH_CLIENTSECRET, code.ToString());
-            var response = await _client.Oauth.CreateAccessToken(request);
+            var response = await client.Oauth.CreateAccessToken(request);
 
             await SignInAsync(response.AccessToken);
         }
@@ -111,9 +99,9 @@ namespace FluentStore.Sources.GitHub.Users
                     };
                     foreach (string scope in _scopes)
                         request.Scopes.Add(scope);
-                    var uri = _client.Oauth.GetGitHubLoginUrl(request);
+                    var uri = client.Oauth.GetGitHubLoginUrl(request);
 
-                    INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
+                    NavigationServiceBase navService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
                     await navService.OpenInBrowser(uri);
                 });
         }
@@ -126,7 +114,7 @@ namespace FluentStore.Sources.GitHub.Users
         public override AbstractForm CreateManageAccountForm()
         {
             return AbstractUIHelper.CreateOpenInBrowserForm("ManageCollection", "Manage your account on the website.",
-                GetAccount().GitHubUser.HtmlUrl, Ioc.Default.GetRequiredService<INavigationService>());
+                GetAccount().GitHubUser.HtmlUrl, Ioc.Default.GetRequiredService<NavigationServiceBase>());
 
             // FIXME: The update call returns HTTP 404
             AbstractForm form = new("ManageCollection", onSubmit: ManageButton_Clicked)
@@ -169,7 +157,7 @@ namespace FluentStore.Sources.GitHub.Users
                 }
             }
 
-            _ = await _client.User.Update(update);
+            _ = await client.User.Update(update);
         }
     }
 }

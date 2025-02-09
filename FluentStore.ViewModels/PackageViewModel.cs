@@ -33,7 +33,7 @@ namespace FluentStore.ViewModels
             DownloadCommand = new AsyncRelayCommand(async () => await Package.DownloadAsync());
         }
 
-        private readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
+        private readonly NavigationServiceBase NavigationService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
         public readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
         private readonly LoggerService Logger = Ioc.Default.GetService<LoggerService>();
 

@@ -85,7 +85,7 @@ namespace FluentStore
         private async void OnSingleInstanceLaunched(object? sender, SingleInstanceLaunchEventArgs e)
         {
             var log = Ioc.Default.GetService<LoggerService>();
-            var navService = Ioc.Default.GetRequiredService<INavigationService>();
+            var navService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
             var pluginLoader = Ioc.Default.GetRequiredService<PluginLoader>();
             var appStartupService = Ioc.Default.GetRequiredService<AppStartupInfo>();
 
@@ -148,7 +148,7 @@ namespace FluentStore
         {
             var log = Ioc.Default.GetService<LoggerService>();
             var appStartupService = Ioc.Default.GetRequiredService<AppStartupInfo>();
-            var navService = Ioc.Default.GetRequiredService<NavigationService>();
+            var navService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
 
             if (appStartupService.IsFirstLaunch)
             {
@@ -301,7 +301,7 @@ namespace FluentStore
             services.AddSingleton(_log);
             services.AddSingleton<ILogger>(_log);
 
-            services.AddSingleton<INavigationService, NavigationService>();
+            services.AddSingleton<NavigationServiceBase, NavigationService>();
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
             services.AddSingleton<IIpfsService, IpfsService>();
             services.AddSingleton<Microsoft.Marketplace.Storefront.Contracts.StorefrontApi>();

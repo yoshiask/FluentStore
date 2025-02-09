@@ -20,7 +20,7 @@ namespace FluentStore.Sources.UwpCommunity
 {
     public class UwpCommunityPackage : PackageBase<Project>
     {
-        readonly INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
+        readonly NavigationServiceBase NavigationService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
         readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
         public UwpCommunityPackage(PackageHandlerBase packageHandler, Project project = null, IEnumerable<string> images = null,

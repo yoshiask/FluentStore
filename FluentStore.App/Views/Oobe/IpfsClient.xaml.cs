@@ -12,11 +12,11 @@ namespace FluentStore.Views.Oobe
     /// </summary>
     public sealed partial class IpfsClient : WizardPageBase
     {
-        private readonly INavigationService _navigationService;
+        private readonly NavigationServiceBase _navigationService;
         private readonly ISettingsService _settings;
 
         public IpfsClient(StartupWizardViewModel wizard,
-            INavigationService navigationService, ISettingsService settings) : base(wizard)
+            NavigationServiceBase navigationService, ISettingsService settings) : base(wizard)
         {
             _navigationService = navigationService;
             _settings = settings;

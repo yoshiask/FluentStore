@@ -36,7 +36,7 @@ namespace FluentStore.Views
             ViewModel = new PackageViewModel();
         }
 
-        INavigationService NavigationService = Ioc.Default.GetRequiredService<INavigationService>();
+        NavigationServiceBase NavigationService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
         PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
         ICommonPathManager PathManager = Ioc.Default.GetRequiredService<ICommonPathManager>();
 

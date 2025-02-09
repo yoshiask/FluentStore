@@ -18,7 +18,7 @@ namespace FluentStore.Sources.MicrosoftStore.Users
         public const string APPIDURI_MSGRAPH = "https://graph.microsoft.com/";
         public const string BASEURL_MSGRAPH = APPIDURI_MSGRAPH + "v1.0/";
 
-        private readonly INavigationService _navService = Ioc.Default.GetRequiredService<INavigationService>();
+        private readonly NavigationServiceBase _navService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
         private GraphServiceClient _graphClient;
         private AccountsSettingsPane _asp;
 
@@ -43,7 +43,7 @@ namespace FluentStore.Sources.MicrosoftStore.Users
 
         public override AbstractForm CreateManageAccountForm()
         {
-            INavigationService navService = Ioc.Default.GetRequiredService<INavigationService>();
+            NavigationServiceBase navService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
             return AbstractUIHelper.CreateOpenInBrowserForm("ManageCollection", "Manage your account on the website.",
                 "https://account.microsoft.com/profile", navService);
         }
