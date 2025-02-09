@@ -6,7 +6,7 @@
         <RootNamespace>FluentStore</RootNamespace>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <Platforms>x86;x64;arm64</Platforms>
-        <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
+        <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
         <PublishProfile>win10-$(Platform).pubxml</PublishProfile>
         <UseWinUI>true</UseWinUI>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -14,7 +14,7 @@
         <FileVersion>$(AssemblyVersion)</FileVersion>
 
         <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
-        <PackageCertificateThumbprint>CA050EFFDAB5866005A7649E1493764E2205F3DB</PackageCertificateThumbprint>
+        <PackageCertificateThumbprint>3E5E1B738D9924BD13020E1F163BB0D048361C0A</PackageCertificateThumbprint>
         <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
         <GenerateTemporaryStoreCertificate>False</GenerateTemporaryStoreCertificate>
         <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
@@ -22,8 +22,8 @@
         <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
         <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
         <GenerateTestArtifacts>False</GenerateTestArtifacts>
-        <AppxBundle>Never</AppxBundle>
-        <AppxBundlePlatforms>x86|x64|arm64</AppxBundlePlatforms>
+        <AppxBundle>Always</AppxBundle>
+        <AppxBundlePlatforms>x86|x64</AppxBundlePlatforms>
         <HoursBetweenUpdateChecks>48</HoursBetweenUpdateChecks>
         <AppInstallerUri>https://ipfs.askharoun.com/FluentStore/BetaInstaller/FluentStoreBeta.appinstaller</AppInstallerUri>
     </PropertyGroup>
@@ -42,20 +42,20 @@
 
     <!-- References -->
     <ItemGroup>
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240802000" />
-        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250108002" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
         <PackageReference Include="Garfoot.Utilities.FluentUrn" Version="1.2.1" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-        <PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.1.240821" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1" />
+        <PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.1.240916" />
         <PackageReference Include="CommunityToolkit.WinUI.Notifications" Version="7.1.2" />
         <PackageReference Include="CommunityToolkit.WinUI.UI.Animations" Version="7.1.2" />
         <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Core" Version="7.1.2" />
         <PackageReference Include="CommunityToolkit.WinUI.UI.Controls.Layout" Version="7.1.2" />
-        <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="2.0.9" />
+        <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.0" />
         <PackageReference Include="PInvoke.User32" Version="0.7.124" />
-        <PackageReference Include="OwlCore" Version="0.6.0" />
-        <PackageReference Include="Vanara.PInvoke.DwmApi" Version="4.0.2" />
-        <PackageReference Include="WinUIEx" Version="2.3.3" />
+        <PackageReference Include="OwlCore" Version="0.6.1" />
+        <PackageReference Include="Vanara.PInvoke.DwmApi" Version="4.0.4" />
+        <PackageReference Include="WinUIEx" Version="2.5.1" />
 
         <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj" />
         <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />

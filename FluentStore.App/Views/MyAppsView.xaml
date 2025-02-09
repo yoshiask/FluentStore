@@ -5,7 +5,6 @@
     xmlns:local="using:FluentStore.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:viewmodels="using:FluentStore.ViewModels"
     xmlns:controls="using:FluentStore.Controls"
@@ -104,9 +103,9 @@
             </GridView.Transitions>
 
             <interactivity:Interaction.Behaviors>
-                <core:EventTriggerBehavior EventName="SelectionChanged">
-                    <core:InvokeCommandAction Command="{x:Bind ViewModel.ViewAppCommand}"/>
-                </core:EventTriggerBehavior>
+                <interactivity:EventTriggerBehavior EventName="SelectionChanged">
+                    <interactivity:InvokeCommandAction Command="{x:Bind ViewModel.ViewAppCommand}"/>
+                </interactivity:EventTriggerBehavior>
             </interactivity:Interaction.Behaviors>
         </GridView>
     </Grid>

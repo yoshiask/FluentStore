@@ -25,13 +25,13 @@
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
                 
                 <!-- Other merged dictionaries here -->
-                <ResourceDictionary Source="/Themes/CommonConverters.xaml"/>
-                <ResourceDictionary Source="/Themes/CompactHyperlinkButtonStyle.xaml"/>
-                <ResourceDictionary Source="/Themes/PackageDisplayTemplates.xaml"/>
-                <ResourceDictionary Source="/Themes/ImageBaseTemplates.xaml"/>
-                <ResourceDictionary Source="/Themes/NavigationFrame.xaml"/>
-                <ResourceDictionary Source="/Themes/ToggleSwitchRightStyle.xaml"/>
-                <ResourceDictionary Source="/Themes/TrimmedTextBlock.xaml"/>
+                <ResourceDictionary Source="ms-appx:///Themes/CommonConverters.xaml"/>
+                <ResourceDictionary Source="ms-appx:///Themes/CompactHyperlinkButtonStyle.xaml"/>
+                <ResourceDictionary Source="ms-appx:///Themes/PackageDisplayTemplates.xaml"/>
+                <ResourceDictionary Source="ms-appx:///Themes/ImageBaseTemplates.xaml"/>
+                <ResourceDictionary Source="ms-appx:///Themes/NavigationFrame.xaml"/>
+                <ResourceDictionary Source="ms-appx:///Themes/ToggleSwitchRightStyle.xaml"/>
+                <ResourceDictionary Source="ms-appx:///Themes/TrimmedTextBlock.xaml"/>
 
                 <ResourceDictionary>
 

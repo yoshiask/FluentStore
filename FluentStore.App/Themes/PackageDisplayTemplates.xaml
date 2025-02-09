@@ -7,10 +7,6 @@
     xmlns:controls="using:FluentStore.Controls"
     xmlns:models="using:FluentStore.SDK.Models">
 
-    <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="/Themes/CommonConverters.xaml"/>
-    </ResourceDictionary.MergedDictionaries>
-
     <DataTemplate x:Key="DefaultDisplayDateTimeTemplate" x:DataType="sys:DateTime">
         <!--<TextBlock Text="{x:Bind ToShortDateString()}" IsTextSelectionEnabled="True"/>-->
         <TextBlock Text="{Binding}" IsTextSelectionEnabled="True"/>

@@ -5,7 +5,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Class="OwlCore.WinUI.AbstractUI.Themes.AbstractDataListStyle"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
-    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:abstractUI="using:OwlCore.AbstractUI.ViewModels"
     xmlns:convertvis="using:OwlCore.WinUI.Converters.Bools.Visible"
     xmlns:themes="using:OwlCore.WinUI.AbstractUI.Themes"
@@ -42,9 +41,9 @@
     <DataTemplate x:Key="DefaultAbstractDataListListTemplate" x:DataType="abstractUI:AbstractDataListViewModel">
         <ListView x:Name="PrimaryListView" ItemsSource="{x:Bind Items}" SelectionMode="None" Margin="10" IsItemClickEnabled="true">
             <interactivity:Interaction.Behaviors>
-                <core:EventTriggerBehavior EventName="ItemClick">
-                    <core:InvokeCommandAction Command="{x:Bind ItemTappedCommand}" InputConverter="{StaticResource ItemClickEventArgsToClickedItemConverter}" />
-                </core:EventTriggerBehavior>
+                <interactivity:EventTriggerBehavior EventName="ItemClick">
+                    <interactivity:InvokeCommandAction Command="{x:Bind ItemTappedCommand}" InputConverter="{StaticResource ItemClickEventArgsToClickedItemConverter}" />
+                </interactivity:EventTriggerBehavior>
             </interactivity:Interaction.Behaviors>
             <ListView.ItemContainerTransitions>
                 <TransitionCollection />
@@ -85,9 +84,9 @@
                                     Height="40" Width="40" Margin="0,0,5,0" Background="Transparent"
                                     Visibility="{Binding IsAddItem, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                                 <interactivity:Interaction.Behaviors>
-                                    <core:EventTriggerBehavior EventName="Click">
-                                        <core:InvokeCommandAction Command="{Binding RequestRemoveCommand}" CommandParameter="{Binding}" />
-                                    </core:EventTriggerBehavior>
+                                    <interactivity:EventTriggerBehavior EventName="Click">
+                                        <interactivity:InvokeCommandAction Command="{Binding RequestRemoveCommand}" CommandParameter="{Binding}" />
+                                    </interactivity:EventTriggerBehavior>
                                 </interactivity:Interaction.Behaviors>
                             </Button>
 
@@ -95,9 +94,9 @@
                                     Height="40" Width="40" Margin="0,0,5,0" Background="Transparent"
                                     Visibility="{Binding IsAddItem, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <interactivity:Interaction.Behaviors>
-                                    <core:EventTriggerBehavior EventName="Click">
-                                        <core:InvokeCommandAction Command="{Binding RequestAddCommand}"  CommandParameter="{Binding}" />
-                                    </core:EventTriggerBehavior>
+                                    <interactivity:EventTriggerBehavior EventName="Click">
+                                        <interactivity:InvokeCommandAction Command="{Binding RequestAddCommand}"  CommandParameter="{Binding}" />
+                                    </interactivity:EventTriggerBehavior>
                                 </interactivity:Interaction.Behaviors>
                             </Button>
                         </Grid>
@@ -130,9 +129,9 @@
     <DataTemplate x:Key="DefaultAbstractDataListGridTemplate" x:DataType="abstractUI:AbstractDataListViewModel">
         <GridView SelectionMode="None" ItemsSource="{x:Bind Items}" IsItemClickEnabled="true">
             <interactivity:Interaction.Behaviors>
-                <core:EventTriggerBehavior EventName="ItemClick">
-                    <core:InvokeCommandAction Command="{x:Bind ItemTappedCommand}" InputConverter="{StaticResource ItemClickEventArgsToClickedItemConverter}" />
-                </core:EventTriggerBehavior>
+                <interactivity:EventTriggerBehavior EventName="ItemClick">
+                    <interactivity:InvokeCommandAction Command="{x:Bind ItemTappedCommand}" InputConverter="{StaticResource ItemClickEventArgsToClickedItemConverter}" />
+                </interactivity:EventTriggerBehavior>
             </interactivity:Interaction.Behaviors>
             <GridView.ItemTemplate>
                 <DataTemplate x:DataType="abstractUI:AbstractDataListItemViewModel">
@@ -163,9 +162,9 @@
                                     Margin="5,-1,0,0" Background="Transparent"
                                     Visibility="{Binding IsAddItem, Converter={StaticResource InverseBoolToVisibilityConverter}}">
                                 <interactivity:Interaction.Behaviors>
-                                    <core:EventTriggerBehavior EventName="Click">
-                                        <core:InvokeCommandAction Command="{Binding RequestRemoveCommand}" CommandParameter="{Binding}" />
-                                    </core:EventTriggerBehavior>
+                                    <interactivity:EventTriggerBehavior EventName="Click">
+                                        <interactivity:InvokeCommandAction Command="{Binding RequestRemoveCommand}" CommandParameter="{Binding}" />
+                                    </interactivity:EventTriggerBehavior>
                                 </interactivity:Interaction.Behaviors>
                             </Button>
                         </Border>

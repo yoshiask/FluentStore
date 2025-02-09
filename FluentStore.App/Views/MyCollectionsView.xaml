@@ -5,7 +5,6 @@
     xmlns:local="using:FluentStore.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:controls="using:FluentStore.Controls"
     mc:Ignorable="d"
@@ -13,9 +12,9 @@
     Loaded="Page_Loaded">
 
     <interactivity:Interaction.Behaviors>
-        <core:EventTriggerBehavior EventName="Loaded">
-            <core:InvokeCommandAction Command="{x:Bind ViewModel.LoadCollectionsCommand}"/>
-        </core:EventTriggerBehavior>
+        <interactivity:EventTriggerBehavior EventName="Loaded">
+            <interactivity:InvokeCommandAction Command="{x:Bind ViewModel.LoadCollectionsCommand}"/>
+        </interactivity:EventTriggerBehavior>
     </interactivity:Interaction.Behaviors>
 
     <Grid>

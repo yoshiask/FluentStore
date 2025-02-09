@@ -7,13 +7,12 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="using:FluentStore.ViewModels"
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
-    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     mc:Ignorable="d">
 
     <interactivity:Interaction.Behaviors>
-        <core:EventTriggerBehavior EventName="Loading">
-            <core:InvokeCommandAction Command="{x:Bind ViewModel.LoadPackagesCommand}"/>
-        </core:EventTriggerBehavior>
+        <interactivity:EventTriggerBehavior EventName="Loading">
+            <interactivity:InvokeCommandAction Command="{x:Bind ViewModel.LoadPackagesCommand}"/>
+        </interactivity:EventTriggerBehavior>
     </interactivity:Interaction.Behaviors>
 
     <UserControl.Resources>

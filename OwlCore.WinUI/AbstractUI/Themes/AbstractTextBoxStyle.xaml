@@ -5,7 +5,6 @@
     xmlns:interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:abstractUI="using:OwlCore.AbstractUI.ViewModels"
     xmlns:convertvis="using:OwlCore.WinUI.Converters.Bools.Visible"
-    xmlns:core="using:Microsoft.Xaml.Interactions.Core"
     xmlns:controls="using:OwlCore.WinUI.AbstractUI.Controls"
     xmlns:automation="using:Microsoft.UI.Xaml.Automation">
 
@@ -43,9 +42,9 @@
                      PlaceholderText="{x:Bind PlaceholderText, Mode=OneWay}"
                      ToolTipService.ToolTip="{x:Bind TooltipText, Mode=OneWay}">
                 <interactivity:Interaction.Behaviors>
-                    <core:EventTriggerBehavior EventName="TextChanging">
-                        <core:InvokeCommandAction Command="{x:Bind ValueChangedCommand}" />
-                    </core:EventTriggerBehavior>
+                    <interactivity:EventTriggerBehavior EventName="TextChanging">
+                        <interactivity:InvokeCommandAction Command="{x:Bind ValueChangedCommand}" />
+                    </interactivity:EventTriggerBehavior>
                 </interactivity:Interaction.Behaviors>
             </TextBox>
         </StackPanel>
