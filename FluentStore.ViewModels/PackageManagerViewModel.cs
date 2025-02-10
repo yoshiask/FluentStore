@@ -24,6 +24,14 @@ public partial class PackageManagerViewModel : ObservableObject
         InstallCommand = new AsyncRelayCommand(InstallAsync, AnyPackagesSelected);
         UninstallCommand = new AsyncRelayCommand(UninstallAsync, AnyPackagesSelected);
         ViewCommand = new AsyncRelayCommand<PluginPackageBase>(ViewAsync);
+
+        SelectedPackages.CollectionChanged += SelectedPackages_CollectionChanged;
+    }
+
+    private void SelectedPackages_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        InstallCommand.NotifyCanExecuteChanged();
+        UninstallCommand.NotifyCanExecuteChanged();
     }
 
     [ObservableProperty]
