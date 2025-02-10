@@ -4,7 +4,6 @@ using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Messages;
 using FluentStore.SDK.Models;
 using Garfoot.Utilities.FluentUrn;
-using IdentityModel.OidcClient;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -22,7 +21,7 @@ internal class WinGetCliHandler : IWinGetImplementation
     public async Task<PackageBase> GetPackage(string id, WinGetProxyHandler packageHandler, PackageStatus status = PackageStatus.Details)
     {
         var results = await _packageManager.SearchPackageAsync(id, true);
-        var result = results.FirstOrDefault(IsNotWinGetId);
+        var result = results.FirstOrDefault(IsNotStoreSourced);
 
         if (result is null)
             return null;
@@ -38,7 +37,7 @@ internal class WinGetCliHandler : IWinGetImplementation
     public async IAsyncEnumerable<PackageBase> SearchAsync(string query, WinGetProxyHandler packageHandler)
     {
         var results = await _packageManager.SearchPackageAsync(query);
-        foreach (var result in results.Where(IsNotWinGetId))
+        foreach (var result in results.Where(IsNotStoreSourced))
             yield return CreateSDKPackage(packageHandler, result);
     }
 
@@ -139,5 +138,5 @@ internal class WinGetCliHandler : IWinGetImplementation
         package.Status = PackageStatus.Details;
     }
 
-    private static bool IsNotWinGetId(WGetNET.WinGetPackage package) => !package.Id.StartsWith("XP");
+    private static bool IsNotStoreSourced(WGetNET.WinGetPackage package) => package.SourceName != "msstore";
 }
