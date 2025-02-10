@@ -2,7 +2,7 @@
 
     <ItemGroup>
         <PackageReference Include="WinGet.Sharp" Version="1.8.1911" />
-        <PackageReference Include="WGet.NET" Version="4.1.0" />
+        <PackageReference Include="WGet.NET" Version="4.2.0" />
         <ProjectReference Include="..\..\FluentStore.SDK\FluentStore.SDK.csproj" />
     </ItemGroup>
 

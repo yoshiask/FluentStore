@@ -8,7 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="OwlCore" Version="0.6.0" />
+		<PackageReference Include="OwlCore" Version="0.6.1" />
 		<PackageReference Include="OwlCore.AbstractUI" Version="0.0.0" />
 		<ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
 	</ItemGroup>

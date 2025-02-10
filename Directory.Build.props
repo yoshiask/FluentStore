@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
     <PropertyGroup>
-		<FluentStoreMajorMinorVersion>0.4</FluentStoreMajorMinorVersion>
+        <FluentStoreMajorMinorVersion>0.4</FluentStoreMajorMinorVersion>
         <FluentStoreVersion>$(FluentStoreMajorMinorVersion).0.0</FluentStoreVersion>
         <MinWindowsVersion>10.0.17763.0</MinWindowsVersion>
         <TargetWindowsVersion>10.0.22621.0</TargetWindowsVersion>
@@ -15,7 +15,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="NuGetizer" Version="1.2.2">
+        <PackageReference Include="NuGetizer" Version="1.2.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
         </PackageReference>

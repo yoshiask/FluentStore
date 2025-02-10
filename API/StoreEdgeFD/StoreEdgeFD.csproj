@@ -10,7 +10,7 @@
 
     <ItemGroup>
         <PackageReference Include="Flurl.Http" Version="4.0.2" />
-        <PackageReference Include="WinGet.Sharp" Version="1.7.11132" />
+        <PackageReference Include="WinGet.Sharp" Version="1.8.1911" />
     </ItemGroup>
 
     <ItemGroup>

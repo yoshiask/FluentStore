@@ -54,7 +54,7 @@
         <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.0" />
         <PackageReference Include="PInvoke.User32" Version="0.7.124" />
         <PackageReference Include="OwlCore" Version="0.6.1" />
-        <PackageReference Include="Vanara.PInvoke.DwmApi" Version="4.0.4" />
+        <PackageReference Include="Vanara.PInvoke.DwmApi" Version="4.0.5" />
         <PackageReference Include="WinUIEx" Version="2.5.1" />
 
         <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj" />

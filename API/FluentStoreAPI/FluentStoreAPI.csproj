@@ -10,7 +10,7 @@
         <PackageReference Include="Flurl.Http" Version="4.0.2" />
         <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="Google.Apis.Firestore.v1" Version="1.68.0.3468" />
+        <PackageReference Include="Google.Apis.Firestore.v1" Version="1.69.0.3672" />
     </ItemGroup>
 
 </Project>

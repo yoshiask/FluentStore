@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CliWrap" Version="3.6.6" />
+        <PackageReference Include="CliWrap" Version="3.7.1" />
         <PackageReference Include="Spectre.Console" Version="0.49.1" />
         <PackageReference Include="Meziantou.Framework.CommandLine" Version="3.0.3" />
     </ItemGroup>
