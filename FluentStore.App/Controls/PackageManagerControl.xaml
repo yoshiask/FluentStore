@@ -52,7 +52,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <local:PackagePicker x:Name="PackagePicker" SelectionMode="Multiple"
+        <local:PackagePicker x:Name="PackagePicker" SelectionMode="Multiple" ViewModel="{x:Bind ViewModel}"
                              x:Load="{x:Bind ViewModel.LoadPackagesCommand.IsRunning, Mode=OneWay, Converter={StaticResource NotBoolConverter}}">
             <local:PackagePicker.Header>
                 <TextBlock Text="Plugin Manager" Style="{StaticResource TextBlockGroupHeaderStyle}"/>
@@ -81,49 +81,6 @@
             </TextBlock>
             <ProgressBar IsIndeterminate="True"/>
         </StackPanel>
-
-        <VisualStateManager.VisualStateGroups>
-            <VisualStateGroup>
-                <VisualState x:Name="WideState">
-                    <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="720" />
-                    </VisualState.StateTriggers>
-                    <VisualState.Setters>
-                        <Setter Target="ManagerGrid.RowDefinitions[1].Height" Value="Auto"/>
-                        <Setter Target="ManagerGrid.ColumnDefinitions[1].Width" Value="2*"/>
-                        <Setter Target="DetailGridSplitter.HorizontalAlignment" Value="Left"/>
-                        <Setter Target="DetailGridSplitter.VerticalAlignment" Value="Stretch"/>
-                        <Setter Target="DetailGridSplitter.Width" Value="16"/>
-                        <Setter Target="DetailGridSplitter.Height" Value="Auto"/>
-                        <Setter Target="DetailGridSplitter.(Grid.Column)" Value="1"/>
-                        <Setter Target="DetailGridSplitter.(Grid.Row)" Value="0"/>
-                        <Setter Target="PackageDetailGrid.(Grid.Column)" Value="1"/>
-                        <Setter Target="PackageDetailGrid.(Grid.Row)" Value="0"/>
-                        <Setter Target="PackageDetailGrid.Padding" Value="16,0,0,0"/>
-                        <Setter Target="PackageDetailGrid.BorderThickness" Value="1,0,0,0"/>
-                    </VisualState.Setters>
-                </VisualState>
-                <VisualState x:Name="NarrowState">
-                    <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="0" />
-                    </VisualState.StateTriggers>
-                    <VisualState.Setters>
-                        <Setter Target="ManagerGrid.RowDefinitions[1].Height" Value="*"/>
-                        <Setter Target="ManagerGrid.ColumnDefinitions[1].Width" Value="Auto"/>
-                        <Setter Target="DetailGridSplitter.HorizontalAlignment" Value="Stretch"/>
-                        <Setter Target="DetailGridSplitter.VerticalAlignment" Value="Top"/>
-                        <Setter Target="DetailGridSplitter.Width" Value="Auto"/>
-                        <Setter Target="DetailGridSplitter.Height" Value="16"/>
-                        <Setter Target="DetailGridSplitter.(Grid.Column)" Value="0"/>
-                        <Setter Target="DetailGridSplitter.(Grid.Row)" Value="1"/>
-                        <Setter Target="PackageDetailGrid.(Grid.Column)" Value="0"/>
-                        <Setter Target="PackageDetailGrid.(Grid.Row)" Value="1"/>
-                        <Setter Target="PackageDetailGrid.Padding" Value="0,8,0,0"/>
-                        <Setter Target="PackageDetailGrid.BorderThickness" Value="0,1,0,0"/>
-                    </VisualState.Setters>
-                </VisualState>
-            </VisualStateGroup>
-        </VisualStateManager.VisualStateGroups>
 
     </Grid>
 

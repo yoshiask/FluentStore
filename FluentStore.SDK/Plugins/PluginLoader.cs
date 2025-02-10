@@ -27,7 +27,7 @@ namespace FluentStore.SDK.Plugins
     {
         private const string FLUENTSTORE_FEED = "ipns://ipfs.askharoun.com/FluentStore/Plugins/NuGet/index.json";
 
-        private static readonly NuGetFramework _targetFramework = NuGetFramework.Parse("net7.0-windows10.0.22621.0");
+        private static readonly NuGetFramework _targetFramework = NuGetFramework.Parse("net8.0-windows10.0.22621.0");
         private static readonly SourceRepository _fluentStoreRepo = FluentStoreNuGetProject.CreateAbstractStorageSourceRepository(FLUENTSTORE_FEED);
 
         private readonly HashSet<PackageIdentity> _loadedAssemblies =
