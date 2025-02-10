@@ -3,7 +3,6 @@ using FluentStore.SDK.Downloads;
 using FluentStore.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using OwlCore.Storage;
 using System;
 using System.IO.Compression;
 using WinUIEx;
@@ -31,9 +30,10 @@ namespace FluentStore.Views.Settings
             cache.Clear();
         }
 
-        private void ResetButton_Click(object sender, RoutedEventArgs e)
+        private async void ResetButton_Click(object sender, RoutedEventArgs e)
         {
             Helpers.Settings.Default.ResetAllSettings();
+            await Helpers.Settings.Default.SaveAsync();
         }
 
         private async void ImportButton_Click(object sender, RoutedEventArgs e)
@@ -93,6 +93,12 @@ namespace FluentStore.Views.Settings
                 "The app should have crashed and pushed a notification " +
                 "that allows the user to view and report the error.");
 #endif
+        }
+
+        private async void ResetOobeButton_Click(object sender, RoutedEventArgs e)
+        {
+            Helpers.Settings.Default.IsOobeCompleted = false;
+            await Helpers.Settings.Default.SaveAsync();
         }
     }
 }

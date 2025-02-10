@@ -34,6 +34,17 @@
             </controls:SettingsBlockControl.SettingsActionableElement>
         </controls:SettingsBlockControl>
 
+        <controls:SettingsBlockControl Title="Reset out-of-box experience"
+                                       Description="Next time you launch Fluent Store, you'll go through the first-time setup again without clearing your settings">
+            <controls:SettingsBlockControl.Icon>
+                <FontIcon Glyph="&#xE74D;"/>
+            </controls:SettingsBlockControl.Icon>
+            <controls:SettingsBlockControl.SettingsActionableElement>
+                <Button Content="Reset" Click="ResetOobeButton_Click"
+                        IsEnabled="{x:Bind helpers:Settings.Default.IsOobeCompleted, Mode=OneWay}"/>
+            </controls:SettingsBlockControl.SettingsActionableElement>
+        </controls:SettingsBlockControl>
+
         <controls:SettingsBlockControl Title="Manage settings">
             <controls:SettingsBlockControl.Icon>
                 <FontIcon Glyph="&#xE90F;"/>
