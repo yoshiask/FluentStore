@@ -17,7 +17,7 @@
         <PackageReference Include="Garfoot.Utilities.FluentUrn" Version="1.2.1" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
         <PackageReference Include="OwlCore" Version="0.6.0" />
-        <PackageReference Include="OwlCore.Kubo" Version="0.17.1" />
+        <PackageReference Include="OwlCore.Kubo" Version="0.20.1" />
     </ItemGroup>
 
 </Project>

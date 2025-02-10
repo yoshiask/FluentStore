@@ -22,7 +22,7 @@
         <PackageReference Include="NuGet.PackageManagement" Version="6.10.1" />
         <PackageReference Include="NuGet.Packaging" Version="6.10.1" />
         <PackageReference Include="NuGet.Protocol" Version="6.10.1" />
-        <PackageReference Include="OwlCore.Storage" Version="0.11.3" />
+        <PackageReference Include="OwlCore.Storage" Version="0.12.1" />
         <PackageReference Include="PInvoke.User32" Version="0.7.124" />
         <PackageReference Include="System.Management" Version="8.0.0" />
         <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
