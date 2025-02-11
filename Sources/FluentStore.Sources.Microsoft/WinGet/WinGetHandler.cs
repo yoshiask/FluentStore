@@ -130,10 +130,14 @@ namespace FluentStore.Sources.Microsoft.WinGet
             if (IsInitialized)
                 return;
 
-            Implementation = await Com.WinGetComHandler.TryCreateAsync();
-            Implementation ??= new Cli.WinGetCliHandler();
-
+            Implementation = await GetImplementationAsync();
             IsInitialized = true;
+        }
+
+        internal static async Task<IWinGetImplementation> GetImplementationAsync()
+        {
+            return await Com.WinGetComHandler.TryCreateAsync()
+                ?? (IWinGetImplementation)new Cli.WinGetCliHandler();
         }
     }
 }

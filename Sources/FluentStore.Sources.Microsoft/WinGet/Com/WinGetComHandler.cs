@@ -4,7 +4,6 @@ using FluentStore.SDK;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Messages;
 using FluentStore.SDK.Models;
-using FluentStore.Sources.Microsoft.WinGet;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Extensions.Logging;
 using Microsoft.Management.Deployment;
@@ -15,7 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WinGet.Sharp;
 
-namespace FluentStore.Sources.WinGet.Com;
+namespace FluentStore.Sources.Microsoft.WinGet.Com;
 
 internal class WinGetComHandler : IWinGetImplementation
 {

@@ -16,9 +16,12 @@ namespace FluentStore.Sources.Microsoft.Store
 {
     public class WpmMsPackage : MicrosoftStorePackageBase
     {
-        public WpmMsPackage(PackageHandlerBase packageHandler, CardModel card = null, ProductSummary summary = null, ProductDetails product = null) : base(packageHandler, card, summary, product)
+        public WpmMsPackage(PackageHandlerBase packageHandler, WinGetPackage internalPackage, CardModel card = null, ProductSummary summary = null, ProductDetails product = null)
+            : base(packageHandler, card, summary, product)
         {
             Guard.IsTrue(IsWinGet);
+
+            InternalPackage = internalPackage;
         }
 
         public void Update(PackageManifestVersion manifest)
@@ -34,11 +37,6 @@ namespace FluentStore.Sources.Microsoft.Store
             
             PackageUri = installer.InstallerUri;
             Type = installer.InstallerType.ToSDKInstallerType();
-
-            var internalPackage = (WinGetPackage)InternalPackage;
-            //internalPackage.Installer = installer.ToWinGet();
-            CopyProperties(ref internalPackage);
-            InternalPackage = internalPackage;
 
             int RankInstaller(SparkInstaller installer)
             {

@@ -15,9 +15,14 @@ namespace FluentStore.Sources.Microsoft.WinGet
     {
         private readonly IWinGetImplementation _winget;
 
-        public WinGetPackage(WinGetProxyHandler packageHandler, object model) : base(packageHandler)
+        public WinGetPackage(WinGetProxyHandler packageHandler, object model)
+            : this(packageHandler.Implementation, packageHandler, model)
         {
-            _winget = packageHandler.Implementation;
+        }
+
+        internal WinGetPackage(IWinGetImplementation winget, PackageHandlerBase packageHandler, object model) : base(packageHandler)
+        {
+            _winget = winget;
             Model = model;
         }
 

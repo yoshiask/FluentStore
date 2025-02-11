@@ -21,6 +21,7 @@ using FluentStore.SDK;
 using FluentStore.SDK.Packages;
 using StoreWarningMessage = Microsoft.Marketplace.Storefront.Contracts.V3.WarningMessage;
 using StoreReview = Microsoft.Marketplace.Storefront.Contracts.V3.Review;
+using FluentStore.Sources.Microsoft.WinGet;
 
 namespace FluentStore.Sources.Microsoft.Store
 {
@@ -49,12 +50,23 @@ namespace FluentStore.Sources.Microsoft.Store
         /// Either <see cref="MicrosoftStorePackage"/> for packaged apps, or
         /// <see cref="WpmMsPackage"/> for apps backed by Windows Package Manager.
         /// </returns>
-        public static MicrosoftStorePackageBase Create(PackageHandlerBase packageHandler, string catalogId, CardModel card = null, ProductSummary summary = null, ProductDetails product = null)
+        public static async Task<MicrosoftStorePackageBase> CreateAsync(PackageHandlerBase packageHandler, string catalogId, CardModel card = null, ProductSummary summary = null, ProductDetails product = null)
         {
-            if (catalogId.StartsWith("XP") || product.CatalogSource == "SparkPartnerCenter")
-                return new WpmMsPackage(packageHandler, card, summary, product);
+            if (catalogId.StartsWith("XP") || product?.CatalogSource == "SparkPartnerCenter")
+            {
+                var winget = await WinGetProxyHandler.GetImplementationAsync();
+                var wingetPackage = new WinGetPackage(winget, packageHandler, product)
+                {
+                    WinGetId = catalogId,
+                    Urn = Urn.Parse($"urn:{MicrosoftStoreHandler.NAMESPACE_MSSTORE}:{catalogId}"),
+                    Status = PackageStatus.Details,
+                };
+                return new WpmMsPackage(packageHandler, wingetPackage, card, summary, product);
+            }
             else
+            {
                 return new MicrosoftStorePackage(packageHandler, card, summary, product);
+            }
         }
 
         public void Update(CardModel card)
@@ -459,7 +471,9 @@ namespace FluentStore.Sources.Microsoft.Store
             set => SetProperty(ref _StoreId, value);
         }
 
-        public bool IsWinGet => Model?.Installer?.Type == "WPM" || StoreId.StartsWith("XP") || Model.CatalogSource == "SparkPartnerCenter";
+        public bool IsWinGet => Model?.Installer?.Type == "WPM"
+            || StoreId.StartsWith("XP")
+            || (Model is not null && Model.CatalogSource == "SparkPartnerCenter");
 
         private PackageManifestVersion _Manifest;
         /// <summary>

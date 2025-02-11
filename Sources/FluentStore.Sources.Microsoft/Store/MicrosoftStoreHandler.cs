@@ -59,14 +59,14 @@ namespace FluentStore.Sources.Microsoft.Store
             {
                 foreach (var details in page.HighlightedResults)
                 {
-                    var package = MicrosoftStorePackageBase.Create(this, details.ProductId, product: details);
+                    var package = await MicrosoftStorePackageBase.CreateAsync(this, details.ProductId, product: details);
                     package.Status = PackageStatus.BasicDetails;
 
                     yield return package;
                 }
                 foreach (var card in page.SearchResults)
                 {
-                    var package = MicrosoftStorePackageBase.Create(this, card.ProductId, card);
+                    var package = await MicrosoftStorePackageBase.CreateAsync(this, card.ProductId, card);
                     package.Status = PackageStatus.BasicDetails;
 
                     yield return package;
@@ -84,7 +84,7 @@ namespace FluentStore.Sources.Microsoft.Store
 
             foreach (var summ in suggs.Payload.AssetSuggestions)
             {
-                var package = MicrosoftStorePackageBase.Create(this, summ.ProductId, summary: summ);
+                var package = await MicrosoftStorePackageBase.CreateAsync(this, summ.ProductId, summary: summ);
                 package.Status = PackageStatus.BasicDetails;
 
                 yield return package;
@@ -211,7 +211,7 @@ namespace FluentStore.Sources.Microsoft.Store
                 return null;
             }
 
-            MicrosoftStorePackageBase package = MicrosoftStorePackageBase.Create(this, catalogId, product: details);
+            MicrosoftStorePackageBase package = await MicrosoftStorePackageBase.CreateAsync(this, catalogId, product: details);
             if (page.TryGetPayload<RatingSummary>(out var ratingSummary))
             {
                 package.Update(ratingSummary);

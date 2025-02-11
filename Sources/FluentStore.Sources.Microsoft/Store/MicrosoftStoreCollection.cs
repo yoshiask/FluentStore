@@ -5,11 +5,15 @@ using CommunityToolkit.Diagnostics;
 using System.Threading.Tasks;
 using FluentStore.SDK;
 using FluentStore.SDK.Packages;
+using Microsoft.Marketplace.Storefront.Contracts.V8.One;
+using System.Collections.Generic;
 
 namespace FluentStore.Sources.Microsoft.Store
 {
     public class MicrosoftStoreCollection : GenericPackageCollection<CollectionDetail>
     {
+        private readonly object _cardItemLock = new();
+
         public MicrosoftStoreCollection(PackageHandlerBase packageHandler, CollectionDetail collectionDetail = null)
             : base(packageHandler)
         {
@@ -38,14 +42,26 @@ namespace FluentStore.Sources.Microsoft.Store
                 ForegroundColor = collectionDetail.CuratedFGColor
             });
 
-            Items.Clear();
-            foreach (var card in collectionDetail.Cards)
-                Items.Add(MicrosoftStorePackageBase.Create(PackageHandler, card.ProductId, card));
+            LoadCardsAsync(collectionDetail.Cards);
         }
 
         private void UpdateUrn()
         {
             Urn = new(MicrosoftStoreHandler.NAMESPACE_COLLECTION, new RawNamespaceSpecificString(Id));
+        }
+
+        private async Task LoadCardsAsync(IEnumerable<CardModel> cards)
+        {
+            Items.Clear();
+
+            foreach (var card in cards)
+            {
+                var item = await MicrosoftStorePackageBase.CreateAsync(PackageHandler, card.ProductId, card);
+                lock (_cardItemLock)
+                {
+                    Items.Add(item);
+                }
+            }
         }
 
         private string _id;

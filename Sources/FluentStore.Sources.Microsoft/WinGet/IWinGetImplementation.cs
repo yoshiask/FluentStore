@@ -27,7 +27,7 @@ internal static class IWinGetImplementationExtenstions
 
     public static async Task<FileSystemInfo> DownloadAsync(this IWinGetImplementation winget, WinGetPackage package, DirectoryInfo folder = null)
     {
-        return await winget.DownloadAsync(package, package.WinGetId);
+        return await winget.DownloadAsync(package, package.WinGetId, folder);
     }
 
     public static Task<bool> InstallAsync(this IWinGetImplementation winget, WinGetPackage package)
