@@ -9,7 +9,7 @@ using FluentStore.SDK.Models;
 
 using SDKInstallerType = FluentStore.SDK.Models.InstallerType;
 
-namespace FluentStore.Sources.WinGet
+namespace FluentStore.Sources.Microsoft.WinGet
 {
     public class WinGetPackage : PackageBase
     {
@@ -21,7 +21,7 @@ namespace FluentStore.Sources.WinGet
             Model = model;
         }
 
-        public override Task<bool> CanDownloadAsync() => _winget.CanDownloadAsync(TODO, TODO);
+        public override Task<bool> CanDownloadAsync() => _winget.CanDownloadAsync(this);
 
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
@@ -30,7 +30,7 @@ namespace FluentStore.Sources.WinGet
 
             folder ??= StorageHelper.GetTempDirectory().CreateSubdirectory(StorageHelper.PrepUrnForFile(Urn));
 
-            DownloadItem = await _winget.DownloadAsync(TODO, TODO, folder);
+            DownloadItem = await _winget.DownloadAsync(this, folder);
             if (DownloadItem is not null)
                 IsDownloaded = true;
 
@@ -51,7 +51,7 @@ namespace FluentStore.Sources.WinGet
 
         public override async Task<bool> InstallAsync()
         {
-            bool isSuccess = await _winget.InstallAsync(TODO, TODO);
+            bool isSuccess = await _winget.InstallAsync(this);
 
             if (isSuccess)
                 IsInstalled = true;

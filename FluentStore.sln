@@ -74,6 +74,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnifiedUpdatePlatform.Servi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnifiedUpdatePlatform.Services.WindowsUpdate", "API\UUPMediaCreator\src\UnifiedUpdatePlatform.Services.WindowsUpdate\UnifiedUpdatePlatform.Services.WindowsUpdate.csproj", "{3BC41048-0234-4996-82BB-3C98163241D2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentStore.Sources.Microsoft", "Sources\FluentStore.Sources.Microsoft\FluentStore.Sources.Microsoft.csproj", "{54E80C11-BF74-4A71-8620-1E110C9529C2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -640,6 +642,26 @@ Global
 		{3BC41048-0234-4996-82BB-3C98163241D2}.Release|x64.Build.0 = Release|x64
 		{3BC41048-0234-4996-82BB-3C98163241D2}.Release|x86.ActiveCfg = Release|x86
 		{3BC41048-0234-4996-82BB-3C98163241D2}.Release|x86.Build.0 = Release|x86
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Debug|Any CPU.Build.0 = Debug|x64
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Debug|ARM.ActiveCfg = Debug|x64
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Debug|ARM.Build.0 = Debug|x64
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Debug|ARM64.Build.0 = Debug|ARM64
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Debug|x64.ActiveCfg = Debug|x64
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Debug|x64.Build.0 = Debug|x64
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Debug|x86.ActiveCfg = Debug|x86
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Debug|x86.Build.0 = Debug|x86
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Release|Any CPU.ActiveCfg = Release|x64
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Release|Any CPU.Build.0 = Release|x64
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Release|ARM.ActiveCfg = Release|x64
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Release|ARM.Build.0 = Release|x64
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Release|ARM64.ActiveCfg = Release|ARM64
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Release|ARM64.Build.0 = Release|ARM64
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Release|x64.ActiveCfg = Release|x64
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Release|x64.Build.0 = Release|x64
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Release|x86.ActiveCfg = Release|x86
+		{54E80C11-BF74-4A71-8620-1E110C9529C2}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -664,6 +686,7 @@ Global
 		{794970D9-5D70-47A4-91F4-27C4081DAFD3} = {042B0595-6134-4558-9725-157181F8D185}
 		{0611BAD5-C405-45EF-BAEC-C52E50E9791D} = {042B0595-6134-4558-9725-157181F8D185}
 		{3BC41048-0234-4996-82BB-3C98163241D2} = {042B0595-6134-4558-9725-157181F8D185}
+		{54E80C11-BF74-4A71-8620-1E110C9529C2} = {5AEB24F0-A15D-4E57-8498-AE6F8C5A04D0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DAB9771E-34BB-4E5E-95EA-D7538346B7C4}

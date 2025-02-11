@@ -19,10 +19,10 @@ using System.IO;
 using Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.PackageManifest;
 using FluentStore.SDK;
 using FluentStore.SDK.Packages;
-using FluentStore.Sources.WinGet;
 using StoreWarningMessage = Microsoft.Marketplace.Storefront.Contracts.V3.WarningMessage;
+using StoreReview = Microsoft.Marketplace.Storefront.Contracts.V3.Review;
 
-namespace FluentStore.Sources.MicrosoftStore
+namespace FluentStore.Sources.Microsoft.Store
 {
     public abstract class MicrosoftStorePackageBase : PackageBase<ProductDetails>
     {
@@ -51,7 +51,7 @@ namespace FluentStore.Sources.MicrosoftStore
         /// </returns>
         public static MicrosoftStorePackageBase Create(PackageHandlerBase packageHandler, string catalogId, CardModel card = null, ProductSummary summary = null, ProductDetails product = null)
         {
-            if (catalogId.StartsWith("XP") || product.CatalogSource == "SparkPartnerCenter")
+            if (catalogId.StartsWith("XP"))
                 return new WpmMsPackage(packageHandler, card, summary, product);
             else
                 return new MicrosoftStorePackage(packageHandler, card, summary, product);
@@ -200,17 +200,18 @@ namespace FluentStore.Sources.MicrosoftStore
 
         public void Update(ReviewList reviewList) => Update(reviewList.Reviews);
 
-        public void Update(IEnumerable<Microsoft.Marketplace.Storefront.Contracts.V3.Review> msReviews)
+        public void Update(IEnumerable<StoreReview> msReviews)
         {
             Guard.IsNotNull(msReviews, nameof(msReviews));
             Guard.IsNotNull(ReviewSummary, nameof(ReviewSummary));
-
+            
+            // TODO: Fix append
             ReviewSummary.Reviews ??= new List<SDK.Models.Review>();
-            foreach (Microsoft.Marketplace.Storefront.Contracts.V3.Review msReview in msReviews)
+            foreach (StoreReview msReview in msReviews)
                 ReviewSummary.Reviews.Append(ToReview(msReview));
         }
 
-        public async Task Update(IAsyncEnumerable<Microsoft.Marketplace.Storefront.Contracts.V3.Review> msReviews)
+        public async Task Update(IAsyncEnumerable<StoreReview> msReviews)
         {
             Guard.IsNotNull(msReviews, nameof(msReviews));
             Guard.IsNotNull(ReviewSummary, nameof(ReviewSummary));
@@ -350,7 +351,7 @@ namespace FluentStore.Sources.MicrosoftStore
                 await InternalPackage.LaunchAsync();
         }
 
-        private static SDK.Models.Review ToReview(Microsoft.Marketplace.Storefront.Contracts.V3.Review msReview)
+        private static SDK.Models.Review ToReview(StoreReview msReview)
         {
             return new()
             {
@@ -476,7 +477,7 @@ namespace FluentStore.Sources.MicrosoftStore
         private PackageBase _InternalPackage;
         /// <summary>
         /// The actual package type. Currently, packaged apps are <see cref="ModernPackage{ProductDetails}"/>
-        /// and WinGet-backed apps are <see cref="WinGetPackage"/>.
+        /// and WinGet-backed apps are <see cref="WinGet.WinGetPackage"/>.
         /// </summary>
         public PackageBase InternalPackage
         {
@@ -485,7 +486,7 @@ namespace FluentStore.Sources.MicrosoftStore
         }
 
         [DisplayAdditionalInformation("Accessibility", "\uE776")]
-        public string AccessibilityNotice => (Model != null && Model.Accessible) ? ACCESSIBILITY_NOTICE_TEXT : null;
+        public string AccessibilityNotice => Model != null && Model.Accessible ? ACCESSIBILITY_NOTICE_TEXT : null;
 
         [DisplayAdditionalInformation("Supported languages", "\uE8F2")]
         public List<string> SupportedLanguages => Model?.SupportedLanguages;

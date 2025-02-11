@@ -14,7 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WinGet.Sharp;
 
-namespace FluentStore.Sources.WinGet.Com;
+namespace FluentStore.Sources.Microsoft.WinGet.Com;
 
 internal class WinGetComHandler : IWinGetImplementation
 {
@@ -49,7 +49,7 @@ internal class WinGetComHandler : IWinGetImplementation
         {
             var log = Ioc.Default.GetService<ILogger>();
             log?.LogError(ex, "Exception while creating WinGet COM handler");
-            
+
             return null;
         }
     }
@@ -87,9 +87,9 @@ internal class WinGetComHandler : IWinGetImplementation
             yield return CreateSDKPackage(packageHandler, matchResult.CatalogPackage);
     }
 
-    public Task<bool> CanDownloadAsync(PackageBase package, string id) => Task.FromResult(package.Model is CatalogPackage);
+    public Task<bool> CanDownloadAsync(WinGetPackage package) => Task.FromResult(package.Model is CatalogPackage);
 
-    public async Task<FileSystemInfo> DownloadAsync(PackageBase package, string id, DirectoryInfo folder = null)
+    public async Task<FileSystemInfo> DownloadAsync(WinGetPackage package, DirectoryInfo folder = null)
     {
         var catalogPackage = (CatalogPackage)package.Model;
 
@@ -144,14 +144,14 @@ internal class WinGetComHandler : IWinGetImplementation
                     new PackageDownloadProgressMessage(package, progress.BytesDownloaded, progress.BytesRequired));
             }
             else if (progress.State == PackageDownloadProgressState.Finished)
-            { 
+            {
                 WeakReferenceMessenger.Default.Send(
                     SuccessMessage.CreateForPackageDownloadCompleted(package));
             }
         }
     }
 
-    public async Task<bool> InstallAsync(PackageBase package, string id)
+    public async Task<bool> InstallAsync(WinGetPackage package)
     {
         var comPackage = (CatalogPackage)package.Model;
 

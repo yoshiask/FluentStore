@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using WinGet.Sharp;
 using WinGet.Sharp.Models;
 
-namespace FluentStore.Sources.WinGet.Cli;
+namespace FluentStore.Sources.Microsoft.WinGet.Cli;
 
 internal class WinGetCliHandler : IWinGetImplementation
 {
@@ -41,15 +41,15 @@ internal class WinGetCliHandler : IWinGetImplementation
             yield return CreateSDKPackage(packageHandler, result);
     }
 
-    public Task<bool> CanDownloadAsync(PackageBase package, string id) => Task.FromResult(id is not null);
+    public Task<bool> CanDownloadAsync(WinGetPackage package) => Task.FromResult(package.WinGetId is not null);
 
-    public async Task<FileSystemInfo> DownloadAsync(PackageBase package, string id, DirectoryInfo folder)
+    public async Task<FileSystemInfo> DownloadAsync(WinGetPackage package, DirectoryInfo folder)
     {
         WeakReferenceMessenger.Default.Send(new PackageDownloadStartedMessage(package));
 
         try
         {
-            var downloaded = await _packageManager.DownloadAsync(id, folder);
+            var downloaded = await _packageManager.DownloadAsync(package.WinGetId, folder);
 
             if (downloaded)
             {
@@ -60,7 +60,7 @@ internal class WinGetCliHandler : IWinGetImplementation
                     .EnumerateFiles("*", SearchOption.TopDirectoryOnly)
                     .Select(f => f.Name);
 
-                var bestFileName = FuzzySharp.Process.ExtractOne(id, fileNames).Value;
+                var bestFileName = FuzzySharp.Process.ExtractOne(package.WinGetId, fileNames).Value;
                 return new FileInfo(Path.Combine(folder.FullName, bestFileName));
             }
             else
@@ -76,13 +76,13 @@ internal class WinGetCliHandler : IWinGetImplementation
         }
     }
 
-    public async Task<bool> InstallAsync(PackageBase package, string id)
+    public async Task<bool> InstallAsync(WinGetPackage package)
     {
         WeakReferenceMessenger.Default.Send(new PackageInstallStartedMessage(package));
 
         try
         {
-            var installed = await _packageManager.InstallPackageAsync(id);
+            var installed = await _packageManager.InstallPackageAsync(package.WinGetId);
 
             if (installed)
             {
