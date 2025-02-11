@@ -80,7 +80,7 @@ async Task BuildPlugin(StatusContext ctx, string pluginCsprojPath)
     {
         StreamReader reader = new(s);
         var text = await reader.ReadToEndAsync(t);
-        AnsiConsole.Markup("[red]" + text + "[/]");
+        AnsiConsole.MarkupInterpolated($"[red]{text}[/]");
     });
 
     if (verbose)
