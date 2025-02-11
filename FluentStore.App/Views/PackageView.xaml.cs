@@ -215,15 +215,9 @@ namespace FluentStore.Views
                 RegisterPackageServiceMessages();
                 ViewModel.IsInstalling = true;
 
-                if (!ViewModel.Package.IsDownloaded)
-                    await ViewModel.Package.DownloadAsync(PathManager.GetTempDirectory());
-
-                if (ViewModel.Package.IsDownloaded)
-                {
-                    bool installed = await ViewModel.Package.InstallAsync();
-                    if (installed && await ViewModel.Package.CanLaunchAsync())
-                        UpdateInstallButtonToLaunch();
-                }
+                bool installed = await ViewModel.Package.InstallAsync();
+                if (installed && await ViewModel.Package.CanLaunchAsync())
+                    UpdateInstallButtonToLaunch();
             }
             finally
             {
