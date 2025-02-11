@@ -41,15 +41,15 @@ internal class WinGetCliHandler : IWinGetImplementation
             yield return CreateSDKPackage(packageHandler, result);
     }
 
-    public Task<bool> CanDownloadAsync(WinGetPackage package) => Task.FromResult(package.WinGetId is not null);
+    public Task<bool> CanDownloadAsync(PackageBase package, string id) => Task.FromResult(id is not null);
 
-    public async Task<FileSystemInfo> DownloadAsync(WinGetPackage package, DirectoryInfo folder)
+    public async Task<FileSystemInfo> DownloadAsync(PackageBase package, string id, DirectoryInfo folder)
     {
         WeakReferenceMessenger.Default.Send(new PackageDownloadStartedMessage(package));
 
         try
         {
-            var downloaded = await _packageManager.DownloadAsync(package.WinGetId, folder);
+            var downloaded = await _packageManager.DownloadAsync(id, folder);
 
             if (downloaded)
             {
@@ -60,7 +60,7 @@ internal class WinGetCliHandler : IWinGetImplementation
                     .EnumerateFiles("*", SearchOption.TopDirectoryOnly)
                     .Select(f => f.Name);
 
-                var bestFileName = FuzzySharp.Process.ExtractOne(package.WinGetId, fileNames).Value;
+                var bestFileName = FuzzySharp.Process.ExtractOne(id, fileNames).Value;
                 return new FileInfo(Path.Combine(folder.FullName, bestFileName));
             }
             else
@@ -76,13 +76,13 @@ internal class WinGetCliHandler : IWinGetImplementation
         }
     }
 
-    public async Task<bool> InstallAsync(WinGetPackage package)
+    public async Task<bool> InstallAsync(PackageBase package, string id)
     {
         WeakReferenceMessenger.Default.Send(new PackageInstallStartedMessage(package));
 
         try
         {
-            var installed = await _packageManager.InstallPackageAsync(package.WinGetId);
+            var installed = await _packageManager.InstallPackageAsync(id);
 
             if (installed)
             {

@@ -4,6 +4,7 @@ using FluentStore.SDK;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Messages;
 using FluentStore.SDK.Models;
+using FluentStore.Sources.Microsoft.WinGet;
 using Garfoot.Utilities.FluentUrn;
 using Microsoft.Extensions.Logging;
 using Microsoft.Management.Deployment;
@@ -14,7 +15,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WinGet.Sharp;
 
-namespace FluentStore.Sources.Microsoft.WinGet.Com;
+namespace FluentStore.Sources.WinGet.Com;
 
 internal class WinGetComHandler : IWinGetImplementation
 {
@@ -87,9 +88,9 @@ internal class WinGetComHandler : IWinGetImplementation
             yield return CreateSDKPackage(packageHandler, matchResult.CatalogPackage);
     }
 
-    public Task<bool> CanDownloadAsync(WinGetPackage package) => Task.FromResult(package.Model is CatalogPackage);
+    public Task<bool> CanDownloadAsync(PackageBase package, string id) => Task.FromResult(package.Model is CatalogPackage);
 
-    public async Task<FileSystemInfo> DownloadAsync(WinGetPackage package, DirectoryInfo folder = null)
+    public async Task<FileSystemInfo> DownloadAsync(PackageBase package, string id, DirectoryInfo folder = null)
     {
         var catalogPackage = (CatalogPackage)package.Model;
 
@@ -151,7 +152,7 @@ internal class WinGetComHandler : IWinGetImplementation
         }
     }
 
-    public async Task<bool> InstallAsync(WinGetPackage package)
+    public async Task<bool> InstallAsync(PackageBase package, string id)
     {
         var comPackage = (CatalogPackage)package.Model;
 

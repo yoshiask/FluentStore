@@ -51,7 +51,7 @@ namespace FluentStore.Sources.Microsoft.Store
         /// </returns>
         public static MicrosoftStorePackageBase Create(PackageHandlerBase packageHandler, string catalogId, CardModel card = null, ProductSummary summary = null, ProductDetails product = null)
         {
-            if (catalogId.StartsWith("XP"))
+            if (catalogId.StartsWith("XP") || product.CatalogSource == "SparkPartnerCenter")
                 return new WpmMsPackage(packageHandler, card, summary, product);
             else
                 return new MicrosoftStorePackage(packageHandler, card, summary, product);
@@ -459,7 +459,7 @@ namespace FluentStore.Sources.Microsoft.Store
             set => SetProperty(ref _StoreId, value);
         }
 
-        public bool IsWinGet => Model?.Installer?.Type == "WPM" || StoreId.StartsWith("XP");
+        public bool IsWinGet => Model?.Installer?.Type == "WPM" || StoreId.StartsWith("XP") || Model.CatalogSource == "SparkPartnerCenter";
 
         private PackageManifestVersion _Manifest;
         /// <summary>
