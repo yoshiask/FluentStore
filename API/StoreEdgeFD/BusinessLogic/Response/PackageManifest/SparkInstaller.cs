@@ -11,7 +11,7 @@ namespace Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.Pa
         public string InstallerUrl { get; set; }
         public string InstallerLocale { get; set; }
         public string MinimumOSVersion { get; set; }
-        public InstallerSwitches? InstallerSwitches { get; set; }
+        public InstallerSwitch? InstallerSwitches { get; set; }
         public InstallerArchitecture Architecture { get; set; }
         public InstallerType InstallerType { get; set; }
         public Markets Markets { get; set; }
@@ -41,7 +41,7 @@ namespace Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.Pa
                 InstallerLocale = InstallerLocale,
                 InstallerSha256 = InstallerSha256,
                 SignatureSha256 = InstallerSha256,
-                InstallerSwitches = InstallerSwitches,
+                InstallerSwitches = InstallerSwitches?.ToWinGet(),
                 InstallerUrl = InstallerUrl,
             };
         }
