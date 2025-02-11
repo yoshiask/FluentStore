@@ -23,6 +23,7 @@ namespace FluentStore.Views
         {
             { typeof(Settings.General), null },
             { typeof(Settings.Plugins), null },
+            { typeof(Settings.Ipfs), null },
             { typeof(Settings.Info), null },
         };
 

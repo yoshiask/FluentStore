@@ -1,8 +1,9 @@
-<local:WizardPageBase
-    x:Class="FluentStore.Views.Oobe.IpfsClient"
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="FluentStore.Views.Settings.Ipfs"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:FluentStore.Views.Oobe"
+    xmlns:local="using:FluentStore.Views.Settings"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:FluentStore.Controls"
@@ -31,13 +32,37 @@
                 </TextBlock>
             </controls:SettingsBlockControl.ExpandableContent>
         </controls:SettingsBlockControl>
+        
+        <controls:SettingsBlockControl Title="Node status" x:Name="NodeStatusBlock"
+                                       Description="Information for the currently connected node">
+            <controls:SettingsBlockControl.Icon>
+                <FontIcon Glyph="&#xE946;" />
+            </controls:SettingsBlockControl.Icon>
+
+            <Button Content="Stop node"
+                    x:Name="StopNodeButton" Click="StopNodeButton_Click"/>
+
+            <controls:SettingsBlockControl.ExpandableContent>
+                <StackPanel Spacing="4">
+                    <TextBlock Margin="16" TextWrapping="WrapWholeWords" IsTextSelectionEnabled="True">
+                        <Run Text="API address: " FontWeight="Bold"/><Run Text="{x:Bind _ipfs.Client.ApiUri}" />
+                        <LineBreak/>
+                        <Run Text="Peer ID: " FontWeight="Bold"/><Run x:Name="IdBlock" />
+                        <LineBreak/><LineBreak/>
+                        <Run Text="Repo path: " FontWeight="Bold"/><Run x:Name="RepoPathBlock" />
+                        <LineBreak/>
+                        <Run Text="Repo size: " FontWeight="Bold"/><Run x:Name="RepoSizeBlock" />
+                    </TextBlock>
+                </StackPanel>
+            </controls:SettingsBlockControl.ExpandableContent>
+        </controls:SettingsBlockControl>
 
         <controls:SettingsBlockControl Title="API Port"
                                        Description="The port used to communicate with IPFS. If not already running on this port, we'll download Kubo and bootstrap it on this port for you.">
             <controls:SettingsBlockControl.Icon>
                 <FontIcon Glyph="&#xEDA3;"/>
             </controls:SettingsBlockControl.Icon>
-            
+
             <NumberBox Value="{x:Bind _settings.IpfsApiPort, Mode=TwoWay}"/>
         </controls:SettingsBlockControl>
 
@@ -59,5 +84,5 @@
             <ToggleSwitch IsOn="{x:Bind _settings.RehostOnIpfs, Mode=TwoWay}" Style="{ThemeResource ToggleSwitchRightStyle}"/>
         </controls:SettingsBlockControl>
     </StackPanel>
-    
-</local:WizardPageBase>
+
+</UserControl>

@@ -77,8 +77,12 @@
         <None Remove="Views\Oobe\Welcome.xaml" />
         <None Remove="Views\Settings\General.xaml" />
         <None Remove="Views\Settings\Info.xaml" />
+        <None Remove="Views\Settings\Ipfs.xaml" />
         <None Remove="Views\Settings\Plugins.xaml" />
         <None Remove="Views\SplashScreen.xaml" />
+        <Page Update="Views\Settings\Ipfs.xaml">
+          <Generator>MSBuild:Compile</Generator>
+        </Page>
         <Page Update="Views\Oobe\InstallPlugins.xaml">
           <Generator>MSBuild:Compile</Generator>
         </Page>

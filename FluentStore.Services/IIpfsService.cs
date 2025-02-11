@@ -23,7 +23,7 @@ public interface IIpfsService : IDisposable, INotifyPropertyChanged
 
     Task TestAsync(CancellationToken token = default);
 
-    void Stop();
+    Task StopAsync();
 }
 
 public class IpfsService : IIpfsService
@@ -80,7 +80,7 @@ public class IpfsService : IIpfsService
         var kuboRepoDir = kuboDir.CreateSubdirectory("repo");
         var kuboBinDir = kuboDir.CreateSubdirectory("bin");
 
-        Stop();
+        await StopAsync();
         
         _bootstrapper = new KuboBootstrapper(kuboRepoDir.FullName)
         {
@@ -95,7 +95,7 @@ public class IpfsService : IIpfsService
 
         // Add peers that are known to reliably serve Fluent Store content
         foreach (var peer in GetKnownPeers())
-            _bootstrapper.Client.TrustedPeers.Add(peer);
+            await _bootstrapper.Client.Bootstrap.AddAsync(peer, token);
 
         Client = _bootstrapper.Client;
         IsRunning = true;
@@ -135,14 +135,25 @@ public class IpfsService : IIpfsService
         }
     }
 
-    public void Stop()
+    public async Task StopAsync()
     {
-        IsRunning = false;
+        Dispose();
+
+        try
+        {
+            if (Client is not null)
+                await Client.ShutdownAsync();
+            
+            IsRunning = false;
+        }
+        catch { }
+    }
+
+    public void Dispose()
+    {
         _bootstrapper?.Dispose();
         _bootstrapper = null;
     }
-
-    public void Dispose() => Stop();
 
     public static IEnumerable<MultiAddress> GetKnownPeers()
     {
