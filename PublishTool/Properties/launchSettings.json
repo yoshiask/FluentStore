@@ -1,8 +1,8 @@
 {
   "profiles": {
     "PublishTool": {
-      "commandName": "Project",
-      "commandLineArgs": "-fv"
+        "commandName": "Project",
+        "commandLineArgs": "-f"
     }
   }
 }

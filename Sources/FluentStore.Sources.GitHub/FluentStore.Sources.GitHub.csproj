@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
         <PackageReference Include="Octokit" Version="14.0.0" />
@@ -7,8 +7,8 @@
 
     <PropertyGroup>
         <Title>GitHub</Title>
-        <Version>$(FluentStoreMajorMinorVersion).0.2</Version>
-        <PackageVersion>$(Version)-alpha</PackageVersion>
+        <Version>$(FluentStoreMajorMinorVersion).0.3</Version>
+        <PackageVersion>$(Version)-beta</PackageVersion>
         <Description>Provides support for viewing GitHub repositories as packages. Downloading and installing may be supported for some repositories. Searching for is not supported.</Description>
     </PropertyGroup>
 
