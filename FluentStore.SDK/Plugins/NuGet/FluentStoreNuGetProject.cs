@@ -18,7 +18,7 @@ namespace FluentStore.SDK.Plugins.NuGet;
 
 public class FluentStoreNuGetProject : NuGetProject
 {
-    private static readonly NuGetVersion _currentSdkVersion = new(typeof(PluginLoader).Assembly.GetName().Version!);
+    private static readonly NuGetVersion _currentSdkVersion = new(typeof(PluginLoader).Assembly.GetName().Version!, "beta");
     const string StatusFileName = "status.tsv";
 
     private static readonly SourceRepository _officialSource =
@@ -42,7 +42,7 @@ public class FluentStoreNuGetProject : NuGetProject
 
     public static NuGetVersion CurrentSdkVersion => _currentSdkVersion;
 
-    public static VersionRange SupportedSdkRange => new(CurrentSdkVersion, new FloatRange(NuGetVersionFloatBehavior.PrereleasePatch));
+    public static VersionRange SupportedSdkRange => VersionRange.Parse($"[{CurrentSdkVersion.Major}.{CurrentSdkVersion.Minor}.*-*, )");
 
     public FluentStoreNuGetProject(string pluginRoot, NuGetFramework targetFramework, string name = "FluentStore")
     {
@@ -90,14 +90,13 @@ public class FluentStoreNuGetProject : NuGetProject
             {
                 var resource = await repo.GetResourceAsync<FindPackageByIdResource>(token);
 
-                var allDepVersions = (await resource.GetAllVersionsAsync(packageId, _cache, NullLogger.Instance, token))
-                    .ToArray();
-
-                if (!allDepVersions.Any())
+                var allDepVersions = await resource.GetAllVersionsAsync(packageId, _cache, NullLogger.Instance, token);
+                var version = versionRange.FindBestMatch(allDepVersions);
+                if (version is null)
                     continue;
 
                 MemoryStream depStream = new();
-                await resource.CopyNupkgToStreamAsync(packageId, versionRange.FindBestMatch(allDepVersions),
+                await resource.CopyNupkgToStreamAsync(packageId, version,
                     depStream, _cache, NullLogger.Instance, token);
 
                 PackageArchiveReader depReader = new(depStream);

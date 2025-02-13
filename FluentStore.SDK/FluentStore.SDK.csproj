@@ -5,11 +5,13 @@
         <TargetPlatformMinVersion>$(MinWindowsVersion)</TargetPlatformMinVersion>
         <LangVersion>latest</LangVersion>
         <Platforms>AnyCPU;x64;x86;ARM64</Platforms>
-        <Version>$(FluentStoreVersion)</Version>
-        <AssemblyVersion>$(Version)</AssemblyVersion>
         <FileVersion>$(AssemblyVersion)</FileVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <IsPackable>true</IsPackable>
+        
+        <Version>$(FluentStoreVersion)</Version>
+        <AssemblyVersion>$(Version)</AssemblyVersion>
+        <PackageVersion>$(Version)-beta</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>
