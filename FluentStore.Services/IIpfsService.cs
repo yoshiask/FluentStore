@@ -80,6 +80,20 @@ public class IpfsService : IIpfsService
         var kuboRepoDir = kuboDir.CreateSubdirectory("repo");
         var kuboBinDir = kuboDir.CreateSubdirectory("bin");
 
+        var lockFile = kuboRepoDir
+            .EnumerateFiles()
+            .FirstOrDefault(f => f.Name.Equals("repo.lock", StringComparison.OrdinalIgnoreCase));
+        if (lockFile is not null)
+        {
+            // Attempt to remove the repo lock, just in case a previous
+            // run didn't exit cleanly
+            try
+            {
+                lockFile.Delete();
+            }
+            catch { }
+        }
+
         await StopAsync();
         
         _bootstrapper = new KuboBootstrapper(kuboRepoDir.FullName)

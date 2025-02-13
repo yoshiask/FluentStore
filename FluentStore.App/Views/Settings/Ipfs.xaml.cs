@@ -38,12 +38,15 @@ public sealed partial class Ipfs : UserControl
     {
         UpdateForRunning();
 
-        var peer = await _ipfs.Client.IdAsync();
-        IdBlock.Text = peer.Id.ToString();
+        if (_ipfs.IsRunning)
+        {
+            var peer = await _ipfs.Client.IdAsync();
+            IdBlock.Text = peer.Id.ToString();
 
-        var repoStats = await _ipfs.Client.Stats.RepositoryAsync();
-        RepoPathBlock.Text = repoStats.RepoPath;
-        RepoSizeBlock.Text = new ByteSize(repoStats.RepoSize).Humanize();
+            var repoStats = await _ipfs.Client.Stats.RepositoryAsync();
+            RepoPathBlock.Text = repoStats.RepoPath;
+            RepoSizeBlock.Text = new ByteSize(repoStats.RepoSize).Humanize();
+        }
     }
 
     private async void ViewDocsButton_Click(object sender, RoutedEventArgs e)

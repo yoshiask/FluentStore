@@ -173,11 +173,20 @@ namespace FluentStore
 
                 // Connect to IPFS node
                 var ipfsService = Ioc.Default.GetRequiredService<IIpfsService>();
+
                 if (!ipfsService.IsRunning)
                 {
-                    SDK.Downloads.AbstractStorageHelper.IpfsClient = ipfsService.Client;
-                    await ipfsService.ConnectOrBootstrapAsync(Ioc.Default);
+                    try
+                    {
+                        await ipfsService.ConnectOrBootstrapAsync(Ioc.Default);
+                    }
+                    catch (Exception ex)
+                    {
+                        _log?.LogError(ex, "Failed to connect to Kubo");
+                    }
                 }
+
+                SDK.Downloads.AbstractStorageHelper.IpfsClient = ipfsService.Client;
             }
 
             if (!appStartupService.LaunchResult.RedirectActivation || appStartupService.IsFirstInstance)
