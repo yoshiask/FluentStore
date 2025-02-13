@@ -20,6 +20,7 @@ namespace FluentStore.SDK.Packages
 
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
+            folder ??= StorageHelper.GetTempDirectory().CreateSubdirectory(StorageHelper.PrepUrnForFile(Urn));
             await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
 
             // Check for success

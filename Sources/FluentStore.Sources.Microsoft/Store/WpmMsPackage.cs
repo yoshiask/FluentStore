@@ -66,7 +66,8 @@ namespace FluentStore.Sources.Microsoft.Store
                 return null;
 
             // Download package
-            FileInfo downloadFile = (FileInfo)await InternalPackage.DownloadAsync(folder);
+            folder ??= StorageHelper.GetTempDirectory().CreateSubdirectory(StorageHelper.PrepUrnForFile(Urn));
+            var downloadFile = (FileInfo)await InternalPackage.DownloadAsync(folder);
             Status = InternalPackage.Status;
 
             // Set the proper file type and extension

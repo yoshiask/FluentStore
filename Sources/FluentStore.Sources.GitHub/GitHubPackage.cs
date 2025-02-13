@@ -155,6 +155,7 @@ namespace FluentStore.Sources.GitHub
             try
             {
                 // Download chosen asset
+                folder ??= StorageHelper.GetTempDirectory().CreateSubdirectory(StorageHelper.PrepUrnForFile(Urn));
                 await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
 
                 // Check for success

@@ -345,8 +345,12 @@ namespace FluentStore.Sources.Microsoft.Store
 
         public override async Task<bool> InstallAsync()
         {
+            if (!IsDownloaded)
+                await InternalDownloadAsync(null);
+
             if (InternalPackage is not null)
                 return await InternalPackage.InstallAsync();
+
             return false;
         }
 
