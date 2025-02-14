@@ -27,7 +27,7 @@ namespace FluentStore.Sources.Microsoft.WinGet
 
         public bool IsInitialized { get; private set; }
 
-        internal IWinGetImplementation Implementation { get; private set; }
+        internal static IWinGetImplementation Implementation { get; private set; }
 
         public override async IAsyncEnumerable<PackageBase> GetFeaturedPackagesAsync()
         {
@@ -136,8 +136,13 @@ namespace FluentStore.Sources.Microsoft.WinGet
 
         internal static async Task<IWinGetImplementation> GetImplementationAsync()
         {
-            return await Com.WinGetComHandler.TryCreateAsync()
-                ?? (IWinGetImplementation)new Cli.WinGetCliHandler();
+            if (Implementation is null)
+            {
+                Implementation = await Com.WinGetComHandler.TryCreateAsync()
+                    ?? (IWinGetImplementation)new Cli.WinGetCliHandler();
+            }
+
+            return Implementation;
         }
     }
 }

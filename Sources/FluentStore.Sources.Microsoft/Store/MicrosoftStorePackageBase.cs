@@ -240,6 +240,9 @@ namespace FluentStore.Sources.Microsoft.Store
         public override bool RequiresDownloadForCompatCheck => false;
         public override async Task<string> GetCannotBeInstalledReason()
         {
+            if (Status.IsLessThan(PackageStatus.Details))
+                return null;
+
             var minRequirements = Model?.SystemRequirements?.Minimum?.Items;
             if (minRequirements is null)
             {

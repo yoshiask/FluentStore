@@ -98,7 +98,18 @@ namespace FluentStore.Sources.Microsoft.Store
             if (packageUrn.NamespaceIdentifier == NAMESPACE_COLLECTION)
             {
                 var response = await StorefrontApi.GetCollection(catalogId, GetSystemOptions());
-                return new MicrosoftStoreCollection(this, response.Payload);
+                MicrosoftStoreCollection collectionPackage = new(this, response.Payload);
+
+                if (status.IsAtLeast(PackageStatus.Details))
+                {
+                    foreach (var card in response.Payload.Cards)
+                    {
+                        var item = await MicrosoftStorePackageBase.CreateAsync(this, card.ProductId, card);
+                        collectionPackage.Items.Add(item);
+                    }
+                }
+
+                return collectionPackage;
             }
             else
             {
@@ -118,11 +129,11 @@ namespace FluentStore.Sources.Microsoft.Store
         {
             var collectionDetail = (await StorefrontApi.GetCollections(options: GetSystemOptions())).Payload;
 
-            foreach (var coll in collectionDetail.Cards)
+            foreach (var card in collectionDetail.Cards)
             {
-                yield return new MicrosoftStorePackage(this, coll)
+                yield return new MicrosoftStoreCollection(this, collectionCard: card)
                 {
-                    Urn = new(NAMESPACE_COLLECTION, new RawNamespaceSpecificString(coll.ProductId))
+                    Status = PackageStatus.BasicDetails
                 };
             }
         }

@@ -6,19 +6,19 @@ using System.Threading.Tasks;
 using FluentStore.SDK;
 using FluentStore.SDK.Packages;
 using Microsoft.Marketplace.Storefront.Contracts.V8.One;
-using System.Collections.Generic;
 
 namespace FluentStore.Sources.Microsoft.Store
 {
     public class MicrosoftStoreCollection : GenericPackageCollection<CollectionDetail>
     {
-        private readonly object _cardItemLock = new();
-
-        public MicrosoftStoreCollection(PackageHandlerBase packageHandler, CollectionDetail collectionDetail = null)
+        public MicrosoftStoreCollection(PackageHandlerBase packageHandler, CollectionDetail collectionDetail = null, CardModel collectionCard = null)
             : base(packageHandler)
         {
             if (collectionDetail != null)
                 Update(collectionDetail);
+
+            if (collectionCard != null)
+                Update(collectionCard);
         }
 
         public void Update(CollectionDetail collectionDetail)
@@ -41,27 +41,33 @@ namespace FluentStore.Sources.Microsoft.Store
                 BackgroundColor = collectionDetail.CuratedBGColor,
                 ForegroundColor = collectionDetail.CuratedFGColor
             });
+        }
 
-            LoadCardsAsync(collectionDetail.Cards);
+        public void Update(CardModel collectionCard)
+        {
+            Guard.IsNotNull(collectionCard, nameof(collectionCard));
+            
+            Id = collectionCard.ProductId;
+            Title = collectionCard.Title;
+            Description = collectionCard.Description;
+            UpdateUrn();
+
+            Images.Clear();
+
+            foreach (var image in collectionCard.Images)
+            {
+                Images.Add(new FileImage(image.Uri)
+                {
+                    ImageType = ImageType.Hero,
+                    BackgroundColor = image.BackgroundColor,
+                    ForegroundColor = image.ForegroundColor
+                });
+            }
         }
 
         private void UpdateUrn()
         {
             Urn = new(MicrosoftStoreHandler.NAMESPACE_COLLECTION, new RawNamespaceSpecificString(Id));
-        }
-
-        private async Task LoadCardsAsync(IEnumerable<CardModel> cards)
-        {
-            Items.Clear();
-
-            foreach (var card in cards)
-            {
-                var item = await MicrosoftStorePackageBase.CreateAsync(PackageHandler, card.ProductId, card);
-                lock (_cardItemLock)
-                {
-                    Items.Add(item);
-                }
-            }
         }
 
         private string _id;
