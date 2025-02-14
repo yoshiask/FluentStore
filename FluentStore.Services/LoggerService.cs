@@ -1,17 +1,21 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 
 namespace FluentStore.Services
 {
     public class LoggerService : IDisposable, ILogger
     {
         private readonly StreamWriter m_logWriter;
+        private readonly ITargetBlock<string[]> m_block;
 
         public LogLevel LogLevel { get; set; } = LogLevel.Error;
 
@@ -22,6 +26,15 @@ namespace FluentStore.Services
         public LoggerService(StreamWriter logWriter = null)
         {
             m_logWriter = logWriter;
+
+            m_block = new ActionBlock<string[]>(
+                WriteLinesAsync,
+                new ExecutionDataflowBlockOptions
+                {
+                    EnsureOrdered = true,
+                    MaxDegreeOfParallelism = 1,
+                }
+            );
         }
 
         /// <summary>
@@ -29,8 +42,7 @@ namespace FluentStore.Services
         /// </summary>
         public void Log(string message, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
         {
-            if (IsEnabled(LogLevel.Trace))
-                WriteLine($"{Path.GetFileName(filePath)}_L{lineNumber:D}_{memberName}() : {message}");
+            WriteLine(LogString(message, filePath, memberName, lineNumber));
         }
 
         /// <summary>
@@ -41,10 +53,12 @@ namespace FluentStore.Services
             if (!IsEnabled(LogLevel.Warning))
                 return;
 
-            WriteLine("=== WARN ===");
-            Log(message, filePath, memberName, lineNumber);
-            WriteLine(ex.ToString());
-            WriteLine("=== ==== ===");
+            WriteLines([
+                "=== WARN ===",
+                LogString(message, filePath, memberName, lineNumber),
+                ex.ToString(),
+                "=== ==== ==="
+            ]);
         }
 
         /// <summary>
@@ -57,25 +71,23 @@ namespace FluentStore.Services
 
             StackTrace trace = new(2, true);
 
-            WriteLine($"=== {errorLevel} EXCEPTION ===");
-            WriteLine($"{ex.GetType().Name}: {ex.Message}");
-            WriteLine(ToTraceString(trace));
-            WriteLine("=== =============== ===");
+            WriteLines([
+                $"=== {errorLevel} EXCEPTION ===",
+                $"{ex.GetType().Name}: {ex.Message}",
+                ToTraceString(trace),
+                "=== =============== ==="
+            ]);
         }
 
-        private void WriteLine(string line)
-        {
-#if DEBUG
-            Debug.WriteLine(line);
-#endif
+        private void WriteLine(string line) => m_block.Post([line]);
 
-            m_logWriter?.WriteLine(line);
-            m_logWriter?.Flush();
-        }
+        private void WriteLines(string[] lines) => m_block.Post(lines);
 
         public void Dispose()
         {
-            m_logWriter?.Flush();
+            m_block.Complete();
+            m_block.Completion.Wait();
+
             m_logWriter?.Dispose();
         }
 
@@ -246,6 +258,36 @@ namespace FluentStore.Services
         public bool IsEnabled(LogLevel logLevel) => LogLevel.CompareTo(logLevel) <= 0;
 
         public IDisposable BeginScope<TState>(TState state) => NullScope.Instance;
+
+        private async Task WriteLineAsync(string line)
+        {
+            if (line is null)
+                return;
+
+#if DEBUG
+            Debug.WriteLine(line);
+#endif
+
+            if (m_logWriter is not null)
+            {
+                await m_logWriter.WriteLineAsync(line);
+                await m_logWriter.FlushAsync();
+            }
+        }
+
+        private async Task WriteLinesAsync(string[] lines)
+        {
+            foreach (var line in lines)
+                await WriteLineAsync(line);
+        }
+
+        [Pure]
+        private string LogString(string message, [CallerFilePath] string filePath = "", [CallerMemberName] string memberName = "", [CallerLineNumber] int lineNumber = 0)
+        {
+            return IsEnabled(LogLevel.Trace)
+                ? $"{Path.GetFileName(filePath)}_L{lineNumber:D}_{memberName}() : {message}"
+                : null;
+        }
     }
 }
 
