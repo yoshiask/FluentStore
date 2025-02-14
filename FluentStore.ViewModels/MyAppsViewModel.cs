@@ -9,7 +9,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.WinUI.UI;
 using System.Threading.Tasks;
 using System;
-using System.Linq;
 using System.Collections;
 
 namespace FluentStore.ViewModels
@@ -18,7 +17,7 @@ namespace FluentStore.ViewModels
     {
         public MyAppsViewModel()
         {
-            ViewAppCommand = new AsyncRelayCommand(ViewAppAsync);
+            ViewAppCommand = new AsyncRelayCommand(ViewAppAsync, () => SelectedApp is not null);
 
             WeakReferenceMessenger.Default.Send(new SetPageHeaderMessage("My Apps"));
         }
@@ -37,7 +36,11 @@ namespace FluentStore.ViewModels
         public AppViewModelBase SelectedApp
         {
             get => _SelectedApp;
-            set => SetProperty(ref _SelectedApp, value);
+            set
+            {
+                SetProperty(ref _SelectedApp, value);
+                ViewAppCommand.NotifyCanExecuteChanged();
+            }
         }
 
         private IAsyncRelayCommand _ViewAppCommand;
@@ -66,6 +69,9 @@ namespace FluentStore.ViewModels
 
         public async Task ViewAppAsync()
         {
+            if (SelectedApp is null)
+                return;
+
             WeakReferenceMessenger.Default.Send(new PageLoadingMessage(true));
 
             try
