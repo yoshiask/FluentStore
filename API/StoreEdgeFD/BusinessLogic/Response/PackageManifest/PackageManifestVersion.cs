@@ -6,7 +6,7 @@ namespace Microsoft.Marketplace.Storefront.StoreEdgeFD.BusinessLogic.Response.Pa
     {
         public string PackageVersion { get; set; }
         public DefaultLocale DefaultLocale { get; set; }
-        public List<Locale> Locales { get; set; }
+        public List<DefaultLocale> Locales { get; set; }
         public List<SparkInstaller> Installers { get; set; }
     }
 }
