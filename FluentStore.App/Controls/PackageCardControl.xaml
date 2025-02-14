@@ -15,12 +15,11 @@
             <RowDefinition Height="150"/>
             <RowDefinition Height="100"/>
         </Grid.RowDefinitions>
-        <Border Background="{x:Bind ViewModel.AppIcon.BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}"
-                VerticalAlignment="Stretch">
-            <ContentControl Content="{x:Bind ViewModel.AppIcon}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+
+        <ContentControl Content="{x:Bind ViewModel.AppIcon}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
                             HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                             ContentTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"/>
-        </Border>
+        
         <Grid Grid.Row="1" Padding="8">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
