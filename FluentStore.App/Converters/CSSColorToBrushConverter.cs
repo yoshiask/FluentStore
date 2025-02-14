@@ -1,19 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using CommunityToolkit.WinUI.Helpers;
+using CommunityToolkit.WinUI.UI.Converters;
 using FluentStore.SDK.Models;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
 using Windows.UI;
 
 namespace FluentStore.Converters
 {
-    public class CSSColorToBrushConverter : IValueConverter
+    public class CSSColorToBrushConverter : DependencyObject, IValueConverter
     {
+        public static readonly DependencyProperty DefaultBrushProperty = DependencyProperty.Register(
+            nameof(DefaultBrush), typeof(Brush), typeof(CSSColorToBrushConverter), new PropertyMetadata(null));
+
+        public Brush DefaultBrush
+        {
+            get => (Brush)GetValue(DefaultBrushProperty);
+            set => SetValue(DefaultBrushProperty, value);
+        }
+
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            if (value == null)
-                return new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+            if (string.IsNullOrWhiteSpace(value?.ToString()))
+                return DefaultBrush ?? new SolidColorBrush(Microsoft.UI.Colors.Transparent);
 
             return new SolidColorBrush(ParseCSSColorAsWinUIColor((string)value));
         }
@@ -118,7 +129,7 @@ namespace FluentStore.Converters
             return Color.FromArgb(drawingColor.A, drawingColor.R, drawingColor.G, drawingColor.B);
         }
 
-        public static Dictionary<string, string> NamedCSSColors = new Dictionary<string, string>()
+        public static readonly Dictionary<string, string> NamedCSSColors = new()
         {
             { "AliceBlue", "#F0F8FF" },
             { "AntiqueWhite", "#FAEBD7" },

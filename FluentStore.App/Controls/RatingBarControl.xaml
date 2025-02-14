@@ -5,13 +5,17 @@
     xmlns:local="using:FluentStore.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:tkcontrols="using:CommunityToolkit.WinUI.UI.Controls"
     x:DefaultBindMode="OneWay"
     mc:Ignorable="d"
     d:DesignHeight="12"
     d:DesignWidth="200">
 
-    <Border>
-        <Grid>
+    <Grid>
+        <TextBlock x:Name="NoReviewsBlock" x:Load="{x:Bind TotalStarCount, Mode=OneWay, Converter={StaticResource NotWholeNumberConverter}}"
+                   Text="No reviews" FontStyle="Italic"/>
+
+        <Grid x:Name="ReviewsBlock" x:Load="{x:Bind TotalStarCount, Mode=OneWay, Converter={StaticResource WholeNumberConverter}}">
             <Grid.Resources>
                 <Style TargetType="FontIcon">
                     <Setter Property="VerticalAlignment" Value="Center"/>
@@ -34,11 +38,12 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Border Grid.Column="0" Background="{ThemeResource SystemAccentColorDark1}" CornerRadius="4,0,0,4">
                 <TextBlock Text="{x:Bind Star5Count}" HorizontalAlignment="Left" Foreground="{ThemeResource MediaTextThemeBrush}"
-                           Visibility="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsTextTrimmed, Converter={StaticResource NotBoolToVisibilityConverter}}"/>
+                            Visibility="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsTextTrimmed, Converter={StaticResource NotBoolToVisibilityConverter}}"/>
 
                 <ToolTipService.ToolTip>
                     <ToolTip>
@@ -56,7 +61,7 @@
 
             <Border Grid.Column="1" Background="{ThemeResource SystemAccentColor}">
                 <TextBlock Text="{x:Bind Star4Count}" HorizontalAlignment="Left" Foreground="{ThemeResource MediaTextThemeBrush}"
-                           Visibility="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsTextTrimmed, Converter={StaticResource NotBoolToVisibilityConverter}}"/>
+                            Visibility="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsTextTrimmed, Converter={StaticResource NotBoolToVisibilityConverter}}"/>
 
                 <ToolTipService.ToolTip>
                     <ToolTip>
@@ -74,7 +79,7 @@
 
             <Border Grid.Column="2" Background="{ThemeResource SystemAccentColorLight1}">
                 <TextBlock Text="{x:Bind Star3Count}" HorizontalAlignment="Left" Foreground="Black"
-                           Visibility="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsTextTrimmed, Converter={StaticResource NotBoolToVisibilityConverter}}"/>
+                            Visibility="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsTextTrimmed, Converter={StaticResource NotBoolToVisibilityConverter}}"/>
 
                 <ToolTipService.ToolTip>
                     <ToolTip>
@@ -92,7 +97,7 @@
 
             <Border Grid.Column="3" Background="{ThemeResource SystemAccentColorLight2}">
                 <TextBlock Text="{x:Bind Star2Count}" HorizontalAlignment="Left" Foreground="Black"
-                           Visibility="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsTextTrimmed, Converter={StaticResource NotBoolToVisibilityConverter}}"/>
+                            Visibility="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsTextTrimmed, Converter={StaticResource NotBoolToVisibilityConverter}}"/>
 
                 <ToolTipService.ToolTip>
                     <ToolTip>
@@ -110,7 +115,7 @@
 
             <Border Grid.Column="4" Background="{ThemeResource SystemAccentColorLight3}" CornerRadius="0,4,4,0">
                 <TextBlock Text="{x:Bind Star1Count}" HorizontalAlignment="Left" Foreground="Black" TextTrimming="None"
-                           Visibility="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsTextTrimmed, Converter={StaticResource NotBoolToVisibilityConverter}}"/>
+                            Visibility="{Binding RelativeSource={RelativeSource Mode=Self}, Path=IsTextTrimmed, Converter={StaticResource NotBoolToVisibilityConverter}}"/>
 
                 <ToolTipService.ToolTip>
                     <ToolTip>
@@ -127,6 +132,6 @@
             <TextBlock Grid.Column="4" Grid.Row="1" Text="1" FontWeight="Bold"/>
 
         </Grid>
-    </Border>
+    </Grid>
 
 </UserControl>

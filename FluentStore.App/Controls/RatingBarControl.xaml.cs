@@ -1,17 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -30,7 +19,7 @@ namespace FluentStore.Controls
             set => SetValue(Star1CountProperty, value);
         }
         public static readonly DependencyProperty Star1CountProperty = DependencyProperty.Register(
-            nameof(Star1Count), typeof(int), typeof(RatingBarControl), new PropertyMetadata(0));
+            nameof(Star1Count), typeof(int), typeof(RatingBarControl), new PropertyMetadata(0, OnStarCountChanged));
 
         public int Star2Count
         {
@@ -38,7 +27,7 @@ namespace FluentStore.Controls
             set => SetValue(Star2CountProperty, value);
         }
         public static readonly DependencyProperty Star2CountProperty = DependencyProperty.Register(
-            nameof(Star2Count), typeof(int), typeof(RatingBarControl), new PropertyMetadata(0));
+            nameof(Star2Count), typeof(int), typeof(RatingBarControl), new PropertyMetadata(0, OnStarCountChanged));
 
         public int Star3Count
         {
@@ -46,7 +35,7 @@ namespace FluentStore.Controls
             set => SetValue(Star3CountProperty, value);
         }
         public static readonly DependencyProperty Star3CountProperty = DependencyProperty.Register(
-            nameof(Star3Count), typeof(int), typeof(RatingBarControl), new PropertyMetadata(0));
+            nameof(Star3Count), typeof(int), typeof(RatingBarControl), new PropertyMetadata(0, OnStarCountChanged));
 
         public int Star4Count
         {
@@ -54,7 +43,7 @@ namespace FluentStore.Controls
             set => SetValue(Star4CountProperty, value);
         }
         public static readonly DependencyProperty Star4CountProperty = DependencyProperty.Register(
-            nameof(Star4Count), typeof(int), typeof(RatingBarControl), new PropertyMetadata(0));
+            nameof(Star4Count), typeof(int), typeof(RatingBarControl), new PropertyMetadata(0, OnStarCountChanged));
 
         public int Star5Count
         {
@@ -62,6 +51,27 @@ namespace FluentStore.Controls
             set => SetValue(Star5CountProperty, value);
         }
         public static readonly DependencyProperty Star5CountProperty = DependencyProperty.Register(
-            nameof(Star5Count), typeof(int), typeof(RatingBarControl), new PropertyMetadata(0));
+            nameof(Star5Count), typeof(int), typeof(RatingBarControl), new PropertyMetadata(0, OnStarCountChanged));
+
+        public int TotalStarCount
+        {
+            get => (int)GetValue(TotalStarCountProperty);
+            set => SetValue(TotalStarCountProperty, value);
+        }
+        public static readonly DependencyProperty TotalStarCountProperty = DependencyProperty.Register(
+            nameof(TotalStarCount), typeof(int), typeof(RatingBarControl), new PropertyMetadata(0));
+
+        private static void OnStarCountChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is not RatingBarControl ratingBar)
+                return;
+
+            var total = ratingBar.Star1Count
+                + ratingBar.Star2Count
+                + ratingBar.Star3Count
+                + ratingBar.Star4Count
+                + ratingBar.Star5Count;
+            ratingBar.TotalStarCount = Math.Max(total, 0);
+        }
     }
 }

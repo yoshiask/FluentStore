@@ -22,8 +22,11 @@
     <converters:NameToFontFamilyConverter x:Key="NameToFontFamilyConverter"/>
     <converters:NumberToStarGridLength x:Key="NumberToStarGridLength"/>
     <converters:CSSColorToBrushConverter x:Name="CSSColorToBrushConverter"/>
+    <converters:CSSColorToBrushConverter x:Name="CSSColorToTextBrushConverter" DefaultBrush="{ThemeResource SystemBaseHighColor}"/>
     <converters:PackageBaseEnumerableToViewModelEnumerable x:Key="PackageBaseEnumerableToViewModelEnumerable"/>
     <converters:PackageDisplayConverter x:Key="PackageDisplayConverter"/>
     <converters:BoolToHeightOrZero x:Key="BoolToHeightOrZero"/>
+    <converters:Int32WithinRangeConverter x:Key="WholeNumberConverter" LowerBound="1" />
+    <converters:Int32WithinRangeConverter x:Key="NotWholeNumberConverter" LowerBound="1" Negate="True" />
 
-</ResourceDictionary>
+    </ResourceDictionary>

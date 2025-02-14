@@ -28,9 +28,9 @@ namespace FluentStore.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
-            if (!(value is GridLength length))
-                return 0;
-            return length.Value;
+            return value is GridLength length
+                ? length.Value
+                : 0;
         }
     }
 }

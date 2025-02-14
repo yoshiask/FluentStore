@@ -8,13 +8,12 @@ namespace FluentStore.Converters
     {
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            Type type = value.GetType();
-            if (typeof(double).IsAssignableFrom(type))
-                return new GridLength((double)value, GridUnitType.Star);
-            else if (typeof(int).IsAssignableFrom(type))
-                return new GridLength((int)value, GridUnitType.Star);
-            else
-                return new GridLength(0);
+            return value switch
+            {
+                double d when d >= 0 => new GridLength(d, GridUnitType.Star),
+                int i when i >= 0 => new GridLength(i, GridUnitType.Star),
+                _ => new GridLength(0)
+            };
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
