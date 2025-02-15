@@ -76,7 +76,7 @@ namespace FluentStore.Sources.Microsoft.Store
             // Set base properties
             Title = card.Title;
             Description = card.Description ?? card.LongDescription;
-            if (card.RatingsCount != null)
+            if (card.RatingsCount != null && card.AverageRating > 0)
             {
                 ReviewSummary = new ReviewSummary
                 {
