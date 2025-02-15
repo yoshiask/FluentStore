@@ -48,7 +48,7 @@
         <Border Background="{Binding BackgroundColor, Converter={StaticResource CSSColorToBrushConverter}}">
             <Viewbox HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <TextBlock Text="{Binding Text}" FontFamily="{Binding FontFamily, Converter={StaticResource NameToFontFamilyConverter}}"
-                           Foreground="{Binding ForegroundColor, Converter={StaticResource CSSColorToBrushConverter}}"
+                           Foreground="{Binding ForegroundColor, Converter={StaticResource CSSColorToTextBrushConverter}}"
                            TextLineBounds="Tight" TextWrapping="NoWrap"
                            FontSize="24" FontWeight="Bold" Padding="12"/>
             </Viewbox>
