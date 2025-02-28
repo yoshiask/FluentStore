@@ -1,4 +1,11 @@
 ﻿using CliWrap;
+using FluentStore.SDK.Plugins;
+using NuGet.Frameworks;
+using NuGet.Packaging.Core;
+using NuGet.Protocol.Core.Types;
+using NuGet.Versioning;
+using OwlCore.Storage;
+using OwlCore.Storage.System.IO;
 using Spectre.Console;
 
 // List architectures
@@ -8,6 +15,7 @@ var argParser = Meziantou.Framework.CommandLineParser.Current;
 var pluginId = argParser.GetArgument("-id");
 bool verbose = argParser.HasArgument("v");
 bool saveLogs = argParser.HasArgument("-log");
+bool install = argParser.HasArgument("-install");
 bool force = argParser.HasArgument("f") || argParser.HasArgument("-force");
 
 // Get folder containing plugin projects
@@ -66,7 +74,8 @@ async Task BuildPlugin(StatusContext ctx, string pluginCsprojPath)
     AnsiConsole.Write(header);
 
     var fileName = $"{identity}.nupkg";
-    if (!force && File.Exists(Path.Combine(pluginOutDir, fileName)))
+    var nupkgFilePath = Path.Combine(pluginOutDir, fileName);
+    if (!force && File.Exists(nupkgFilePath))
     {
         AnsiConsole.MarkupLine("Skipping: Plugin package found in cache");
         AnsiConsole.WriteLine();
@@ -115,5 +124,27 @@ async Task BuildPlugin(StatusContext ctx, string pluginCsprojPath)
     }
 
     AnsiConsole.MarkupLine($"[green]Successfully packed {id}[/]");
+
+    if (install)
+    {
+        var mainDrive = Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles));
+        var appDataDir = Path.Combine(mainDrive?.FullName ?? "C:", "ProgramData", "FluentStoreBeta");
+        SystemFolder pluginDir = new(Path.Combine(appDataDir, "Plugins"));
+
+        var statusFile = await pluginDir.GetFirstByNameAsync("status.tsv") as IFile;
+        var entries = await PluginStatusRecord.ReadAsync(statusFile);
+
+        SystemFolder outputDir = new(pluginOutDir);
+        var pluginFile = await outputDir.GetFirstByNameAsync(fileName) as IFile;
+        await pluginDir.CreateCopyOfAsync(pluginFile!, true);
+        
+        using var pluginStream = await pluginFile!.OpenReadAsync();
+        DownloadResourceResult resource = new(pluginStream, "");
+        PackageIdentity nugetIdentity = resource.PackageReader.NuspecReader.GetIdentity();
+
+        entries[id] = new(nugetIdentity, NuGetFramework.UnsupportedFramework, PluginInstallStatus.AppRestartRequired, PluginInstallStatus.NoAction, VersionRange.All);
+        await entries.WriteAsync(statusFile);
+    }
+
     AnsiConsole.WriteLine();
 }
