@@ -24,7 +24,7 @@ public class FluentStoreNuGetProject : NuGetProject
     private static readonly SourceRepository _officialSource =
         Repository.Factory.GetCoreV3("https://api.nuget.org/v3/index.json");
 
-    private readonly Dictionary<string, PluginEntry> _entries;
+    private readonly PluginStatusRecord _entries;
     private readonly string _statusFilePath;
     private readonly SourceCacheContext _cache = new();
 
@@ -59,14 +59,7 @@ public class FluentStoreNuGetProject : NuGetProject
         }
         else
         {
-            var lines = File.ReadAllLines(_statusFilePath);
-            _entries = new(lines.Length);
-
-            foreach (var line in lines)
-            {
-                var entry = PluginEntry.Parse(line);
-                _entries.Add(entry.Id, entry);
-            }
+            _entries = PluginStatusRecord.Read(_statusFilePath);
         }
     }
 
