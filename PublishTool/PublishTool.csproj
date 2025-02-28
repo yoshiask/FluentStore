@@ -2,17 +2,20 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>$(AppTargetFramework)</TargetFramework>
+        <TargetFramework>net9.0-windows$(TargetWindowsVersion)</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <Platforms>AnyCPU;x64;x86;ARM64;x64</Platforms>
-		<LangVersion>latest</LangVersion>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="CliWrap" Version="3.7.1" />
-        <PackageReference Include="Spectre.Console" Version="0.49.1" />
         <PackageReference Include="Meziantou.Framework.CommandLine" Version="3.0.3" />
+        <PackageReference Include="Microsoft.Build" Version="17.13.9" ExcludeAssets="runtime" />
+        <PackageReference Include="Microsoft.Build.Locator" Version="1.7.8" />
+        <PackageReference Include="Microsoft.Build.Runtime" Version="17.13.9" ExcludeAssets="runtime" />
+        <PackageReference Include="Spectre.Console" Version="0.49.1" />
     </ItemGroup>
 
     <ItemGroup>

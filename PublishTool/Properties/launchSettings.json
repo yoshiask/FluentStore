@@ -2,7 +2,7 @@
   "profiles": {
     "PublishTool": {
         "commandName": "Project",
-        "commandLineArgs": "--id=FluentStore.Sources.Microsoft -v -f"
+        "commandLineArgs": "--id=FluentStore.Sources.Microsoft -v -f --install"
     }
   }
 }

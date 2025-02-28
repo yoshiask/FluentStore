@@ -1,8 +1,8 @@
 ﻿using CliWrap;
 using FluentStore.SDK.Plugins;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Locator;
 using NuGet.Frameworks;
-using NuGet.Packaging.Core;
-using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using OwlCore.Storage;
 using OwlCore.Storage.System.IO;
@@ -20,8 +20,10 @@ bool force = argParser.HasArgument("f") || argParser.HasArgument("-force");
 
 // Get folder containing plugin projects
 string curDir = Environment.CurrentDirectory;
-string sourcesDir = Path.GetFullPath(Path.Combine(curDir, @"..\..\..\..\..\Sources"));
+string sourcesDir = Path.GetFullPath(Path.Combine(curDir, @"..\..\..\..\Sources"));
 string pluginOutDir = Path.Combine(sourcesDir, "output");
+
+MSBuildLocator.RegisterDefaults();
 
 Directory.CreateDirectory(pluginOutDir);
 
@@ -51,18 +53,14 @@ async Task BuildPlugin(StatusContext ctx, string pluginCsprojPath)
 {
     ctx.Status($"Preparing plugin project...");
 
+    // Open csproj with MSBuild
     var pluginSrcDir = Path.GetDirectoryName(pluginCsprojPath)!;
-    var id = Path.GetFileNameWithoutExtension(pluginCsprojPath);
+    Project csproj = new(pluginCsprojPath);
 
-    // Get build output directories
-    var csproj = System.Xml.Linq.XDocument.Load(pluginCsprojPath);
-    var propGroup = csproj.Root!.Element("PropertyGroup")!;
-    var title = propGroup.Element("Title")?.Value;
-
-    var version = propGroup.Element("Version")?.Value;
-    var packageVersion = propGroup.Element("PackageVersion")?.Value;
-    if (packageVersion is not null)
-        version = packageVersion.Replace("$(Version)", version);
+    // Get relevant project properties
+    var id = csproj.GetPropertyValue("PackageId");
+    var title = csproj.GetPropertyValue("Title");
+    var version = csproj.GetPropertyValue("PackageVersion");
 
     var identity = $"{id}.{version}";
 
@@ -138,12 +136,12 @@ async Task BuildPlugin(StatusContext ctx, string pluginCsprojPath)
         var pluginFile = await outputDir.GetFirstByNameAsync(fileName) as IFile;
         await pluginDir.CreateCopyOfAsync(pluginFile!, true);
         
-        using var pluginStream = await pluginFile!.OpenReadAsync();
-        DownloadResourceResult resource = new(pluginStream, "");
-        PackageIdentity nugetIdentity = resource.PackageReader.NuspecReader.GetIdentity();
+        entries[id] = new(id, NuGetVersion.Parse(version), NuGetFramework.UnsupportedFramework,
+            PluginInstallStatus.AppRestartRequired, PluginInstallStatus.NoAction, VersionRange.All);
 
-        entries[id] = new(nugetIdentity, NuGetFramework.UnsupportedFramework, PluginInstallStatus.AppRestartRequired, PluginInstallStatus.NoAction, VersionRange.All);
         await entries.WriteAsync(statusFile);
+
+        AnsiConsole.MarkupLine($"[green]Successfully installed {id}[/]");
     }
 
     AnsiConsole.WriteLine();
