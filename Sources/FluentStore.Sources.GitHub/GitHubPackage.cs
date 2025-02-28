@@ -14,36 +14,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace FluentStore.Sources.GitHub
 {
     public partial class GitHubPackage : PackageBase<Repository>
     {
-        private readonly Dictionary<Architecture, string[]> architecture_strings = new()
-        {
-            {
-                Architecture.x64,
-                new[] { "x64", "amd64", /*"x86_64"*/ }
-                // x86_64 has an underscore, and therefore has to be handled differently
-            },
-            {
-                Architecture.x86,
-                new[] { /*"x86",*/ "i386", "i686" }
-                // "x86" is special, see above comment
-            },
-            {
-                Architecture.Arm,
-                new[] { "arm", "arm32", "aarch32" }
-            },
-            {
-                Architecture.Arm64,
-                new[] { "arm64", "aarch64" }
-            },
-        };
-        private readonly char[] separator_chars = [' ', '_', '-', '+', '@', '!', '.'];
-
         public GitHubPackage(PackageHandlerBase packageHandler, Repository repo = null, IReadOnlyList<Release> releases = null)
             : base(packageHandler)
         {
@@ -99,49 +75,15 @@ namespace FluentStore.Sources.GitHub
                 // Find suitable release asset
                 // Some assets may be architecture-specific
                 var arch = Win32Helper.GetSystemArchitecture();
-                foreach (Release rel in Releases)
-                {
-                    if (rel.Assets.Count == 0) continue;
 
-                    // Pick proper asset for architecture
-                    IEnumerable<ReleaseAsset> assets = rel.Assets.ToList();
+                var associatedAssets = Releases.SelectMany(release => release.Assets.Select(a => new { Asset = a, Release = release }));
+                var rankedAssets = InstallerSelection.FilterAndRankInstallers(associatedAssets, a => a.Asset.Name, Title, arch);
+                
+                var topAsset = rankedAssets.FirstOrDefault()
+                    ?? throw WebException.Create(404, $"No packages are available for {ShortTitle}");
 
-                    // Exclude mismatched architectures, but keep assets that don't specify an architecture
-                    assets = assets.Where(a =>
-                    {
-                        List<string> parts = a.Name.Split(separator_chars).ToList();
-                        int x86Idx = parts.IndexOf("x86");
-                        if (x86Idx != -1)
-                        {
-                            // Contains x86
-                            bool isNextPart64 = Regex.IsMatch(parts[x86Idx + 1], "x?64");
-                            return (arch == Architecture.x86 && !isNextPart64)
-                                || (arch == Architecture.x64 && isNextPart64);
-                        }
-
-                        // Check for direct match with arch
-                        if (a.Name.Contains(StringComparison.InvariantCultureIgnoreCase, architecture_strings[arch]))
-                            return true;
-
-                        // Check if neutral
-                        return !architecture_strings.Any(e => a.Name.Contains(StringComparison.InvariantCultureIgnoreCase, e.Value));
-                    });
-
-                    if (!assets.Any()) continue;
-
-                    if (assets.Count() > 1)
-                    {
-                        // Rank assets by file type
-                        assets = assets.OrderBy(a => RankAsset(a.Name)).ToList();
-                    }
-                    
-                    asset = assets.First();
-                    release = rel;
-                    break;
-                }
-
-                if (asset == null)
-                    throw WebException.Create(404, "No packages are available for " + ShortTitle);
+                asset = topAsset.Asset;
+                release = topAsset.Release;
 
                 PackageUri = new(asset.BrowserDownloadUrl);
                 Version = release.TagName;
@@ -193,6 +135,7 @@ namespace FluentStore.Sources.GitHub
 
                     // Pick file that is most likely an installer
                     IEnumerable<ZipArchiveEntry> assets = archive.Entries;
+
                     if (assets.All(e => e.FullName.StartsWith(archive.Entries[0].FullName)))
                     {
                         // All files are in the same folder, check one level deeper
@@ -204,12 +147,13 @@ namespace FluentStore.Sources.GitHub
                         // Only look at top-level files
                         assets = assets.Where(e => !e.FullName.Contains('/'));
                     }
-                    assets = assets.OrderBy(e => RankAsset(e.Name));
-                    if (!assets.Any())
-                        throw new Exception("Failed to find a good installer candidate for " + Title);
+
+                    assets = assets.OrderBy(e => InstallerSelection.RankInstaller(e.Name, Title));
+                    
+                    ZipArchiveEntry selectedAsset = assets.FirstOrDefault()
+                        ?? throw new Exception("Failed to find a good installer candidate for " + Title);
 
                     // Extract everything, but keep track of installer
-                    ZipArchiveEntry selectedAsset = assets.First();
                     var dir = new DirectoryInfo(archiveFile.FullName[..^archiveFile.Extension.Length]);
                     archive.ExtractToDirectory(dir.FullName, true);
                     DownloadItem = new FileInfo(Path.Combine(dir.FullName, selectedAsset.FullName));
@@ -234,31 +178,6 @@ namespace FluentStore.Sources.GitHub
                 IsInstalled = true;
 
             return success;
-        }
-
-        private int RankAsset(string filename)
-        {
-            int extIdx = filename.LastIndexOf('.');
-            if (extIdx < 0) return int.MaxValue;
-
-            string ext = filename[(extIdx + 1)..];
-            int score = ext.ToUpperInvariant() switch
-            {
-                "APPINSTALLER" => 0,
-                "MSIXBUNDLE" => 1,
-                "APPXBUNDLE" => 2,
-                "MSIX" => 3,
-                "APPX" => 4,
-                "MSI" => 5,
-                "EXE" => 6,
-                "ZIP" => 7,
-
-                // Default to MaxInt - 10, so if the asset contains the name of the repo, we don't overflow
-                _ => 0x7FFFFFF5
-            };
-            if (!filename.Contains(Title, StringComparison.InvariantCultureIgnoreCase))
-                score += 10;
-            return score;
         }
 
         public override Task LaunchAsync()
