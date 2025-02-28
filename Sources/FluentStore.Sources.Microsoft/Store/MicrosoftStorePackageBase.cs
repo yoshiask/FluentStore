@@ -351,7 +351,7 @@ namespace FluentStore.Sources.Microsoft.Store
             if (!IsDownloaded)
                 await InternalDownloadAsync(null);
 
-            if (InternalPackage is not null)
+            if (IsDownloaded && InternalPackage is not null)
                 return await InternalPackage.InstallAsync();
 
             return false;

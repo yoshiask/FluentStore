@@ -49,12 +49,19 @@ namespace FluentStore.Sources.Microsoft.Store
                 }
                 WeakReferenceMessenger.Default.Send(new SuccessMessage(null, this, SuccessType.PackageFetchCompleted));
 
+                var prereqIds = updates.First().Xml.Relationships.Prerequisites.AtLeastOne
+                    .SelectMany(p => p.UpdateIdentity)
+                    .Select(u => u.UpdateID)
+                    .ToHashSet();
+
+                var updateIds1 = updates.Select(u => u.UpdateInfo.ID).ToHashSet();
+                var updateIds2 = updates.Select(u => u.Xml.UpdateIdentity.UpdateID).ToHashSet();
+
                 // Set up progress handler
                 void DownloadProgress(GeneralDownloadProgress progress)
                 {
-                    var status = progress.DownloadedStatus[0];
                     WeakReferenceMessenger.Default.Send(
-                        new PackageDownloadProgressMessage(this, status.DownloadedBytes, status.File.FileSize));
+                        new PackageDownloadProgressMessage(this, progress.DownloadedTotalBytes, progress.EstimatedTotalBytes));
                 }
 
                 // Start download

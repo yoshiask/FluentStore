@@ -55,7 +55,7 @@ namespace FluentStore.Sources.Microsoft.Store
         {
             var page = (await StorefrontApi.Search(query, "apps", GetSystemOptions())).Payload;
 
-            do
+            while (page is not null)
             {
                 foreach (var details in page.HighlightedResults)
                 {
@@ -64,6 +64,7 @@ namespace FluentStore.Sources.Microsoft.Store
 
                     yield return package;
                 }
+                
                 foreach (var card in page.SearchResults)
                 {
                     var package = await MicrosoftStorePackageBase.CreateAsync(this, card.ProductId, card);
@@ -72,10 +73,10 @@ namespace FluentStore.Sources.Microsoft.Store
                     yield return package;
                 }
 
-                page = page.NextUri is null
-                    ? null : (await StorefrontApi.NextSearchPage(page)).Payload;
+                page = page.NextUri is not null
+                    ? (await StorefrontApi.NextSearchPage(page)).Payload
+                    : null;
             }
-            while (page.NextUri is not null);
         }
 
         public override async IAsyncEnumerable<PackageBase> GetSearchSuggestionsAsync(string query)

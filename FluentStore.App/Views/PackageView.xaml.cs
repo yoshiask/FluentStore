@@ -416,12 +416,12 @@ namespace FluentStore.Views
             {
                 _ = DispatcherQueue.TryEnqueue(() =>
                 {
-                    double prog = 100 * m.Downloaded / m.Total;
+                    double prog = m.Downloaded / m.Total;
 
                     SetProgressUI(true);
                     ProgressIndicator.IsIndeterminate = false;
                     ProgressIndicator.Value = prog;
-                    ProgressText.Text = $"{prog:##0}%";
+                    ProgressText.Text = $"{100 * prog:##0}%";
 
                     PackageHelper.HandlePackageDownloadProgressToast(m, progressToast);
                 });

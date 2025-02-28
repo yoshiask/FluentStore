@@ -102,7 +102,10 @@ namespace StoreDownloader
             }
             else
             {
-                filteredAppFiles = appfiles.Where(app => !app.Targets.Any(t => t.Contains("Xbox")));
+                filteredAppFiles = appfiles
+                    .Where(app => !app.Targets.Any(t => t.Contains("Xbox")))
+                    .Reverse()
+                    .Take(1);
             }
 
             List<UUPFile> fileList = filteredAppFiles.Select(boundApp =>
@@ -113,7 +116,7 @@ namespace StoreDownloader
                     long.Parse(boundApp.Size),
                     boundApp.Digest,
                     "sha1");
-            }).Reverse().ToList();
+            }).ToList();
 
             using var helperDl = new HttpDownloader(downloadDirectory.FullName);
             return await helperDl.DownloadAsync(fileList, progress).ConfigureAwait(false)

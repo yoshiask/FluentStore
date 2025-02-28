@@ -158,6 +158,8 @@ namespace FluentStore.SDK.Helpers
 
             try
             {
+                Guard.IsNotNull(downloadUri, nameof(downloadUri));
+
                 ulong? length = null;
                 void DownloadProgress(ulong progress)
                 {
