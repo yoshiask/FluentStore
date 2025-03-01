@@ -7,6 +7,7 @@ using FluentStore.SDK.Models;
 using FluentStore.SDK.Packages;
 using Microsoft.Marketplace.Storefront.Contracts.V3;
 using Microsoft.Marketplace.Storefront.Contracts.V8.One;
+using Microsoft.Msix.Utils.AppxPackaging;
 using OwlCore.AbstractUI.Models;
 using StoreDownloader;
 using System;
@@ -14,6 +15,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices.ComTypes;
 using UnifiedUpdatePlatform.Services.WindowsUpdate;
 using UnifiedUpdatePlatform.Services.WindowsUpdate.Downloads;
 
@@ -21,6 +23,8 @@ namespace FluentStore.Sources.Microsoft.Store
 {
     public class MicrosoftStorePackage : MicrosoftStorePackageBase
     {
+        private readonly HashSet<AppxPackageDependency> _dependencies = [];
+
         public MicrosoftStorePackage(PackageHandlerBase packageHandler, CardModel card = null, ProductSummary summary = null, ProductDetails product = null) : base(packageHandler, card, summary, product)
         {
             Guard.IsFalse(IsWinGet);
@@ -40,36 +44,47 @@ namespace FluentStore.Sources.Microsoft.Store
 
                 // Get update data
                 WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
-                var updates = await FE3Handler.GetUpdates(categoryIds, sysInfo, "", FileExchangeV3UpdateFilter.Application);
-                if (updates == null || !updates.Any())
+                var allUpdates = await FE3Handler.GetUpdates(categoryIds, sysInfo, "", FileExchangeV3UpdateFilter.Application);
+                if (allUpdates == null || !allUpdates.Any())
                 {
                     WeakReferenceMessenger.Default.Send(new ErrorMessage(
-                        WebException.Create(404, "No packages are available for " + ShortTitle), this, ErrorType.PackageFetchFailed));
+                        WebException.Create(404, $"No packages are available for {ShortTitle}"), this, ErrorType.PackageFetchFailed));
                     return null;
                 }
+
+                var updates = allUpdates;
+                if (!downloadEverything)
+                {
+                    // Filter and rank available installers
+                    var rankedUpdates = InstallerSelection.FilterAndRankInstallers(
+                        allUpdates,
+                        u => u.AppxMetadata.ContentPackageId,
+                        ShortTitle
+                    );
+                    
+                    var update = rankedUpdates.FirstOrDefault()
+                        ?? throw new Exception($"Failed to determine the best available installer for {ShortTitle}");
+                    updates = [update];
+                }
+
+                var uupFiles = await MSStoreDownloader.FetchFilesAsync(updates, includeDeps: true);
+
                 WeakReferenceMessenger.Default.Send(new SuccessMessage(null, this, SuccessType.PackageFetchCompleted));
 
-                var prereqIds = updates.First().Xml.Relationships.Prerequisites.AtLeastOne
-                    .SelectMany(p => p.UpdateIdentity)
-                    .Select(u => u.UpdateID)
-                    .ToHashSet();
-
-                var updateIds1 = updates.Select(u => u.UpdateInfo.ID).ToHashSet();
-                var updateIds2 = updates.Select(u => u.Xml.UpdateIdentity.UpdateID).ToHashSet();
-
                 // Set up progress handler
-                void DownloadProgress(GeneralDownloadProgress progress)
+                Progress<GeneralDownloadProgress> progress = new(DownloadProgress);
+                void DownloadProgress(GeneralDownloadProgress progressUpdate)
                 {
                     WeakReferenceMessenger.Default.Send(
-                        new PackageDownloadProgressMessage(this, progress.DownloadedTotalBytes, progress.EstimatedTotalBytes));
+                        new PackageDownloadProgressMessage(this, progressUpdate.DownloadedTotalBytes, progressUpdate.EstimatedTotalBytes));
                 }
 
                 // Start download
                 WeakReferenceMessenger.Default.Send(new PackageDownloadStartedMessage(this));
-                string[] files = await MSStoreDownloader.DownloadPackageAsync(updates, folder, new DownloadProgress(DownloadProgress),
-                    downloadAll: downloadEverything);
+                var files = await MSStoreDownloader.DownloadFilesAsync(uupFiles, folder, progress);
                 if (files == null || files.Length == 0)
-                    throw new Exception("Failed to download pacakges using WindowsUpdateLib");
+                    throw new Exception("Failed to download packages using WindowsUpdateLib");
+
                 IsDownloaded = InternalPackage.IsDownloaded = true;
 
                 if (downloadEverything)
@@ -79,12 +94,97 @@ namespace FluentStore.Sources.Microsoft.Store
                 }
                 else
                 {
-                    InternalPackage.DownloadItem = DownloadItem
-                        = new FileInfo(Path.Combine(folder.FullName, files[0]));
+                    var mainPackageFileInfo = new FileInfo(Path.Combine(folder.FullName, files[0]));
+                    InternalPackage.DownloadItem = DownloadItem = mainPackageFileInfo;
 
-                    await ((ModernPackage<ProductDetails>)InternalPackage).GetInstallerType();
-                    Type = InternalPackage.Type;
+                    // Determine whether package is a bundle or not
+                    Type = InstallerTypes.FromExtension(mainPackageFileInfo.Extension);
+                    if (!Type.HasFlag(InstallerType.Msix))
+                        throw new Exception($"Expected an MSIX-type installer, got {Type}");
+
+                    // Enumerate dependencies by package family name and minimum version
+                    IStream appxStream;
+                    Architecture sysArch = Win32Helper.GetSystemArchitecture();
+                    
+                    if (Type.HasFlag(InstallerType.Bundle))
+                    {
+                        AppxBundleMetadata appxBundleMetadata = new(mainPackageFileInfo.FullName);
+                        ChildPackageMetadata targetChildPackage = null;
+                        
+                        foreach (var childPackage in appxBundleMetadata.ChildAppxPackages.Where(p => p.ResourceId is null))
+                        {
+                            var childArch = Enum.Parse<Architecture>(childPackage.Architecture, true);
+
+                            // Always accept exact matches
+                            if (childArch == sysArch)
+                            {
+                                targetChildPackage = childPackage;
+                                break;
+                            }
+
+                            // Allow a 32-bit installer to be chosen for 64-bit systems when necessary
+                            else if (childArch.Reduce() == sysArch.Reduce() && childArch.GetBitnessInt() < sysArch.GetBitnessInt())
+                            {
+                                targetChildPackage = childPackage;
+                            }
+
+                            // Fall back to neutral
+                            else if (childArch is Architecture.Neutral && targetChildPackage is null)
+                            {
+                                targetChildPackage = childPackage;
+                            }
+                        }
+
+                        appxStream = appxBundleMetadata.AppxBundleReader
+                            .GetPayloadPackage(targetChildPackage.RelativeFilePath)
+                            .GetStream();
+                    }
+                    else
+                    {
+                        appxStream = global::Microsoft.Msix.Utils.StreamUtils.CreateInputStreamOnFile(mainPackageFileInfo.FullName);
+                    }
+                    
+                    AppxMetadata appxMetadata = new(appxStream);
+                    var appxArch = Enum.Parse<Architecture>(appxMetadata.Architecture);
+                    var appxManifest = appxMetadata.AppxReader.GetManifest();
+                    var appxDependenciesEnumerator = appxManifest.GetPackageDependencies();
+
+                    _dependencies.Clear();
+                    while (appxDependenciesEnumerator.GetHasCurrent())
+                    {
+                        var appxDependency = appxDependenciesEnumerator.GetCurrent();
+
+                        _dependencies.Add(new(appxDependency, appxArch));
+
+                        appxDependenciesEnumerator.MoveNext();
+                    }
+
+                    (appxStream as IDisposable)?.Dispose();
+
+                    var updatePfns = allUpdates
+                        .Select(u => PackageFullName.Parse(u.AppxMetadata.ContentPackageId))
+                        .ToArray();
+
+                    // Select which UUP updates to fetch
+                    var depUpdates = allUpdates
+                        .Select(u => new
+                        {
+                            PackageFullName = PackageFullName.Parse(u.AppxMetadata.ContentPackageId),
+                            Update = u
+                        })
+                        .Where(u => _dependencies.Any(d => d.IsFullfilledBy(u.PackageFullName)))
+                        .DistinctBy(u => u.PackageFullName.Name)
+                        .Select(u => u.Update)
+                        .ToList();
+
+                    // Download dependencies
+                    uupFiles = await MSStoreDownloader.FetchFilesAsync(depUpdates, includeDeps: true);
+                    files = await MSStoreDownloader.DownloadFilesAsync(uupFiles, folder, progress);
+                    if (files == null || files.Length != _dependencies.Count)
+                        throw new Exception("Failed to download package dependencies using WindowsUpdateLib");
                 }
+
+                WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageDownloadCompleted(this));
 
                 return DownloadItem;
             }
@@ -121,10 +221,7 @@ namespace FluentStore.Sources.Microsoft.Store
             };
             downloadEverything.Clicked += DownloadEverything_Clicked;
 
-            return new()
-            {
-                downloadEverything
-            };
+            return [downloadEverything];
         }
 
         private async void DownloadEverything_Clicked(object sender, EventArgs e)

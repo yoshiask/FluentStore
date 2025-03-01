@@ -6,6 +6,7 @@
 
         <PackageReference Include="Microsoft.Identity.Client" Version="4.68.0" />
         <PackageReference Include="Microsoft.Graph" Version="5.69.0" />
+        <PackageReference Include="Microsoft.Msix.Utils" Version="2.1.1" />
 
         <ProjectReference Include="..\..\API\MSStore\StoreDownloader\StoreDownloader.csproj" />
         <ProjectReference Include="..\..\API\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
