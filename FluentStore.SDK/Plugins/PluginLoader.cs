@@ -28,11 +28,23 @@ namespace FluentStore.SDK.Plugins
         private const string FLUENTSTORE_FEED = "ipns://ipfs.askharoun.com/FluentStore/Plugins/NuGet/index.json";
 
         private static readonly NuGetFramework _targetFramework = NuGetFramework.Parse("net8.0-windows10.0.22621.0");
+        private static readonly NuGetVersion _targetFrameworkVersion = new(_targetFramework.Version);
         private static readonly SourceRepository _fluentStoreRepo = FluentStoreNuGetProject.CreateAbstractStorageSourceRepository(FLUENTSTORE_FEED);
 
         private readonly HashSet<PackageIdentity> _loadedAssemblies =
         [
-            new("NETStandard.Library", new NuGetVersion(2, 1, 0))
+            // SDK reference
+            new("NETStandard.Library", new NuGetVersion(2, 1, 0)),
+
+            // Known .NET dependencies
+            new("System.ComponentModel.Primitives", _targetFrameworkVersion),
+            new("System.ComponentModel.TypeConverter", _targetFrameworkVersion),
+            new("System.Diagnostics.DianosticSource", _targetFrameworkVersion),
+            new("System.Dynamic.Runtime", _targetFrameworkVersion),
+            new("System.Runtime.Serialization.Primitives", _targetFrameworkVersion),
+            new("System.Text.Json", new(9, 0, 0)),
+            new("Microsoft.CSharp", _targetFrameworkVersion),
+            new("System.Reflection", _targetFrameworkVersion),
         ];
 
         private readonly ISettingsService _settings;

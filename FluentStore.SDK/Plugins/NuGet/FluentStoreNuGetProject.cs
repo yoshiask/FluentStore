@@ -328,10 +328,23 @@ public class FluentStoreNuGetProject : NuGetProject
             {
                 reader.CopyFiles(pluginFolder, libItems.Append(reader.GetNuspecFile()), (src, _, stream) =>
                 {
-                    var dst = Path.Combine(pluginFolder, Path.GetFileName(src));
-                    using var file = File.OpenWrite(dst);
-                    stream.CopyTo(file);
-                    includedDlls.Add(Path.GetFileNameWithoutExtension(src));
+                    string dst;
+
+                    if (Path.EndsInDirectorySeparator(src))
+                    {
+                        dst = Path.Combine(pluginFolder, src);
+                        Directory.CreateDirectory(dst);
+                    }
+                    else
+                    {
+                        var fileName = Path.GetFileName(src);
+                        dst = Path.Combine(pluginFolder, Path.GetFileName(src));
+                    
+                        using var file = File.OpenWrite(dst);
+                        stream.CopyTo(file);
+                        includedDlls.Add(Path.GetFileNameWithoutExtension(src));
+                    }
+
                     return dst;
                 }, NullLogger.Instance, token);
             }

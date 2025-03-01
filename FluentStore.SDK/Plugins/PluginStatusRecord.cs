@@ -22,8 +22,11 @@ public class PluginStatusRecord : Dictionary<string, PluginEntry>
     {
         foreach (var line in entryLines)
         {
+            if (string.IsNullOrWhiteSpace(line))
+                continue;
+
             var entry = PluginEntry.Parse(line);
-            Add(entry.Id, entry);
+            this[entry.Id] = entry;
         }
     }
 
@@ -50,11 +53,11 @@ public class PluginStatusRecord : Dictionary<string, PluginEntry>
             token.ThrowIfCancellationRequested();
 
             string line = await reader.ReadLineAsync(token);
-            if (line is null)
+            if (string.IsNullOrWhiteSpace(line))
                 return record;
 
             var entry = PluginEntry.Parse(line);
-            record.Add(entry.Id, entry);
+            record[entry.Id] = entry;
         }
     }
 
