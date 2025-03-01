@@ -88,7 +88,7 @@ namespace FluentStore
             var navService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
             var pluginLoader = Ioc.Default.GetRequiredService<PluginLoader>();
             var appStartupService = Ioc.Default.GetRequiredService<AppStartupInfo>();
-
+            
             await pluginLoader.InitAsync();
 
             ProtocolResult result = navService.ParseProtocol(e.Arguments, e.IsFirstInstance);
@@ -118,6 +118,7 @@ namespace FluentStore
                 });
 
                 await Settings.Default.LoadAsync();
+                _log.SetLogLevel(Settings.Default.LoggingLevel);
 
                 // Start OOBE if not configured
                 if (!Settings.Default.IsOobeCompleted)
@@ -284,19 +285,7 @@ namespace FluentStore
 
             var logFile = pathManager.CreateLogFile();
             var logFileStream = logFile.Open(System.IO.FileMode.Create);
-            _log = new LoggerService(logFileStream)
-            {
-                LogLevel = settings.LoggingLevel switch
-                {
-                    OwlCore.Diagnostics.LogLevel.Trace => LogLevel.Trace,
-                    OwlCore.Diagnostics.LogLevel.Information => LogLevel.Information,
-                    OwlCore.Diagnostics.LogLevel.Warning => LogLevel.Warning,
-                    OwlCore.Diagnostics.LogLevel.Error => LogLevel.Error,
-                    OwlCore.Diagnostics.LogLevel.Critical => LogLevel.Critical,
-
-                    _ => throw new ArgumentOutOfRangeException("LoggingLevel")
-                }
-            };
+            _log = new LoggerService(logFileStream);
             services.AddSingleton(_log);
             services.AddSingleton<ILogger>(_log);
 

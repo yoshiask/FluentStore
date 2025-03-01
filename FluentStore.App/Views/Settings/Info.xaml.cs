@@ -2,6 +2,8 @@
 using FluentStore.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
+using OwlCore.Diagnostics;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -36,6 +38,24 @@ namespace FluentStore.Views.Settings
                 }
                 catch { }
             }
+        }
+
+        private void LogLevel_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is not Selector selector)
+                return;
+
+            if (selector.SelectedValue is not LogLevel newLogLevel)
+                return;
+
+            var currentLogLevel = Helpers.Settings.Default.LoggingLevel;
+            if (currentLogLevel == newLogLevel)
+                return;
+
+            Helpers.Settings.Default.LoggingLevel = newLogLevel;
+
+            var log = Ioc.Default.GetService<LoggerService>();
+            log?.SetLogLevel(newLogLevel);
         }
 
         private async void SendFeedbackButton_Click(object sender, RoutedEventArgs e)

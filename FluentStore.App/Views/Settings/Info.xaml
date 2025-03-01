@@ -57,7 +57,8 @@
                         </controls:SettingsDisplayControl.Icon>
                         <controls:SettingsDisplayControl.SettingsActionableElement>
                             <ComboBox ItemsSource="{tkui:EnumValues Type=ocDiag:LogLevel}"
-                                      SelectedItem="{x:Bind helpers:Settings.Default.LoggingLevel, Mode=OneWay}" />
+                                      SelectedItem="{x:Bind helpers:Settings.Default.LoggingLevel, Mode=OneWay}"
+                                      SelectionChanged="LogLevel_SelectionChanged"/>
                         </controls:SettingsDisplayControl.SettingsActionableElement>
                     </controls:SettingsDisplayControl>
 

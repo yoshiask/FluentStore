@@ -259,6 +259,20 @@ namespace FluentStore.Services
 
         public IDisposable BeginScope<TState>(TState state) => NullScope.Instance;
 
+        public void SetLogLevel(OwlCore.Diagnostics.LogLevel ocLogLevel)
+        {
+            LogLevel = ocLogLevel switch
+            {
+                OwlCore.Diagnostics.LogLevel.Trace => LogLevel.Trace,
+                OwlCore.Diagnostics.LogLevel.Information => LogLevel.Information,
+                OwlCore.Diagnostics.LogLevel.Warning => LogLevel.Warning,
+                OwlCore.Diagnostics.LogLevel.Error => LogLevel.Error,
+                OwlCore.Diagnostics.LogLevel.Critical => LogLevel.Critical,
+
+                _ => throw new ArgumentOutOfRangeException(nameof(ocLogLevel))
+            };
+        }
+
         private async Task WriteLineAsync(string line)
         {
             if (line is null)
