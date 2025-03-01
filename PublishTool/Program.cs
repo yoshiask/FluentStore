@@ -13,6 +13,7 @@ string[] archs = ["x64", "x86", "arm64"];
 
 var argParser = Meziantou.Framework.CommandLineParser.Current;
 var pluginId = argParser.GetArgument("-id");
+var repoPath = argParser.GetArgument("-repo");
 bool verbose = argParser.HasArgument("v");
 bool saveLogs = argParser.HasArgument("-log");
 bool install = argParser.HasArgument("-install");
@@ -20,7 +21,7 @@ bool force = argParser.HasArgument("f") || argParser.HasArgument("-force");
 
 // Get folder containing plugin projects
 string curDir = Environment.CurrentDirectory;
-string sourcesDir = Path.GetFullPath(Path.Combine(curDir, @"..\..\..\..\Sources"));
+string sourcesDir = Path.GetFullPath(Path.Combine(repoPath ?? curDir, "Sources"));
 string pluginOutDir = Path.Combine(sourcesDir, "output");
 
 MSBuildLocator.RegisterDefaults();

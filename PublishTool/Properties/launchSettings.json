@@ -2,7 +2,7 @@
   "profiles": {
     "PublishTool": {
         "commandName": "Project",
-        "commandLineArgs": "--id=FluentStore.Sources.Microsoft -v -f --install"
+        "commandLineArgs": "--repo=E:\\Repos\\yoshiask\\FluentStore --id=FluentStore.Sources.Microsoft -v -f --install"
     }
   }
 }
