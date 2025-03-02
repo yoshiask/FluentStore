@@ -136,7 +136,7 @@ namespace FluentStore.Sources.UwpCommunity
         {
             if (PackageUri == null)
             {
-                // No downlod link is available
+                // No download link is available
                 WeakReferenceMessenger.Default.Send(new ErrorMessage(
                     new Exception($"There are no download links available for {Title}."), this, ErrorType.PackageFetchFailed));
                 return null;
@@ -178,11 +178,11 @@ namespace FluentStore.Sources.UwpCommunity
 
         public override async Task<List<ImageBase>> CacheScreenshots()
         {
-            var screenhots = Images.Where(i => i.ImageType == ImageType.Screenshot).ToList();
+            var screenshots = Images.Where(i => i.ImageType == ImageType.Screenshot).ToList();
 
             if (LinkedPackage != null)
-                LinkedPackage.ScreenshotsCache = screenhots;
-            return screenhots;
+                LinkedPackage.ScreenshotsCache = screenshots;
+            return screenshots;
         }
 
         public override async Task<bool> InstallAsync()
