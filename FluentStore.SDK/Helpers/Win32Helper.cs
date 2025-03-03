@@ -83,10 +83,13 @@ namespace FluentStore.SDK.Helpers
         /// <inheritdoc cref="PackageBase.CacheAppIcon"/>
         public static ImageBase GetAppIcon(Stream stream)
         {
-            // Open package archive for reading
-            ZipArchive archive = new(stream);
+            ZipArchive archive = null;
+
             try
             {
+                // Open package archive for reading
+                archive = new(stream);
+
                 // Get the app icon
                 ZipArchiveEntry iconEntry = archive.Entries.FirstOrDefault(e => e.FullName.StartsWith(".rsrc/ICON/1"));
                 if (iconEntry != null)
@@ -110,7 +113,7 @@ namespace FluentStore.SDK.Helpers
             }
             finally
             {
-                archive.Dispose();
+                archive?.Dispose();
             }
             
         }

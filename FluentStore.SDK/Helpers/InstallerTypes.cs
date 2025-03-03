@@ -62,8 +62,11 @@ namespace FluentStore.SDK.Helpers
 
         public static InstallerType FromExtension(string ext)
         {
+            ext = ext.TrimStart('.');
+
             if (Enum.TryParse(ext, true, out InstallerType type))
                 return type;
+
             return InstallerType.Unknown;
         }
     }

@@ -279,6 +279,13 @@ namespace FluentStore.Sources.Microsoft.Store
 
         protected abstract Task<FileSystemInfo> InternalDownloadAsync(DirectoryInfo folder);
 
+        protected virtual async Task<bool> InternalInstallAsync()
+        {
+            if (InternalPackage is not null)
+                return await InternalPackage.InstallAsync();
+            return false;
+        }
+
         public override async Task<ImageBase> CacheAppIcon()
         {
             // Prefer tiles, then logos, then posters.
@@ -351,8 +358,8 @@ namespace FluentStore.Sources.Microsoft.Store
             if (!IsDownloaded)
                 await InternalDownloadAsync(null);
 
-            if (IsDownloaded && InternalPackage is not null)
-                return await InternalPackage.InstallAsync();
+            if (IsDownloaded)
+                return await InternalInstallAsync();
 
             return false;
         }

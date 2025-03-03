@@ -6,10 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.IO;
+using FluentStore.SDK.PackageTypes;
 
 namespace FluentStore.SDK.Packages
 {
-    public class ModernPackage<TModel>(PackageHandlerBase packageHandler) : GenericPackage<TModel>(packageHandler)
+    public class ModernPackage<TModel>(PackageHandlerBase packageHandler) : GenericPackage<TModel>(packageHandler), IHasDependencies
     {
         public override bool Equals(PackageBase other)
         {
@@ -124,6 +125,13 @@ namespace FluentStore.SDK.Packages
         {
             get => _LogoRelativePath;
             set => SetProperty(ref _LogoRelativePath, value);
+        }
+
+        private List<FileSystemInfo> _DependencyDownloadItems;
+        public List<FileSystemInfo> DependencyDownloadItems
+        {
+            get => _DependencyDownloadItems;
+            set => SetProperty(ref _DependencyDownloadItems, value);
         }
     }
 }

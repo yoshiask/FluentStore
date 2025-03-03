@@ -77,7 +77,9 @@ namespace FluentStore.Sources.GitHub
                 var arch = Win32Helper.GetSystemArchitecture();
 
                 var associatedAssets = Releases.SelectMany(release => release.Assets.Select(a => new { Asset = a, Release = release }));
-                var rankedAssets = InstallerSelection.FilterAndRankInstallers(associatedAssets, a => a.Asset.Name, Title, arch);
+                var rankedAssets = InstallerSelection
+                    .FilterAndRank(associatedAssets, a => a.Asset.Name, Title, arch)
+                    .Select(r => r.Installer);
                 
                 var topAsset = rankedAssets.FirstOrDefault()
                     ?? throw WebException.Create(404, $"No packages are available for {ShortTitle}");
@@ -97,7 +99,7 @@ namespace FluentStore.Sources.GitHub
             try
             {
                 // Download chosen asset
-                folder ??= StorageHelper.GetTempDirectory().CreateSubdirectory(StorageHelper.PrepUrnForFile(Urn));
+                folder ??= StorageHelper.GetTempDirectoryForPackage(this);
                 await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
 
                 // Check for success
@@ -148,7 +150,7 @@ namespace FluentStore.Sources.GitHub
                         assets = assets.Where(e => !e.FullName.Contains('/'));
                     }
 
-                    assets = assets.OrderBy(e => InstallerSelection.RankInstaller(e.Name, Title));
+                    assets = assets.OrderBy(e => InstallerSelection.Rank(e.Name, Title));
                     
                     ZipArchiveEntry selectedAsset = assets.FirstOrDefault()
                         ?? throw new Exception("Failed to find a good installer candidate for " + Title);

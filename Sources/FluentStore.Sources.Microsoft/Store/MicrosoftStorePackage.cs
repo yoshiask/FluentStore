@@ -30,6 +30,12 @@ namespace FluentStore.Sources.Microsoft.Store
             Guard.IsFalse(IsWinGet);
         }
 
+        protected ModernPackage<ProductDetails> ModernPackage
+        {
+            get => (ModernPackage<ProductDetails>)InternalPackage;
+            set => InternalPackage = value;
+        }
+
         public override Task<bool> CanDownloadAsync() =>
             Task.FromResult(Model?.Skus.FirstOrDefault()?.FulfillmentData?.WuCategoryId is not null);
 
@@ -40,7 +46,9 @@ namespace FluentStore.Sources.Microsoft.Store
                 // Get system and package info
                 string[] categoryIds = [Model.Skus[0].FulfillmentData.WuCategoryId];
                 var sysInfo = SystemHelper.GetSystemInfo();
-                folder ??= StorageHelper.GetTempDirectory().CreateSubdirectory(StorageHelper.PrepUrnForFile(Urn));
+                var sysArch = Win32Helper.GetSystemArchitecture();
+
+                folder ??= StorageHelper.GetTempDirectoryForPackage(this);
 
                 // Get update data
                 WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
@@ -55,16 +63,27 @@ namespace FluentStore.Sources.Microsoft.Store
                 var updates = allUpdates;
                 if (!downloadEverything)
                 {
-                    // Filter and rank available installers
-                    var rankedUpdates = InstallerSelection.FilterAndRankInstallers(
-                        allUpdates,
-                        u => u.AppxMetadata.ContentPackageId,
-                        ShortTitle
-                    );
+                    // Filter out dependencies and parse package full name
+                    var appUpdates = allUpdates
+                        .Select(u => new
+                        {
+                            Update = u,
+                            PackageFullName = PackageFullName.Parse(u.AppxMetadata.ContentPackageId)
+                        })
+                        .Where(a => !string.IsNullOrEmpty(a.PackageFullName.ResourceId));
+
+                    // Rank app packages by architecture compatibility,
+                    // then by package version
+                    var rankedUpdates = InstallerSelection
+                        .FilterAndRankByArchitecture(appUpdates,
+                            a => a.PackageFullName.Architecture
+                        )
+                        .ThenByDescending(r => r.Installer.PackageFullName.Version);
                     
                     var update = rankedUpdates.FirstOrDefault()
                         ?? throw new Exception($"Failed to determine the best available installer for {ShortTitle}");
-                    updates = [update];
+
+                    updates = [update.Installer.Update];
                 }
 
                 var uupFiles = await MSStoreDownloader.FetchFilesAsync(updates, includeDeps: true);
@@ -99,44 +118,31 @@ namespace FluentStore.Sources.Microsoft.Store
 
                     // Determine whether package is a bundle or not
                     Type = InstallerTypes.FromExtension(mainPackageFileInfo.Extension);
-                    if (!Type.HasFlag(InstallerType.Msix))
+                    if (Type.Reduce() is not InstallerType.Msix)
                         throw new Exception($"Expected an MSIX-type installer, got {Type}");
 
                     // Enumerate dependencies by package family name and minimum version
                     IStream appxStream;
-                    Architecture sysArch = Win32Helper.GetSystemArchitecture();
                     
                     if (Type.HasFlag(InstallerType.Bundle))
                     {
                         AppxBundleMetadata appxBundleMetadata = new(mainPackageFileInfo.FullName);
-                        ChildPackageMetadata targetChildPackage = null;
-                        
-                        foreach (var childPackage in appxBundleMetadata.ChildAppxPackages.Where(p => p.ResourceId is null))
-                        {
-                            var childArch = Enum.Parse<Architecture>(childPackage.Architecture, true);
 
-                            // Always accept exact matches
-                            if (childArch == sysArch)
-                            {
-                                targetChildPackage = childPackage;
-                                break;
-                            }
+                        var rankedChildPackages = InstallerSelection
+                            .FilterAndRankByArchitecture(
+                                appxBundleMetadata.ChildAppxPackages.Where(p => p.ResourceId is null),
+                                p => Enum.Parse<Architecture>(p.Architecture, true),
+                                sysArch
+                            )
+                            .ThenByDescending(r => r.Installer.Version);
 
-                            // Allow a 32-bit installer to be chosen for 64-bit systems when necessary
-                            else if (childArch.Reduce() == sysArch.Reduce() && childArch.GetBitnessInt() < sysArch.GetBitnessInt())
-                            {
-                                targetChildPackage = childPackage;
-                            }
+                        var selectedChildInstaller = rankedChildPackages.FirstOrDefault()
+                            ?? throw new Exception($"Bundle does not contain a package compatible with {sysArch}");
 
-                            // Fall back to neutral
-                            else if (childArch is Architecture.Neutral && targetChildPackage is null)
-                            {
-                                targetChildPackage = childPackage;
-                            }
-                        }
+                        ChildPackageMetadata selectedChildPackage = selectedChildInstaller.Installer;
 
                         appxStream = appxBundleMetadata.AppxBundleReader
-                            .GetPayloadPackage(targetChildPackage.RelativeFilePath)
+                            .GetPayloadPackage(selectedChildPackage.RelativeFilePath)
                             .GetStream();
                     }
                     else
@@ -178,10 +184,14 @@ namespace FluentStore.Sources.Microsoft.Store
                         .ToList();
 
                     // Download dependencies
+                    var dependencyDir = folder.CreateSubdirectory("deps");
                     uupFiles = await MSStoreDownloader.FetchFilesAsync(depUpdates, includeDeps: true);
-                    files = await MSStoreDownloader.DownloadFilesAsync(uupFiles, folder, progress);
+                    files = await MSStoreDownloader.DownloadFilesAsync(uupFiles, dependencyDir, progress);
                     if (files == null || files.Length != _dependencies.Count)
                         throw new Exception("Failed to download package dependencies using WindowsUpdateLib");
+
+                    // Ensure internal package knows about the dependencies
+                    ModernPackage.DependencyDownloadItems = dependencyDir.EnumerateFileSystemInfos().ToList();
                 }
 
                 WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageDownloadCompleted(this));
@@ -200,17 +210,15 @@ namespace FluentStore.Sources.Microsoft.Store
 
         protected override void PopulateInternalPackage(CardModel card)
         {
-            var package = (ModernPackage<ProductDetails>)InternalPackage ?? new ModernPackage<ProductDetails>(PackageHandler);
-            package.PackageFamilyName ??= card.PackageFamilyNames?[0];
-            InternalPackage = package;
+            ModernPackage ??= new ModernPackage<ProductDetails>(PackageHandler);
+            ModernPackage.PackageFamilyName ??= card.PackageFamilyNames?[0];
         }
 
         protected override void PopulateInternalPackage(ProductDetails product)
         {
-            var package = (ModernPackage<ProductDetails>)InternalPackage ?? new ModernPackage<ProductDetails>(PackageHandler);
-            package.PackageFamilyName = product.PackageFamilyNames?[0];
-            package.PublisherDisplayName = product.PublisherName;
-            InternalPackage = package;
+            ModernPackage ??= new ModernPackage<ProductDetails>(PackageHandler);
+            ModernPackage.PackageFamilyName = product.PackageFamilyNames?[0];
+            ModernPackage.PublisherDisplayName = product.PublisherName;
         }
 
         public override List<AbstractButton> GetAdditionalCommands()

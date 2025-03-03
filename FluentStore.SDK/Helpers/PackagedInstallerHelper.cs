@@ -16,8 +16,7 @@ using Windows.ApplicationModel;
 using Windows.Management.Deployment;
 using Windows.System;
 using Windows.System.Profile;
-using Windows.Foundation;
-using OwlCore.Storage;
+using Windows.Foundation;using FluentStore.SDK.PackageTypes;
 
 namespace FluentStore.SDK.Helpers
 {
@@ -103,6 +102,7 @@ namespace FluentStore.SDK.Helpers
                 // Deploy package
                 WeakReferenceMessenger.Default.Send(new PackageInstallStartedMessage(package));
                 IAsyncOperationWithProgress<DeploymentResult, DeploymentProgress> operation;
+
                 if (package.Type == InstallerType.AppInstaller)
                 {
                     operation = pkgManager.AddPackageByAppInstallerFileAsync(
@@ -112,13 +112,17 @@ namespace FluentStore.SDK.Helpers
                 }
                 else
                 {
+                    IEnumerable<Uri> dependencies = null;
+                    if (package is IHasDependencies packageWithDependencies)
+                        dependencies = packageWithDependencies.DependencyDownloadItems?.Select(f => new Uri(f.FullName)).ToArray();
+
                     operation = pkgManager.AddPackageAsync(
                         new Uri(package.DownloadItem.FullName),
-                        null,
-                        DeploymentOptions.ForceApplicationShutdown);
+                        dependencies,
+                        DeploymentOptions.None);
                 }
-                var result = await operation.AsTask(new Progress<DeploymentProgress>(InstallProgress));
 
+                var result = await operation.AsTask(new Progress<DeploymentProgress>(InstallProgress));
                 if (!result.IsRegistered)
                 {
                     WeakReferenceMessenger.Default.Send(new ErrorMessage(result.ExtendedErrorCode, package, ErrorType.PackageInstallFailed));
@@ -128,6 +132,7 @@ namespace FluentStore.SDK.Helpers
                     WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageInstallCompleted(package));
                     package.IsInstalled = true;
                 }
+
                 return result.IsRegistered;
             }
             catch (Exception ex)

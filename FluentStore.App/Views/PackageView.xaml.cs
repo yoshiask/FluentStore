@@ -232,7 +232,7 @@ namespace FluentStore.Views
                 RegisterPackageServiceMessages();
                 ViewModel.IsInstalling = false;
 
-                await ViewModel.Package.DownloadAsync(PathManager.GetTempDirectory());
+                await ViewModel.Package.DownloadAsync(PathManager.GetTempDirectoryForPackage(ViewModel.Package));
             }
             finally
             {

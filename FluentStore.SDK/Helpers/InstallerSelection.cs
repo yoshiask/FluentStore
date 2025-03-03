@@ -6,7 +6,7 @@ using FluentStore.SDK.Models;
 
 namespace FluentStore.SDK.Helpers;
 
-public static class InstallerSelection
+public static partial class InstallerSelection
 {
     private static readonly Dictionary<Architecture, string[]> architecture_strings = new()
     {
@@ -32,7 +32,7 @@ public static class InstallerSelection
 
     private static readonly char[] separator_chars = [' ', '_', '-', '+', '@', '!', '.'];
 
-    public static IEnumerable<T> FilterAndRankInstallers<T>(this IEnumerable<T> installers, Func<T, string> filenameSelector, string packageTitle, Architecture arch = Architecture.Unknown)
+    public static IOrderedEnumerable<RankedInstaller<T>> FilterAndRank<T>(this IEnumerable<T> installers, Func<T, string> filenameSelector, string packageTitle, Architecture arch = Architecture.Unknown)
     {
         if (arch is Architecture.Unknown)
             arch = Win32Helper.GetSystemArchitecture();
@@ -49,7 +49,7 @@ public static class InstallerSelection
                 if (x86Idx != -1)
                 {
                     // Contains x86
-                    bool isNextPart64 = Regex.IsMatch(parts[x86Idx + 1], "x?64");
+                    bool isNextPart64 = Amd64Regex().IsMatch(parts[x86Idx + 1]);
                     return (arch == Architecture.x86 && !isNextPart64)
                         || (arch == Architecture.x64 && isNextPart64);
                 }
@@ -62,11 +62,10 @@ public static class InstallerSelection
                 return !architecture_strings.Any(e => a.Filename.Contains(StringComparison.InvariantCultureIgnoreCase, e.Value));
             })
 
+
             // Rank installers by file type and title
-            .OrderBy(a => RankInstaller(a.Filename, packageTitle))
-            
-            // Project back to only installer
-            .Select(a => a.Installer);
+            .Select(a => new RankedInstaller<T>(a.Installer, Rank(a.Filename, packageTitle)))
+            .OrderBy(r => r.Rank);
     }
 
     /// <summary>
@@ -75,7 +74,7 @@ public static class InstallerSelection
     /// Lower is better.
     /// </para>
     /// </summary>
-    public static int RankInstaller(string filename, string packageTitle)
+    public static int Rank(string filename, string packageTitle)
     {
         int extIdx = filename.LastIndexOf('.');
         if (extIdx < 0) return int.MaxValue;
@@ -102,5 +101,47 @@ public static class InstallerSelection
         return rank;
     }
 
+    public static IOrderedEnumerable<RankedInstaller<T>> FilterAndRankByArchitecture<T>(IEnumerable<T> installers, Func<T, Architecture> archSelector, Architecture sysArch = Architecture.Unknown)
+    {
+        if (sysArch is Architecture.Unknown)
+            sysArch = Win32Helper.GetSystemArchitecture();
+
+        var sysArchReduced = sysArch.Reduce();
+        var sysArchBitness = sysArchReduced.GetBitnessInt();
+
+        return installers
+            .Select(installer =>
+            {
+                var installerArch = archSelector(installer);
+                int rank = int.MaxValue;
+
+                // Always accept exact matches
+                if (installerArch == sysArch)
+                {
+                    rank = 0;
+                }
+
+                // Allow a 32-bit installer to be chosen for 64-bit systems when necessary
+                else if (installerArch.Reduce() == sysArchReduced && installerArch.GetBitnessInt() < sysArchBitness)
+                {
+                    rank = 1;
+                }
+
+                // Fall back to neutral
+                else if (installerArch is Architecture.Neutral)
+                {
+                    rank = 2;
+                }
+
+                return new RankedInstaller<T>(installer, rank);
+            })
+            .OrderBy(r => r.Rank);
+    }
+
     private record Item<T>(T Installer, string Filename);
+
+    [GeneratedRegex("(x|amd)?64")]
+    private static partial Regex Amd64Regex();
 }
+
+public record RankedInstaller<T>(T Installer, int Rank);

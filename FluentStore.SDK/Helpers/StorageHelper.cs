@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK.Downloads;
 using FluentStore.SDK.Messages;
+using FluentStore.Services;
 using Garfoot.Utilities.FluentUrn;
 using OwlCore.Storage;
 using System;
@@ -208,6 +209,16 @@ namespace FluentStore.SDK.Helpers
             var dir = new DirectoryInfo(archiveFile.FullName[..^archiveFile.Extension.Length]);
             archive.ExtractToDirectory(dir.FullName, overwrite);
             return dir;
+        }
+
+        public static DirectoryInfo GetTempDirectoryForPackage(PackageBase package)
+        {
+            return GetTempDirectory().CreateSubdirectory(PrepUrnForFile(package.Urn));
+        }
+
+        public static DirectoryInfo GetTempDirectoryForPackage(this ICommonPathManager pathManager, PackageBase package)
+        {
+            return pathManager.GetTempDirectory().CreateSubdirectory(PrepUrnForFile(package.Urn));
         }
 
         internal static string GetFileId(FileSystemInfo file)

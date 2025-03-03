@@ -19,7 +19,7 @@
         <PackageReference Include="Humanizer" Version="2.14.1" />
         <PackageReference Include="IdentityModel.OidcClient" Version="6.0.0" />
         <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.5.0" />
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250108002" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250205002" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
         <PackageReference Include="NuGet.PackageManagement" Version="6.12.1" />
         <PackageReference Include="NuGet.Packaging" Version="6.12.1" />
