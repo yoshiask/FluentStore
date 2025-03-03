@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace FluentStore.SDK.Models;
@@ -27,20 +25,6 @@ public partial record PackageFullName(string Name, Version Version, Architecture
         var publisherId = match.Groups["pub"].Value;
 
         return new(name, version, architecture, resourceId, publisherId);
-    }
-
-    public static string ComputePublisherId(string publisher)
-    {
-        // TODO: Consider https://learn.microsoft.com/en-us/windows/win32/api/appmodel/nf-appmodel-packagenameandpublisheridfromfamilyname
-
-        // https://www.tmurgent.com/TmBlog/?p=3270
-
-        var publisherBytes = Encoding.Unicode.GetBytes(publisher);
-        var hashBytes = SHA256.HashData(publisherBytes);
-        var idBytes = hashBytes[^8..];
-        var id = Base32.ToBase32(idBytes);
-
-        return id;
     }
 
     [GeneratedRegex($"^{RxName}_{RxVersion}_{RxArchitecture}_{RxResourceId}_{RxPublisherId}$")]

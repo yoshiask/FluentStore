@@ -16,7 +16,8 @@ using Windows.ApplicationModel;
 using Windows.Management.Deployment;
 using Windows.System;
 using Windows.System.Profile;
-using Windows.Foundation;using FluentStore.SDK.PackageTypes;
+using Windows.Foundation;
+using FluentStore.SDK.PackageTypes;
 
 namespace FluentStore.SDK.Helpers
 {
