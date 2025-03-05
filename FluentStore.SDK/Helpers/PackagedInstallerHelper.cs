@@ -88,7 +88,7 @@ namespace FluentStore.SDK.Helpers
         }
 
         /// <inheritdoc cref="PackageBase.InstallAsync"/>
-        public static async Task<bool> Install(PackageBase package)
+        public static async Task<bool> Install(PackageBase package, bool installDependencies = true)
         {
             try
             {
@@ -114,13 +114,13 @@ namespace FluentStore.SDK.Helpers
                 else
                 {
                     IEnumerable<Uri> dependencies = null;
-                    if (package is IHasDependencies packageWithDependencies)
+                    if (package is IHasDependencies packageWithDependencies && installDependencies)
                         dependencies = packageWithDependencies.DependencyDownloadItems?.Select(f => new Uri(f.FullName)).ToArray();
 
                     operation = pkgManager.AddPackageAsync(
                         new Uri(package.DownloadItem.FullName),
                         dependencies,
-                        DeploymentOptions.None);
+                        DeploymentOptions.ForceTargetApplicationShutdown);
                 }
 
                 var result = await operation.AsTask(new Progress<DeploymentProgress>(InstallProgress));
@@ -138,6 +138,14 @@ namespace FluentStore.SDK.Helpers
             }
             catch (Exception ex)
             {
+                // "The package could not be installed because resources it modifies are currently in use."
+                // We've configured the install operation to close the main app if necessary, so this means
+                // some dependencies must already be installed. Retry the install, without dependencies.
+                if ((uint)ex.HResult is 0x80073D02)
+                {
+                    return await Install(package, false);
+                }
+
                 WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, package, ErrorType.PackageInstallFailed));
                 return false;
             }
