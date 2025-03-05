@@ -17,7 +17,7 @@
 
     <PropertyGroup>
         <Title>Microsoft Store &amp; WinGet</Title>
-        <Version>$(FluentStoreMajorMinorVersion).0.3</Version>
+        <Version>$(FluentStoreMajorMinorVersion).0.4</Version>
         <PackageVersion>$(Version)-beta</PackageVersion>
         <Description>Download or install apps and collections from the Microsoft Store and WinGet Community. Movies, arcade, and some games may not be supported.</Description>
     </PropertyGroup>
