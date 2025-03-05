@@ -47,6 +47,7 @@ public partial record PackageFullName(string Name, Version Version, Architecture
 }
 
 public partial record PackageFamilyName(string Name, string PublisherId)
+    : IEquatable<PackageFamilyName>, IEquatable<PackageFullName>
 {
     public override string ToString() => $"{Name}_{PublisherId}";
 
@@ -65,4 +66,6 @@ public partial record PackageFamilyName(string Name, string PublisherId)
 
     [GeneratedRegex($"^{PackageFullName.RxName}_{PackageFullName.RxPublisherId}$")]
     public static partial Regex PackageFamilyNameRegex();
+
+    public bool Equals(PackageFullName other) => Name == other.Name && PublisherId == other.PublisherId;
 }

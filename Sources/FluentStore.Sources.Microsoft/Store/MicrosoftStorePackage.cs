@@ -64,20 +64,22 @@ namespace FluentStore.Sources.Microsoft.Store
                 if (!downloadEverything)
                 {
                     // Filter out dependencies and parse package full name
+                    var appPackageFamilyNames = Model.PackageFamilyNames
+                        .Select(PackageFamilyName.Parse)
+                        .ToHashSet();
+
                     var appUpdates = allUpdates
                         .Select(u => new
                         {
                             Update = u,
                             PackageFullName = PackageFullName.Parse(u.AppxMetadata.ContentPackageId)
                         })
-                        .Where(a => !string.IsNullOrEmpty(a.PackageFullName.ResourceId));
+                        .Where(a => appPackageFamilyNames.Contains(a.PackageFullName.ToPackageFamilyName()));
 
                     // Rank app packages by architecture compatibility,
                     // then by package version
                     var rankedUpdates = InstallerSelection
-                        .FilterAndRankByArchitecture(appUpdates,
-                            a => a.PackageFullName.Architecture
-                        )
+                        .FilterAndRankByArchitecture(appUpdates, a => a.PackageFullName.Architecture)
                         .ThenByDescending(r => r.Installer.PackageFullName.Version);
                     
                     var update = rankedUpdates.FirstOrDefault()
@@ -86,7 +88,7 @@ namespace FluentStore.Sources.Microsoft.Store
                     updates = [update.Installer.Update];
                 }
 
-                var uupFiles = await MSStoreDownloader.FetchFilesAsync(updates, includeDeps: true);
+                var uupFiles = await MSStoreDownloader.FetchFilesAsync(updates, includeDeps: false);
 
                 WeakReferenceMessenger.Default.Send(new SuccessMessage(null, this, SuccessType.PackageFetchCompleted));
 
