@@ -1,6 +1,7 @@
 ﻿using Installer.Utils.TaskDialog;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -30,14 +31,16 @@ namespace Installer.Steps
             {
                 HttpClient client = new();
                 client.DefaultRequestHeaders.Add("User-Agent", "FluentStoreInstaller");
-                HttpResponseMessage response = await client.GetAsync("https://api.github.com/repos/yoshiask/FluentStore/releases/latest");
+                HttpResponseMessage response = await client.GetAsync("https://api.github.com/repos/yoshiask/FluentStore/releases");
                 if (!response.IsSuccessStatusCode)
                 {
                     App.InstallerWindow.NextStep();
                     return;
                 }
 
-                JsonObject latest = JsonObject.Parse(await response.Content.ReadAsStringAsync());
+                JsonArray releases = JsonArray.Parse(await response.Content.ReadAsStringAsync());
+
+                JsonObject latest = releases.First().GetObject();
                 string tagName = latest["tag_name"].GetString();
                 string htmlUrl = latest["html_url"].GetString();
 
