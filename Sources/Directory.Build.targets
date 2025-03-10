@@ -1,20 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
 
-    <!--<Target Name="InstallPlugin" AfterTargets="Build">
-        <InstallPluginTask OutputDir="$(MSBuildProjectDirectory)\$(OutDir)"
-                           PluginAssemblyName="$(AssemblyName)"/>
-    </Target>-->
-
-    <!--<Target Name="IncludeAllFilesInTargetDir" AfterTargets="Build">
-        <ItemGroup>
-            <None Include="$(TargetDir)\**">
-                <Pack>true</Pack>
-                <PackagePath>tools</PackagePath>
-            </None>
-        </ItemGroup>
-    </Target>-->
-
     <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
         <ItemGroup>
             <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))"/>
