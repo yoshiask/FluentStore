@@ -1,0 +1,70 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" InitialTargets="CopyInstallerPackage">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net48</TargetFramework>
+        <Nullable>enable</Nullable>
+        <LangVersion>9</LangVersion>
+        <UseWPF>true</UseWPF>
+        <Platforms>AnyCPU;x64;x86;ARM;ARM64</Platforms>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <NoWarn>1701;1702;CS8618;CS8603;CS8625</NoWarn>
+        <AssemblyVersion>0.2.1.0</AssemblyVersion>
+        <FileVersion>$(AssemblyVersion)</FileVersion>
+
+        <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <ApplicationIcon>Resources\Logo.ico</ApplicationIcon>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Remove="Resources\Background.png" />
+        <None Remove="Resources\Square71x71Logo.png" />
+    </ItemGroup>
+    
+    <Target Name="CopyInstallerPackage" BeforeTargets="Resources">
+        <Message Text="Copied installer package" />
+        <Copy SourceFiles="Resources\Packages\FluentStore_Beta_$(Platform).zip" DestinationFiles="Resources\FluentStore_Beta.zip" />
+    </Target>
+
+    <ItemGroup>
+        <PackageReference Include="PostSharp.Community.Packer" Version="1.2.0" />
+        <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.22000.196" />
+        <PackageReference Include="System.Resources.Extensions" Version="6.0.0" />
+        <Reference Include="System.Net.Http" />
+        <Resource Include="Resources\Background.png" />
+        <Resource Include="Resources\Square71x71Logo.png" />
+
+        <Compile Update="DefaultResources.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>DefaultResources.resx</DependentUpon>
+        </Compile>
+
+        <EmbeddedResource Update="DefaultResources.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>DefaultResources.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+    </ItemGroup>
+
+    <PropertyGroup Condition=" '$(Platform)' == 'x86' Or '$(Platform)' == 'AnyCPU' ">
+        <RuntimeIdentifier>win-x86</RuntimeIdentifier>
+        <DefineConstants>$(DefineConstants);X86</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Platform)' == 'x64' ">
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <DefineConstants>$(DefineConstants);X64</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Platform)' == 'ARM' ">
+        <RuntimeIdentifier>win-ARM</RuntimeIdentifier>
+        <DefineConstants>$(DefineConstants);ARM</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Platform)' == 'ARM64' ">
+        <RuntimeIdentifier>win-ARM64</RuntimeIdentifier>
+        <DefineConstants>$(DefineConstants);ARM64</DefineConstants>
+    </PropertyGroup>
+
+</Project>
