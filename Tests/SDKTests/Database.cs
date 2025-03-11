@@ -1,8 +1,8 @@
 ﻿namespace SDKTests;
 
-public class Firebase
+public class Database
 {
-    private const string USERID = "2UYoF8HWrNOyzRaGe4EWONiEL003";
+    private const string USERID = "67e556ca-026c-418a-83db-fb390a8534ef";
     private const string EMAIL = "test@askharoun.com";
     private const string PASSWORD = "yol6xKcdkJ4WGD";
 
@@ -15,18 +15,6 @@ public class Firebase
 
         Assert.NotNull(featured);
         Assert.NotEmpty(featured.Carousel);
-    }
-
-    [Fact]
-    public async Task ListDefaultPlugins()
-    {
-        FluentStoreAPI.FluentStoreAPI api = new();
-
-        var pluginDefaults = await api.GetPluginDefaultsAsync();
-
-        Assert.NotNull(pluginDefaults);
-        Assert.NotEmpty(pluginDefaults.Packages);
-        Assert.NotEmpty(pluginDefaults.Feeds);
     }
 
     [Fact]
