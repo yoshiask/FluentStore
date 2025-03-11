@@ -1,10 +1,12 @@
 ﻿using FluentStoreAPI.Models;
 using FluentStoreAPI.Models.Firebase;
+using FluentStoreAPI.Models.Supabase;
 using Flurl;
 using Flurl.Http;
 using Google.Apis.Firestore.v1;
 using Google.Apis.Firestore.v1.Data;
 using Newtonsoft.Json.Linq;
+using Supabase;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -21,66 +23,56 @@ namespace FluentStoreAPI
         private const string NAME_PREFIX = "projects/fluent-store/databases/(default)/documents";
 
         private readonly FirestoreService _firestore;
+        private readonly Client _supabase;
 
         private ProjectsResource.DatabasesResource.DocumentsResource Documents => _firestore.Projects.Databases.Documents;
 
-        public string Token { get; set; }
-        public string RefreshToken { get; set; }
+        public string? Token { get; set; }
+        public string? RefreshToken { get; set; }
 
-        public FluentStoreAPI()
+        public FluentStoreAPI() : this(Constants.SUPABASE_URL, Constants.SUPABASE_KEY)
         {
-            var firestoreInit = new Google.Apis.Services.BaseClientService.Initializer
+        }
+
+        public FluentStoreAPI(string supabaseUrl, string supabaseKey)
+        {
+            SupabaseOptions options = new()
             {
-                ApiKey = KEY,
-                ApplicationName = "FluentStoreAPI",
+                AutoRefreshToken = true,
             };
-            _firestore = new(firestoreInit);
+            
+            _supabase = new(supabaseUrl, supabaseKey, options);
         }
 
-        public FluentStoreAPI(string token, string refreshToken) : this()
-        {
-            Token = token;
-            RefreshToken = refreshToken;
-        }
+        public async Task InitAsync() => await _supabase.InitializeAsync();
 
         public async Task<HomePageFeatured> GetHomePageFeaturedAsync(CancellationToken token = default)
         {
-            var document = await GetDocumentAsync(BuildName("featured", "home"), token);
-            return new(document);
+            var carouselResult = await _supabase.From<FeaturedHomeCarouselItem>().Get();
+            var carouselItems = carouselResult.Models;
+
+            return new()
+            {
+                Carousel = carouselItems,
+            };
         }
 
-        public async Task<HomePageFeatured> GetHomePageFeaturedAsync(Version appVersion)
+        public async Task<HomePageFeatured> GetHomePageFeaturedAsync(Version appVersion, CancellationToken token = default)
         {
-            HomePageFeatured document = await GetHomePageFeaturedAsync();
+            HomePageFeatured document = await GetHomePageFeaturedAsync(token);
 
             for (int i = 0; i < document.Carousel.Count; i++)
             {
-                string feat = document.Carousel[i];
+                var feat = document.Carousel[i];
 
-                int idx = feat.LastIndexOf("/?");
-                if (idx < 0) continue;
+                bool show = appVersion >= feat.MinVersion
+                    && appVersion <= feat.MaxVersion;
 
-                string urn = feat.Substring(0, idx);
-                string expression = feat.Substring(idx + 2);
-                document.Carousel[i] = urn;
-
-                bool show = true;
-                QueryParamCollection queries = new(expression);
-                if (queries.TryGetFirst("vMax", out object vMaxVal) && Version.TryParse(vMaxVal.ToString(), out Version vMax))
-                    show &= appVersion <= vMax;
-                if (queries.TryGetFirst("vMin", out object vMinVal) && Version.TryParse(vMinVal.ToString(), out Version vMin))
-                    show &= appVersion >= vMin;
                 if (!show)
                     document.Carousel.RemoveAt(i--);
             }
 
             return document;
-        }
-
-        public async Task<PluginDefaults> GetPluginDefaultsAsync(CancellationToken token = default)
-        {
-            var document = await GetDocumentAsync(BuildName("defaults", "plugins"), token);
-            return new(document);
         }
     }
 }
