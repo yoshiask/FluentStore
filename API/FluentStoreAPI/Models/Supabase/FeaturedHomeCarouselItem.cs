@@ -18,4 +18,6 @@ public class FeaturedHomeCarouselItem : BaseModel
 
     [Column("max_version")]
     public Version? MaxVersion { get; set; }
+
+    public override string ToString() => $"{PackageUrn} ({MinVersion}, {MaxVersion})";
 }
