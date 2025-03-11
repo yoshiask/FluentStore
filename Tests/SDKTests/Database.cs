@@ -1,6 +1,8 @@
-﻿namespace SDKTests;
+﻿using Xunit.Abstractions;
 
-public class Database
+namespace SDKTests;
+
+public class Database(ITestOutputHelper output)
 {
     private const string USERID = "67e556ca-026c-418a-83db-fb390a8534ef";
     private const string EMAIL = "test@askharoun.com";
@@ -15,6 +17,9 @@ public class Database
 
         Assert.NotNull(featured);
         Assert.NotEmpty(featured.Carousel);
+
+        foreach (var item in featured.Carousel)
+            output.WriteLine(item.ToString());
     }
 
     [Fact]
