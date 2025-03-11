@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using Installer.Utils.TaskDialog;
+using Windows.System;
 
 namespace Installer
 {
@@ -13,7 +15,8 @@ namespace Installer
         private List<Page> _Steps = new()
         {
             new Steps.S00_Welcome(),
-            new Steps.S01_Updates(),
+            // Skip update check for `.appinstaller`
+            //new Steps.S01_Updates(),
             new Steps.S02_License(),
             new Steps.S03_BeginInstall(),
             new Steps.S04_Installing(),
@@ -51,8 +54,13 @@ namespace Installer
         {
             if (curStep + 1 >= Steps.Count)
             {
-                // No more steps, setup done
-                App.Current.Shutdown();
+                // No more steps, try to open Fluent Store
+                Launcher.LaunchUriAsync(new Uri("fluentstore://"))
+                    .AsTask()
+                    .ContinueWith(task =>
+                    {
+                        Dispatcher.Invoke(App.Current.Shutdown);
+                    });
                 return;
             }
 

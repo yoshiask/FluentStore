@@ -73,9 +73,9 @@ namespace Installer {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] FluentStore_Beta {
+        internal static byte[] Cert {
             get {
-                object obj = ResourceManager.GetObject("FluentStore_Beta", resourceCulture);
+                object obj = ResourceManager.GetObject("Cert", resourceCulture);
                 return ((byte[])(obj));
             }
         }

@@ -16,7 +16,7 @@ namespace Installer.Steps
         private void Step_Loaded(object sender, RoutedEventArgs e)
         {
             App.InstallerWindow.SetBackButtonText();
-            App.InstallerWindow.SetNextButtonText("Finish");
+            App.InstallerWindow.SetNextButtonText("Launch");
             App.InstallerWindow.SetNextButtonEnabled();
             App.InstallerWindow.SetBackButtonEnabled(false);
             App.InstallerWindow.SetCancelButtonEnabled(false);

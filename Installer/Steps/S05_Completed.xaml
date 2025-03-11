@@ -35,7 +35,7 @@
                            FontSize="24" FontWeight="Bold"/>
                 <TextBlock TextWrapping="Wrap" FontSize="14" Margin="0,8,0,0">
                     <Run Text="Fluent Store Beta "/><Run Text="{x:Static inst:App.VersionString}"/>
-                    <Run Text="has been installed on your computer. Click Finish to close setup."/>
+                    <Run Text="has been installed on your computer. Click Launch to close setup and open Fluent Store."/>
                 </TextBlock>
             </StackPanel>
         </Grid>

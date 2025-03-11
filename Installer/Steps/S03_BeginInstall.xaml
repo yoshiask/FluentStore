@@ -19,15 +19,14 @@
 
         <TextBlock Text="Ready to Install" TextWrapping="Wrap" Grid.Row="0"
                    FontSize="24" FontWeight="Bold"/>
-        <TextBlock Text="Setup is now ready to being installing Fluent Store Beta on your computer." Grid.Row="1"
+        <TextBlock Text="Setup is now ready to begin installing Fluent Store Beta on your computer." Grid.Row="1"
                    TextWrapping="Wrap" FontSize="14" Margin="0,8,0,0"/>
-        <TextBlock Grid.Row="2" TextWrapping="Wrap" FontSize="14" Margin="0,8,0,0">
-            <Run Text="You may be prompted to change some system settings." FontWeight="SemiBold"/>
-            <Run Text="These changes are required only for installation, and can be undone after the app is installed."/>
-            <Hyperlink Click="Hyperlink_Click">Why are these changes required?</Hyperlink>
+        <TextBlock Text="A self-signed code certificate will be installed and immediately removed after the app is installed."
+                   Grid.Row="2" TextWrapping="Wrap" FontSize="14" Margin="0,8,0,0"/>
+        <TextBlock Grid.Row="3" TextWrapping="Wrap" FontSize="14" Margin="0,8,0,0">
+            <Run Text="Click 'Install' to continue with the installation," FontWeight="SemiBold"/>
+            <Run Text="or click Back if you want to review or change any settings."/>
         </TextBlock>
-        <TextBlock Text="Click Install to continue with the installation, or click Back if you want to review or change any settings." Grid.Row="3"
-                   TextWrapping="Wrap" FontSize="14" Margin="0,8,0,0"/>
     </Grid>
     
 </Page>

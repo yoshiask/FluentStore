@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 
 namespace Installer.Steps
@@ -21,15 +20,6 @@ namespace Installer.Steps
             App.InstallerWindow.SetNextButtonEnabled();
             App.InstallerWindow.SetBackButtonEnabled();
             App.InstallerWindow.SetCancelButtonEnabled();
-        }
-
-        private void Hyperlink_Click(object sender, RoutedEventArgs e)
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "http://josh.askharoun.com/Fluent%20Store/help/installer-faq",
-                UseShellExecute = true
-            });
         }
     }
 }

@@ -14,7 +14,7 @@
         <FileVersion>$(AssemblyVersion)</FileVersion>
 
         <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
-        <PackageCertificateThumbprint>3E5E1B738D9924BD13020E1F163BB0D048361C0A</PackageCertificateThumbprint>
+        <PackageCertificateThumbprint>F7731B4EADB0017947A65882F26EE334E2E334D6</PackageCertificateThumbprint>
         <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
         <GenerateTemporaryStoreCertificate>False</GenerateTemporaryStoreCertificate>
         <GenerateAppInstallerFile>False</GenerateAppInstallerFile>

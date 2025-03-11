@@ -1,13 +1,12 @@
-﻿using Microsoft.Win32;
-using System;
-using System.Diagnostics;
-using System.Globalization;
+﻿using System;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using static Installer.Utils.InstallScriptLocalization;
+using Windows.Management.Deployment;
 
 namespace Installer.Steps
 {
@@ -16,12 +15,7 @@ namespace Installer.Steps
     /// </summary>
     public partial class S04_Installing : Page
     {
-        private DirectoryInfo TempFolder;
-        private FileInfo ZipFile;
-        private Process psProc;
-        private const string regPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock";
-        private bool? AllowAllTrustedApps = null;
-        private bool? AllowDevelopmentWithoutDevLicense = null;
+        private readonly CancellationTokenSource cts = new();
 
         public S04_Installing()
         {
@@ -36,194 +30,104 @@ namespace Installer.Steps
             App.InstallerWindow.SetBackButtonEnabled(false);
             App.InstallerWindow.SetCancelButtonEnabled();
 
-            // Extract ZIP to temp folder
-            OutputBoxWriteLine("Extracting installer...");
-            TempFolder = Directory.CreateDirectory(Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FluentStoreInstaller"));
-            ZipFile = new(Path.Combine(TempFolder.FullName, "FluentStore_Beta.zip"));
-            App.InstallerDir = new(Path.Combine(TempFolder.FullName, "FluentStore_Beta"));
-
-            Debug.WriteLine("Extracting to " + App.InstallerDir.FullName);
-            File.WriteAllBytes(ZipFile.FullName, DefaultResources.FluentStore_Beta);
-            if (App.InstallerDir.Exists)
-                App.InstallerDir.Delete(true);
-            System.IO.Compression.ZipFile.ExtractToDirectory(ZipFile.FullName, App.InstallerDir.FullName);
-
-            // Run Install.ps1
-            ProcessStartInfo startInfo = new()
-            {
-                FileName = "powershell",
-                WorkingDirectory = App.InstallerDir.FullName,
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-                UseShellExecute = false,
-            };
-            psProc = Process.Start(startInfo);
-            if (psProc == null)
-            {
-                // Script failed to start
-                ProgressBar.Visibility = Visibility.Collapsed;
-                App.InstallerWindow.ShowErrorMessage("Failed to start install script.");
-                return;
-            }
-
-            psProc.EnableRaisingEvents = true;
-            psProc.ErrorDataReceived += PsProc_ErrorDataReceived;
-            psProc.Exited += (s, evt) =>
-            {
-                psProc?.Dispose();
-                Debug.WriteLine("Console closed");
-            };
-            if (!psProc.Start())
-            {
-                // Script failed to start
-                ProgressBar.Visibility = Visibility.Collapsed;
-                App.InstallerWindow.ShowErrorMessage("Failed to start install script.");
-                return;
-            }
-            OutputBoxWriteLine("Beginning install...");
-            psProc.BeginErrorReadLine();
-            await psProc.StandardOutput.ReadLineAsync();
-            await Task.Delay(100);
-
-            // Set execution policy for process to allow script to run
-            await psProc.StandardInput.WriteLineAsync("Get-ExecutionPolicy");
-            await Task.Delay(100);
-            await psProc.StandardInput.WriteLineAsync("Set-ExecutionPolicy -Scope Process Unrestricted");
-            await Task.Delay(100);
-
-            // Temporarily set culture to en-US
-            var culture = CultureInfo.CurrentCulture = new CultureInfo("en-US");
-            await psProc.StandardInput.WriteLineAsync($"[cultureinfo]::CurrentCulture = \"{culture.Name}\"");
-            await Task.Delay(100);
-
-            // Set developer license so the install script doesn't open settings
-            using RegistryKey? hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
-            RegistryKey? regKey = hklm.OpenSubKey(regPath, true);
-            if (regKey == null)
-                regKey = Registry.LocalMachine.CreateSubKey(regPath, true);
-
-            int? regVal = regKey.GetValue("AllowAllTrustedApps") as int?;
-            if (regVal.HasValue)
-                AllowAllTrustedApps = regVal.Value > 0;
-            regVal = regKey.GetValue("AllowDevelopmentWithoutDevLicense") as int?;
-            if (regVal.HasValue)
-                AllowDevelopmentWithoutDevLicense = regVal.Value > 0;
-
-            regKey.SetValue("AllowAllTrustedApps", true, RegistryValueKind.DWord);
-            regKey.SetValue("AllowDevelopmentWithoutDevLicense", true, RegistryValueKind.DWord);
-            regKey.Close();
-
-            // Start install script
-            await psProc.StandardInput.WriteLineAsync(".\\Install.ps1");
-
-            bool isError = false;
-            string hresultMsg = string.Empty;
-            while (!psProc.HasExited)
-            {
-                string? line = await psProc.StandardOutput.ReadLineAsync();
-                if (line == null)
-                    continue;
-
-                Debug.WriteLine("\tOut> " + line);
-                OutputBoxWriteLine(line.Replace(App.InstallerDir.FullName, "$(InstallerPath)"));
-                if (line.Contains("HRESULT"))
-                {
-                    // Error occurred
-                    isError = true;
-                    int idxHR = line.IndexOf("HRESULT: ");
-                    hresultMsg = line.Substring(idxHR);
-                }
-                else if (isError)
-                {
-                    // Read rest of error
-                    if (string.IsNullOrWhiteSpace(line))
-                    {
-                        // End of error message
-                        isError = false;
-                        ProgressBar.Visibility = Visibility.Collapsed;
-                        App.InstallerWindow.ShowErrorMessage(hresultMsg);
-                        return;
-                    }
-                    else
-                    {
-                        hresultMsg += line;
-                    }
-                }
-
-                else if (line.StartsWith("Press enter to continue"))
-                {
-                    await psProc.StandardInput.WriteLineAsync();
-                }
-                else if (line == GetLocalizedString(KEY_Success))
-                {
-                    // Install succeeded
-                    App.InstallerWindow.NextStep();
-                }
-                else if (line.StartsWith(GetLocalizedString(KEY_Error)))
-                {
-                    // Install failed
-                    ProgressBar.Visibility = Visibility.Collapsed;
-                    App.InstallerWindow.ShowErrorMessage(line);
-                    return;
-                }
-            }
-
-            if (!isError)
-            {
-                Debug.WriteLine("PowerShell script exited");
-                Debug.WriteLine("Removing temporary files");
-                TempFolder.Delete(true);
-            }
+            await Task.Run(async () => await InstallAsync(cts.Token));
         }
 
-        private void OutputBoxWriteLine(string line)
+        private async Task InstallAsync(CancellationToken token = default)
         {
-            OutputBox.Text += line + "\r\n";
-        }
+            X509Store? store = null;
+            X509Certificate2? cert = null;
 
-        public void Cancel()
-        {
             try
             {
-                if (psProc != null && !psProc.HasExited)
+                token.ThrowIfCancellationRequested();
+
+                // Install certificate
+                QueueOutputBoxWriteLine("Preparing certificate...");
+                cert = new(DefaultResources.Cert);
+                store = new(StoreName.TrustedPeople, StoreLocation.LocalMachine);
+                store.Open(OpenFlags.ReadWrite);
+                store.Add(cert);
+                QueueOutputBoxWriteLine($"Certificate added with subject '{cert.Subject}'");
+
+                token.ThrowIfCancellationRequested();
+
+                // Install package
+                QueueOutputBoxWriteLine("Installing package...");
+                var appInstallerPath = "https://ipfs.askharoun.com/FluentStore/BetaInstaller/FluentStoreBeta.appinstaller";
+                await InstallWithPackageManager(appInstallerPath, token);
+
+                QueueOutputBoxWriteLine($"Fluent Store Beta was successfully installed.");
+
+                // Install succeeded
+                Dispatcher.Invoke(delegate
                 {
-                    Debug.WriteLine("Killing PowerShell script");
-                    psProc?.Kill();
-                    psProc?.Close();
-                }
-
-                using RegistryKey? hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
-                RegistryKey? regKey = hklm.OpenSubKey(regPath, true);
-                if (regKey != null)
-                {
-                    if (AllowAllTrustedApps.HasValue)
-                        regKey.SetValue("AllowAllTrustedApps", AllowAllTrustedApps.Value, RegistryValueKind.DWord);
-                    else
-                        regKey.DeleteValue("AllowAllTrustedApps");
-
-                    if (AllowDevelopmentWithoutDevLicense.HasValue)
-                        regKey.SetValue("AllowDevelopmentWithoutDevLicense", AllowDevelopmentWithoutDevLicense.Value, RegistryValueKind.DWord);
-                    else
-                        regKey.DeleteValue("AllowDevelopmentWithoutDevLicense");
-
-                    regKey.Close();
-                }
-
-                Debug.WriteLine("Removing temporary files");
-                TempFolder?.Delete(true);
+                    App.InstallerWindow.SetNextButtonEnabled(true);
+                });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Debug.WriteLine("Error while cancelling");
+                ShowErrorMessage(ex);
+            }
+            finally
+            {
+                // Even if the install failed, we want to clean up after ourselves
+                if (store is not null && cert is not null)
+                {
+                    store?.Remove(cert);
+                    QueueOutputBoxWriteLine("Removed certificate");
+                }
             }
         }
 
-        private void PsProc_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+        private void UpdateProgress(uint progress)
         {
-            Debug.WriteLine("\tERR> " + e.Data);
+            Dispatcher.Invoke(delegate
+            {
+                ProgressBar.IsIndeterminate = false;
+                ProgressBar.Value = progress;
+                QueueOutputBoxWriteLine($"Installing {progress:#0}%");
+            });
+        }
+
+        private void QueueOutputBoxWriteLine(string line)
+        {
+            Dispatcher.Invoke(delegate
+            {
+                OutputBox.Text += line + "\r\n";
+            });
+        }
+
+        private void ShowErrorMessage(Exception ex)
+        {
+            Dispatcher.Invoke(delegate
+            {
+                ProgressBar.Visibility = Visibility.Collapsed;
+                QueueOutputBoxWriteLine(ex.ToString());
+
+                string message = ex.Data.Contains("RestrictedDescription")
+                    ? ex.Data["RestrictedDescription"].ToString().Trim()
+                    : ex.Message;
+                App.InstallerWindow.ShowErrorMessage(message);
+            });
+        }
+
+        public void Cancel() => cts.Cancel();
+
+        private async Task InstallWithPackageManager(string installerPath, CancellationToken token = default)
+        {
+            PackageManager pm = new();
+
+            var defaultVolume = pm.GetDefaultPackageVolume();
+
+            var operation = pm.AddPackageByAppInstallerFileAsync(new Uri(installerPath), default, defaultVolume);
+            var task = operation.AsTask(token, new Progress<DeploymentProgress>(OnProgress));
+
+            var installResult = await task;
+            if (!installResult.IsRegistered)
+                throw new Exception(installResult.ErrorText);
+
+            void OnProgress(DeploymentProgress e) => UpdateProgress(e.percentage);
         }
 
         private void OutputBox_TextChanged(object sender, TextChangedEventArgs e)

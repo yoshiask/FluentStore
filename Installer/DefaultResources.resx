@@ -121,9 +121,6 @@
   <data name="Background" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Background.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="FluentStore_Beta" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\Packages\FluentStoreBeta.appinstaller;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="LICENSE" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\LICENSE;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -132,5 +129,8 @@
   </data>
   <data name="Square71x71Logo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Square71x71Logo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Cert" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\yoshiask_self2025.cer;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>
