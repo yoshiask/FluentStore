@@ -1,8 +1,4 @@
 ﻿using FluentStoreAPI.Models;
-using Flurl;
-using Flurl.Http;
-using Google.Apis.Firestore.v1.Data;
-using Supabase.Gotrue;
 using System;
 using System.Collections.Generic;
 using System.Threading;
