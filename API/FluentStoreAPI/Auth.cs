@@ -5,32 +5,29 @@ namespace FluentStoreAPI
 {
     public partial class FluentStoreAPI
     {
-        public async Task SignUpAsync(string email, string password)
+        public async Task<Guid?> SignUpAsync(string email, string password)
         {
-            var session = await _supabase.Auth.SignUp(email, password)
+            var session = await _supabase.Auth.SignUp(email, password);
+
+            var id = session?.User?.Id
                 ?? throw new Exception("Failed to sign up");
 
-            Token = session.AccessToken;
-            RefreshToken = session.RefreshToken;
+            return new(id);
         }
 
         public async Task SignInAsync(string email, string password)
         {
-            var session = await _supabase.Auth.SignInWithPassword(email, password)
-                ?? throw new Exception("Failed to sign in");
+            var session = await _supabase.Auth.SignInWithPassword(email, password);
 
-            Token = session.AccessToken;
-            RefreshToken = session.RefreshToken;
+            if (session?.User?.Id is null)
+                throw new Exception("Failed to sign in");
         }
 
         /// <summary>
         /// Exchanges the <see cref="RefreshToken"/> to get new tokens.
         /// </summary>
         /// <remarks>Note that this does *not* update <see cref="Token"/> or <see cref="RefreshToken"/></remarks>
-        public async Task UseRefreshToken()
-        {
-            await _supabase.Auth.RefreshToken();
-        }
+        public async Task UseRefreshToken() => await _supabase.Auth.RefreshToken();
 
         /// <summary>
         /// Sends a password reset email.

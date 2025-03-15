@@ -1,6 +1,5 @@
 ﻿using FluentStoreAPI.Models;
 using FluentStoreAPI.Models.Supabase;
-using Google.Apis.Firestore.v1;
 using Supabase;
 using System;
 using System.Threading;
@@ -10,17 +9,7 @@ namespace FluentStoreAPI
 {
     public partial class FluentStoreAPI
     {
-        public const string STORAGE_BASE_URL = "https://firebasestorage.googleapis.com/v0/b/fluent-store.appspot.com/o/";
-        private const string KEY = "AIzaSyCoINaQk7QdzPryW0oZHppWnboRRPk26fQ";
-        private const string NAME_PREFIX = "projects/fluent-store/databases/(default)/documents";
-
-        private readonly FirestoreService _firestore;
         private readonly Client _supabase;
-
-        private ProjectsResource.DatabasesResource.DocumentsResource Documents => _firestore.Projects.Databases.Documents;
-
-        public string? Token { get; set; }
-        public string? RefreshToken { get; set; }
 
         public FluentStoreAPI() : this(Constants.SUPABASE_URL, Constants.SUPABASE_KEY)
         {
