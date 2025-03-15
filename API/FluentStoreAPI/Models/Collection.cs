@@ -1,59 +1,113 @@
-﻿using Google.Apis.Firestore.v1.Data;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using Newtonsoft.Json;
+using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
 
-namespace FluentStoreAPI.Models
+namespace FluentStoreAPI.Models;
+
+[Table("UserCollections")]
+public class Collection : BaseModel, IEquatable<Collection>
 {
-    public class Collection
-    {
-        public Collection() { }
+    [PrimaryKey("id")]
+    public Guid Id { get; set; }
 
-        internal Collection(Document d)
+    [Column("created_at")]
+    public DateTimeOffset CreatedAt { get; set; }
+
+    [Column("modified_at")]
+    public DateTimeOffset ModifiedAt { get; set; }
+
+    [Column("name")]
+    public string Name { get; set; } = "";
+
+    [Column("description")]
+    public string Description { get; set; } = "";
+
+    [Column("is_public")]
+    public bool IsPublic { get; set; }
+    
+    [Column("tile_glyph")]
+    public string? TileGlyph { get; set; }
+    
+    [Column("image_url")]
+    public string? ImageUrl { get; set; }
+
+    [Column("author_id")]
+    public Guid AuthorId { get; set; }
+
+    [Column("items")]
+    public List<string> Items { get; set; } = [];
+
+    [JsonIgnore]
+    public bool IsPrivate => !IsPublic;
+
+    public bool Equals(Collection? other)
+    {
+        if (other is null)
+            return false;
+
+        // Check simple properties, ignoring timestamps
+        var sameProps = Id == other.Id
+            && Name == other.Name
+            && Description == other.Description
+            && IsPublic == other.IsPublic
+            && TileGlyph == other.TileGlyph
+            && ImageUrl == other.ImageUrl
+            && AuthorId == other.AuthorId
+            && Items?.Count == other.Items?.Count;
+
+        if (!sameProps)
+            return false;
+
+        if (Items is null)
+            return true;
+
+        for (int i = 0; i < Items.Count; i++)
         {
-            AuthorId = d.Fields[nameof(AuthorId)].StringValue;
-            Description = d.Fields[nameof(Description)].StringValue;
-            ImageUrl = d.Fields[nameof(ImageUrl)].StringValue;
-            IsPublic = d.Fields[nameof(IsPublic)].BooleanValue ?? false;
-            Name = d.Fields[nameof(Name)].StringValue;
-            TileGlyph = d.Fields[nameof(TileGlyph)].StringValue;
-            Items = d.Fields[nameof(Items)].ArrayValue.Values
-                .Select(v => v.StringValue).ToList();
+            var item = Items[i];
+            var otherItem = other.Items![i];
+            if (item != otherItem)
+                return false;
         }
 
-        public Guid Id { get; set; }
-        public bool IsPublic { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string TileGlyph { get; set; }
-        public string ImageUrl { get; set; }
-        public string AuthorId { get; set; }
-        public List<string> Items { get; set; } = [];
+        return true;
+    }
 
-        [Ignore]
-        public bool IsPrivate => !IsPublic;
+    public static bool operator ==(Collection obj1, Collection obj2)
+    {
+        if (ReferenceEquals(obj1, obj2))
+            return true;
 
-        public static implicit operator Document(Collection c)
+        if (obj1 is null)
+            return false;
+        
+        if (obj2 is null)
+            return false;
+        
+        return obj1.Equals(obj2);
+    }
+
+    public static bool operator !=(Collection obj1, Collection obj2) => !(obj1 != obj2);
+
+    public override bool Equals(object? obj) => Equals(obj as Collection);
+
+    public override int GetHashCode()
+    {
+        unchecked
         {
-            return new()
-            {
-                Fields =
-                {
-                    [nameof(AuthorId)] = new() { StringValue = c.AuthorId.ToString() },
-                    [nameof(Description)] = new() { StringValue = c.Description },
-                    [nameof(ImageUrl)] = new() { StringValue = c.ImageUrl },
-                    [nameof(IsPublic)] = new() { BooleanValue = c.IsPublic },
-                    [nameof(Name)] = new() { StringValue = c.Name },
-                    [nameof(TileGlyph)] = new() { StringValue = c.TileGlyph },
-                    [nameof(Items)] = new()
-                    {
-                        ArrayValue = new()
-                        {
-                            Values = c.Items.Select(x => new Value() { StringValue = x }).ToList()
-                        }
-                    },
-                }
-            };
+            int hashCode = Id.GetHashCode();
+            hashCode = (hashCode * 397) ^ Name.GetHashCode();
+            hashCode = (hashCode * 397) ^ Description.GetHashCode();
+            hashCode = (hashCode * 397) ^ IsPublic.GetHashCode();
+            hashCode = (hashCode * 397) ^ TileGlyph?.GetHashCode() ?? -1;
+            hashCode = (hashCode * 397) ^ ImageUrl?.GetHashCode() ?? -1;
+            hashCode = (hashCode * 397) ^ AuthorId.GetHashCode();
+
+            foreach (var item in Items)
+                hashCode = (hashCode * 397) ^ item.GetHashCode();
+
+            return hashCode;
         }
     }
 }
