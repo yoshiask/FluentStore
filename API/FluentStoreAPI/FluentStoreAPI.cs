@@ -1,16 +1,8 @@
 ﻿using FluentStoreAPI.Models;
-using FluentStoreAPI.Models.Firebase;
 using FluentStoreAPI.Models.Supabase;
-using Flurl;
-using Flurl.Http;
 using Google.Apis.Firestore.v1;
-using Google.Apis.Firestore.v1.Data;
-using Newtonsoft.Json.Linq;
 using Supabase;
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -48,7 +40,7 @@ namespace FluentStoreAPI
 
         public async Task<HomePageFeatured> GetHomePageFeaturedAsync(CancellationToken token = default)
         {
-            var carouselResult = await _supabase.From<FeaturedHomeCarouselItem>().Get();
+            var carouselResult = await _supabase.From<FeaturedHomeCarouselItem>().Get(token);
             var carouselItems = carouselResult.Models;
 
             return new()
