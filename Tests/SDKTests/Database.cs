@@ -1,4 +1,5 @@
-﻿using FluentStoreAPI.Models;
+﻿using FluentStoreAPI;
+using FluentStoreAPI.Models;
 using Xunit.Abstractions;
 
 namespace SDKTests;
@@ -129,16 +130,16 @@ public class Database(ITestOutputHelper output)
             output.WriteLine($"{c.Name} ({c.Id})");
     }
 
-    private static async Task<FluentStoreAPI.FluentStoreAPI> CreateAuthedClient()
+    private static async Task<FluentStoreApiClient> CreateAuthedClient()
     {
-        FluentStoreAPI.FluentStoreAPI api = new();
+        FluentStoreApiClient api = new();
         await api.SignInAsync(EMAIL, PASSWORD);
         return api;
     }
 
-    private static async Task<FluentStoreAPI.FluentStoreAPI> CreateClient()
+    private static async Task<FluentStoreApiClient> CreateClient()
     {
-        FluentStoreAPI.FluentStoreAPI api = new();
+        FluentStoreApiClient api = new();
         await api.InitAsync();
         return api;
     }
