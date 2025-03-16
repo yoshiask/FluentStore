@@ -2,6 +2,7 @@
 using FluentStore.SDK.AbstractUI.Models;
 using FluentStore.SDK.Images;
 using FluentStore.SDK.Models;
+using FluentStore.SDK.Packages;
 using FluentStore.SDK.Users;
 using FluentStore.Services;
 using Flurl;
@@ -170,6 +171,17 @@ namespace FluentStore.SDK
         /// Whether the package was saved successfully.
         /// </returns>
         public virtual Task<bool> SavePackageAsync(PackageBase package) => Task.FromResult(false);
+
+        /// <summary>
+        /// Attempts to save changes made to the package.
+        /// </summary>
+        /// <param name="package">
+        /// The package with changes to apply.
+        /// </param>
+        /// <returns>
+        /// Whether the package was saved successfully.
+        /// </returns>
+        public virtual Task<bool> AddToCollectionAsync(IPackageCollection collection, PackageBase package) => Task.FromResult(false);
 
         #endregion
 

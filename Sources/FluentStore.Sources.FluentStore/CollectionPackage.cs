@@ -28,7 +28,7 @@ namespace FluentStore.Sources.FluentStore
             // Set base properties
             Title = collection.Name;
             PublisherId = collection.AuthorId.ToString();
-            Urn = Urn.Parse($"urn:{FluentStoreHandler.NAMESPACE_COLLECTION}:{PublisherId}:{Model.Id}");
+            Urn = Urn.Parse($"urn:{FluentStoreHandler.NAMESPACE_COLLECTION}:{Model.Id}");
             ReleaseDate = collection.CreatedAt;
             Description = collection.Description;
             ShortTitle = Title;

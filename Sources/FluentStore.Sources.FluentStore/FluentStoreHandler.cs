@@ -4,7 +4,6 @@ using Garfoot.Utilities.FluentUrn;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentStore.SDK;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Linq;
 using FluentStore.SDK.Helpers;
 using FluentStore.Services;
@@ -13,6 +12,7 @@ using OwlCore.AbstractUI.Models;
 using System;
 using FluentStore.Sources.FluentStore.Users;
 using FluentStoreAPI;
+using FluentStore.SDK.Packages;
 
 namespace FluentStore.Sources.FluentStore
 {
@@ -60,11 +60,16 @@ namespace FluentStore.Sources.FluentStore
                     var items = new List<PackageBase>(collection.Items.Count);
                     foreach (string packageId in collection.Items)
                     {
-                        // Get details for each item
-                        Urn packageUrn = Urn.Parse(packageId);
-                        PackageBase package = await PackageService.GetPackageAsync(packageUrn, PackageStatus.BasicDetails);
-                        items.Add(package);
+                        try
+                        {
+                            // Get details for each item
+                            Urn packageUrn = Urn.Parse(packageId);
+                            PackageBase package = await PackageService.GetPackageAsync(packageUrn, PackageStatus.BasicDetails);
+                            items.Add(package);
+                        }
+                        catch { }
                     }
+
                     collectionPack.Update(items);
 
                     var authorProfile = await FSApi.GetCurrentUserProfileAsync();
@@ -215,6 +220,18 @@ namespace FluentStore.Sources.FluentStore
                 default:
                     return false;
             }
+        }
+
+        public override async Task<bool> AddToCollectionAsync(IPackageCollection collection, PackageBase package)
+        {
+            if (collection is CollectionPackage collectionPackage)
+            {
+                collectionPackage.Items.Add(package);
+                collectionPackage.Model.Items.Add(package.Urn.ToString());
+                return await SavePackageAsync(collectionPackage);
+            }
+
+            return false;
         }
 
         public override async Task<bool> DeletePackageAsync(PackageBase package)
