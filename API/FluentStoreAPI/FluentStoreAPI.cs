@@ -24,6 +24,8 @@ namespace FluentStoreAPI
             _supabase = new(supabaseUrl, supabaseKey, options);
         }
 
+        public Client SupabaseClient => _supabase;
+
         public async Task InitAsync() => await _supabase.InitializeAsync();
 
         public async Task<HomePageFeatured> GetHomePageFeaturedAsync(CancellationToken token = default)

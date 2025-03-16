@@ -11,6 +11,7 @@ using FluentStore.Services;
 using FluentStore.SDK.AbstractUI.Models;
 using OwlCore.AbstractUI.Models;
 using System;
+using FluentStore.Sources.FluentStore.Users;
 
 namespace FluentStore.Sources.FluentStore
 {
@@ -42,11 +43,9 @@ namespace FluentStore.Sources.FluentStore
         {
             if (urn.NamespaceIdentifier == NAMESPACE_COLLECTION)
             {
-                string[] id = urn.GetContent<NamespaceSpecificString>().UnEscapedValue.Split(':');
-                string userId = id[0];
-                string collId = id[1];
+                var collId = Guid.Parse(urn.GetContent<NamespaceSpecificString>().UnEscapedValue);
 
-                var collection = await FSApi.GetCollectionAsync(userId, collId);
+                var collection = await FSApi.GetCollectionAsync(collId);
                 var collectionPack = new CollectionPackage(this, collection)
                 {
                     Status = PackageStatus.BasicDetails
@@ -64,7 +63,7 @@ namespace FluentStore.Sources.FluentStore
                     }
                     collectionPack.Update(items);
 
-                    var authorProfile = await FSApi.GetUserProfileAsync(userId);
+                    var authorProfile = await FSApi.GetCurrentUserProfileAsync();
                     collectionPack.Update(authorProfile);
 
                     collectionPack.Status = PackageStatus.Details;
@@ -82,7 +81,7 @@ namespace FluentStore.Sources.FluentStore
             if (!AccountHandler.IsLoggedIn)
                 yield break;
 
-            var collections = await FSApi.GetCollectionsAsync(AccountHandler.CurrentUser.Id);
+            var collections = await FSApi.GetCollectionsAsync(CurrentAccount.Uuid);
 
             foreach (var coll in collections)
                 yield return new CollectionPackage(this, coll) { Status = PackageStatus.BasicDetails };
@@ -176,7 +175,7 @@ namespace FluentStore.Sources.FluentStore
         {
             return package is CollectionPackage collectionPackage
                 && AccountHandler.IsLoggedIn
-                && collectionPackage.Model.AuthorId == AccountHandler.CurrentUser.Id;
+                && collectionPackage.Model.AuthorId == CurrentAccount.Uuid;
         }
 
         public override bool CanEditCollection(PackageBase package) => CanEditPackage(package);
@@ -187,7 +186,7 @@ namespace FluentStore.Sources.FluentStore
         {
             FluentStoreAPI.Models.Collection collection = new()
             {
-                AuthorId = AccountHandler.CurrentUser.Id,
+                AuthorId = CurrentAccount.Uuid,
                 IsPublic = true,
             };
             return new CollectionPackage(this, collection);
@@ -198,7 +197,8 @@ namespace FluentStore.Sources.FluentStore
             switch (package)
             {
                 case CollectionPackage collectionPackage:
-                    return await FSApi.UpdateCollectionAsync(AccountHandler.CurrentUser.Id, collectionPackage.Model);
+                    var updatedId = await FSApi.UpdateCollectionAsync(collectionPackage.Model);
+                    return updatedId is not null;
 
                 default:
                     return false;
@@ -210,11 +210,14 @@ namespace FluentStore.Sources.FluentStore
             switch (package)
             {
                 case CollectionPackage collectionPackage:
-                    return await FSApi.DeleteCollectionAsync(AccountHandler.CurrentUser.Id, collectionPackage.Model.Id.ToString());
+                    await FSApi.DeleteCollectionAsync(collectionPackage.Model.Id);
+                    return true;
 
                 default:
                     return false;
             }
         }
+
+        private FluentStoreAccount CurrentAccount => (FluentStoreAccount)AccountHandler.CurrentUser;
     }
 }
