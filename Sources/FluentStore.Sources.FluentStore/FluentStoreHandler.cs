@@ -20,17 +20,20 @@ namespace FluentStore.Sources.FluentStore
     {
         public const string NAMESPACE_COLLECTION = "fluent-store-collection";
 
-        private readonly FluentStoreApiClient FSApi = Ioc.Default.GetRequiredService<FluentStoreApiClient>();
-        private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
+        private readonly FluentStoreApiClient FSApi;
+        private readonly PackageService PackageService;
         private const string NameBoxId = "NameBox";
         private const string ImageUrlBoxId = "ImageUrlBox";
         private const string TileGlyphBoxId = "TileGlyphBox";
         private const string DescriptionBoxId = "DescriptionBox";
         private const string IsPublicSwitchId = "IsPublicSwitch";
 
-        public FluentStoreHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
+        public FluentStoreHandler(PackageService pkgSvc, IPasswordVaultService passwordVaultService, ICommonPathManager pathManager)
+            : base(passwordVaultService)
         {
-            AccountHandler = new FluentStoreAccountHandler(FSApi, passwordVaultService);
+            FSApi = new();
+            PackageService = pkgSvc;
+            AccountHandler = new FluentStoreAccountHandler(FSApi, passwordVaultService, pathManager);
         }
 
         public override HashSet<string> HandledNamespaces => new()

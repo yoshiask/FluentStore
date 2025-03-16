@@ -7,8 +7,10 @@ using FluentStoreAPI.Models;
 using Flurl;
 using OwlCore.AbstractUI.Models;
 using Supabase.Gotrue.Exceptions;
+using Supabase.Gotrue.Interfaces;
 using System;
 using System.Threading.Tasks;
+using static Supabase.Gotrue.Constants;
 
 namespace FluentStore.Sources.FluentStore.Users
 {
@@ -16,10 +18,13 @@ namespace FluentStore.Sources.FluentStore.Users
     {
         private readonly FluentStoreApiClient _client;
 
-        public FluentStoreAccountHandler(FluentStoreApiClient fsApi, IPasswordVaultService passwordVault)
+        public FluentStoreAccountHandler(FluentStoreApiClient client, IPasswordVaultService passwordVault, ICommonPathManager pathManager)
             : base(passwordVault)
         {
-            _client = fsApi;
+            _client = client;
+
+            _client.SupabaseClient.Auth.AddStateChangedListener(OnSupabaseAuthStateChanged);
+            _client.SupabaseClient.Auth.SetPersistence(new PasswordVaultSessionPersistence(passwordVault, pathManager, this));
         }
 
         public override string Id => "fluent-store-user";
@@ -28,7 +33,7 @@ namespace FluentStore.Sources.FluentStore.Users
 
         public override Task HandleAuthActivation(Url url) => Task.CompletedTask;
 
-        public override Task<bool> SignInAsync(CredentialBase credential) => SignInAsync(null, credential.Password);
+        public override Task<bool> SignInAsync(CredentialBase credential) => Task.Run(SignIn);
 
         /// <summary>
         /// Sign in using the supplied token and refresh token.
@@ -39,15 +44,17 @@ namespace FluentStore.Sources.FluentStore.Users
         /// get a new token.
         /// </remarks>
         /// <returns>Whether the sign-in succeeded.</returns>
-        protected async Task<bool> SignInAsync(string token, string refreshToken)
+        protected bool SignIn()
         {
             try
             {
-                // TODO: Sign in
-
-                IsLoggedIn = true;
+                if (_client.SupabaseClient.Auth.CurrentSession is null)
+                {
+                    // Attempt to load previous session
+                    _client.SupabaseClient.Auth.LoadSession();
+                }
             }
-            catch (Exception ex)
+            catch
             {
                 IsLoggedIn = false;
             }
@@ -55,12 +62,7 @@ namespace FluentStore.Sources.FluentStore.Users
             return IsLoggedIn;
         }
 
-        public override Task SignOutAsync()
-        {
-            // TODO: Sign out
-
-            return Task.CompletedTask;
-        }
+        public override async Task SignOutAsync() => await _client.SupabaseClient.Auth.SignOut();
 
         public override AbstractForm CreateSignInForm()
         {
@@ -106,11 +108,12 @@ namespace FluentStore.Sources.FluentStore.Users
             try
             {
                 await _client.SignInAsync(email, password);
-                //await SignInAsync(response);
             }
             catch (GotrueException ex)
             {
                 string errorMessage = ex.Reason.ToString();
+
+                epForm.EmailBox.Subtitle = errorMessage;
 
                 AbstractTextBox errorMessageBox = epForm.GetChildById<AbstractTextBox>("ErrorMessageBox");
                 if (errorMessageBox is null)
@@ -174,6 +177,30 @@ namespace FluentStore.Sources.FluentStore.Users
             if (await _client.UpdateUserProfileAsync(profile))
             {
                 await UpdateCurrentUser();
+            }
+        }
+
+        private void OnSupabaseAuthStateChanged(IGotrueClient<Supabase.Gotrue.User, Supabase.Gotrue.Session> sender, AuthState stateChanged)
+        {
+            switch (stateChanged)
+            {
+                case AuthState.SignedIn:
+                    IsLoggedIn = true;
+                    break;
+
+                case AuthState.SignedOut:
+                    IsLoggedIn = false;
+                    CurrentUser = null;
+                    break;
+
+                case AuthState.UserUpdated:
+                    var profile = _client.GetCurrentUserProfile();
+
+                    IsLoggedIn = profile is not null;
+                    CurrentUser = IsLoggedIn
+                        ? new FluentStoreAccount(profile)
+                        : null;
+                    break;
             }
         }
     }
