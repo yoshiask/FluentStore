@@ -12,6 +12,7 @@ using FluentStore.SDK.AbstractUI.Models;
 using OwlCore.AbstractUI.Models;
 using System;
 using FluentStore.Sources.FluentStore.Users;
+using FluentStoreAPI;
 
 namespace FluentStore.Sources.FluentStore
 {
@@ -19,7 +20,7 @@ namespace FluentStore.Sources.FluentStore
     {
         public const string NAMESPACE_COLLECTION = "fluent-store-collection";
 
-        private readonly FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
+        private readonly FluentStoreApiClient FSApi = Ioc.Default.GetRequiredService<FluentStoreApiClient>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
         private const string NameBoxId = "NameBox";
         private const string ImageUrlBoxId = "ImageUrlBox";
@@ -29,7 +30,7 @@ namespace FluentStore.Sources.FluentStore
 
         public FluentStoreHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
         {
-            AccountHandler = new Users.FluentStoreAccountHandler(FSApi, passwordVaultService);
+            AccountHandler = new FluentStoreAccountHandler(FSApi, passwordVaultService);
         }
 
         public override HashSet<string> HandledNamespaces => new()

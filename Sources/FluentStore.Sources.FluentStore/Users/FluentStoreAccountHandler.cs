@@ -14,9 +14,9 @@ namespace FluentStore.Sources.FluentStore.Users
 {
     public class FluentStoreAccountHandler : AccountHandlerBase<FluentStoreAccount>
     {
-        private readonly FluentStoreAPI.FluentStoreAPI _client;
+        private readonly FluentStoreApiClient _client;
 
-        public FluentStoreAccountHandler(FluentStoreAPI.FluentStoreAPI fsApi, IPasswordVaultService passwordVault)
+        public FluentStoreAccountHandler(FluentStoreApiClient fsApi, IPasswordVaultService passwordVault)
             : base(passwordVault)
         {
             _client = fsApi;
@@ -151,7 +151,7 @@ namespace FluentStore.Sources.FluentStore.Users
             string password = epForm.GetPassword();
             string displayName = epForm.GetChildById<AbstractTextBox>($"{epForm.Id}_DisplayName")?.Value;
 
-            FluentStoreAPI.Models.Profile profile = new()
+            Profile profile = new()
             {
                 DisplayName = displayName
             };
@@ -166,7 +166,7 @@ namespace FluentStore.Sources.FluentStore.Users
 
             string displayName = form.GetChildById<AbstractTextBox>($"{form.Id}_DisplayName")?.Value;
 
-            FluentStoreAPI.Models.Profile profile = new()
+            Profile profile = new()
             {
                 DisplayName = displayName
             };
