@@ -111,37 +111,14 @@ namespace FluentStore.Sources.FluentStore.Users
             }
             catch (GotrueException ex)
             {
-                string errorMessage = ex.Reason.ToString();
+                if (!Constants.GotrueReasons.TryGetValue(ex.Reason, out var errorMessage))
+                    errorMessage = ex.Reason.ToString();
 
                 epForm.EmailBox.Subtitle = errorMessage;
-
-                AbstractTextBox errorMessageBox = epForm.GetChildById<AbstractTextBox>("ErrorMessageBox");
-                if (errorMessageBox is null)
-                {
-                    errorMessageBox = new("ErrorMessageBox", errorMessage);
-                    epForm.Add(errorMessageBox);
-                }
-                else
-                {
-                    errorMessageBox.Value = errorMessage;
-                }
             }
-            catch (Flurl.Http.FlurlHttpException ex)
+            catch (Exception ex)
             {
-                // TODO: Error messages
-
-                string errorMessage = ex.Message;
-
-                AbstractTextBox errorMessageBox = epForm.GetChildById<AbstractTextBox>("ErrorMessageBox");
-                if (errorMessageBox is null)
-                {
-                    errorMessageBox = new("ErrorMessageBox", errorMessage);
-                    epForm.Add(errorMessageBox);
-                }
-                else
-                {
-                    errorMessageBox.Value = errorMessage;
-                }
+                epForm.EmailBox.Subtitle = ex.Message;
             }
         }
 
