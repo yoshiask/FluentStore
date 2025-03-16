@@ -2,7 +2,7 @@
 using Supabase.Postgrest.Attributes;
 using Supabase.Postgrest.Models;
 
-namespace FluentStoreAPI.Models.Supabase;
+namespace FluentStoreAPI.Models;
 
 [Table("FeaturedHomeCarousel")]
 public class FeaturedHomeCarouselItem : BaseModel

@@ -1,5 +1,4 @@
 ﻿using FluentStoreAPI.Models;
-using FluentStoreAPI.Models.Supabase;
 using Supabase;
 using System;
 using System.Threading;
