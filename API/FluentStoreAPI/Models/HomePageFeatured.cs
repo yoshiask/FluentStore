@@ -1,5 +1,4 @@
-﻿using FluentStoreAPI.Models.Supabase;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace FluentStoreAPI.Models
 {
