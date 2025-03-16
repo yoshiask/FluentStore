@@ -1,18 +1,18 @@
-﻿using FSAPI = FluentStoreAPI.FluentStoreAPI;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
-using FluentStore.ViewModels.Messages;
-using Garfoot.Utilities.FluentUrn;
 using FluentStore.SDK;
-using FluentStore.Services;
-using FluentStore.SDK.Models;
 using FluentStore.SDK.Helpers;
+using FluentStore.SDK.Models;
+using FluentStore.Services;
+using FluentStore.ViewModels.Messages;
+using FluentStoreAPI;
+using Garfoot.Utilities.FluentUrn;
 using OwlCore.Extensions;
-using System.Linq;
 
 namespace FluentStore.ViewModels
 {
@@ -24,7 +24,7 @@ namespace FluentStore.ViewModels
         }
 
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
-        private readonly FSAPI FSApi = Ioc.Default.GetRequiredService<FSAPI>();
+        private readonly FluentStoreApiClient FSApi = Ioc.Default.GetRequiredService<FluentStoreApiClient>();
 
         private void CarouselItems_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {

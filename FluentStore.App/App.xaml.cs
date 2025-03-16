@@ -293,7 +293,7 @@ namespace FluentStore
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
             services.AddSingleton<IIpfsService, IpfsService>();
             services.AddSingleton<Microsoft.Marketplace.Storefront.Contracts.StorefrontApi>();
-            services.AddSingleton<FluentStoreAPI.FluentStoreAPI>();
+            services.AddSingleton<FluentStoreAPI.FluentStoreApiClient>();
             services.AddSingleton<PackageService>();
             services.AddSingleton<PluginLoader>();
 
