@@ -88,7 +88,7 @@ public class Collection : BaseModel, IEquatable<Collection>
         return obj1.Equals(obj2);
     }
 
-    public static bool operator !=(Collection obj1, Collection obj2) => !(obj1 != obj2);
+    public static bool operator !=(Collection obj1, Collection obj2) => !(obj1 == obj2);
 
     public override bool Equals(object? obj) => Equals(obj as Collection);
 

@@ -14,12 +14,14 @@ public partial class FluentStoreApiClient
         await UpdateDisplayNameAsync(profile.DisplayName);
     }
 
-    public async Task<Profile> GetCurrentUserProfileAsync() => await Task.Run(GetCurrentUserProfile);
+    public async Task<Profile?> GetCurrentUserProfileAsync() => await Task.Run(GetCurrentUserProfile);
 
-    public Profile GetCurrentUserProfile()
+    public Profile? GetCurrentUserProfile()
     {
-        var user = _supabase.Auth.CurrentUser
-            ?? throw new Exception("Must be signed in to fetch profile");
+        var user = _supabase.Auth.CurrentUser;
+
+        if (user is null)
+            return null;
 
         Profile profile = new()
         {
@@ -27,8 +29,11 @@ public partial class FluentStoreApiClient
             Email = user.Email
         };
 
-        if (_supabase.Auth.CurrentUser!.UserMetadata.TryGetValue("display_name", out var displayName))
-            profile.DisplayName = displayName?.ToString() ?? profile.Email ?? user.Id!;
+        string? displayName = null;
+        if (_supabase.Auth.CurrentUser!.UserMetadata.TryGetValue("display_name", out var savedDisplayName))
+            displayName = savedDisplayName?.ToString();
+
+        profile.DisplayName = displayName ?? profile.Email ?? user.Id!;
 
         return profile;
     }
