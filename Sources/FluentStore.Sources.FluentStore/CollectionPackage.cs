@@ -29,7 +29,7 @@ namespace FluentStore.Sources.FluentStore
             Title = collection.Name;
             PublisherId = collection.AuthorId.ToString();
             Urn = Urn.Parse($"urn:{FluentStoreHandler.NAMESPACE_COLLECTION}:{PublisherId}:{Model.Id}");
-            //ReleaseDate = collection.LastUpdateDateUtc;
+            ReleaseDate = collection.CreatedAt;
             Description = collection.Description;
             ShortTitle = Title;
         }

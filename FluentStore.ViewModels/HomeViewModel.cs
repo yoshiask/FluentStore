@@ -66,11 +66,11 @@ namespace FluentStore.ViewModels
             CarouselItems.CollectionChanged += CarouselItems_CollectionChanged;
             CarouselItems.Clear();
 
-            await featured.Carousel.InParallel(async id =>
+            await featured.Carousel.InParallel(async item =>
             {
                 try
                 {
-                    Urn packageUrn = Urn.Parse(id);
+                    Urn packageUrn = Urn.Parse(item.PackageUrn);
                     var package = await PackageService.GetPackageAsync(packageUrn);
                     CarouselItems.Add(new PackageViewModel(package));
                 }
