@@ -14,14 +14,21 @@ namespace FluentStoreAPI
             await UpdateDisplayNameAsync(profile.DisplayName);
         }
 
-        public async Task<Profile> GetUserProfileAsync() => await Task.Run(GetUserProfile);
+        public async Task<Profile> GetCurrentUserProfileAsync() => await Task.Run(GetCurrentUserProfile);
 
-        public Profile GetUserProfile()
+        public Profile GetCurrentUserProfile()
         {
-            Profile profile = new();
+            var user = _supabase.Auth.CurrentUser
+                ?? throw new Exception("Must be signed in to fetch profile");
+
+            Profile profile = new()
+            {
+                Id = new(user.Id!),
+                Email = user.Email
+            };
 
             if (_supabase.Auth.CurrentUser!.UserMetadata.TryGetValue("display_name", out var displayName))
-                profile.DisplayName = displayName?.ToString() ?? _supabase.Auth.CurrentUser.Email!;
+                profile.DisplayName = displayName?.ToString() ?? profile.Email ?? user.Id!;
 
             return profile;
         }
