@@ -18,7 +18,6 @@ namespace FluentStore.SDK.Plugins.NuGet;
 
 public class FluentStoreNuGetProject : NuGetProject
 {
-    private static readonly NuGetVersion _currentSdkVersion = new(typeof(PluginLoader).Assembly.GetName().Version!, "beta");
     const string StatusFileName = "status.tsv";
 
     private static readonly SourceRepository _officialSource =
@@ -40,9 +39,18 @@ public class FluentStoreNuGetProject : NuGetProject
 
     public List<SourceRepository> Repositories { get; } = [_officialSource];
 
-    public static NuGetVersion CurrentSdkVersion => _currentSdkVersion;
+    public static NuGetVersion CurrentSdkVersion { get; }
 
-    public static VersionRange SupportedSdkRange => VersionRange.Parse($"[{CurrentSdkVersion.Major}.{CurrentSdkVersion.Minor}.*-*, )");
+    public static VersionRange SupportedSdkRange { get; }
+
+    static FluentStoreNuGetProject()
+    {
+        CurrentSdkVersion = new(typeof(PluginLoader).Assembly.GetName().Version!, "beta");
+
+        SupportedSdkRange = CurrentSdkVersion.Major is 0
+            ? VersionRange.Parse($"[0.{CurrentSdkVersion.Minor}.{CurrentSdkVersion.Patch}-*, )")
+            : VersionRange.Parse($"[{CurrentSdkVersion.Major}.{CurrentSdkVersion.Minor}.*-*, )");
+    }
 
     public FluentStoreNuGetProject(string pluginRoot, NuGetFramework targetFramework, string name = "FluentStore")
     {
