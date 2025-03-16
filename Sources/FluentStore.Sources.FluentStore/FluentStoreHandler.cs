@@ -198,7 +198,15 @@ namespace FluentStore.Sources.FluentStore
             {
                 case CollectionPackage collectionPackage:
                     var updatedId = await FSApi.UpdateCollectionAsync(collectionPackage.Model);
-                    return updatedId is not null;
+                    if (updatedId is not null)
+                    {
+                        collectionPackage.Model.Id = updatedId.Value;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
 
                 default:
                     return false;

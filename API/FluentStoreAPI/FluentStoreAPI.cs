@@ -47,8 +47,8 @@ namespace FluentStoreAPI
             {
                 var feat = document.Carousel[i];
 
-                bool show = appVersion >= feat.MinVersion
-                    && appVersion <= feat.MaxVersion;
+                bool show = feat.MinVersion is null || appVersion >= feat.MinVersion;
+                show &= feat.MaxVersion is null || appVersion <= feat.MaxVersion;
 
                 if (!show)
                     document.Carousel.RemoveAt(i--);

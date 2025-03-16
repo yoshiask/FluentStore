@@ -6,6 +6,7 @@ using FluentStoreAPI;
 using FluentStoreAPI.Models;
 using Flurl;
 using OwlCore.AbstractUI.Models;
+using Supabase.Gotrue.Exceptions;
 using System;
 using System.Threading.Tasks;
 
@@ -106,6 +107,21 @@ namespace FluentStore.Sources.FluentStore.Users
             {
                 await _client.SignInAsync(email, password);
                 //await SignInAsync(response);
+            }
+            catch (GotrueException ex)
+            {
+                string errorMessage = ex.Reason.ToString();
+
+                AbstractTextBox errorMessageBox = epForm.GetChildById<AbstractTextBox>("ErrorMessageBox");
+                if (errorMessageBox is null)
+                {
+                    errorMessageBox = new("ErrorMessageBox", errorMessage);
+                    epForm.Add(errorMessageBox);
+                }
+                else
+                {
+                    errorMessageBox.Value = errorMessage;
+                }
             }
             catch (Flurl.Http.FlurlHttpException ex)
             {
