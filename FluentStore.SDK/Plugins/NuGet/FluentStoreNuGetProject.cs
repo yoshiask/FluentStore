@@ -121,7 +121,7 @@ public class FluentStoreNuGetProject : NuGetProject
                 // in the plugin folder so we can pick it up next time.
                 status = uninstallStatus;
 
-                string pluginFilePath = Path.Combine(PluginRoot, $"{packageIdentity}.nupkg");
+                string pluginFilePath = Path.Combine(PluginRoot, $"{packageIdentity.Id}.{packageIdentity.Version}.nupkg");
                 await downloadResourceResult.PackageReader.CopyNupkgAsync(pluginFilePath, token);
             }
         }

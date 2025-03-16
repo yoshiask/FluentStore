@@ -36,7 +36,7 @@ await AnsiConsole.Status()
     .StartAsync("Starting...", async (ctx) =>
     {
         IEnumerable<string> pluginCsprojPaths = pluginId is not null
-            ? ([Path.Combine(sourcesDir, pluginId, $"{pluginId}.csproj")])
+            ? [Path.Combine(sourcesDir, pluginId, $"{pluginId}.csproj")]
             : Directory.EnumerateFiles(sourcesDir, "*.csproj", SearchOption.AllDirectories);
 
         foreach (var pluginCsprojPath in pluginCsprojPaths)

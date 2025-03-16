@@ -39,7 +39,7 @@ namespace FluentStore.SDK.Plugins
             // Known .NET dependencies
             new("System.ComponentModel.Primitives", _targetFrameworkVersion),
             new("System.ComponentModel.TypeConverter", _targetFrameworkVersion),
-            new("System.Diagnostics.DianosticSource", _targetFrameworkVersion),
+            new("System.Diagnostics.DiagnosticSource", _targetFrameworkVersion),
             new("System.Dynamic.Runtime", _targetFrameworkVersion),
             new("System.Runtime.Serialization.Primitives", _targetFrameworkVersion),
             new("System.Text.Json", new(9, 0, 0)),
@@ -404,7 +404,7 @@ namespace FluentStore.SDK.Plugins
                 .ToList();
             foreach (var entry in pendingInstalls)
             {
-                var pluginPath = Path.Combine(_settings.PluginDirectory, $"{entry.ToPackageIdentity()}.nupkg");
+                var pluginPath = Path.Combine(_settings.PluginDirectory, $"{entry.Id}.{entry.Version}.nupkg");
                 using FileStream plugin = new(pluginPath, FileMode.Open);
 
                 var installStatus = await InstallPlugin(plugin, true);
