@@ -161,7 +161,7 @@ namespace FluentStore
 
                 // Load plugins and initialize package and account services
                 log?.Log($"Began loading plugins");
-                await pluginLoader.LoadPlugins();
+                await pluginLoader.LoadPlugins(Settings.Default.AutoUpdatePlugins);
                 log?.Log($"Finished loading plugins");
 
                 // Attempt to silently sign into any saved accounts

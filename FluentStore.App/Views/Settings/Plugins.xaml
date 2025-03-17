@@ -14,6 +14,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -41,7 +42,16 @@
             </controls:SettingsBlockControl.ExpandableContent>
         </controls:SettingsBlockControl>
 
-        <controls:SettingsBlockControl Title="Install from file" Grid.Row="1"
+        <controls:SettingsBlockControl Title="Auto-update plugins" Grid.Row="1"
+                                       Description="Whether to check for plugin updates and automatically install them on startup.">
+            <controls:SettingsBlockControl.Icon>
+                <FontIcon Glyph="&#xE777;"/>
+            </controls:SettingsBlockControl.Icon>
+
+            <ToggleSwitch IsOn="{x:Bind helpers:Settings.Default.AutoUpdatePlugins, Mode=TwoWay}" Style="{ThemeResource ToggleSwitchRightStyle}"/>
+        </controls:SettingsBlockControl>
+
+        <controls:SettingsBlockControl Title="Install from file" Grid.Row="2"
                                        Description="Choose a NuGet package from your device to install as a plugin">
             <controls:SettingsBlockControl.Icon>
                 <FontIcon Glyph="&#xE8DA;"/>
@@ -51,7 +61,7 @@
             </controls:SettingsBlockControl.SettingsActionableElement>
         </controls:SettingsBlockControl>
 
-        <controls:PackageManagerControl MinHeight="400" Grid.Row="2"/>
+        <controls:PackageManagerControl MinHeight="400" Grid.Row="3"/>
 
     </Grid>
 

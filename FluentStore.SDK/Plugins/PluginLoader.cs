@@ -105,14 +105,22 @@ namespace FluentStore.SDK.Plugins
         /// Attempts to load all plugins located in <see cref="ISettingsService.PluginDirectory"/>
         /// and registers all loaded package handlers with the current <see cref="PackageService"/>.
         /// </summary>
-        public async Task LoadPlugins()
+        public async Task LoadPlugins(bool withAutoUpdate = false)
         {
             if (!Directory.Exists(_settings.PluginDirectory))
                 return;
 
             var installedPlugins = await Project.GetInstalledPackagesAsync();
             foreach (var plugin in installedPlugins)
-                await LoadPlugin(plugin.PackageIdentity.Id);
+            {
+                var updateStatus = PluginInstallStatus.NoAction;
+
+                if (withAutoUpdate)
+                    updateStatus = await UpdatePlugin(plugin.PackageIdentity);
+
+                if (updateStatus.IsLessThan(PluginInstallStatus.AppRestartRequired))
+                    await LoadPlugin(plugin.PackageIdentity.Id);
+            }
         }
 
         public async Task<PluginLoadResult> LoadPlugin(string pluginId)
@@ -194,13 +202,15 @@ namespace FluentStore.SDK.Plugins
         /// Whether to force download or install, even if a plugin with the same ID
         /// is already installed.
         /// </param>
-        public async Task InstallPlugins(IEnumerable<string> pluginIds, bool overwrite = false)
+        public async Task InstallPlugins(IEnumerable<string> pluginIds, bool overwrite = false, CancellationToken token = default)
         {
             Directory.CreateDirectory(_settings.PluginDirectory);
 
             foreach (var pluginId in pluginIds)
             {
-                await InstallPlugin(pluginId, overwrite);
+                token.ThrowIfCancellationRequested();
+
+                await InstallPlugin(pluginId, overwrite, token);
             }
         }
 
@@ -218,23 +228,22 @@ namespace FluentStore.SDK.Plugins
         /// Whether the plugin was installed successfully. <see langword="false"/> if the plugin
         /// was already installed and <paramref name="overwrite"/> was <see langword="false"/>.
         /// </returns>
-        public async Task<bool> InstallPlugin(string pluginId, bool overwrite = false)
+        public async Task<PluginInstallStatus> InstallPlugin(string pluginId, bool overwrite = false, CancellationToken token = default)
         {
             try
             {
-                var downloadedResource = await FetchPlugin(pluginId);
+                var downloadedResource = await FetchPlugin(pluginId, token);
 
                 WeakReferenceMessenger.Default.Send(new Messages.PluginInstallStartedMessage(pluginId));
 
-                var status = await InstallPlugin(downloadedResource, overwrite, true);
-                return status.IsGreaterThan(PluginInstallStatus.Failed);
+                return await InstallPlugin(downloadedResource, overwrite, true, token);
             }
             catch (Exception ex)
             {
                 _log.UnhandledException(ex, LogLevel.Error);
                 WeakReferenceMessenger.Default.Send(new Messages.ErrorMessage(
                     ex, pluginId, Messages.ErrorType.PluginInstallFailed));
-                return false;
+                return PluginInstallStatus.Failed;
             }
         }
 
@@ -381,6 +390,20 @@ namespace FluentStore.SDK.Plugins
             }
 
             return status;
+        }
+
+        public async Task<PluginInstallStatus> UpdatePlugin(PackageIdentity pluginIdentity, CancellationToken token = default)
+        {
+            var findPackageResource = await FluentStoreRepo.GetResourceAsync<FindPackageByIdResource>(token);
+            if (findPackageResource is null)
+                return PluginInstallStatus.NoAction;
+
+            var allVersions = await findPackageResource.GetAllVersionsAsync(pluginIdentity.Id, new(), global::NuGet.Common.NullLogger.Instance, token);
+            var latestVersion = FluentStoreNuGetProject.SupportedSdkRange.FindBestMatch(allVersions);
+            if (latestVersion is null || latestVersion <= pluginIdentity.Version)
+                return PluginInstallStatus.NoAction;
+
+            return await InstallPlugin(pluginIdentity.Id, true, token);
         }
 
         /// <summary>

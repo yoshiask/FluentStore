@@ -24,6 +24,8 @@ namespace FluentStore.Services
 
         public bool RehostOnIpfs { get; set; }
 
+        public bool AutoUpdatePlugins { get; set; }
+
         public Dictionary<string, bool> PackageHandlerEnabled { get; set; }
 
         /// <summary>
@@ -43,6 +45,8 @@ namespace FluentStore.Services
         public virtual int IpfsGatewayPort() => 8080;
 
         public virtual bool RehostOnIpfs() => true;
+
+        public virtual bool AutoUpdatePlugins() => true;
 
         public virtual string ExclusionFilter() => @"(?i)(guide|manual|tutorial)(?-i)";
 
