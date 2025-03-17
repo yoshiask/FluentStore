@@ -46,10 +46,9 @@ public class FluentStoreNuGetProject : NuGetProject
     static FluentStoreNuGetProject()
     {
         CurrentSdkVersion = new(typeof(PluginLoader).Assembly.GetName().Version!, "beta");
+        NuGetVersion nextBreakingSdkVersion = new(0, CurrentSdkVersion.Minor + 1, 0, "alpha");
 
-        SupportedSdkRange = CurrentSdkVersion.Major is 0
-            ? VersionRange.Parse($"[0.{CurrentSdkVersion.Minor}.{CurrentSdkVersion.Patch}-*, )")
-            : VersionRange.Parse($"[{CurrentSdkVersion.Major}.{CurrentSdkVersion.Minor}.*-*, )");
+        SupportedSdkRange = VersionRange.Parse($"[{CurrentSdkVersion.Major}.{CurrentSdkVersion.Minor}.*-*, {nextBreakingSdkVersion})");
     }
 
     public FluentStoreNuGetProject(string pluginRoot, NuGetFramework targetFramework, string name = "FluentStore")
