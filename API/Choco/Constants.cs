@@ -4,7 +4,8 @@ namespace Chocolatey
 {
     public static class Constants
     {
-        private const string CHOCOLATEY_API_BASE = "community.chocolatey.org/api/v2";
+        private const string CHOCOLATEY_DOMAIN = "chocolatey.org";
+        private const string CHOCOLATEY_API_BASE = CHOCOLATEY_DOMAIN + "/api/v2";
         public const string CHOCOLATEY_API_HOST = "https://" + CHOCOLATEY_API_BASE;
 
         public static readonly XNamespace XMLNS_ATOM = "http://www.w3.org/2005/Atom";

@@ -40,7 +40,7 @@ namespace Chocolatey
 
         public static async Task<string> GetPackagePropertyAsync(string id, Version version, string propertyName)
         {
-            var entry = await Constants.CHOCOLATEY_API_HOST.AppendPathSegment($"Packages(Id='{id}', Version='{version}')")
+            var entry = await Constants.CHOCOLATEY_API_HOST.AppendPathSegment($"Packages(Id='{id}',Version='{version}')")
                 .AppendPathSegment(propertyName)
                 .GetXDocumentAsync();
             return entry.Root.Value;
