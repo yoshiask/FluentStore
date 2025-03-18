@@ -153,21 +153,6 @@ namespace FluentStore
 
             if (appStartupService.IsFirstLaunch)
             {
-                var pluginLoader = Ioc.Default.GetRequiredService<PluginLoader>();
-
-                log?.Log($"Began installing pending plugins");
-                await pluginLoader.HandlePendingOperations();
-                log?.Log($"Finished install pending plugins");
-
-                // Load plugins and initialize package and account services
-                log?.Log($"Began loading plugins");
-                await pluginLoader.LoadPlugins(Settings.Default.AutoUpdatePlugins);
-                log?.Log($"Finished loading plugins");
-
-                // Attempt to silently sign into any saved accounts
-                var pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
-                await pkgSvc.TrySlientSignInAsync();
-
                 // Update last launched version
                 Settings.Default.LastLaunchedVersion = Windows.ApplicationModel.Package.Current.Id.Version.ToVersion();
                 await Settings.Default.SaveAsync();
@@ -188,6 +173,21 @@ namespace FluentStore
                 }
 
                 SDK.Downloads.AbstractStorageHelper.IpfsClient = ipfsService.Client;
+
+                var pluginLoader = Ioc.Default.GetRequiredService<PluginLoader>();
+
+                log?.Log($"Began installing pending plugins");
+                await pluginLoader.HandlePendingOperations();
+                log?.Log($"Finished install pending plugins");
+
+                // Load plugins and initialize package and account services
+                log?.Log($"Began loading plugins");
+                await pluginLoader.LoadPlugins(Settings.Default.AutoUpdatePlugins);
+                log?.Log($"Finished loading plugins");
+
+                // Attempt to silently sign into any saved accounts
+                var pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
+                await pkgSvc.TrySlientSignInAsync();
             }
 
             if (!appStartupService.LaunchResult.RedirectActivation || appStartupService.IsFirstInstance)
