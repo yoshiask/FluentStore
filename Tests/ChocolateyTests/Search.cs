@@ -7,10 +7,12 @@ namespace ChocolateyTests;
 
 public class Search(ITestOutputHelper output)
 {
+    private readonly IChocoSearchService _client = new ChocoCommunityWebClient();
+
     [Fact]
     public async Task SearchAsync_Minimum1()
     {
-        var actualResults = await Choco.SearchAsync("git");
+        var actualResults = await _client.SearchAsync("git");
         foreach (var result in actualResults)
             output.WriteLine($"{result.Title} {result.Version}");
 
@@ -25,7 +27,7 @@ public class Search(ITestOutputHelper output)
     [Fact]
     public async Task SearchAsync_MinimumWithSpace()
     {
-        var actualResults = await Choco.SearchAsync("google chrome");
+        var actualResults = await _client.SearchAsync("google chrome");
         foreach (var result in actualResults)
             output.WriteLine($"{result.Title} {result.Version}");
 
@@ -43,7 +45,7 @@ public class Search(ITestOutputHelper output)
         string query = "python";
         int pageSize = 10;
 
-        var results1 = await Choco.SearchAsync(query, top: pageSize, skip: 0);
+        var results1 = await _client.SearchAsync(query, top: pageSize, skip: 0);
         foreach (var result in results1)
             output.WriteLine($"{result.Title} {result.Version}");
 
@@ -54,7 +56,7 @@ public class Search(ITestOutputHelper output)
             Assert.NotNull(result.Title);
         }
 
-        var results2 = await Choco.SearchAsync(query, top: pageSize, skip: pageSize);
+        var results2 = await _client.SearchAsync(query, top: pageSize, skip: pageSize);
         foreach (var result in results2)
             output.WriteLine($"{result.Title} {result.Version}");
 
