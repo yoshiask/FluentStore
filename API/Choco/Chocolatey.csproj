@@ -8,8 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="CliWrap" Version="3.8.2" />
         <PackageReference Include="Flurl.Http" Version="4.0.2" />
         <PackageReference Include="Flurl.Http.Xml" Version="4.0.0" />
+        <PackageReference Include="NuGet.Versioning" Version="6.13.2" />
     </ItemGroup>
 
 </Project>

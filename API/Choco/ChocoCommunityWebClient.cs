@@ -1,12 +1,11 @@
 ﻿using Chocolatey.Models;
 using Flurl;
-using Flurl.Http;
 using Flurl.Http.Xml;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using NuGet.Versioning;
 
 namespace Chocolatey;
 
@@ -26,14 +25,14 @@ public class ChocoCommunityWebClient : IChocoSearchService
         return entries.Select(entry => new Package(entry)).ToList();
     }
 
-    public async Task<Package> GetPackageAsync(string id, Version version)
+    public async Task<Package> GetPackageAsync(string id, NuGetVersion version)
     {
         var entry = await Constants.CHOCOLATEY_API_HOST.AppendPathSegment($"Packages(Id='{id}',Version='{version}')")
             .GetXDocumentAsync();
         return new Package(entry.Root);
     }
 
-    public async Task<string> GetPackagePropertyAsync(string id, Version version, string propertyName)
+    public async Task<string> GetPackagePropertyAsync(string id, NuGetVersion version, string propertyName)
     {
         var entry = await Constants.CHOCOLATEY_API_HOST.AppendPathSegment($"Packages(Id='{id}',Version='{version}')")
             .AppendPathSegment(propertyName)

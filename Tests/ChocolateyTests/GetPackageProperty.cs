@@ -2,6 +2,7 @@
 using Chocolatey.Models;
 using System;
 using System.Threading.Tasks;
+using NuGet.Versioning;
 using Xunit;
 
 namespace ChocolateyTests
@@ -14,7 +15,7 @@ namespace ChocolateyTests
         public async Task GetPackagePropertyAsync()
         {
             string id = "git";
-            Version v = new(2, 35, 1, 2);
+            NuGetVersion v = new(2, 35, 1, 2);
             string actual;
 
             actual = await _client.GetPackagePropertyAsync(id, v, "Title");
@@ -31,7 +32,7 @@ namespace ChocolateyTests
         public async Task GetPackageDatePropertyAsync()
         {
             string id = "git";
-            Version v = new(2, 35, 1, 2);
+            NuGetVersion v = new(2, 35, 1, 2);
             DateTimeOffset actual;
 
             actual = await _client.GetPackageDatePropertyAsync(id, v, "Created");
@@ -48,7 +49,7 @@ namespace ChocolateyTests
         public async Task GetPackageBooleanPropertyAsync()
         {
             string id = "git";
-            Version v = new(2, 35, 1, 2);
+            NuGetVersion v = new(2, 35, 1, 2);
             bool actual;
 
             actual = await _client.GetPackageBooleanPropertyAsync(id, v, "IsPrerelease");
@@ -65,7 +66,7 @@ namespace ChocolateyTests
         public async Task GetPackageInt32PropertyAsync()
         {
             string id = "git";
-            Version v = new(2, 35, 1, 2);
+            NuGetVersion v = new(2, 35, 1, 2);
             int actual;
 
             // Don't assert an exact value, download counts are subject to change
@@ -78,7 +79,7 @@ namespace ChocolateyTests
         public async Task GetPackageInt64PropertyAsync()
         {
             string id = "git";
-            Version v = new(2, 35, 1, 2);
+            NuGetVersion v = new(2, 35, 1, 2);
             long actual;
 
             actual = await _client.GetPackageInt64PropertyAsync(id, v, "PackageSize");
@@ -89,7 +90,7 @@ namespace ChocolateyTests
         public async Task GetPackagePropertyAsync_Enum()
         {
             string id = "git";
-            Version v = new(2, 35, 1, 2);
+            NuGetVersion v = new(2, 35, 1, 2);
             PackageStatus actual;
 
             actual = await _client.GetPackagePropertyAsync(id, v, "PackageStatus", Enum.Parse<PackageStatus>);
