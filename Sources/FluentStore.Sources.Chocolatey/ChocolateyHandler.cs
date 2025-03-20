@@ -9,7 +9,6 @@ using Garfoot.Utilities.FluentUrn;
 using NuGet.Versioning;
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace FluentStore.Sources.Chocolatey
@@ -27,10 +26,7 @@ namespace FluentStore.Sources.Chocolatey
             _pkgMan = new ChocoAdminCliClient();
         }
 
-        public override HashSet<string> HandledNamespaces => new()
-        {
-            NAMESPACE_CHOCO
-        };
+        public override HashSet<string> HandledNamespaces => [NAMESPACE_CHOCO];
 
         public override string DisplayName => "Chocolatey";
 
@@ -38,12 +34,23 @@ namespace FluentStore.Sources.Chocolatey
         {
             Guard.IsEqualTo(packageUrn.NamespaceIdentifier, NAMESPACE_CHOCO, nameof(packageUrn));
 
-            // TODO: Support getting packages without specifying a version
             var urnStr = packageUrn.GetContent<NamespaceSpecificString>().UnEscapedValue;
+
+            string id;
+            NuGetVersion version = null;
+
             int versionIdx = urnStr.LastIndexOf(':');
-            if (versionIdx <= 0)
-                throw new NotSupportedException("The choco client library does not currently support fetching package info without specifying a version.");
-            var package = await _search.GetPackageAsync(urnStr[..versionIdx], NuGetVersion.Parse(urnStr[(versionIdx + 1)..]));
+            if (versionIdx > 0)
+            {
+                _ = NuGetVersion.TryParse(urnStr[(versionIdx + 1)..], out version);
+                id = urnStr[..versionIdx];
+            }
+            else
+            {
+                id = urnStr;
+            }
+
+            var package = await _search.GetPackageAsync(id, version);
 
             return new ChocolateyPackage(this, _pkgMan, package);
         }
@@ -60,15 +67,16 @@ namespace FluentStore.Sources.Chocolatey
 
         public override async Task<PackageBase> GetPackageFromUrl(Url url)
         {
-            Regex rx = ChocoRx();
-            Match m = rx.Match(url.ToString());
-            if (!m.Success)
+            if (!url.Authority.Equals("community.chocolatey.org", StringComparison.InvariantCultureIgnoreCase)
+                || url.PathSegments.Count < 2
+                || !url.PathSegments[0].Equals("packages", StringComparison.InvariantCultureIgnoreCase))
                 return null;
 
-            string urn = $"urn:{NAMESPACE_CHOCO}:{m.Groups["id"]}";
-            var versionGroup = m.Groups["version"];
-            if (versionGroup.Success)
-                urn += "." + versionGroup.Value;
+            string id = url.PathSegments[1];
+            string urn = $"urn:{NAMESPACE_CHOCO}:{id}";
+
+            if (url.PathSegments.Count >= 3)
+                urn += $".{url.PathSegments[2]}";
 
             return await GetPackage(Urn.Parse(urn));
         }
@@ -81,12 +89,9 @@ namespace FluentStore.Sources.Chocolatey
             string url = $"https://community.chocolatey.org/packages/{chocoPackage.PackageId}";
 
             if (chocoPackage.Version != null)
-                url += "/" + chocoPackage.Version;
+                url += $"/{chocoPackage.Version}";
 
             return url;
         }
-
-        [GeneratedRegex("^https?:\\/\\/community\\.chocolatey\\.org\\/packages\\/(?<id>[^\\/\\s]+)(?:\\/(?<version>[\\d.]+))?", RegexOptions.IgnoreCase, "en-US")]
-        private static partial Regex ChocoRx();
     }
 }
