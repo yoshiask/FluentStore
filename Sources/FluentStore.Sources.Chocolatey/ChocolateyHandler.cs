@@ -76,7 +76,7 @@ namespace FluentStore.Sources.Chocolatey
             string urn = $"urn:{NAMESPACE_CHOCO}:{id}";
 
             if (url.PathSegments.Count >= 3)
-                urn += $".{url.PathSegments[2]}";
+                urn += $":{url.PathSegments[2]}";
 
             return await GetPackage(Urn.Parse(urn));
         }

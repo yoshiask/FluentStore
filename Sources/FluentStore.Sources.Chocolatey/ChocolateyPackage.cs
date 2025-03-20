@@ -3,14 +3,17 @@ using Chocolatey.Models;
 using CommunityToolkit.Diagnostics;
 using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK;
+using FluentStore.SDK.Attributes;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
 using FluentStore.SDK.Messages;
 using FluentStore.SDK.Models;
 using Garfoot.Utilities.FluentUrn;
+using Humanizer;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FluentStore.Sources.Chocolatey
@@ -48,6 +51,8 @@ namespace FluentStore.Sources.Chocolatey
             Website = Link.Create(pack.ProjectUrl, "Project website");
 
             // Set Choco package properties
+            DownloadCountDisplay = pack.DownloadCount.ToMetric();
+            // TODO: Don't show broken links
             Links =
             [
                 Link.Create(pack.DocsUrl, ShortTitle + " docs"),
@@ -55,6 +60,7 @@ namespace FluentStore.Sources.Chocolatey
                 Link.Create(pack.PackageSourceUrl, ShortTitle + " source"),
                 Link.Create(pack.MailingListUrl, ShortTitle + " mailing list"),
             ];
+            Tags = pack.Tags.ToList();
         }
 
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
@@ -143,17 +149,35 @@ namespace FluentStore.Sources.Chocolatey
         public override Task LaunchAsync() => Task.CompletedTask;
 
         private string _PackageId;
+        [DisplayAdditionalInformation("Package ID", "\uE625")]
         public string PackageId
         {
             get => _PackageId;
             set => SetProperty(ref _PackageId, value);
         }
 
+        private string _DownloadCountDisplay;
+        [DisplayAdditionalInformation("Download count", "\uE896")]
+        public string DownloadCountDisplay
+        {
+            get => _DownloadCountDisplay;
+            set => SetProperty(ref _DownloadCountDisplay, value);
+        }
+
         private Link[] _Links;
+        [DisplayAdditionalInformation("Links", "\uE71B")]
         public Link[] Links
         {
             get => _Links;
             set => SetProperty(ref _Links, value);
+        }
+
+        private List<string> _Tags = [];
+        [DisplayAdditionalInformation(Icon = "\uE8EC")]
+        public List<string> Tags
+        {
+            get => _Tags;
+            set => SetProperty(ref _Tags, value);
         }
     }
 }
