@@ -21,9 +21,9 @@
         <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.5.0" />
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250205002" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
-        <PackageReference Include="NuGet.PackageManagement" Version="6.12.1" />
-        <PackageReference Include="NuGet.Packaging" Version="6.12.1" />
-        <PackageReference Include="NuGet.Protocol" Version="6.12.1" />
+        <PackageReference Include="NuGet.PackageManagement" Version="6.13.2" />
+        <PackageReference Include="NuGet.Packaging" Version="6.13.2" />
+        <PackageReference Include="NuGet.Protocol" Version="6.13.2" />
         <PackageReference Include="OwlCore.Storage" Version="0.12.1" />
         <PackageReference Include="PInvoke.User32" Version="0.7.124" />
         <PackageReference Include="System.Management" Version="9.0.1" />
