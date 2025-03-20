@@ -116,7 +116,13 @@ namespace FluentStore.SDK.Plugins
                 var updateStatus = PluginInstallStatus.NoAction;
 
                 if (withAutoUpdate)
-                    updateStatus = await UpdatePlugin(plugin.PackageIdentity);
+                {
+                    try
+                    {
+                        updateStatus = await UpdatePlugin(plugin.PackageIdentity);
+                    }
+                    catch { }
+                }
 
                 if (updateStatus.IsLessThan(PluginInstallStatus.AppRestartRequired))
                     await LoadPlugin(plugin.PackageIdentity.Id);
