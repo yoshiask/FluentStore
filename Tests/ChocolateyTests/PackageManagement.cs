@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Chocolatey;
+using Chocolatey.Cli;
 using Chocolatey.Models;
 using Xunit;
 using Xunit.Abstractions;
