@@ -99,4 +99,33 @@ public partial class ChocoCliClient : IChocoPackageService
     {
         throw new NotImplementedException();
     }
+
+    public async IAsyncEnumerable<(string Id, NuGetVersion Version)> ListAsync()
+    {
+        ChocoArgumentsBuilder argBuilder = new()
+        {
+            LimitOutput = true,
+        };
+
+        argBuilder.Build(["list"]);
+
+        List<(string, NuGetVersion)> installedPackages = [];
+
+        var result = await CliWrap.Cli.Wrap(ChocoArgumentsBuilder.CHOCO_EXE)
+            .WithArguments((List<string>)["list"])
+            .WithStandardOutputPipe(PipeTarget.ToDelegate(HandleStdOut))
+            .WithValidation(CommandResultValidation.None)
+            .ExecuteAsync();
+
+        foreach (var p in installedPackages)
+            yield return p;
+
+        void HandleStdOut(string line)
+        {
+            int separatorIdx = line.IndexOf('|');
+            var id = line.Substring(0, separatorIdx).Trim();
+            var version = NuGetVersion.Parse(line.Substring(separatorIdx + 1).Trim());
+            installedPackages.Add((id, version));
+        }
+    }
 }
