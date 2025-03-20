@@ -1,4 +1,5 @@
 ﻿using Chocolatey;
+using Chocolatey.Cli;
 using CommunityToolkit.Diagnostics;
 using FluentStore.SDK;
 using FluentStore.SDK.Images;
@@ -23,7 +24,7 @@ namespace FluentStore.Sources.Chocolatey
         public ChocolateyHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
         {
             _search = new ChocoCommunityWebClient();
-            _pkgMan = new ChocoCliClient();
+            _pkgMan = new ChocoAdminCliClient();
         }
 
         public override HashSet<string> HandledNamespaces => new()
