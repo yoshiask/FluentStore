@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Chocolatey.Models;
 using NuGet.Versioning;
@@ -14,4 +15,6 @@ public interface IChocoPackageService
     Task<bool> UpgradeAsync(string id, IProgress<PackageProgress>? progress = null);
     
     Task<bool> UpgradeAllAsync(IProgress<PackageProgress>? progress = null);
+    
+    IAsyncEnumerable<(string Id, NuGetVersion Version)> ListAsync();
 }

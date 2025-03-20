@@ -27,25 +27,37 @@ public class ChocoAdminCliClient : IChocoPackageService
 
             argBuilder.Build(args);
 
-            ProcessStartInfo info = new(ChocoArgumentsBuilder.CHOCO_EXE)
-            {
-                Arguments = string.Join(" ", args),
-
-                // Required to run as admin
-                UseShellExecute = true,
-                Verb = "runas",
-            };
-
-            var process = Process.Start(info);
-            process.WaitForExit();
+            var process = RunChocoAsAdmin(args);
 
             return process.ExitCode is 0;
         });
     }
 
-    public Task<bool> UninstallAsync(string id, NuGetVersion? version = null, IProgress<PackageProgress>? progress = null)
+    public IAsyncEnumerable<(string Id, NuGetVersion Version)> ListAsync()
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<bool> UninstallAsync(string id, NuGetVersion? version = null, IProgress<PackageProgress>? progress = null)
+    {
+        return await Task.Run(delegate
+        {
+            List<string> args = ["uninstall", id];
+
+            ChocoArgumentsBuilder argBuilder = new()
+            {
+                Version = version,
+                Yes = true,
+                LimitOutput = true,
+                NoOp = NoOp
+            };
+
+            argBuilder.Build(args);
+
+            var process = RunChocoAsAdmin(args);
+
+            return process.ExitCode is 0;
+        });
     }
 
     public Task<bool> UpgradeAllAsync(IProgress<PackageProgress>? progress = null)
@@ -56,5 +68,22 @@ public class ChocoAdminCliClient : IChocoPackageService
     public Task<bool> UpgradeAsync(string id, IProgress<PackageProgress>? progress = null)
     {
         throw new NotImplementedException();
+    }
+
+    private Process RunChocoAsAdmin(List<string> args)
+    {
+        ProcessStartInfo info = new(ChocoArgumentsBuilder.CHOCO_EXE)
+        {
+            Arguments = string.Join(" ", args),
+
+            // Required to run as admin
+            UseShellExecute = true,
+            Verb = "runas",
+        };
+
+        var process = Process.Start(info);
+        process.WaitForExit();
+
+        return process;
     }
 }
