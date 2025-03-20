@@ -1,4 +1,5 @@
-﻿using Chocolatey.Models;
+﻿using Chocolatey;
+using Chocolatey.Models;
 using CommunityToolkit.Diagnostics;
 using CommunityToolkit.Mvvm.Messaging;
 using FluentStore.SDK;
@@ -10,15 +11,18 @@ using Garfoot.Utilities.FluentUrn;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Management.Automation;
 using System.Threading.Tasks;
 
 namespace FluentStore.Sources.Chocolatey
 {
     public class ChocolateyPackage : PackageBase<Package>
     {
-        public ChocolateyPackage(PackageHandlerBase packageHandler, Package pack = null) : base(packageHandler)
+        private readonly IChocoPackageService _pkgMan;
+
+        public ChocolateyPackage(PackageHandlerBase packageHandler, IChocoPackageService pkgMan, Package pack = null) : base(packageHandler)
         {
+            _pkgMan = pkgMan;
+
             if (pack != null)
                 Update(pack);
         }
@@ -44,32 +48,31 @@ namespace FluentStore.Sources.Chocolatey
             Website = Link.Create(pack.ProjectUrl, "Project website");
 
             // Set Choco package properties
-            Links = new[]
-            {
+            Links =
+            [
                 Link.Create(pack.DocsUrl, ShortTitle + " docs"),
                 Link.Create(pack.BugTrackerUrl, ShortTitle + " bug tracker"),
                 Link.Create(pack.PackageSourceUrl, ShortTitle + " source"),
                 Link.Create(pack.MailingListUrl, ShortTitle + " mailing list"),
-            };
+            ];
         }
 
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
         {
             // Find the package URI
             await PopulatePackageUri();
-            if (!Status.IsAtLeast(SDK.PackageStatus.DownloadReady))
+            if (PackageUri is null)
                 return null;
 
             // Download package
             await StorageHelper.BackgroundDownloadPackage(this, PackageUri, folder);
-            if (!Status.IsAtLeast(SDK.PackageStatus.Downloaded))
+            if (!IsDownloaded)
                 return null;
 
             // Set the proper file name
-            DownloadItem = ((FileInfo)DownloadItem).CopyRename($"{Model.Id}.{Model.Version}.nupkg");
+            DownloadItem = ((FileInfo)DownloadItem).CopyRename($"{Model.Id}_{Model.Version}.nupkg");
 
             WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageDownloadCompleted(this));
-            Status = SDK.PackageStatus.Downloaded;
             return DownloadItem;
         }
 
@@ -78,11 +81,9 @@ namespace FluentStore.Sources.Chocolatey
             WeakReferenceMessenger.Default.Send(new PackageFetchStartedMessage(this));
             try
             {
-                if (PackageUri == null)
-                    PackageUri = new(Model.DownloadUrl);
+                PackageUri = new(Model.DownloadUrl);
 
                 WeakReferenceMessenger.Default.Send(new SuccessMessage(null, this, SuccessType.PackageFetchCompleted));
-                Status = SDK.PackageStatus.DownloadReady;
             }
             catch (Exception ex)
             {
@@ -105,67 +106,41 @@ namespace FluentStore.Sources.Chocolatey
             return icon ?? TextImage.CreateFromName(Model.Title);
         }
 
-        public override async Task<ImageBase> CacheHeroImage()
-        {
-            return null;
-        }
+        public override async Task<ImageBase> CacheHeroImage() => null;
 
-        public override async Task<List<ImageBase>> CacheScreenshots()
-        {
-            return new List<ImageBase>();
-        }
+        public override async Task<List<ImageBase>> CacheScreenshots() => new List<ImageBase>();
 
         public override async Task<bool> InstallAsync()
         {
-            // Make sure installer is downloaded
-            Guard.IsTrue(Status.IsAtLeast(SDK.PackageStatus.Downloaded), nameof(Status));
-            bool isSuccess = false;
-
             try
             {
-                // Extract nupkg and locate PowerShell install script
-                var dir = StorageHelper.ExtractArchiveToDirectory((FileInfo)DownloadItem, true);
-                FileInfo installer = new(Path.Combine(dir.FullName, "tools", "chocolateyInstall.ps1"));
-                DownloadItem = installer;
+                WeakReferenceMessenger.Default.Send(new PackageInstallStartedMessage(this));
 
-                // Run install script
-                // Cannot find a provider with the name '$ErrorActionPreference = 'Stop';
-                using PowerShell ps = PowerShell.Create();
-                var results = await ps.AddScript(File.ReadAllText(installer.FullName))
-                                      .InvokeAsync();
-                
+                Progress<PackageProgress> progress = new(p =>
+                {
+                    WeakReferenceMessenger.Default.Send(
+                        new PackageDownloadProgressMessage(this, p.Percentage, 100));
+                });
+
+                bool isSuccess = await _pkgMan.InstallAsync(PackageId, progress: progress);
+                if (!isSuccess)
+                    throw new Exception();
+
+                WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageInstallCompleted(this));
+                return true;
             }
             catch (Exception ex)
             {
                 WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, this, ErrorType.PackageInstallFailed));
                 return false;
             }
-
-            if (isSuccess)
-            {
-                WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPackageInstallCompleted(this));
-                Status = SDK.PackageStatus.Installed;
-            }
-            return isSuccess;
         }
 
-        public override Task<bool> CanLaunchAsync()
-        {
-            return Task.FromResult(false);
-        }
+        public override Task<bool> CanDownloadAsync() => Task.FromResult(Model?.DownloadUrl is not null);
 
-        public override Task LaunchAsync()
-        {
-            return Task.CompletedTask;
-        }
+        public override Task<bool> CanLaunchAsync() => Task.FromResult(false);
 
-        private InstallerType? _PackagedInstallerType;
-        public InstallerType? PackagedInstallerType
-        {
-            get => _PackagedInstallerType;
-            set => SetProperty(ref _PackagedInstallerType, value);
-        }
-        public bool HasPackagedInstallerType => PackagedInstallerType == null;
+        public override Task LaunchAsync() => Task.CompletedTask;
 
         private string _PackageId;
         public string PackageId
