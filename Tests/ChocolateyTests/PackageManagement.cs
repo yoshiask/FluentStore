@@ -16,9 +16,20 @@ public class PackageManagement(ITestOutputHelper output)
 
     [Theory]
     [InlineData("git")]
+    [InlineData("dotnet-windowshosting")]
+    [InlineData("notepadplusplus")]
     public async Task InstallLatestAsync(string id)
     {
         Progress<PackageProgress> progress = new(p => output.WriteLine(p.ToString()));
         await _pkgMan.InstallAsync(id, progress: progress);
+    }
+
+    [Theory]
+    [InlineData("git")]
+    [InlineData("dotnet-windowshosting")]
+    public async Task UninstallLatestAsync(string id)
+    {
+        Progress<PackageProgress> progress = new(p => output.WriteLine(p.ToString()));
+        await _pkgMan.UninstallAsync(id, progress: progress);
     }
 }
