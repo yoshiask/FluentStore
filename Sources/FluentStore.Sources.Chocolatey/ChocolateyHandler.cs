@@ -5,6 +5,7 @@ using FluentStore.SDK.Images;
 using FluentStore.Services;
 using Flurl;
 using Garfoot.Utilities.FluentUrn;
+using NuGet.Versioning;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -16,8 +17,13 @@ namespace FluentStore.Sources.Chocolatey
     {
         public const string NAMESPACE_CHOCO = "choco";
 
+        private readonly IChocoSearchService _search;
+        private readonly IChocoPackageService _pkgMan;
+
         public ChocolateyHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
         {
+            _search = new ChocoCommunityWebClient();
+            _pkgMan = new ChocoCliClient();
         }
 
         public override HashSet<string> HandledNamespaces => new()
@@ -36,27 +42,20 @@ namespace FluentStore.Sources.Chocolatey
             int versionIdx = urnStr.LastIndexOf(':');
             if (versionIdx <= 0)
                 throw new NotSupportedException("The choco client library does not currently support fetching package info without specifying a version.");
-            var package = await Choco.GetPackageAsync(urnStr[..versionIdx], Version.Parse(urnStr[(versionIdx + 1)..]));
+            var package = await _search.GetPackageAsync(urnStr[..versionIdx], NuGetVersion.Parse(urnStr[(versionIdx + 1)..]));
 
-            return new ChocolateyPackage(this, package);
+            return new ChocolateyPackage(this, _pkgMan, package);
         }
 
         public override async IAsyncEnumerable<PackageBase> SearchAsync(string query)
         {
-            var results = await Choco.SearchAsync(query);
+            var results = await _search.SearchAsync(query);
 
             foreach (var chocoPackage in results)
-                yield return new ChocolateyPackage(this, chocoPackage);
+                yield return new ChocolateyPackage(this, _pkgMan, chocoPackage);
         }
 
-        public override ImageBase GetImage()
-        {
-            return new TextImage
-            {
-                Text = "Ch",
-                FontFamily = "Segoe UI Variable Display"
-            };
-        }
+        public override ImageBase GetImage() => new FileImage("https://github.com/chocolatey/choco-theme/blob/main/images/global-shared/logo.png?raw=true");
 
         public override async Task<PackageBase> GetPackageFromUrl(Url url)
         {
