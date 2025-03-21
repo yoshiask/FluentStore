@@ -52,15 +52,22 @@ namespace FluentStore.Sources.Chocolatey
 
             // Set Choco package properties
             DownloadCountDisplay = pack.DownloadCount.ToMetric();
-            // TODO: Don't show broken links
-            Links =
-            [
-                Link.Create(pack.DocsUrl, ShortTitle + " docs"),
-                Link.Create(pack.BugTrackerUrl, ShortTitle + " bug tracker"),
-                Link.Create(pack.PackageSourceUrl, ShortTitle + " source"),
-                Link.Create(pack.MailingListUrl, ShortTitle + " mailing list"),
-            ];
             Tags = pack.Tags.ToList();
+
+            Links.Clear();
+
+            if (!string.IsNullOrEmpty(pack.DocsUrl))
+                Links.Add(Link.Create(pack.DocsUrl, "Docs"));
+
+            if (!string.IsNullOrEmpty(pack.BugTrackerUrl))
+                Links.Add(Link.Create(pack.BugTrackerUrl, "Bug tracker"));
+
+            if (!string.IsNullOrEmpty(pack.PackageSourceUrl))
+                Links.Add(Link.Create(pack.PackageSourceUrl, "Source"));
+
+            if (!string.IsNullOrEmpty(pack.MailingListUrl))
+                Links.Add(Link.Create(pack.MailingListUrl, "Mailing list"));
+
         }
 
         public override async Task<FileSystemInfo> DownloadAsync(DirectoryInfo folder = null)
@@ -164,9 +171,9 @@ namespace FluentStore.Sources.Chocolatey
             set => SetProperty(ref _DownloadCountDisplay, value);
         }
 
-        private Link[] _Links;
+        private List<Link> _Links = [];
         [DisplayAdditionalInformation("Links", "\uE71B")]
-        public Link[] Links
+        public List<Link> Links
         {
             get => _Links;
             set => SetProperty(ref _Links, value);
