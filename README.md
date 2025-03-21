@@ -26,7 +26,7 @@ Several sources are currently supported, with several more planned for the futur
 | Microsoft Store   | ✅     | ✅      | ✅      | ✅         |
 | WinGet            | ✅     | ✅      | ✅      | ✅         |
 | GitHub Releases   | ❌     | ✅      | ✅      |            |
-| Chocolatey        | 🔷     | 🔷      | 🔷      |            | [#30](https://github.com/yoshiask/FluentStore/issues/30)
+| Chocolatey        | ✅     | ✅      | ✅      |            | [#30](https://github.com/yoshiask/FluentStore/issues/30)
 | UWP Community     | ❌     | ✅¹     | ✅¹     | ✅         |
 | Fluent Store      | ❌     | ✅²     | ✅²     | ✅         |
 | Scoop             | ❌     | ❌      | ❌      |            | [#40](https://github.com/yoshiask/FluentStore/issues/40)
