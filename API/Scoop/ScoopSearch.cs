@@ -20,16 +20,18 @@ public static class ScoopSearch
             Count = true,
             Top = count,
             Skip = skip,
-            Filter = string.Empty,
-            Highlight = "Name,NamePartial,NameSuffix,Description,Version,License,Metadata/Repository,Metadata/AuthorName",
-            HighlightPreTag = string.Empty,
-            HighlightPostTag = string.Empty,
+            Filter = "Metadata/OfficialRepositoryNumber eq 1 and Metadata/DuplicateOf eq null",
             OrderBy = "search.score() desc, Metadata/OfficialRepositoryNumber desc, NameSortable asc",
             Search = query,
             SearchMode = "all",
-            Select = "Id,Name,NamePartial,NameSuffix,Description,Homepage,License,Version,Metadata/Repository,Metadata/FilePath,Metadata/AuthorName,Metadata/OfficialRepository,Metadata/RepositoryStars,Metadata/Committed,Metadata/Sha"
+            Select = "Id,Name,NamePartial,NameSuffix,Description,Notes,Homepage,License,Version,Metadata/Repository,Metadata/FilePath,Metadata/OfficialRepository,Metadata/RepositoryStars,Metadata/Committed,Metadata/Sha"
         };
 
+        return await SearchAsync(request, token);
+    }
+
+    public static async Task<SearchResponse> SearchAsync(SearchRequest request, CancellationToken token = default)
+    {
         var http = await SEARCH_URL
             .WithHeader("api-key", API_KEY)
             .SetQueryParam("api-version", API_VERSION)

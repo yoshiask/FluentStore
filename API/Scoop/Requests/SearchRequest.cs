@@ -2,7 +2,7 @@
 
 namespace Scoop.Requests;
 
-internal class SearchRequest
+public class SearchRequest
 {
     [JsonPropertyName("count")]
     public bool Count { get; set; }
@@ -23,18 +23,18 @@ internal class SearchRequest
     public int Skip { get; set; }
 
     [JsonPropertyName("top")]
-    public int Top { get; set; }
+    public int Top { get; set; } = 20;
 
     [JsonPropertyName("select")]
     public string Select { get; set; }
 
     [JsonPropertyName("highlight")]
-    public string Highlight { get; set; }
+    public string Highlight { get; set; } = string.Empty;
 
     [JsonPropertyName("highlightPreTag")]
-    public string HighlightPreTag { get; set; }
+    public string HighlightPreTag { get; set; } = string.Empty;
 
     [JsonPropertyName("highlightPostTag")]
-    public string HighlightPostTag { get; set; }
+    public string HighlightPostTag { get; set; } = string.Empty;
 }
 
