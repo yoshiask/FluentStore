@@ -1,9 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using Scoop.Converters;
 
 namespace Scoop.Responses;
+
+// https://github.com/ScoopInstaller/Scoop/wiki/App-Manifests
 
 public class Manifest
 {
@@ -40,6 +42,7 @@ public class Manifest
     /// If the entire application is dual licensed, separate
     /// licenses with a pipe symbol (|).
     /// </remarks>
+    // TODO: Deserialize non-standard licenses e.g. extras/sourcetree
     [JsonPropertyName("license")]
     public string License { get; set; }
 
@@ -48,7 +51,7 @@ public class Manifest
     /// be used to wrap the differences.
     /// </summary>
     [JsonPropertyName("architecture")]
-    public Architecture Architecture { get; set; }
+    public Architecture? Architecture { get; set; }
 
     /// <summary>
     /// Definition of how the manifest can be updated automatically.
@@ -63,8 +66,8 @@ public class Manifest
     /// A string or array of strings of programs (executables or scripts)
     /// to make available on the user's path. 
     /// </summary>
-    [JsonPropertyName("bin")]
-    public object Bin { get; set; }
+    // TODO: Deserialize complex bin
+    public JsonElement? Bin { get; set; }
 
     /// <summary>
     /// App maintainers and developers can use the bin/checkver tool
@@ -76,8 +79,9 @@ public class Manifest
     /// can also specify a different URL to check—for an example see
     /// the ruby manifest.
     /// </summary>
+    // TODO: Deserialize complex checkver
     [JsonPropertyName("checkver")]
-    public string CheckVer { get; set; }
+    public JsonElement? CheckVer { get; set; }
 
     /// <summary>
     /// Runtime dependencies for the app which will be installed automatically.
@@ -86,7 +90,7 @@ public class Manifest
     /// See also <see cref="Suggest"/> for an alternative to <see cref="Depends"/>.
     /// </remarks>
     [JsonPropertyName("depends")]
-    public List<string> Depends { get; set; }
+    public List<string>? Depends { get; set; }
 
     /// <summary>
     /// Add this directory to the user's path (or system path if --global is used).
@@ -94,14 +98,14 @@ public class Manifest
     /// install directory.
     /// </summary>
     [JsonPropertyName("env_add_path")]
-    public string EnvAddPath { get; set; }
+    public string? EnvAddPath { get; set; }
 
     /// <summary>
     /// Sets one or more environment variables for the user
     /// (or system if --global is used).
     /// </summary>
     [JsonPropertyName("env_set")]
-    public Dictionary<string, string> EnvSet { get; set; }
+    public Dictionary<string, string>? EnvSet { get; set; }
 
     /// <summary>
     /// If <see cref="Url"/> points to a compressed file (.zip, .7z, .tar, .gz,
@@ -109,7 +113,7 @@ public class Manifest
     /// specified from it.
     /// </summary>
     [JsonPropertyName("extract_dir")]
-    public string ExtractDir { get; set; }
+    public string? ExtractDir { get; set; }
 
     /// <summary>
     /// If <see cref="Url"/> points to a compressed file (.zip, .7z, .tar, .gz,
@@ -117,15 +121,15 @@ public class Manifest
     /// directory specified.
     /// </summary>
     [JsonPropertyName("extract_to")]
-    public string ExtractTo { get; set; }
+    public string? ExtractTo { get; set; }
 
     /// <summary>
     /// A string or array of strings with a file hash for each URL in url.
     /// Hashes are SHA256 by default, but you can use SHA512, SHA1 or MD5 by
     /// prefixing the hash string with 'sha512:', 'sha1:' or 'md5:'.
     /// </summary>
-    [JsonPropertyName("hash")]
-    public object Hash { get; set; }
+    [JsonConverter(typeof(StringOrArrayJsonConverter))]
+    public List<string> Hash { get; set; }
 
     /// <summary>
     /// Set to <see langword="true"/> if the installer is InnoSetup based.
@@ -133,7 +137,77 @@ public class Manifest
     [JsonPropertyName("innosetup")]
     public bool IsInnoSetup { get; set; }
 
-    public 
+    /// <summary>
+    /// Instructions for running a non-MSI installer. 
+    /// </summary>
+    public Installer? Installer { get; set; }
+
+    /// <summary>
+    /// A one-line string, or array of strings, with a message to be displayed after installing the app.
+    /// </summary>
+    [JsonConverter(typeof(StringOrArrayJsonConverter))]
+    public List<string> Notes { get; set; }
+
+    /// <summary>
+    /// A string or array of strings of directories and files to persist inside the data directory for the app.
+    /// </summary>
+    [JsonConverter(typeof(StringOrArrayJsonConverter))]
+    public List<string> Persist { get; set; }
+
+    /// <summary>
+    /// A one-line string, or array of strings, of the commands to be executed after an application is installed.
+    /// These can use variables like $dir, $persist_dir, and $version.
+    /// </summary>
+    [JsonConverter(typeof(StringOrArrayJsonConverter))]
+    public List<string> PostInstall { get; set; }
+
+    /// <summary>
+    /// Same options as <see cref="PostInstall"/>, but executed before an application is installed.
+    /// </summary>
+    [JsonConverter(typeof(StringOrArrayJsonConverter))]
+    public List<string> PreInstall { get; set; }
+
+    /// <summary>
+    /// Same options as <see cref="PostInstall"/>, but executed before an application is installed.
+    /// </summary>
+    [JsonConverter(typeof(StringOrArrayJsonConverter))]
+    public List<string> PreUninstall { get; set; }
+
+    /// <summary>
+    /// Same options as <see cref="PostInstall"/>, but executed before an application is installed.
+    /// </summary>
+    [JsonConverter(typeof(StringOrArrayJsonConverter))]
+    public List<string> PostUninstall { get; set; }
+
+    /// <summary>
+    /// Install as a PowerShell module in <c>~/scoop/modules</c>. 
+    /// </summary>
+    [JsonPropertyName("psmodule")]
+    public PowerShellModuleDeclaration? PowerShellModule { get; set; }
+
+    /// <summary>
+    /// Specifies the shortcut values to make available in the startmenu.
+    /// The array has to contain a executable/label pair. The third and fourth element are optional. 
+    /// </summary>
+    public List<List<string>>? Shortcuts { get; set; }
+
+    /// <summary>
+    /// Display a message suggesting optional apps that provide complementary features.
+    /// </summary>
+    public Dictionary<string, List<string>>? Suggest { get; set; }
+
+    /// <summary>
+    /// Same options as <see cref="Installer"/>, but the file/script is run to uninstall the application. 
+    /// </summary>
+    public Installer? Uninstaller { get; set; }
+
+    /// <summary>
+    /// The URL or URLs of files to download. If there's more than one URL, you can use a JSON - array, e.g.
+    /// <c>"url": [ "http://example.org/program.zip", "http://example.org/dependencies.zip" ]</c>.
+    /// URLs can be HTTP, HTTPS or FTP.
+    /// </summary>
+    [JsonConverter(typeof(StringOrArrayJsonConverter))]
+    public List<string> Url { get; set; }
 }
 
 public class Architecture
@@ -143,6 +217,9 @@ public class Architecture
 
     [JsonPropertyName("32bit")]
     public ManifestDifference X86 { get; set; }
+
+    [JsonPropertyName("arm64")]
+    public ManifestDifference Arm64 { get; set; }
 }
 
 public class ManifestDifference
@@ -160,7 +237,33 @@ public class Installer
     [JsonPropertyName("file")]
     public string File { get; set; }
 
+    /// <summary>
+    /// A one-line string, or array of strings, of commands to be executed as
+    /// an installer/uninstaller instead of <see cref="File"/>.
+    /// </summary>
     [JsonPropertyName("script")]
-    public string Script { get; set; }
+    [JsonConverter(typeof(StringOrArrayJsonConverter))]
+    public List<string> Script { get; set; }
+
+    /// <summary>
+    /// An array of arguments to pass to the installer. Optional.
+    /// </summary>
+    public List<string> Args { get; set; }
+
+    /// <summary>
+    /// <see langword="true"/> if the installer should be kept after running (for future uninstallation, as an example).
+    /// If omitted or set to any other value, the installer will be deleted after running.
+    /// See <see href="https://github.com/ScoopInstaller/Java/blob/master/bucket/oraclejdk.json">java/oraclejdk</see> for an example.
+    /// This option will be ignored when used in an <see cref="Manifest.Uninstaller"/> directive.
+    /// </summary>
+    public bool Keep { get; set; }
+}
+
+public class PowerShellModuleDeclaration
+{
+    /// <summary>
+    /// The name of the module, which should match at least one file in the extracted directory for PowerShell to recognize this as a module.
+    /// </summary>
+    public string Name { get; set; }
 }
 
