@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Scoop.Converters;
@@ -36,15 +37,15 @@ public class Manifest
     /// For well-known licenses, please use the identifier found
     /// at <see href="https://spdx.org/licenses"/> For other licenses, use the
     /// URL of the license, if available. Otherwise, use
-    /// “Freeware”, “Proprietary”, “Public Domain”, “Shareware”,
-    /// or “Unknown”, as appropriate. If different files have
+    /// "Freeware", "Proprietary", "Public Domain", "Shareware",
+    /// or "Unknown", as appropriate. If different files have
     /// different licenses, separate licenses with a comma (,).
     /// If the entire application is dual licensed, separate
     /// licenses with a pipe symbol (|).
     /// </remarks>
     // TODO: Deserialize non-standard licenses e.g. extras/sourcetree
     [JsonPropertyName("license")]
-    public string License { get; set; }
+    public LicenseInfo? License { get; set; }
 
     /// <summary>
     /// If the app has 32- and 64-bit versions, architecture can
@@ -128,8 +129,7 @@ public class Manifest
     /// Hashes are SHA256 by default, but you can use SHA512, SHA1 or MD5 by
     /// prefixing the hash string with 'sha512:', 'sha1:' or 'md5:'.
     /// </summary>
-    [JsonConverter(typeof(StringOrArrayJsonConverter))]
-    public List<string> Hash { get; set; }
+    public StringOrArray Hash { get; set; }
 
     /// <summary>
     /// Set to <see langword="true"/> if the installer is InnoSetup based.
@@ -145,39 +145,33 @@ public class Manifest
     /// <summary>
     /// A one-line string, or array of strings, with a message to be displayed after installing the app.
     /// </summary>
-    [JsonConverter(typeof(StringOrArrayJsonConverter))]
-    public List<string> Notes { get; set; }
+    public StringOrArray Notes { get; set; }
 
     /// <summary>
     /// A string or array of strings of directories and files to persist inside the data directory for the app.
     /// </summary>
-    [JsonConverter(typeof(StringOrArrayJsonConverter))]
-    public List<string> Persist { get; set; }
+    public StringOrArray Persist { get; set; }
 
     /// <summary>
     /// A one-line string, or array of strings, of the commands to be executed after an application is installed.
     /// These can use variables like $dir, $persist_dir, and $version.
     /// </summary>
-    [JsonConverter(typeof(StringOrArrayJsonConverter))]
-    public List<string> PostInstall { get; set; }
+    public StringOrArray PostInstall { get; set; }
 
     /// <summary>
     /// Same options as <see cref="PostInstall"/>, but executed before an application is installed.
     /// </summary>
-    [JsonConverter(typeof(StringOrArrayJsonConverter))]
-    public List<string> PreInstall { get; set; }
+    public StringOrArray PreInstall { get; set; }
 
     /// <summary>
     /// Same options as <see cref="PostInstall"/>, but executed before an application is installed.
     /// </summary>
-    [JsonConverter(typeof(StringOrArrayJsonConverter))]
-    public List<string> PreUninstall { get; set; }
+    public StringOrArray PreUninstall { get; set; }
 
     /// <summary>
     /// Same options as <see cref="PostInstall"/>, but executed before an application is installed.
     /// </summary>
-    [JsonConverter(typeof(StringOrArrayJsonConverter))]
-    public List<string> PostUninstall { get; set; }
+    public StringOrArray PostUninstall { get; set; }
 
     /// <summary>
     /// Install as a PowerShell module in <c>~/scoop/modules</c>. 
@@ -194,7 +188,7 @@ public class Manifest
     /// <summary>
     /// Display a message suggesting optional apps that provide complementary features.
     /// </summary>
-    public Dictionary<string, List<string>>? Suggest { get; set; }
+    public Dictionary<string, StringOrArray>? Suggest { get; set; }
 
     /// <summary>
     /// Same options as <see cref="Installer"/>, but the file/script is run to uninstall the application. 
@@ -206,8 +200,7 @@ public class Manifest
     /// <c>"url": [ "http://example.org/program.zip", "http://example.org/dependencies.zip" ]</c>.
     /// URLs can be HTTP, HTTPS or FTP.
     /// </summary>
-    [JsonConverter(typeof(StringOrArrayJsonConverter))]
-    public List<string> Url { get; set; }
+    public StringOrArray Url { get; set; }
 }
 
 public class Architecture
@@ -242,13 +235,12 @@ public class Installer
     /// an installer/uninstaller instead of <see cref="File"/>.
     /// </summary>
     [JsonPropertyName("script")]
-    [JsonConverter(typeof(StringOrArrayJsonConverter))]
-    public List<string> Script { get; set; }
+    public StringOrArray Script { get; set; }
 
     /// <summary>
     /// An array of arguments to pass to the installer. Optional.
     /// </summary>
-    public List<string> Args { get; set; }
+    public List<string>? Args { get; set; }
 
     /// <summary>
     /// <see langword="true"/> if the installer should be kept after running (for future uninstallation, as an example).
@@ -265,5 +257,22 @@ public class PowerShellModuleDeclaration
     /// The name of the module, which should match at least one file in the extracted directory for PowerShell to recognize this as a module.
     /// </summary>
     public string Name { get; set; }
+}
+
+[JsonConverter(typeof(LicenseJsonConverter))]
+public class LicenseInfo
+{
+    /// <summary>
+    /// The SPDX identifier, or "Freeware" (free to use forever), "Proprietary" (must pay to use),
+    /// "Public Domain", "Shareware" (free to try, must pay eventually), or "Unknown"
+    /// (unable to determine the license), as appropriate.
+    /// </summary>
+    public List<List<string>> MultiLicenses { get; set; } = [["Unknown"]];
+
+    /// <summary>
+    /// For non-SPDX licenses, include a link to the license. It is acceptable to include links
+    /// to SPDX licenses, as well.
+    /// </summary>
+    public Uri? Url { get; set; }
 }
 

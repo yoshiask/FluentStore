@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Scoop.Requests;
 
@@ -27,6 +28,9 @@ public class SearchRequest
 
     [JsonPropertyName("select")]
     public string Select { get; set; }
+
+    [JsonPropertyName("facets")]
+    public List<string> Facets { get; set; } = [];
 
     [JsonPropertyName("highlight")]
     public string Highlight { get; set; } = string.Empty;
