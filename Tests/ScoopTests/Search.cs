@@ -25,6 +25,29 @@ public class Search(ITestOutputHelper output)
     }
 
     [Theory]
+    [InlineData("vscode")]
+    [InlineData("notepadplusplus")]
+    [InlineData("notepadplusplus-np")]
+    [InlineData("jetbrains-mono")]
+    [InlineData("7zip")]
+    [InlineData("7zip-beta")]
+    public async Task GetManifestAsync_FromSearchResult(string name)
+    {
+        var response = await _search.SearchAsync(name);
+        var searchResult = response.Results.FirstOrDefault();
+
+        Assert.NotNull(searchResult);
+        Assert.Equal(name, searchResult.Name, ignoreCase: true);
+        Assert.NotNull(searchResult.Metadata);
+
+        var manifest = await _search.GetManifestAsync(searchResult.Metadata);
+
+        Assert.NotNull(manifest);
+
+        output.WriteLine(manifest.Description ?? "{null}");
+    }
+
+    [Theory]
     [InlineData("stack", "https://github.com/ScoopInstaller/Main/raw/489bc5445ae47a5504cb0fb1c32a43fa34d9a8f8/bucket/stack.json", "Add-Path -Path \"$env:APPDATA\\local\\bin\" -Global:$global")]
     [InlineData("cuda", "https://github.com/ScoopInstaller/Main/raw/489bc5445ae47a5504cb0fb1c32a43fa34d9a8f8/bucket/cuda.json", "$names = @('bin', 'extras', 'include', 'lib', 'libnvvp', 'nvml', 'nvvm', 'compute-sanitizer')\r\nforeach ($name in $names) {\r\n    Copy-Item \"$dir\\cuda_*\\*\\$name\" \"$dir\" -Recurse -Force\r\n    Copy-Item \"$dir\\lib*\\*\\$name\" \"$dir\" -Recurse -Force\r\n}\r\nGet-ChildItem \"$dir\" -Exclude $names | Remove-Item -Recurse -Force")]
     [InlineData("go", "https://github.com/ScoopInstaller/Main/raw/489bc5445ae47a5504cb0fb1c32a43fa34d9a8f8/bucket/go.json", "$envgopath = \"$env:USERPROFILE\\go\"\r\nif ($env:GOPATH) { $envgopath = $env:GOPATH }\r\ninfo \"Adding '$envgopath\\bin' to PATH...\"\r\nAdd-Path -Path \"$envgopath\\bin\" -Global:$global -Force")]
