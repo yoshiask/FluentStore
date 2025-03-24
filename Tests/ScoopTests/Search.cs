@@ -5,10 +5,12 @@ namespace ScoopTests;
 
 public class Search(ITestOutputHelper output)
 {
+    public readonly ScoopSearch _search = new();
+
     [Fact]
     public async Task SearchAsync_Minimum1()
     {
-        var response = await ScoopSearch.SearchAsync("vscode");
+        var response = await _search.SearchAsync("vscode");
         var actualResults = response.Results;
         Assert.Equal(3, actualResults.Count);
 

@@ -7,13 +7,17 @@ using Scoop.Responses;
 
 namespace Scoop;
 
-public static class ScoopSearch
+public class ScoopSearch : IScoopSearchService, IScoopMetadataService
 {
     private const string SEARCH_URL = "https://scoopsearch.search.windows.net/indexes/apps/docs/search";
     private const string API_VERSION = "2020-06-30";
-    private const string API_KEY = "DC6D2BBE65FC7313F2C52BBD2B0286ED";
+    private const string PUBLIC_API_KEY = "DC6D2BBE65FC7313F2C52BBD2B0286ED";
 
-    public static async Task<SearchResponse> SearchAsync(string query, int count = 20, int skip = 0, CancellationToken token = default)
+    public string UserAgent { get; set; } = "Scoop/.NET";
+
+    public string ApiKey { get; set; } = PUBLIC_API_KEY;
+
+    public async Task<SearchResponse> SearchAsync(string query, int count = 20, int skip = 0, CancellationToken token = default)
     {
         SearchRequest request = new()
         {
@@ -30,25 +34,26 @@ public static class ScoopSearch
         return await SearchAsync(request, token);
     }
 
-    public static async Task<SearchResponse> SearchAsync(SearchRequest request, CancellationToken token = default)
+    public async Task<SearchResponse> SearchAsync(SearchRequest request, CancellationToken token = default)
     {
         var http = await SEARCH_URL
-            .WithHeader("api-key", API_KEY)
+            .WithHeader("User-Agent", UserAgent)
+            .WithHeader("api-key", ApiKey)
             .SetQueryParam("api-version", API_VERSION)
             .PostJsonAsync(request, cancellationToken: token);
 
         return await http.GetJsonAsync<SearchResponse>();
     }
 
-    public static Task<Manifest> GetManifestAsync(SearchResultMetadata metadata, CancellationToken token = default)
+    public Task<Manifest> GetManifestAsync(SearchResultMetadata metadata, CancellationToken token = default)
     {
         return GetManifestAsync(metadata.GetManifestUrl(), token);
     }
 
-    public static async Task<Manifest> GetManifestAsync(Url metadataUrl, CancellationToken token = default)
+    public async Task<Manifest> GetManifestAsync(Url metadataUrl, CancellationToken token = default)
     {
         var manifest = await metadataUrl
-            .WithHeader("User-Agent", "fluent-store")
+            .WithHeader("User-Agent", UserAgent)
             .GetJsonAsync<Manifest>(cancellationToken: token);
         return manifest;
     }
