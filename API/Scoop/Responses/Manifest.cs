@@ -43,7 +43,6 @@ public class Manifest
     /// If the entire application is dual licensed, separate
     /// licenses with a pipe symbol (|).
     /// </remarks>
-    // TODO: Deserialize non-standard licenses e.g. extras/sourcetree
     [JsonPropertyName("license")]
     public LicenseInfo? License { get; set; }
 
