@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Scoop;
 
-public interface IScoopPackageManager
+public interface IScoopAppManager
 {
     Task InstallAsync(string name, CancellationToken token = default);
 
@@ -14,9 +14,7 @@ public interface IScoopPackageManager
 
     Task UninstallAsync(string name, CancellationToken token = default);
 
-    IAsyncEnumerable<object> ListInstalledAppsAsync(string name, CancellationToken token = default);
+    IAsyncEnumerable<object> GetInstalledAppsAsync(string name, CancellationToken token = default);
 
     Task<object> GetAppInfoAsync(string name, CancellationToken token = default);
-
-    Task AddBucketAsync(string name, CancellationToken token = default);
 }
