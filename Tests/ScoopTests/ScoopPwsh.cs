@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -16,7 +17,7 @@ public class ScoopPwsh : IScoopAppManager, IScoopBucketManager
 {
     private const string CMDLET_SCOOP = "scoop";
 
-    public async Task AddBucketAsync(string name, string repo = null, CancellationToken token = default)
+    public async Task AddBucketAsync(string name, string? repo = null, CancellationToken token = default)
     {
         var ps = PowerShell.Create();
         ps.AddCommand(CMDLET_SCOOP).AddArgument("bucket").AddArgument("add").AddArgument(name);
@@ -37,15 +38,21 @@ public class ScoopPwsh : IScoopAppManager, IScoopBucketManager
         throw new NotImplementedException();
     }
 
-    public async IAsyncEnumerable<Bucket> GetBucketsAsync(CancellationToken token = default)
+    public async IAsyncEnumerable<Bucket> GetBucketsAsync([EnumeratorCancellation] CancellationToken token = default)
     {
         using var ps = CreatePwsh();
         ps.AddCommand(CMDLET_SCOOP).AddArgument("bucket").AddArgument("list");
 
+        token.ThrowIfCancellationRequested();
+
         var psResults = await ps.InvokeAsync();
+
+        token.ThrowIfCancellationRequested();
 
         foreach (var psResult in psResults)
         {
+            token.ThrowIfCancellationRequested();
+
             Bucket bucket = new()
             {
                 Name = GetValue<string>(psResult, "Name"),
@@ -56,9 +63,6 @@ public class ScoopPwsh : IScoopAppManager, IScoopBucketManager
 
             yield return bucket;
         }
-
-        yield break;
-        throw new NotImplementedException();
     }
 
     public IAsyncEnumerable<object> GetInstalledAppsAsync(string name, CancellationToken token = default)
