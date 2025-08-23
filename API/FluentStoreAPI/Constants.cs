@@ -5,8 +5,8 @@ namespace FluentStoreAPI;
 
 public static class Constants
 {
-    public const string SUPABASE_URL = "https://obzzzkffllguthirhhku.supabase.co";
-    public const string SUPABASE_KEY = "sb_publishable_I_uZ1ypjQOujpYbxf8T3Rw_dS1p1SN_";
+    public const string DEFAULT_SUPABASE_URL = "https://obzzzkffllguthirhhku.supabase.co";
+    public const string DEFAULT_SUPABASE_KEY = "sb_publishable_I_uZ1ypjQOujpYbxf8T3Rw_dS1p1SN_";
 
     public static IReadOnlyDictionary<FailureHint.Reason, string> GotrueReasons { get; } = new Dictionary<FailureHint.Reason, string>
     {
