@@ -11,7 +11,7 @@ namespace Microsoft.Marketplace.Storefront.Contracts
     public class StorefrontApi
     {
         // What is this? Without it, most of the cards are missing
-        private const long DEVICE_VERSION_ID = 2814751249596416;
+        private const long DEVICE_VERSION_ID = 2814751477596160;
 
         /// <summary>
         /// Get all the page details for the given product.
@@ -143,11 +143,12 @@ namespace Microsoft.Marketplace.Storefront.Contracts
         /// <summary>
         /// Get all the details for the given collection of recommendations.
         /// </summary>
-        public async Task<ResponseItem<V3.ProductList>> GetRecommendationCollection(string collectionId, RequestOptions options = null)
+        public async Task<ResponseItem<V3.ProductList>> GetRecommendationCollection(string collectionId, string mediaType, RequestOptions options = null)
         {
             var response = await GetStorefrontBase(options).AppendPathSegments("recommendations", "collections", collectionId)
                 .SetQueryParam("deviceFamilyVersion", DEVICE_VERSION_ID)
                 .SetQueryParam("cardsEnabled", true)
+                .SetQueryParam("mediaType", mediaType)
                 .GetJsonAsync<ResponseItem>();
             return response.Convert<V3.ProductList>();
         }
