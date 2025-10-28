@@ -95,12 +95,12 @@ public class FluentStoreNuGetProject : NuGetProject
                 if (version is null)
                     continue;
 
-                MemoryStream depStream = new();
+                MemoryStream nupkgStream = new();
                 await resource.CopyNupkgToStreamAsync(packageId, version,
-                    depStream, _cache, NullLogger.Instance, token);
+                    nupkgStream, _cache, NullLogger.Instance, token);
 
-                PackageArchiveReader depReader = new(depStream);
-                DownloadResourceResult resourceResult = new(depStream, depReader, repo.PackageSource.Source);
+                PackageArchiveReader nupkgReader = new(nupkgStream);
+                DownloadResourceResult resourceResult = new(nupkgStream, nupkgReader, repo.PackageSource.Source);
                 return resourceResult;
             }
             catch
@@ -248,22 +248,9 @@ public class FluentStoreNuGetProject : NuGetProject
         // Ensure compatible SDK version
         var sdkDep = deps?.FirstOrDefault(d => d.Id == "FluentStore.SDK");
         if (sdkDep is not null && deps is not null && !sdkDep.VersionRange.Satisfies(CurrentSdkVersion))
-            throw new Exception($"{id} does not support Fluent Store SDK {CurrentSdkVersion}: requires {sdkDep.VersionRange}");
+            throw new PluginSdkNotSupportedException(id, sdkDep.VersionRange);
 
         return (tfm, deps, sdkDep);
-    }
-
-    public bool CheckCompatibility(PackageReaderBase reader)
-    {
-        try
-        {
-            _ = GetCompatibleDependencies(reader);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
     }
 
     public bool CheckCompatibility(NuGetFramework tfm, VersionRange sdkVersion, IFrameworkCompatibilityProvider compat = null)
