@@ -88,7 +88,14 @@ namespace FluentStore
             var navService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
             var pluginLoader = Ioc.Default.GetRequiredService<PluginLoader>();
             var appStartupService = Ioc.Default.GetRequiredService<AppStartupInfo>();
-            
+
+            IAppUpdateService updater = new LatestJsonUpdateService(@"file://E:\Documents\site\ipfs\FluentStore\versions.json");
+            var update = await updater.FetchAvailableUpdate();
+            if (update != null)
+            {
+                await updater.DownloadUpdate(update, @"E:\Downloads", null);
+            }
+
             await pluginLoader.InitAsync();
 
             ProtocolResult result = navService.ParseProtocol(e.Arguments, e.IsFirstInstance);
