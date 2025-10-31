@@ -1,9 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.WinUI.Notifications;
 using FluentStore.Helpers;
+using FluentStore.Helpers.Updater;
 using FluentStore.SDK;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Plugins;
+using FluentStore.SDK.Plugins.NuGet;
 using FluentStore.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -89,11 +91,12 @@ namespace FluentStore
             var pluginLoader = Ioc.Default.GetRequiredService<PluginLoader>();
             var appStartupService = Ioc.Default.GetRequiredService<AppStartupInfo>();
 
-            IAppUpdateService updater = new LatestJsonUpdateService(@"file://E:\Documents\site\ipfs\FluentStore\versions.json");
-            var update = await updater.FetchAvailableUpdate();
+            PackageHandlerBase updater = new AppUpdatePackageSource();
+            var update = await updater.GetPackage(AppUpdatePackageSource.FormatUrn(FluentStoreNuGetProject.CurrentSdkVersion.Release));
+
             if (update != null)
             {
-                await updater.DownloadUpdate(update, @"E:\Downloads", null);
+                var downloadedUpdate = await update.DownloadAsync(new(@"E:\Downloads"));
             }
 
             await pluginLoader.InitAsync();
