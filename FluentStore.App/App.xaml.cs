@@ -91,14 +91,6 @@ namespace FluentStore
             var pluginLoader = Ioc.Default.GetRequiredService<PluginLoader>();
             var appStartupService = Ioc.Default.GetRequiredService<AppStartupInfo>();
 
-            PackageHandlerBase updater = new AppUpdatePackageSource();
-            var update = await updater.GetPackage(AppUpdatePackageSource.FormatUrn(FluentStoreNuGetProject.CurrentSdkVersion.Release));
-
-            if (update != null)
-            {
-                var downloadedUpdate = await update.DownloadAsync(new(@"E:\Downloads"));
-            }
-
             await pluginLoader.InitAsync();
 
             ProtocolResult result = navService.ParseProtocol(e.Arguments, e.IsFirstInstance);
@@ -160,6 +152,19 @@ namespace FluentStore
             var log = Ioc.Default.GetService<LoggerService>();
             var appStartupService = Ioc.Default.GetRequiredService<AppStartupInfo>();
             var navService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
+
+            // Kick off update check in background
+            Window.DispatcherQueue.TryEnqueue(async () =>
+            {
+                var updater = new AppUpdatePackageSource();
+                var update = await updater.GetPackage(AppUpdatePackageSource.FormatUrn(FluentStoreNuGetProject.CurrentSdkVersion.Release));
+
+                if (update is not null && await update.CanInstallAsync())
+                {
+                    Views.Update.UpdateWindow updateWindow = new(update);
+                    updateWindow.DispatcherQueue.TryEnqueue(updateWindow.Activate);
+                }
+            });
 
             if (appStartupService.IsFirstLaunch)
             {
