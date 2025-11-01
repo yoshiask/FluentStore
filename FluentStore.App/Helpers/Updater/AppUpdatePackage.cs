@@ -3,15 +3,14 @@ using FluentStore.SDK;
 using FluentStore.SDK.Downloads;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Images;
-using FluentStore.SDK.Models;
-using Garfoot.Utilities.FluentUrn;
+using FluentStore.SDK.Plugins.NuGet;
+using Humanizer;
 using OwlCore.Kubo;
 using OwlCore.Storage;
 using OwlCore.Storage.System.IO;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FluentStore.Helpers.Updater;
@@ -27,7 +26,8 @@ internal partial class AppUpdatePackage : PackageBase<OnlineVersionInfo>
         Model = versionInfo;
 
         Urn = AppUpdatePackageSource.FormatUrn(release);
-        Title = App.AppName;
+        ShortTitle = App.AppName;
+        Title = $"{App.AppName} {release.Titleize()}";
         Version = Model.VersionStr;
         Description = Model.Description;
         DeveloperName = "Joshua Askharoun";
@@ -43,13 +43,26 @@ internal partial class AppUpdatePackage : PackageBase<OnlineVersionInfo>
 
     public string Release { get; private set; }
 
-    public override Task<ImageBase> CacheAppIcon() => Task.FromResult<ImageBase>(null);
+    public override Task<ImageBase> CacheAppIcon() => Task.FromResult<ImageBase>(new FileImage("ms-appx:///Assets/AppIcon.ico"));
 
     public override Task<ImageBase> CacheHeroImage() => Task.FromResult<ImageBase>(null);
 
     public override Task<List<ImageBase>> CacheScreenshots() => Task.FromResult<List<ImageBase>>([]);
 
     public override Task<bool> CanDownloadAsync() => Task.FromResult(InstallerInfo?.IsValid() ?? false);
+
+    public override Task<string> GetCannotBeInstalledReason()
+    {
+        if (!InstallerInfo?.IsValid() ?? false)
+            return Task.FromResult("Installer information is either unavailable or does not provide any sources to download from.");
+
+        var onlineVersion = Model.Version;
+        var installedVersion = FluentStoreNuGetProject.CurrentSdkVersion;
+        //if (onlineVersion <= installedVersion)
+        //    return Task.FromResult($"Detected app downgrade. Version {onlineVersion} is older than the installed version {installedVersion}.");
+
+        return Task.FromResult<string>(null);
+    }
 
     public override Task<bool> CanLaunchAsync() => Task.FromResult(false);
 
