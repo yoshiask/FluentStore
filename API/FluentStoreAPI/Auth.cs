@@ -23,6 +23,20 @@ public partial class FluentStoreApiClient
             throw new Exception("Failed to sign in");
     }
 
+    public async Task<Uri> GetGoogleSignInUrlAsync(string? redirectUrl)
+    {
+        var authState = await _supabase.Auth.SignIn(Supabase.Gotrue.Constants.Provider.Google, new()
+        {
+            RedirectTo = redirectUrl
+        });
+        return authState.Uri;
+    }
+
+    public async Task CompleteSignInFromUrlAsync(Uri uri)
+    {
+        var session = await _supabase.Auth.GetSessionFromUrl(uri);
+    }
+
     /// <summary>
     /// Exchanges the <see cref="RefreshToken"/> to get new tokens.
     /// </summary>

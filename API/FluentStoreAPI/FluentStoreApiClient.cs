@@ -10,7 +10,7 @@ public partial class FluentStoreApiClient
 {
     private readonly Client _supabase;
 
-    public FluentStoreApiClient() : this(Constants.SUPABASE_URL, Constants.SUPABASE_KEY)
+    public FluentStoreApiClient() : this(Constants.DEFAULT_SUPABASE_URL, Constants.DEFAULT_SUPABASE_KEY)
     {
     }
 

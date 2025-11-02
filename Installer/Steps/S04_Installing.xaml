@@ -19,7 +19,7 @@
 
         <TextBlock Text="Installing" TextWrapping="Wrap" Grid.Row="0"
                    FontSize="24" FontWeight="Bold"/>
-        <TextBlock Text="Please wait while Fluent Store Beta is being installed." Grid.Row="1"
+        <TextBlock Text="Please wait while Fluent Store Beta is being installed. This might take a while." Grid.Row="1"
                    TextWrapping="Wrap" FontSize="14" Margin="0,8,0,0"/>
         <ProgressBar x:Name="ProgressBar" IsIndeterminate="True" Grid.Row="2" Margin="0,8,0,0"/>
 

@@ -1,24 +1,16 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using FluentStore.SDK.AbstractUI.Models;
 using FluentStore.SDK.AbstractUI.ViewModels;
 using FluentStore.SDK.Users;
 
 namespace FluentStore.ViewModels.Auth
 {
-    public class AccountHandlerViewModel : ObservableObject
+    public partial class AccountHandlerViewModel(AccountHandlerBase handler) : ObservableObject
     {
-        private AccountHandlerBase _handler;
-
-        public AccountHandlerViewModel(AccountHandlerBase handler)
-        {
-            _handler = handler;
-        }
-
         public AccountHandlerBase Handler
         {
-            get => _handler;
-            set => SetProperty(ref _handler, value);
+            get => handler;
+            set => SetProperty(ref handler, value);
         }
 
         /// <inheritdoc cref="AccountHandlerBase.SignOutAsync"/>
@@ -29,5 +21,8 @@ namespace FluentStore.ViewModels.Auth
 
         /// <inheritdoc cref="AccountHandlerBase.CreateSignInForm"/>
         public AbstractFormViewModel CreateSignInForm() => new(Handler.CreateSignInForm());
+
+        /// <inheritdoc cref="AccountHandlerBase.CreateSignUpForm"/>
+        public AbstractFormViewModel CreateSignUpForm() => new(Handler.CreateSignUpForm());
     }
 }

@@ -9,7 +9,7 @@
         <Platforms>AnyCPU;x86;x64;arm;arm64</Platforms>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <NoWarn>1701;1702;CS8618;CS8603;CS8625</NoWarn>
-        <AssemblyVersion>0.4.0.0</AssemblyVersion>
+        <AssemblyVersion>0.4.1.0</AssemblyVersion>
         <FileVersion>$(AssemblyVersion)</FileVersion>
 
         <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>

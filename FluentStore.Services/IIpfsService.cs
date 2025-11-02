@@ -2,9 +2,12 @@
 using Ipfs.Http;
 using Microsoft.Extensions.DependencyInjection;
 using OwlCore.Kubo;
+using OwlCore.Storage;
+using OwlCore.Storage.System.IO;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -80,6 +83,8 @@ public class IpfsService : IIpfsService
         var kuboRepoDir = kuboDir.CreateSubdirectory("repo");
         var kuboBinDir = kuboDir.CreateSubdirectory("bin");
 
+        var kuboBinFolder = new SystemFolder(kuboBinDir);
+
         var lockFile = kuboRepoDir
             .EnumerateFiles()
             .FirstOrDefault(f => f.Name.Equals("repo.lock", StringComparison.OrdinalIgnoreCase));
@@ -87,6 +92,7 @@ public class IpfsService : IIpfsService
         {
             // Attempt to remove the repo lock, just in case a previous
             // run didn't exit cleanly
+            await SetAllFileAttributesRecursive(kuboBinFolder, attributes => attributes & ~FileAttributes.ReadOnly);
             try
             {
                 lockFile.Delete();
@@ -96,13 +102,13 @@ public class IpfsService : IIpfsService
 
         await StopAsync();
         
-        _bootstrapper = new KuboBootstrapper(kuboRepoDir.FullName)
+        _bootstrapper = new KuboBootstrapper(kuboRepoDir.FullName, new Version(0, 35))
         {
             RoutingMode         = settings.RehostOnIpfs ? DhtRoutingMode.Auto : DhtRoutingMode.AutoClient,
             GatewayUri          = GetLocalUri(settings.IpfsGatewayPort),
             ApiUri              = GetLocalUri(settings.IpfsApiPort),
             LaunchConflictMode  = BootstrapLaunchConflictMode.Relaunch,
-            BinaryWorkingFolder = new(kuboBinDir),
+            BinaryWorkingFolder = kuboBinFolder,
         };
 
         await _bootstrapper.StartAsync(token);
@@ -197,6 +203,38 @@ public class IpfsService : IIpfsService
         {
             return null;
         }
+    }
+
+    // See https://github.com/Arlodotexe/OwlCore.Kubo/blob/f6a949de864f111e3b688b2de82bda23f31e9895/tests/OwlCore.Kubo.Tests/TestFixture.cs#L76-L104
+
+    /// <summary>
+    /// Creates a temp folder for the test fixture to work in, safely unlocking and removing existing files if needed.
+    /// </summary>
+    /// <returns>The folder that was created.</returns>
+    private static async Task<SystemFolder> SafeCreateWorkingFolder(SystemFolder rootFolder, string name)
+    {
+        // When Kubo is stopped unexpectedly, it may leave some files with a ReadOnly attribute.
+        // Since this folder is created every time tests are run, we need to clean up any files leftover from prior runs.
+        // To do that, we need to remove the ReadOnly file attribute.
+        var testTempRoot = (SystemFolder)await rootFolder.CreateFolderAsync(name, overwrite: false);
+        await SetAllFileAttributesRecursive(testTempRoot, attributes => attributes & ~FileAttributes.ReadOnly);
+
+        // Delete and recreate the folder.
+        return (SystemFolder)await rootFolder.CreateFolderAsync(name, overwrite: true);
+    }
+
+    /// <summary>
+    /// Changes the file attributes of all files in all subfolders of the provided <see cref="SystemFolder"/>.
+    /// </summary>
+    /// <param name="rootFolder">The folder to set file permissions in.</param>
+    /// <param name="transform">This function is provided the current file attributes, and should return the new file attributes.</param>
+    private static async Task SetAllFileAttributesRecursive(SystemFolder rootFolder, Func<FileAttributes, FileAttributes> transform)
+    {
+        await foreach (SystemFile file in rootFolder.GetFilesAsync())
+            file.Info.Attributes = transform(file.Info.Attributes);
+
+        await foreach (SystemFolder folder in rootFolder.GetFoldersAsync())
+            await SetAllFileAttributesRecursive(folder, transform);
     }
 }
 

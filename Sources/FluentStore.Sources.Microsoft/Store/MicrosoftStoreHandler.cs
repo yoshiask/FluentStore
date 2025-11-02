@@ -42,10 +42,14 @@ namespace FluentStore.Sources.Microsoft.Store
 
         public override async IAsyncEnumerable<PackageBase> GetFeaturedPackagesAsync()
         {
-            var collection = await StorefrontApi.GetRecommendationCollection("TopFree", options: GetSystemOptions());
+            var collection = await StorefrontApi.GetRecommendationCollection("topFree", "apps", options: GetSystemOptions());
 
-            var packages = collection.Payload.Cards.Where(card => card.ProductId.Length == 12 && card.TypeTag == "app")
+            var packages = collection.Payload.Cards?
+                .Where(card => card.ProductId.Length == 12)
                 .Select(card => new MicrosoftStorePackage(this, card) { Status = PackageStatus.BasicDetails });
+
+            if (packages is null)
+                yield break;
 
             foreach (var package in packages)
                 yield return package;
