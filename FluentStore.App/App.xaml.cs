@@ -13,6 +13,7 @@ using Microsoft.UI.Xaml;
 using System;
 using System.Threading.Tasks;
 using Windows.UI.Notifications;
+using WinUIEx;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -156,14 +157,7 @@ namespace FluentStore
             // Kick off update check in background
             Window.DispatcherQueue.TryEnqueue(async () =>
             {
-                var updater = new AppUpdatePackageSource();
-                var update = await updater.GetPackage(AppUpdatePackageSource.FormatUrn(FluentStoreNuGetProject.CurrentSdkVersion.Release));
-
-                if (update is not null && await update.CanInstallAsync())
-                {
-                    Views.Update.UpdateWindow updateWindow = new(update);
-                    updateWindow.DispatcherQueue.TryEnqueue(updateWindow.Activate);
-                }
+                await new AppUpdatePackageSource().CheckForUpdatesWithWindow();
             });
 
             if (appStartupService.IsFirstLaunch)

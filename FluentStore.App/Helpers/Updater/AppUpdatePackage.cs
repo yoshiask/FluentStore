@@ -58,8 +58,8 @@ internal partial class AppUpdatePackage : PackageBase<OnlineVersionInfo>
 
         var onlineVersion = Model.Version;
         var installedVersion = FluentStoreNuGetProject.CurrentSdkVersion;
-        //if (onlineVersion <= installedVersion)
-        //    return Task.FromResult($"Detected app downgrade. Version {onlineVersion} is older than the installed version {installedVersion}.");
+        if (onlineVersion <= installedVersion)
+            return Task.FromResult($"Detected app downgrade. Version {onlineVersion} is older than the installed version {installedVersion}.");
 
         return Task.FromResult<string>(null);
     }
