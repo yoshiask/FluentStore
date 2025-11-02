@@ -1,12 +1,16 @@
-﻿using System;
+﻿using Installer.Utils;
+using System;
+using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using Windows.Management.Deployment;
+using Windows.Web.Http;
 
 namespace Installer.Steps
 {
@@ -52,6 +56,11 @@ namespace Installer.Steps
 
                 token.ThrowIfCancellationRequested();
 
+                // Install .NET runtime
+                await InstallDotNetRuntime();
+
+                token.ThrowIfCancellationRequested();
+
                 // Install package
                 QueueOutputBoxWriteLine("Installing package...");
                 var appInstallerPath = "https://ipfs.askharoun.com/FluentStore/BetaInstaller/FluentStoreBeta.appinstaller";
@@ -80,13 +89,13 @@ namespace Installer.Steps
             }
         }
 
-        private void UpdateProgress(uint progress)
+        private void UpdateProgress(uint progress, string verb = "Installing")
         {
             Dispatcher.Invoke(delegate
             {
                 ProgressBar.IsIndeterminate = false;
                 ProgressBar.Value = progress;
-                QueueOutputBoxWriteLine($"Installing {progress:#0}%");
+                QueueOutputBoxWriteLine($"{verb} {progress:#0}%");
             });
         }
 
@@ -125,9 +134,127 @@ namespace Installer.Steps
 
             var installResult = await task;
             if (!installResult.IsRegistered)
-                throw new Exception(installResult.ErrorText);
+                throw installResult.ExtendedErrorCode;
 
             void OnProgress(DeploymentProgress e) => UpdateProgress(e.percentage);
+        }
+
+        private async Task InstallDotNetRuntime(CancellationToken token = default)
+        {
+            // Check for installed runtime (doesn't need to be foolproof; just avoid downloading if possible)
+            QueueOutputBoxWriteLine("Checking for .NET runtime...");
+
+            try
+            {
+                var dotnetProcess = Process.Start(new ProcessStartInfo
+                {
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    FileName = "dotnet",
+                    Arguments = "--list-runtimes"
+                });
+
+                Regex rxRuntime = new(@"^(?<id>[\w.]+)\s+((?<major>\d+)\.\S+)");
+
+                while (true)
+                {
+                    // Ensure dotnet process closes when cancelled
+                    if (token.IsCancellationRequested)
+                    {
+                        dotnetProcess.Kill();
+                        token.ThrowIfCancellationRequested();
+                        return;
+                    }
+
+                    var line = await dotnetProcess.StandardOutput.ReadLineAsync();
+                    if (string.IsNullOrWhiteSpace(line))
+                        break;
+
+                    var match = rxRuntime.Match(line);
+                    if (!match.Success)
+                        continue;
+
+                    var id = match.Groups["id"].Value;
+                    var ver = match.Groups["ver"].Value;
+                    var major = uint.Parse(match.Groups["major"].Value);
+
+                    if (major >= App.RequiredDotNetRuntimeVersion && id.Equals(App.RequiredDotNetRuntimeId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        QueueOutputBoxWriteLine($"Found compatible .NET runtime: {id} {ver}");
+                        return;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // Swallow exceptions when checking for .NET, it's probably not installed
+            }
+
+            // Download .NET runtime
+            QueueOutputBoxWriteLine($"No compatible runtime found. Downloading from {App.DotNetInstallerUrl}...");
+
+            var lastProgress = uint.MaxValue;
+            HttpClient http = new();
+            using var installerHttpResponse = await http.GetAsync(new Uri(App.DotNetInstallerUrl))
+                .AsTask(token, new Progress<HttpProgress>(OnDownloadProgress));
+
+            installerHttpResponse.EnsureSuccessStatusCode();
+
+            var installerPath = Path.GetTempFileName();
+            using (var installerDstStream = new FileStream(installerPath, FileMode.OpenOrCreate, FileAccess.Write))
+            {
+                await installerHttpResponse.Content
+                    .WriteToStreamAsync(installerDstStream.AsOutputStream())
+                    .AsTask(token);
+            }
+
+            // Run installer
+            QueueOutputBoxWriteLine("Installing .NET runtime...");
+            var installProcess = Process.Start(new ProcessStartInfo
+            {
+                UseShellExecute = false,
+                FileName = installerPath,
+                Arguments = "/install /quiet /norestart"
+            });
+            installProcess.WaitForExit();
+
+            // Clean up installer
+            File.Delete(installerPath);
+
+            switch (installProcess.ExitCode)
+            {
+                case 0:
+                    QueueOutputBoxWriteLine(".NET runtime was successfully installed.");
+                    return;
+
+                case 3010:
+                    QueueOutputBoxWriteLine(".NET runtime was installed but may require a system restart.");
+                    return;
+
+                case 1618:
+                    QueueOutputBoxWriteLine("Failed to install .NET runtime. Ensure no other installations are in progress.");
+                    return;
+
+                default:
+                    if (MsiExitCodes.Messages.TryGetValue(installProcess.ExitCode, out var message))
+                        QueueOutputBoxWriteLine(message);
+                    throw new Exception($"Failed to install .NET runtime. Installer exited with code {installProcess.ExitCode}.");
+            }
+
+            void OnDownloadProgress(HttpProgress progress)
+            {
+                if (progress.TotalBytesToReceive is null)
+                    return;
+
+                var fraction = (float)progress.BytesReceived / progress.TotalBytesToReceive;
+                var percent = (uint)fraction * 100;
+
+                if (lastProgress != percent)
+                {
+                    lastProgress = percent;
+                    UpdateProgress(percent, "Downloading .NET runtime");
+                }
+            }
         }
 
         private void OutputBox_TextChanged(object sender, TextChangedEventArgs e)
