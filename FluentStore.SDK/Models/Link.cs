@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Diagnostics;
 using System;
+using System.Diagnostics.Contracts;
 
 namespace FluentStore.SDK.Models
 {
@@ -38,6 +39,7 @@ namespace FluentStore.SDK.Models
             set => _TextContent = value;
         }
 
+        [Pure]
         public override string ToString() => $"[{TextContent}]({Uri})";
 
         /// <summary>
@@ -48,6 +50,7 @@ namespace FluentStore.SDK.Models
         /// to <see cref="Link(Uri, string)"/>, or <c>null</c> if <paramref name="uri"/>
         /// is <c>null</c>.
         /// </returns>
+        [Pure]
         public static Link Create(Uri uri, string textContent = null)
             => uri is null ? null : new(uri, textContent);
 
@@ -59,6 +62,7 @@ namespace FluentStore.SDK.Models
         /// to <see cref="Link(string, string)"/>, or <c>null</c> if <paramref name="uri"/>
         /// is <c>null</c>.
         /// </returns>
+        [Pure]
         public static Link Create(string url, string textContent = null)
         {
             if (Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri))

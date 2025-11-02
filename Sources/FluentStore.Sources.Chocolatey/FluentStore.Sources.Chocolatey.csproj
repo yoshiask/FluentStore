@@ -7,7 +7,7 @@
 
     <PropertyGroup>
         <Title>Chocolatey</Title>
-        <Version>$(FluentStoreMajorMinorVersion).0.2</Version>
+        <Version>$(FluentStoreMajorMinorVersion).1.0</Version>
         <PackageVersion>$(Version)-alpha</PackageVersion>
         <Description>Provides support for the Chocolatey Community repository. Requires the Chocolatey CLI to be intalled.</Description>
     </PropertyGroup>
