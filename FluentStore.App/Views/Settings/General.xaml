@@ -24,6 +24,16 @@
             <ToggleSwitch IsOn="{x:Bind helpers:Settings.Default.UseExclusionFilter}" Style="{ThemeResource ToggleSwitchRightStyle}"/>
         </controls:SettingsBlockControl>
 
+        <controls:SettingsBlockControl Title="Check for updates"
+                                       Description="Searches online for the latest version of Fluent Store">
+            <controls:SettingsBlockControl.Icon>
+                <FontIcon Glyph="&#xE777;"/>
+            </controls:SettingsBlockControl.Icon>
+            <controls:SettingsBlockControl.SettingsActionableElement>
+                <Button Content="Go" Click="CheckForUpdatesButton_Click"/>
+            </controls:SettingsBlockControl.SettingsActionableElement>
+        </controls:SettingsBlockControl>
+
         <controls:SettingsBlockControl Title="Clear installer cache"
                                        Description="Removes all cached app installers">
             <controls:SettingsBlockControl.Icon>
