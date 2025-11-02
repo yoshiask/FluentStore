@@ -66,6 +66,7 @@ namespace FluentStore.Sources.Microsoft.Store
                     // Filter out dependencies and parse package full name
                     var appPackageFamilyNames = Model.PackageFamilyNames
                         .Select(PackageFamilyName.Parse)
+                        .Select(p => p.GetHashCode())
                         .ToHashSet();
 
                     var appUpdates = allUpdates
@@ -74,7 +75,7 @@ namespace FluentStore.Sources.Microsoft.Store
                             Update = u,
                             PackageFullName = PackageFullName.Parse(u.AppxMetadata.ContentPackageId)
                         })
-                        .Where(a => appPackageFamilyNames.Contains(a.PackageFullName.ToPackageFamilyName()));
+                        .Where(a => appPackageFamilyNames.Contains(a.PackageFullName.ToPackageFamilyName().GetHashCode()));
 
                     // Rank app packages by architecture compatibility,
                     // then by package version

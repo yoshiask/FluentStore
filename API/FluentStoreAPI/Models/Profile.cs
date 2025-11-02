@@ -1,26 +1,12 @@
-﻿using Google.Apis.Firestore.v1.Data;
+﻿using System;
 
 namespace FluentStoreAPI.Models;
 
 public class Profile
 {
-    public Profile() { }
+    public Guid Id { get; set; }
 
-    internal Profile(Document d)
-    {
-        DisplayName = d.Fields[nameof(DisplayName)].StringValue;
-    }
+    public string? Email { get; set; }
 
     public string DisplayName { get; set; }
-
-    public static implicit operator Document(Profile profile)
-    {
-        return new()
-        {
-            Fields =
-            {
-                [nameof(DisplayName)] = new() { StringValue = profile.DisplayName },
-            }
-        };
-    }
 }

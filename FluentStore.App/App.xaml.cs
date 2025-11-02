@@ -1,9 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.WinUI.Notifications;
 using FluentStore.Helpers;
+using FluentStore.Helpers.Updater;
 using FluentStore.SDK;
 using FluentStore.SDK.Helpers;
 using FluentStore.SDK.Plugins;
+using FluentStore.SDK.Plugins.NuGet;
 using FluentStore.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -11,6 +13,7 @@ using Microsoft.UI.Xaml;
 using System;
 using System.Threading.Tasks;
 using Windows.UI.Notifications;
+using WinUIEx;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -88,7 +91,7 @@ namespace FluentStore
             var navService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
             var pluginLoader = Ioc.Default.GetRequiredService<PluginLoader>();
             var appStartupService = Ioc.Default.GetRequiredService<AppStartupInfo>();
-            
+
             await pluginLoader.InitAsync();
 
             ProtocolResult result = navService.ParseProtocol(e.Arguments, e.IsFirstInstance);
@@ -151,23 +154,14 @@ namespace FluentStore
             var appStartupService = Ioc.Default.GetRequiredService<AppStartupInfo>();
             var navService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
 
+            // Kick off update check in background
+            Window.DispatcherQueue.TryEnqueue(async () =>
+            {
+                await new AppUpdatePackageSource().CheckForUpdatesWithWindow();
+            });
+
             if (appStartupService.IsFirstLaunch)
             {
-                var pluginLoader = Ioc.Default.GetRequiredService<PluginLoader>();
-
-                log?.Log($"Began installing pending plugins");
-                await pluginLoader.HandlePendingOperations();
-                log?.Log($"Finished install pending plugins");
-
-                // Load plugins and initialize package and account services
-                log?.Log($"Began loading plugins");
-                await pluginLoader.LoadPlugins();
-                log?.Log($"Finished loading plugins");
-
-                // Attempt to silently sign into any saved accounts
-                var pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
-                await pkgSvc.TrySlientSignInAsync();
-
                 // Update last launched version
                 Settings.Default.LastLaunchedVersion = Windows.ApplicationModel.Package.Current.Id.Version.ToVersion();
                 await Settings.Default.SaveAsync();
@@ -188,6 +182,21 @@ namespace FluentStore
                 }
 
                 SDK.Downloads.AbstractStorageHelper.IpfsClient = ipfsService.Client;
+
+                var pluginLoader = Ioc.Default.GetRequiredService<PluginLoader>();
+
+                log?.Log($"Began installing pending plugins");
+                await pluginLoader.HandlePendingOperations();
+                log?.Log($"Finished install pending plugins");
+
+                // Load plugins and initialize package and account services
+                log?.Log($"Began loading plugins");
+                await pluginLoader.LoadPlugins(Settings.Default.AutoUpdatePlugins);
+                log?.Log($"Finished loading plugins");
+
+                // Attempt to silently sign into any saved accounts
+                var pkgSvc = Ioc.Default.GetRequiredService<PackageService>();
+                await pkgSvc.TrySlientSignInAsync();
             }
 
             if (!appStartupService.LaunchResult.RedirectActivation || appStartupService.IsFirstInstance)
@@ -293,7 +302,7 @@ namespace FluentStore
             services.AddSingleton<IPasswordVaultService, PasswordVaultService>();
             services.AddSingleton<IIpfsService, IpfsService>();
             services.AddSingleton<Microsoft.Marketplace.Storefront.Contracts.StorefrontApi>();
-            services.AddSingleton<FluentStoreAPI.FluentStoreAPI>();
+            services.AddSingleton<FluentStoreAPI.FluentStoreApiClient>();
             services.AddSingleton<PackageService>();
             services.AddSingleton<PluginLoader>();
 

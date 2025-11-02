@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using FluentStore.Helpers.Updater;
 using FluentStore.SDK.Downloads;
 using FluentStore.Services;
 using Microsoft.UI.Xaml;
@@ -19,6 +20,34 @@ namespace FluentStore.Views.Settings
         public General()
         {
             this.InitializeComponent();
+        }
+
+        private async void CheckForUpdatesButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Control;
+
+            if (button is not null)
+                button.IsEnabled = false;
+
+            var updateAvailable = await new AppUpdatePackageSource().CheckForUpdatesWithWindow();
+
+            if (!updateAvailable)
+            {
+                // No update was available
+                ContentDialog dialog = new()
+                {
+                    Title = "No updates available",
+                    Content = "You're on the latest release of Fluent Store.",
+                    IsPrimaryButtonEnabled = true,
+                    PrimaryButtonText = "OK",
+                    XamlRoot = XamlRoot,
+                };
+
+                await dialog.ShowAsync();
+            }
+
+            if (button is not null)
+                button.IsEnabled = true;
         }
 
         private void ClearCacheButton_Click(object sender, RoutedEventArgs e)

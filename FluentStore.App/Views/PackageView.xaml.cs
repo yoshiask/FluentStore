@@ -180,14 +180,13 @@ namespace FluentStore.Views
                         };
                         item.Click += async (object s, RoutedEventArgs e) =>
                         {
-                            // Add package to collection
+                            // Get collection to modify and package to add
                             var it = (MenuFlyoutItem)s;
                             var col = (SDK.Packages.IPackageCollection)it.Tag;
-                            col.Items.Add(ViewModel.Package);
+                            var colPackage = (PackageBase)it.Tag;
 
                             // Save collection
-                            var package = (PackageBase)it.Tag;
-                            await package.PackageHandler.SavePackageAsync(package);
+                            await colPackage.PackageHandler.AddToCollectionAsync(col, ViewModel.Package);
                         };
                         flyout.Items.Add(item);
                     }

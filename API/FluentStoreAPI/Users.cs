@@ -1,78 +1,91 @@
 ﻿using FluentStoreAPI.Models;
-using Flurl;
-using Flurl.Http;
-using Google.Apis.Firestore.v1.Data;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace FluentStoreAPI
+namespace FluentStoreAPI;
+
+public partial class FluentStoreApiClient
 {
-    public partial class FluentStoreAPI
+    public async Task SignUpAndCreateProfileAsync(string email, string password, Profile profile)
     {
-        public async Task<Models.Firebase.UserSignInResponse> SignUpAndCreateProfileAsync(string email, string password, Profile profile)
+        await SignUpAsync(email, password);
+        await UpdateDisplayNameAsync(profile.DisplayName);
+    }
+
+    public async Task<Profile?> GetCurrentUserProfileAsync() => await Task.Run(GetCurrentUserProfile);
+
+    public Profile? GetCurrentUserProfile()
+    {
+        var user = _supabase.Auth.CurrentUser;
+
+        if (user is null)
+            return null;
+
+        Profile profile = new()
         {
-            var signInResponse = await SignUpAsync(email, password);
-            await UpdateUserProfileAsync(signInResponse.LocalID, profile);
-            return signInResponse;
+            Id = new(user.Id!),
+            Email = user.Email
+        };
+
+        string? displayName = null;
+        if (_supabase.Auth.CurrentUser!.UserMetadata.TryGetValue("display_name", out var savedDisplayName))
+            displayName = savedDisplayName?.ToString();
+
+        profile.DisplayName = displayName ?? profile.Email ?? user.Id!;
+
+        return profile;
+    }
+
+    public async Task<bool> UpdateUserProfileAsync(Profile profile)
+    {
+        await UpdateDisplayNameAsync(profile.DisplayName);
+        return true;
+    }
+
+    public async Task<List<Collection>> GetCollectionsAsync(Guid userId)
+    {
+        var response = await _supabase.From<Collection>()
+            .Where(c => c.AuthorId == userId)
+            .Get();
+
+        return response.Models;
+    }
+
+    public async Task<Collection> GetCollectionAsync(Guid collectionId)
+    {
+        var response = await _supabase.From<Collection>()
+            .Where(c => c.Id == collectionId)
+            .Get();
+
+        return response.Model
+            ?? throw new Exception($"No collection with ID '{collectionId}' exists.");
+    }
+
+    public async Task<Guid?> UpdateCollectionAsync(Collection collection, CancellationToken token = default)
+    {
+        // Make sure collection has a unique ID and updated timestamp
+        if (collection.Id == Guid.Empty)
+        {
+            collection.Id = Guid.NewGuid();
+            collection.CreatedAt = DateTimeOffset.Now;
         }
 
-        public async Task<Profile> GetUserProfileAsync(string userId)
-        {
-            var profile = await GetUserDocument(userId, "public", "profile");
-            return new(profile);
-        }
+        // Set author to current user
+        collection.AuthorId = new(_supabase.Auth.CurrentUser!.Id!);
 
-        public async Task<bool> UpdateUserProfileAsync(string userId, Profile profile)
-        {
-            return await UpdateUserDocument(userId, "public", "profile", profile);
-        }
+        // Update modified timestamp
+        collection.ModifiedAt = DateTimeOffset.Now;
 
-        public async Task<List<Collection>> GetCollectionsAsync(string userId)
-        {
-            var queryRequest = Documents.RunQuery(new RunQueryRequest()
-            {
-                StructuredQuery = new()
-                {
-                    From = [new CollectionSelector() { CollectionId = "collections" }],
-                    //Where = new FieldFilter()
-                }
-            }, NAME_PREFIX + $"/users/{userId}");
-            var queryResults = await queryRequest.ExecuteAsync();
+        var response = await _supabase.From<Collection>().Upsert(collection, cancellationToken: token);
+        return response.Model?.Id;
+    }
 
-            var request = Documents.ListDocuments(NAME_PREFIX, $"users/{userId}/collections");
-            request.AccessToken = Token;
-            var collections = await request.ExecuteAsync();
-
-            return collections.Documents
-                .Select(d => new Collection(d))
-                .ToList();
-        }
-
-        public async Task<Collection> GetCollectionAsync(string userId, string collectionId)
-        {
-            var document = await GetUserDocument(userId, "collections", collectionId);
-            return new Collection(document);
-        }
-
-        public async Task<bool> UpdateCollectionAsync(string userId, Collection collection, CancellationToken token = default)
-        {
-            // Make sure collection has a unique ID
-            if (collection.Id == Guid.Empty)
-                collection.Id = Guid.NewGuid();
-
-            // Set author to current user
-            collection.AuthorId = userId;
-
-            return await UpdateUserDocument(userId, "collections",
-                collection.Id.ToString(), collection, token);
-        }
-
-        public async Task<bool> DeleteCollectionAsync(string userId, string collectionId)
-        {
-            return await DeleteUserDocument(userId, "collections", collectionId);
-        }
+    public async Task DeleteCollectionAsync(Guid collectionId, CancellationToken token = default)
+    {
+        await _supabase.From<Collection>()
+            .Where(c => c.Id == collectionId)
+            .Delete(cancellationToken: token);
     }
 }

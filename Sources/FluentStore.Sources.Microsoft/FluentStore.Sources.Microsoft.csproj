@@ -2,10 +2,10 @@
 
     <ItemGroup>
         <PackageReference Include="WinGet.Sharp" Version="1.8.1911" />
-        <PackageReference Include="WGet.NET" Version="4.2.0" />
+        <PackageReference Include="WGet.NET" Version="4.3.1" />
 
-        <PackageReference Include="Microsoft.Identity.Client" Version="4.68.0" />
-        <PackageReference Include="Microsoft.Graph" Version="5.69.0" />
+        <PackageReference Include="Microsoft.Identity.Client" Version="4.69.1" />
+        <PackageReference Include="Microsoft.Graph" Version="5.73.0" />
         <PackageReference Include="Microsoft.Msix.Utils" Version="2.1.1" />
 
         <ProjectReference Include="..\..\API\MSStore\StoreDownloader\StoreDownloader.csproj" />
@@ -17,7 +17,7 @@
 
     <PropertyGroup>
         <Title>Microsoft Store &amp; WinGet</Title>
-        <Version>$(FluentStoreMajorMinorVersion).0.3</Version>
+        <Version>0.4.0.5</Version>
         <PackageVersion>$(Version)-beta</PackageVersion>
         <Description>Download or install apps and collections from the Microsoft Store and WinGet Community. Movies, arcade, and some games may not be supported.</Description>
     </PropertyGroup>

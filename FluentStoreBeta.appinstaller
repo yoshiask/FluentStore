@@ -1,32 +1,32 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <AppInstaller
-    Version="0.3.1.0"
+    Version="0.4.0.0"
     Uri="https://ipfs.askharoun.com/FluentStore/BetaInstaller/FluentStoreBeta.appinstaller"
     xmlns="http://schemas.microsoft.com/appx/appinstaller/2017">
 
     <MainBundle Name="52374YoshiAskharoun.FluentStore"
                 Publisher="CN=Joshua Askharoun, O=Joshua Askharoun, S=Texas, C=US"
-                Version="0.3.1.0"
-                Uri="https://ipfs.askharoun.com/FluentStore/BetaInstaller/FluentStoreBeta_0.3.1.msixbundle" />
+                Version="0.4.0.0"
+                Uri="https://ipfs.askharoun.com/FluentStore/BetaInstaller/FluentStoreBeta_0.4.0.msixbundle" />
     
     <Dependencies>
-        <Package Version="1003.565.600.0"
-                 Uri="https://ipfs.askharoun.com/FluentStore/BetaInstaller/Microsoft.WindowsAppRuntime.1.1_arm64.msix"
+        <Package Version="6000.401.2352.0"
+                 Uri="https://ipfs.askharoun.com/FluentStore/BetaInstaller/Microsoft.WindowsAppRuntime.1.6_arm64.msix"
                  Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
                  ProcessorArchitecture="arm64"
-                 Name="Microsoft.WindowsAppRuntime.1.1" />
+                 Name="Microsoft.WindowsAppRuntime.1.6" />
 
-        <Package Version="1003.565.600.0"
-                 Uri="https://ipfs.askharoun.com/FluentStore/BetaInstaller/Microsoft.WindowsAppRuntime.1.1_x64.msix"
+        <Package Version="6000.401.2352.0"
+                 Uri="https://ipfs.askharoun.com/FluentStore/BetaInstaller/Microsoft.WindowsAppRuntime.1.6_x64.msix"
                  Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
                  ProcessorArchitecture="x64"
-                 Name="Microsoft.WindowsAppRuntime.1.1" />
+                 Name="Microsoft.WindowsAppRuntime.1.6" />
 
-        <Package Version="1003.565.600.0"
-                 Uri="https://ipfs.askharoun.com/FluentStore/BetaInstaller/Microsoft.WindowsAppRuntime.1.1_x86.msix"
+        <Package Version="6000.401.2352.0"
+                 Uri="https://ipfs.askharoun.com/FluentStore/BetaInstaller/Microsoft.WindowsAppRuntime.1.6_x86.msix"
                  Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
                  ProcessorArchitecture="x86"
-                 Name="Microsoft.WindowsAppRuntime.1.1" />
+                 Name="Microsoft.WindowsAppRuntime.1.6" />
     </Dependencies>
 
 </AppInstaller>

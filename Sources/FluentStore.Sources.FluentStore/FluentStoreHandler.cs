@@ -4,13 +4,15 @@ using Garfoot.Utilities.FluentUrn;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentStore.SDK;
-using CommunityToolkit.Mvvm.DependencyInjection;
 using System.Linq;
 using FluentStore.SDK.Helpers;
 using FluentStore.Services;
 using FluentStore.SDK.AbstractUI.Models;
 using OwlCore.AbstractUI.Models;
 using System;
+using FluentStore.Sources.FluentStore.Users;
+using FluentStoreAPI;
+using FluentStore.SDK.Packages;
 
 namespace FluentStore.Sources.FluentStore
 {
@@ -18,17 +20,20 @@ namespace FluentStore.Sources.FluentStore
     {
         public const string NAMESPACE_COLLECTION = "fluent-store-collection";
 
-        private readonly FluentStoreAPI.FluentStoreAPI FSApi = Ioc.Default.GetRequiredService<FluentStoreAPI.FluentStoreAPI>();
-        private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
+        private readonly FluentStoreApiClient FSApi;
+        private readonly PackageService PackageService;
         private const string NameBoxId = "NameBox";
         private const string ImageUrlBoxId = "ImageUrlBox";
         private const string TileGlyphBoxId = "TileGlyphBox";
         private const string DescriptionBoxId = "DescriptionBox";
         private const string IsPublicSwitchId = "IsPublicSwitch";
 
-        public FluentStoreHandler(IPasswordVaultService passwordVaultService) : base(passwordVaultService)
+        public FluentStoreHandler(PackageService pkgSvc, IPasswordVaultService passwordVaultService, ICommonPathManager pathManager)
+            : base(passwordVaultService)
         {
-            AccountHandler = new Users.FluentStoreAccountHandler(FSApi, passwordVaultService);
+            FSApi = new();
+            PackageService = pkgSvc;
+            AccountHandler = new FluentStoreAccountHandler(FSApi, passwordVaultService, pathManager);
         }
 
         public override HashSet<string> HandledNamespaces => new()
@@ -42,11 +47,9 @@ namespace FluentStore.Sources.FluentStore
         {
             if (urn.NamespaceIdentifier == NAMESPACE_COLLECTION)
             {
-                string[] id = urn.GetContent<NamespaceSpecificString>().UnEscapedValue.Split(':');
-                string userId = id[0];
-                string collId = id[1];
+                var collId = Guid.Parse(urn.GetContent<NamespaceSpecificString>().UnEscapedValue);
 
-                var collection = await FSApi.GetCollectionAsync(userId, collId);
+                var collection = await FSApi.GetCollectionAsync(collId);
                 var collectionPack = new CollectionPackage(this, collection)
                 {
                     Status = PackageStatus.BasicDetails
@@ -57,14 +60,19 @@ namespace FluentStore.Sources.FluentStore
                     var items = new List<PackageBase>(collection.Items.Count);
                     foreach (string packageId in collection.Items)
                     {
-                        // Get details for each item
-                        Urn packageUrn = Urn.Parse(packageId);
-                        PackageBase package = await PackageService.GetPackageAsync(packageUrn, PackageStatus.BasicDetails);
-                        items.Add(package);
+                        try
+                        {
+                            // Get details for each item
+                            Urn packageUrn = Urn.Parse(packageId);
+                            PackageBase package = await PackageService.GetPackageAsync(packageUrn, PackageStatus.BasicDetails);
+                            items.Add(package);
+                        }
+                        catch { }
                     }
+
                     collectionPack.Update(items);
 
-                    var authorProfile = await FSApi.GetUserProfileAsync(userId);
+                    var authorProfile = await FSApi.GetCurrentUserProfileAsync();
                     collectionPack.Update(authorProfile);
 
                     collectionPack.Status = PackageStatus.Details;
@@ -82,7 +90,7 @@ namespace FluentStore.Sources.FluentStore
             if (!AccountHandler.IsLoggedIn)
                 yield break;
 
-            var collections = await FSApi.GetCollectionsAsync(AccountHandler.CurrentUser.Id);
+            var collections = await FSApi.GetCollectionsAsync(CurrentAccount.Uuid);
 
             foreach (var coll in collections)
                 yield return new CollectionPackage(this, coll) { Status = PackageStatus.BasicDetails };
@@ -176,7 +184,7 @@ namespace FluentStore.Sources.FluentStore
         {
             return package is CollectionPackage collectionPackage
                 && AccountHandler.IsLoggedIn
-                && collectionPackage.Model.AuthorId == AccountHandler.CurrentUser.Id;
+                && collectionPackage.Model.AuthorId == CurrentAccount.Uuid;
         }
 
         public override bool CanEditCollection(PackageBase package) => CanEditPackage(package);
@@ -187,7 +195,7 @@ namespace FluentStore.Sources.FluentStore
         {
             FluentStoreAPI.Models.Collection collection = new()
             {
-                AuthorId = AccountHandler.CurrentUser.Id,
+                AuthorId = CurrentAccount.Uuid,
                 IsPublic = true,
             };
             return new CollectionPackage(this, collection);
@@ -198,11 +206,32 @@ namespace FluentStore.Sources.FluentStore
             switch (package)
             {
                 case CollectionPackage collectionPackage:
-                    return await FSApi.UpdateCollectionAsync(AccountHandler.CurrentUser.Id, collectionPackage.Model);
+                    var updatedId = await FSApi.UpdateCollectionAsync(collectionPackage.Model);
+                    if (updatedId is not null)
+                    {
+                        collectionPackage.Model.Id = updatedId.Value;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
 
                 default:
                     return false;
             }
+        }
+
+        public override async Task<bool> AddToCollectionAsync(IPackageCollection collection, PackageBase package)
+        {
+            if (collection is CollectionPackage collectionPackage)
+            {
+                collectionPackage.Items.Add(package);
+                collectionPackage.Model.Items.Add(package.Urn.ToString());
+                return await SavePackageAsync(collectionPackage);
+            }
+
+            return false;
         }
 
         public override async Task<bool> DeletePackageAsync(PackageBase package)
@@ -210,11 +239,14 @@ namespace FluentStore.Sources.FluentStore
             switch (package)
             {
                 case CollectionPackage collectionPackage:
-                    return await FSApi.DeleteCollectionAsync(AccountHandler.CurrentUser.Id, collectionPackage.Model.Id.ToString());
+                    await FSApi.DeleteCollectionAsync(collectionPackage.Model.Id);
+                    return true;
 
                 default:
                     return false;
             }
         }
+
+        private FluentStoreAccount CurrentAccount => (FluentStoreAccount)AccountHandler.CurrentUser;
     }
 }

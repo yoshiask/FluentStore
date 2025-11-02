@@ -1,16 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <ProjectReference Include="..\..\API\FluentStoreAPI\FluentStoreAPI.csproj">
-            <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-            <IncludeAssets>FluentStoreAPI.dll</IncludeAssets>
-        </ProjectReference>
+        <ProjectReference Include="..\..\API\FluentStoreAPI\FluentStoreAPI.csproj"/>
         <ProjectReference Include="..\..\FluentStore.SDK\FluentStore.SDK.csproj" />
     </ItemGroup>
 
     <PropertyGroup>
         <Title>Fluent Store Social</Title>
-        <Version>$(FluentStoreMajorMinorVersion).0.3</Version>
+        <Version>$(FluentStoreMajorMinorVersion).1.1</Version>
         <PackageVersion>$(Version)-beta</PackageVersion>
         <Description>Create and explore package collections from people around the world.</Description>
     </PropertyGroup>

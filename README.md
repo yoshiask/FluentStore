@@ -14,21 +14,23 @@ Several sources are currently supported, with several more planned for the futur
 
 **Legend**
 | Symbol   | Description
----        | :---:
+---:       | :---
 | ✅      | Available in latest release
 | ☑       | Available in next release
 | 🔷      | Currently in development
 | ❌      | Not available at this time
+|          | Not applicable
 
-| Source Name       | Search | Download | Install | Collections
----                 | :---:  | :---:    | :---:   | :---:
-| Microsoft Store   | ✅     | ✅      | ✅      | ✅
-| WinGet            | ✅     | ✅      | ✅      | ✅
-| GitHub Releases   | ❌     | ✅      | ✅      | ❌
-| Chocolatey        | 🔷     | 🔷      | 🔷      | ❌
-| Scoop             | ❌     | ❌      | ❌      | ❌
-| UWP Community     | ❌     | ✅¹     | ✅¹     | ✅
-| Fluent Store      | ❌     | ✅²     | ✅²     | ✅
+| Source Name       | Search | Download | Install | Collections | *Tracking issue*
+:---                 | :---:  | :---:    | :---:   | :---:       |  :---
+| Microsoft Store   | ✅     | ✅      | ✅      | ✅         |
+| WinGet            | ✅     | ✅      | ✅      | ✅         |
+| GitHub Releases   | ❌     | ✅      | ✅      |            |
+| Chocolatey        | ✅     | ✅      | ✅      |            | [#30](https://github.com/yoshiask/FluentStore/issues/30)
+| UWP Community     | ❌     | ✅¹     | ✅¹     | ✅         |
+| Fluent Store      | ❌     | ✅²     | ✅²     | ✅         |
+| Scoop             | ❌     | ❌      | ❌      |            | [#40](https://github.com/yoshiask/FluentStore/issues/40)
+| WebCatalog        | ❌     | ❌      | ❌      |            | [#85](https://github.com/yoshiask/FluentStore/issues/85)
 
 1.  UWP Community projects have 'download' links, but they do not go directly to an installer.
     Fluent Store will attempt to follow the link and download/install it if recognized. If not, the link is opened in the default browser.

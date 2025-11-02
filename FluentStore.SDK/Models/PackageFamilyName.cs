@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace FluentStore.SDK.Models;
 
-public partial record PackageFullName(string Name, Version Version, Architecture Architecture, string ResourceId, string PublisherId)
+public sealed partial record PackageFullName(string Name, Version Version, Architecture Architecture, string ResourceId, string PublisherId)
     : IEquatable<PackageFullName>
 {
     public override string ToString() => $"{Name}_{Version}_{Architecture}_{ResourceId}_{PublisherId}";
@@ -27,7 +27,7 @@ public partial record PackageFullName(string Name, Version Version, Architecture
         return new(name, version, architecture, resourceId, publisherId);
     }
 
-    [GeneratedRegex($"^{RxName}_{RxVersion}_{RxArchitecture}_{RxResourceId}_{RxPublisherId}$")]
+    [GeneratedRegex($"^{RxName}_{RxVersion}_{RxArchitecture}_{RxResourceId}_{RxPublisherId}$", RegexOptions.IgnoreCase)]
     public static partial Regex PackageFullNameRegex();
 
     [StringSyntax("regex")]
@@ -44,6 +44,20 @@ public partial record PackageFullName(string Name, Version Version, Architecture
 
     [StringSyntax("regex")]
     public const string RxPublisherId = @"(?<pub>[a-hjkmnp-tv-z0-9]{13}?)";
+
+    public bool Equals(PackageFullName other)
+    {
+        if (other is null)
+            return false;
+
+        return ToString().Equals(other.ToString(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Name.ToUpperInvariant(), Version, Architecture,
+            ResourceId.ToUpperInvariant(), PublisherId.ToUpperInvariant());
+    }
 }
 
 public partial record PackageFamilyName(string Name, string PublisherId)
@@ -64,8 +78,11 @@ public partial record PackageFamilyName(string Name, string PublisherId)
         return new(name, publisherId);
     }
 
-    [GeneratedRegex($"^{PackageFullName.RxName}_{PackageFullName.RxPublisherId}$")]
+    [GeneratedRegex($"^{PackageFullName.RxName}_{PackageFullName.RxPublisherId}$", RegexOptions.IgnoreCase)]
     public static partial Regex PackageFamilyNameRegex();
 
-    public bool Equals(PackageFullName other) => Name == other.Name && PublisherId == other.PublisherId;
+    public bool Equals(PackageFullName other) => Name.Equals(other.Name, StringComparison.OrdinalIgnoreCase)
+        && PublisherId.Equals(other.PublisherId, StringComparison.OrdinalIgnoreCase);
+
+    public override int GetHashCode() => HashCode.Combine(Name.ToUpperInvariant(), PublisherId.ToUpperInvariant());
 }

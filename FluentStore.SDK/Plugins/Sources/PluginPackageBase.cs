@@ -75,7 +75,7 @@ public abstract partial class PluginPackageBase(PackageHandlerBase packageHandle
                 FontFamily = SharedResources.SymbolFont,
                 Text = "\uECC5",
                 ForegroundColor = SharedResources.InfoColor,
-                Caption = "An update is available.",
+                Caption = $"An update is available to {Version}.",
             };
         }
         else if (IsInstalled)

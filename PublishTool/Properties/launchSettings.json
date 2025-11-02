@@ -2,7 +2,8 @@
   "profiles": {
     "PublishTool": {
         "commandName": "Project",
-        "commandLineArgs": "--repo=E:\\Repos\\yoshiask\\FluentStore --id=FluentStore.Sources.Scoop -v -f --install"
+        //"commandLineArgs": "--repo=E:\\Repos\\yoshiask\\FluentStore -f"
+        "commandLineArgs": "--repo=E:\\Repos\\yoshiask\\FluentStore --id=FluentStore.Sources.FluentStore -v -f --install"
     }
   }
 }

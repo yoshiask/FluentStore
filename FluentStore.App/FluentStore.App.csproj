@@ -14,7 +14,7 @@
         <FileVersion>$(AssemblyVersion)</FileVersion>
 
         <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
-        <PackageCertificateThumbprint>3E5E1B738D9924BD13020E1F163BB0D048361C0A</PackageCertificateThumbprint>
+        <PackageCertificateThumbprint>F7731B4EADB0017947A65882F26EE334E2E334D6</PackageCertificateThumbprint>
         <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
         <GenerateTemporaryStoreCertificate>False</GenerateTemporaryStoreCertificate>
         <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
@@ -69,6 +69,7 @@
         <None Remove="Controls\PackageManagerControl.xaml" />
         <None Remove="Controls\PackagePicker.xaml" />
         <None Remove="Themes\NavigationFrame.xaml" />
+        <None Remove="UpdateWindow.xaml" />
         <None Remove="Views\Auth\AccountsView.xaml" />
         <None Remove="Views\Oobe\InstallPlugins.xaml" />
         <None Remove="Views\Oobe\IpfsClient.xaml" />
@@ -80,6 +81,13 @@
         <None Remove="Views\Settings\Ipfs.xaml" />
         <None Remove="Views\Settings\Plugins.xaml" />
         <None Remove="Views\SplashScreen.xaml" />
+        <None Remove="Views\Update\UpdateWindowBody.xaml" />
+        <Page Update="Views\Update\UpdateWindowBody.xaml">
+          <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="UpdateWindow.xaml">
+          <Generator>MSBuild:Compile</Generator>
+        </Page>
         <Page Update="Views\Settings\Ipfs.xaml">
           <Generator>MSBuild:Compile</Generator>
         </Page>

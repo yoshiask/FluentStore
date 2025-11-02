@@ -18,7 +18,6 @@ namespace FluentStore.SDK.Plugins.NuGet;
 
 public class FluentStoreNuGetProject : NuGetProject
 {
-    private static readonly NuGetVersion _currentSdkVersion = new(typeof(PluginLoader).Assembly.GetName().Version!, "beta");
     const string StatusFileName = "status.tsv";
 
     private static readonly SourceRepository _officialSource =
@@ -40,9 +39,17 @@ public class FluentStoreNuGetProject : NuGetProject
 
     public List<SourceRepository> Repositories { get; } = [_officialSource];
 
-    public static NuGetVersion CurrentSdkVersion => _currentSdkVersion;
+    public static NuGetVersion CurrentSdkVersion { get; }
 
-    public static VersionRange SupportedSdkRange => VersionRange.Parse($"[{CurrentSdkVersion.Major}.{CurrentSdkVersion.Minor}.*-*, )");
+    public static VersionRange SupportedSdkRange { get; }
+
+    static FluentStoreNuGetProject()
+    {
+        CurrentSdkVersion = new(typeof(PluginLoader).Assembly.GetName().Version!, "beta");
+        NuGetVersion nextBreakingSdkVersion = new(0, CurrentSdkVersion.Minor + 1, 0, "alpha");
+
+        SupportedSdkRange = VersionRange.Parse($"[{CurrentSdkVersion.Major}.{CurrentSdkVersion.Minor}.*-*, {nextBreakingSdkVersion})");
+    }
 
     public FluentStoreNuGetProject(string pluginRoot, NuGetFramework targetFramework, string name = "FluentStore")
     {
@@ -88,12 +95,12 @@ public class FluentStoreNuGetProject : NuGetProject
                 if (version is null)
                     continue;
 
-                MemoryStream depStream = new();
+                MemoryStream nupkgStream = new();
                 await resource.CopyNupkgToStreamAsync(packageId, version,
-                    depStream, _cache, NullLogger.Instance, token);
+                    nupkgStream, _cache, NullLogger.Instance, token);
 
-                PackageArchiveReader depReader = new(depStream);
-                DownloadResourceResult resourceResult = new(depStream, depReader, repo.PackageSource.Source);
+                PackageArchiveReader nupkgReader = new(nupkgStream);
+                DownloadResourceResult resourceResult = new(nupkgStream, nupkgReader, repo.PackageSource.Source);
                 return resourceResult;
             }
             catch
@@ -121,7 +128,7 @@ public class FluentStoreNuGetProject : NuGetProject
                 // in the plugin folder so we can pick it up next time.
                 status = uninstallStatus;
 
-                string pluginFilePath = Path.Combine(PluginRoot, $"{packageIdentity}.nupkg");
+                string pluginFilePath = Path.Combine(PluginRoot, $"{packageIdentity.Id}.{packageIdentity.Version}.nupkg");
                 await downloadResourceResult.PackageReader.CopyNupkgAsync(pluginFilePath, token);
             }
         }
@@ -241,22 +248,9 @@ public class FluentStoreNuGetProject : NuGetProject
         // Ensure compatible SDK version
         var sdkDep = deps?.FirstOrDefault(d => d.Id == "FluentStore.SDK");
         if (sdkDep is not null && deps is not null && !sdkDep.VersionRange.Satisfies(CurrentSdkVersion))
-            throw new Exception($"{id} does not support Fluent Store SDK {CurrentSdkVersion}: requires {sdkDep.VersionRange}");
+            throw new PluginSdkNotSupportedException(id, sdkDep.VersionRange);
 
         return (tfm, deps, sdkDep);
-    }
-
-    public bool CheckCompatibility(PackageReaderBase reader)
-    {
-        try
-        {
-            _ = GetCompatibleDependencies(reader);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
     }
 
     public bool CheckCompatibility(NuGetFramework tfm, VersionRange sdkVersion, IFrameworkCompatibilityProvider compat = null)

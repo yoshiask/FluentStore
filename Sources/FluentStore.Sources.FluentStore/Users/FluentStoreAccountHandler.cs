@@ -3,22 +3,28 @@ using FluentStore.SDK.AbstractUI.Models;
 using FluentStore.SDK.Users;
 using FluentStore.Services;
 using FluentStoreAPI;
-using FluentStoreAPI.Models.Firebase;
+using FluentStoreAPI.Models;
 using Flurl;
 using OwlCore.AbstractUI.Models;
+using Supabase.Gotrue.Exceptions;
+using Supabase.Gotrue.Interfaces;
 using System;
 using System.Threading.Tasks;
+using static Supabase.Gotrue.Constants;
 
 namespace FluentStore.Sources.FluentStore.Users
 {
     public class FluentStoreAccountHandler : AccountHandlerBase<FluentStoreAccount>
     {
-        private readonly FluentStoreAPI.FluentStoreAPI FSApi;
+        private readonly FluentStoreApiClient _client;
 
-        public FluentStoreAccountHandler(FluentStoreAPI.FluentStoreAPI fsApi, IPasswordVaultService passwordVault)
+        public FluentStoreAccountHandler(FluentStoreApiClient client, IPasswordVaultService passwordVault, ICommonPathManager pathManager)
             : base(passwordVault)
         {
-            FSApi = fsApi;
+            _client = client;
+
+            _client.SupabaseClient.Auth.AddStateChangedListener(OnSupabaseAuthStateChanged);
+            _client.SupabaseClient.Auth.SetPersistence(new PasswordVaultSessionPersistence(passwordVault, pathManager, this));
         }
 
         public override string Id => "fluent-store-user";
@@ -27,7 +33,7 @@ namespace FluentStore.Sources.FluentStore.Users
 
         public override Task HandleAuthActivation(Url url) => Task.CompletedTask;
 
-        public override Task<bool> SignInAsync(CredentialBase credential) => SignInAsync(null, credential.Password);
+        public override Task<bool> SignInAsync(CredentialBase credential) => Task.Run(SignIn);
 
         /// <summary>
         /// Sign in using the supplied token and refresh token.
@@ -38,56 +44,25 @@ namespace FluentStore.Sources.FluentStore.Users
         /// get a new token.
         /// </remarks>
         /// <returns>Whether the sign-in succeeded.</returns>
-        protected async Task<bool> SignInAsync(string token, string refreshToken)
+        protected bool SignIn()
         {
             try
             {
-                FSApi.Token = token;
-                FSApi.RefreshToken = refreshToken;
-
-                if (FSApi.Token == null)
+                if (_client.SupabaseClient.Auth.CurrentSession is null)
                 {
-                    // Use refresh token to get a new token
-                    // This call internally sets the Token and RefreshToken props
-                    await FSApi.UseRefreshToken();
+                    // Attempt to load previous session
+                    _client.SupabaseClient.Auth.LoadSession();
                 }
-
-                CurrentUser = await UpdateAccount();
-
-                if (FSApi.RefreshToken != null)
-                    SaveCredential(FSApi.RefreshToken);
-
-                IsLoggedIn = true;
             }
-            catch (Exception ex)
+            catch
             {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(ex.Message);
-#endif
-
-                FSApi.Token = null;
-                FSApi.RefreshToken = null;
                 IsLoggedIn = false;
             }
 
             return IsLoggedIn;
         }
 
-        protected async Task<bool> SignInAsync(FluentStoreAPI.Models.Firebase.UserSignInResponse signInResponse)
-        {
-            return await SignInAsync(signInResponse.IDToken, signInResponse.RefreshToken);
-        }
-
-        public override Task SignOutAsync()
-        {
-            RemoveCredential(FSApi.RefreshToken);
-
-            IsLoggedIn = false;
-            FSApi.Token = FSApi.RefreshToken = null;
-            CurrentUser = null;
-
-            return Task.CompletedTask;
-        }
+        public override async Task SignOutAsync() => await _client.SupabaseClient.Auth.SignOut();
 
         public override AbstractForm CreateSignInForm()
         {
@@ -118,10 +93,8 @@ namespace FluentStore.Sources.FluentStore.Users
 
         protected override async Task<Account> UpdateCurrentUser()
         {
-            var user = (await FSApi.GetCurrentUserDataAsync())[0];
-            var profile = await FSApi.GetUserProfileAsync(user.LocalID);
-
-            return new FluentStoreAccount(user, profile);
+            var profile = await _client.GetCurrentUserProfileAsync();
+            return new FluentStoreAccount(profile);
         }
 
         private async void OnSignInFormSubmitted(object sender, EventArgs e)
@@ -134,27 +107,18 @@ namespace FluentStore.Sources.FluentStore.Users
 
             try
             {
-                var response = await FSApi.SignInAsync(email, password);
-                await SignInAsync(response);
+                await _client.SignInAsync(email, password);
             }
-            catch (Flurl.Http.FlurlHttpException ex)
+            catch (GotrueException ex)
             {
-                if (ex.StatusCode == 400)
-                {
-                    var errorResponse = await ex.GetErrorResponse();
-                    string errorMessage = UserSignInResponse.CommonErrors.GetMessage(errorResponse.Message);
+                if (!Constants.GotrueReasons.TryGetValue(ex.Reason, out var errorMessage))
+                    errorMessage = ex.Reason.ToString();
 
-                    AbstractTextBox? errorMessageBox = epForm.GetChildById<AbstractTextBox>("ErrorMessageBox");
-                    if (errorMessageBox == null)
-                    {
-                        errorMessageBox = new("ErrorMessageBox", errorMessage);
-                        epForm.Add(errorMessageBox);
-                    }
-                    else
-                    {
-                        errorMessageBox.Value = errorMessage;
-                    }
-                }
+                epForm.EmailBox.Subtitle = errorMessage;
+            }
+            catch (Exception ex)
+            {
+                epForm.EmailBox.Subtitle = ex.Message;
             }
         }
 
@@ -167,13 +131,12 @@ namespace FluentStore.Sources.FluentStore.Users
             string password = epForm.GetPassword();
             string displayName = epForm.GetChildById<AbstractTextBox>($"{epForm.Id}_DisplayName")?.Value;
 
-            FluentStoreAPI.Models.Profile profile = new()
+            Profile profile = new()
             {
                 DisplayName = displayName
             };
 
-            var response = await FSApi.SignUpAndCreateProfileAsync(email, password, profile);
-            await SignInAsync(response);
+            await _client.SignUpAndCreateProfileAsync(email, password, profile);
         }
 
         private async void OnManageAccountFormSubmitted(object sender, EventArgs e)
@@ -183,14 +146,38 @@ namespace FluentStore.Sources.FluentStore.Users
 
             string displayName = form.GetChildById<AbstractTextBox>($"{form.Id}_DisplayName")?.Value;
 
-            FluentStoreAPI.Models.Profile profile = new()
+            Profile profile = new()
             {
                 DisplayName = displayName
             };
 
-            if (await FSApi.UpdateUserProfileAsync(CurrentUser.Id, profile))
+            if (await _client.UpdateUserProfileAsync(profile))
             {
                 await UpdateCurrentUser();
+            }
+        }
+
+        private void OnSupabaseAuthStateChanged(IGotrueClient<Supabase.Gotrue.User, Supabase.Gotrue.Session> sender, AuthState stateChanged)
+        {
+            switch (stateChanged)
+            {
+                case AuthState.SignedIn:
+                    IsLoggedIn = true;
+                    break;
+
+                case AuthState.SignedOut:
+                    IsLoggedIn = false;
+                    CurrentUser = null;
+                    break;
+
+                case AuthState.UserUpdated:
+                    var profile = _client.GetCurrentUserProfile();
+
+                    IsLoggedIn = profile is not null;
+                    CurrentUser = IsLoggedIn
+                        ? new FluentStoreAccount(profile)
+                        : null;
+                    break;
             }
         }
     }

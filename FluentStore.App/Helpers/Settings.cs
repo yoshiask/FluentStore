@@ -85,6 +85,11 @@ namespace FluentStore.Helpers
             get => GetSetting(s_defVals.RehostOnIpfs);
             set => SetSetting(value);
         }
+        public bool AutoUpdatePlugins
+        {
+            get => GetSetting(s_defVals.AutoUpdatePlugins);
+            set => SetSetting(value);
+        }
 
         public bool IsDebug
         {
