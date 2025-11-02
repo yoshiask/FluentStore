@@ -36,7 +36,8 @@ namespace FluentStore.Views.Settings
                 // No update was available
                 ContentDialog dialog = new()
                 {
-                    Content = "No updates are available. You're on the latest release of Fluent Store.",
+                    Title = "No updates available",
+                    Content = "You're on the latest release of Fluent Store.",
                     IsPrimaryButtonEnabled = true,
                     PrimaryButtonText = "OK",
                     XamlRoot = XamlRoot,
