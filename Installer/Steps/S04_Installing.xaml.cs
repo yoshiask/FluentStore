@@ -63,7 +63,7 @@ namespace Installer.Steps
 
                 // Install package
                 QueueOutputBoxWriteLine("Installing package...");
-                var appInstallerPath = "https://ipfs.askharoun.com/FluentStore/BetaInstaller/FluentStoreBeta.appinstaller";
+                var appInstallerPath = "https://ipfs.askharoun.com/FluentStore/BetaInstaller/0.4.1/FluentStoreBeta.appinstaller";
                 await InstallWithPackageManager(appInstallerPath, token);
 
                 QueueOutputBoxWriteLine($"Fluent Store Beta was successfully installed.");

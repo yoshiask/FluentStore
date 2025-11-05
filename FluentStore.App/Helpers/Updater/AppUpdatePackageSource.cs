@@ -18,8 +18,8 @@ namespace FluentStore.Helpers.Updater;
 
 internal class AppUpdatePackageSource() : PackageHandlerBase(null)
 {
-    private const string LATEST_JSON_PATH = "file://E:\\Documents\\site\\ipfs\\FluentStore\\versions.json";
-    //private const string LATEST_JSON_PATH = "ipns://ipfs.askharoun.com/FluentStore/Latest/latest.json";
+    //private const string LATEST_JSON_PATH = "file://E:\\Documents\\site\\ipfs\\FluentStore\\versions.json";
+    private const string LATEST_JSON_PATH = "ipns://ipfs.askharoun.com/FluentStore/versions.json";
 
     private Dictionary<string, IOrderedEnumerable<OnlineVersionInfo>> _index;
 
