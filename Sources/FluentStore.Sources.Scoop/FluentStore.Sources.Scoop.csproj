@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.4.7" />
+        <ProjectReference Include="..\..\API\Scoop\Scoop.csproj" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <Title>Scoop</Title>
+        <Version>$(FluentStoreMajorMinorVersion).0.1</Version>
+        <PackageVersion>$(Version)-alpha</PackageVersion>
+        <Description>Provides support for Scoop. Requires the Scoop CLI to be intalled.</Description>
+    </PropertyGroup>
+
+</Project>
