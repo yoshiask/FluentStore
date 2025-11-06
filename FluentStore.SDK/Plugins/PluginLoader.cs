@@ -111,7 +111,7 @@ namespace FluentStore.SDK.Plugins
                 return;
 
             var installedPlugins = await Project.GetInstalledPackagesAsync();
-            foreach (var plugin in installedPlugins)
+            foreach (var plugin in installedPlugins.ToList())
             {
                 var updateStatus = PluginInstallStatus.NoAction;
 
