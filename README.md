@@ -40,7 +40,7 @@ Several sources are currently supported, with several more planned for the futur
 
 ## Where to download?
 - [GitHub Releases](https://github.com/yoshiask/FluentStore/releases)
-- [IPFS Gateway](https://ipfs.askharoun.com/FluentStore/BetaInstaller/FluentStoreBeta.appinstaller)
+- [IPFS Gateway](https://ipfs.askharoun.com/FluentStore/BetaInstaller/FluentStoreBeta.appinstaller?filename=FluentStoreBeta.appinstaller&download=true)
 
 ## Frequently Asked Questions
 ### What are the system requirements?
