@@ -90,18 +90,18 @@ public class IpfsService : IIpfsService
             .FirstOrDefault(f => f.Name.Equals("repo.lock", StringComparison.OrdinalIgnoreCase));
         if (lockFile is not null)
         {
-            // Attempt to remove the repo lock, just in case a previous
-            // run didn't exit cleanly
-            await SetAllFileAttributesRecursive(kuboBinFolder, attributes => attributes & ~FileAttributes.ReadOnly);
             try
             {
+                // Attempt to remove the repo lock, just in case a previous
+                // run didn't exit cleanly
+                await SetAllFileAttributesRecursive(kuboBinFolder, attributes => attributes & ~FileAttributes.ReadOnly);
                 lockFile.Delete();
             }
             catch { }
         }
 
         await StopAsync();
-        
+
         _bootstrapper = new KuboBootstrapper(kuboRepoDir.FullName, new Version(0, 38, 2))
         {
             RoutingMode         = settings.RehostOnIpfs ? DhtRoutingMode.Auto : DhtRoutingMode.AutoClient,
