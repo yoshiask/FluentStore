@@ -102,7 +102,7 @@ public class IpfsService : IIpfsService
 
         await StopAsync();
         
-        _bootstrapper = new KuboBootstrapper(kuboRepoDir.FullName, new Version(0, 35))
+        _bootstrapper = new KuboBootstrapper(kuboRepoDir.FullName, new Version(0, 38, 2))
         {
             RoutingMode         = settings.RehostOnIpfs ? DhtRoutingMode.Auto : DhtRoutingMode.AutoClient,
             GatewayUri          = GetLocalUri(settings.IpfsGatewayPort),
