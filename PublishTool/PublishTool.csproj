@@ -10,16 +10,20 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CliWrap" Version="3.7.1" />
-        <PackageReference Include="Meziantou.Framework.CommandLine" Version="3.0.3" />
-        <PackageReference Include="Microsoft.Build" Version="17.13.9" ExcludeAssets="runtime" />
-        <PackageReference Include="Microsoft.Build.Locator" Version="1.7.8" />
-        <PackageReference Include="Microsoft.Build.Runtime" Version="17.13.9" ExcludeAssets="runtime" />
+        <PackageReference Include="CliWrap" Version="3.9.0" />
+        <PackageReference Include="Meziantou.Framework.CommandLine" Version="3.0.8" />
+        <PackageReference Include="Microsoft.Build" Version="17.14.28" ExcludeAssets="runtime" />
+        <PackageReference Include="Microsoft.Build.Locator" Version="1.10.12" />
+        <PackageReference Include="Microsoft.Build.Runtime" Version="17.14.28" ExcludeAssets="runtime" />
         <PackageReference Include="Spectre.Console" Version="0.53.0" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Update="NuGetizer" Version="1.4.6" />
     </ItemGroup>
 
 </Project>

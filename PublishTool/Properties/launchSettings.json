@@ -2,8 +2,9 @@
   "profiles": {
     "PublishTool": {
         "commandName": "Project",
-        //"commandLineArgs": "--repo=E:\\Repos\\yoshiask\\FluentStore -f"
-        "commandLineArgs": "--repo=E:\\Repos\\yoshiask\\FluentStore --id=FluentStore.Sources.Microsoft -v -f --install"
+        "commandLineArgs": "release --repo=E:\\Repos\\yoshiask\\FluentStore"
+        //"commandLineArgs": "pluginBuild --repo=E:\\Repos\\yoshiask\\FluentStore -f"
+        //"commandLineArgs": "pluginBuild --repo=E:\\Repos\\yoshiask\\FluentStore --id=FluentStore.Sources.Microsoft -v -f --install"
     }
   }
 }
