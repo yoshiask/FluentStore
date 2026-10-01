@@ -4,6 +4,7 @@
         <TargetFramework>$(AppTargetFramework)</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <Platforms>x86;x64;arm64</Platforms>
 
         <IsPackable>false</IsPackable>
     </PropertyGroup>
