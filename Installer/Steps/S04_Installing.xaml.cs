@@ -191,11 +191,12 @@ namespace Installer.Steps
             }
 
             // Download .NET runtime
-            QueueOutputBoxWriteLine($"No compatible runtime found. Downloading from {App.DotNetInstallerUrl}...");
+            var dotnetInstallerUrl = App.GetDotNetInstallerUri();
+            QueueOutputBoxWriteLine($"No compatible runtime found. Downloading from {dotnetInstallerUrl}...");
 
             var lastProgress = uint.MaxValue;
             HttpClient http = new();
-            using var installerHttpResponse = await http.GetAsync(new Uri(App.DotNetInstallerUrl))
+            using var installerHttpResponse = await http.GetAsync(dotnetInstallerUrl)
                 .AsTask(token, new Progress<HttpProgress>(OnDownloadProgress));
 
             installerHttpResponse.EnsureSuccessStatusCode();
