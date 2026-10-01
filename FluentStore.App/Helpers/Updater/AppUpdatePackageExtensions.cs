@@ -7,22 +7,36 @@ namespace FluentStore.Helpers.Updater;
 
 internal static class AppUpdatePackageExtensions
 {
-    public static async Task<bool> CheckForUpdatesWithWindow(this AppUpdatePackageSource updater)
+    public static async Task<UpdateCheckResult> CheckForUpdatesWithWindow(this AppUpdatePackageSource updater)
     {
-        var update = await updater.GetPackage(AppUpdatePackageSource.FormatUrn(FluentStoreNuGetProject.CurrentSdkVersion.Release));
-
-        if (update is not null && await update.CanInstallAsync())
+        try
         {
-            Views.Update.UpdateWindow updateWindow = new(update);
-            updateWindow.DispatcherQueue.TryEnqueue(delegate
+            var update = await updater.GetPackage(AppUpdatePackageSource.FormatUrn(FluentStoreNuGetProject.CurrentSdkVersion.Release));
+
+            if (update is not null && await update.CanInstallAsync())
             {
-                updateWindow.CenterOnScreen();
-                updateWindow.Activate();
-            });
+                Views.Update.UpdateWindow updateWindow = new(update);
+                updateWindow.DispatcherQueue.TryEnqueue(delegate
+                {
+                    updateWindow.CenterOnScreen();
+                    updateWindow.Activate();
+                });
 
-            return true;
+                return UpdateCheckResult.UpdateAvailable;
+            }
+
+            return UpdateCheckResult.NoUpdateAvailable;
         }
-
-        return false;
+        catch
+        {
+            return UpdateCheckResult.Error;
+        }
     }
+}
+
+internal enum UpdateCheckResult
+{
+    Error,
+    NoUpdateAvailable,
+    UpdateAvailable,
 }

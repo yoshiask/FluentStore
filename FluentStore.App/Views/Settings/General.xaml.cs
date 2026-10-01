@@ -26,18 +26,21 @@ namespace FluentStore.Views.Settings
         {
             var button = sender as Control;
 
-            if (button is not null)
-                button.IsEnabled = false;
+            button?.IsEnabled = false;
 
             var updateAvailable = await new AppUpdatePackageSource().CheckForUpdatesWithWindow();
 
-            if (!updateAvailable)
+            if (updateAvailable is not UpdateCheckResult.UpdateAvailable)
             {
                 // No update was available
                 ContentDialog dialog = new()
                 {
-                    Title = "No updates available",
-                    Content = "You're on the latest release of Fluent Store.",
+                    Title = updateAvailable is UpdateCheckResult.NoUpdateAvailable
+                        ? "No updates available"
+                        : "Update check failed",
+                    Content = updateAvailable is UpdateCheckResult.NoUpdateAvailable
+                        ? "You're on the latest release of Fluent Store."
+                        : "An error occurred while checking for updates.",
                     IsPrimaryButtonEnabled = true,
                     PrimaryButtonText = "OK",
                     XamlRoot = XamlRoot,
@@ -46,8 +49,7 @@ namespace FluentStore.Views.Settings
                 await dialog.ShowAsync();
             }
 
-            if (button is not null)
-                button.IsEnabled = true;
+            button?.IsEnabled = true;
         }
 
         private void ClearCacheButton_Click(object sender, RoutedEventArgs e)
