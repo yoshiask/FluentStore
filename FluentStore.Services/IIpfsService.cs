@@ -31,9 +31,9 @@ public interface IIpfsService : IDisposable, INotifyPropertyChanged
 
 public class IpfsService : IIpfsService
 {
-    private const string NODE_ID_ASKHAROUNCOM = "12D3KooWLD34NS3SbD6WzeWu2MrS6BtqtqkryhNSVBCBjNcd5EfQ";
-    private const string IPv4_ASKHAROUNCOM = "45.15.24.95";
-    private const string IPv6_ASKHAROUNCOM = "2a02:4780:1:1::1:9b3b";
+    private const string NODE_ID_ASKHAROUNCOM = "12D3KooWSMZxKCg9GgDiou1G2H7DPqNoDztKaGe3byq3T52CcsZR";
+    private const string IPv4_ASKHAROUNCOM = "31.97.213.1";
+    private const string IPv6_ASKHAROUNCOM = "2a02:4780:10:6cf7::1";
 
     private KuboBootstrapper _bootstrapper;
     private IpfsClient _client;
@@ -181,7 +181,8 @@ public class IpfsService : IIpfsService
             $"/ip4/{IPv4_ASKHAROUNCOM}/tcp/4001/p2p/{NODE_ID_ASKHAROUNCOM}",
             $"/ip4/{IPv4_ASKHAROUNCOM}/udp/4001/quic/p2p/{NODE_ID_ASKHAROUNCOM}",
             $"/ip6/{IPv6_ASKHAROUNCOM}/tcp/4001/p2p/{NODE_ID_ASKHAROUNCOM}",
-            $"/ip6/{IPv6_ASKHAROUNCOM}/udp/4001/quic/p2p/{NODE_ID_ASKHAROUNCOM}",
+            $"/ip4/{IPv4_ASKHAROUNCOM}/udp/4001/quic-v1/p2p/{NODE_ID_ASKHAROUNCOM}",
+            $"/ip6/{IPv6_ASKHAROUNCOM}/udp/4001/quic-v1/p2p/{NODE_ID_ASKHAROUNCOM}",
         ];
     }
 
