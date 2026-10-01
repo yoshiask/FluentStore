@@ -1,6 +1,5 @@
 ﻿using FluentStoreAPI;
 using FluentStoreAPI.Models;
-using Xunit.Abstractions;
 
 namespace SDKTests;
 

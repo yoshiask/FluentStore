@@ -10,7 +10,6 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
-        <PackageReference Include="xunit" Version="2.9.3" />
         <PackageReference Include="xunit.runner.visualstudio" Version="4.0.0">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
@@ -19,15 +18,12 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
+        <PackageReference Include="xunit.v3" Version="4.0.1" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\API\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
         <ProjectReference Include="..\..\Sources\FluentStore.Sources.Microsoft\FluentStore.Sources.Microsoft.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Update="NuGetizer" Version="1.5.1" />
     </ItemGroup>
 
 </Project>

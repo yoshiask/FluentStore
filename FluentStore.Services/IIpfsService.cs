@@ -27,6 +27,8 @@ public interface IIpfsService : IDisposable, INotifyPropertyChanged
     Task TestAsync(CancellationToken token = default);
 
     Task StopAsync();
+
+    Task WaitForConnectionAsync();
 }
 
 public class IpfsService : IIpfsService
@@ -35,6 +37,7 @@ public class IpfsService : IIpfsService
     private const string IPv4_ASKHAROUNCOM = "31.97.213.1";
     private const string IPv6_ASKHAROUNCOM = "2a02:4780:10:6cf7::1";
 
+    private TaskCompletionSource<bool> _connectionTask;
     private KuboBootstrapper _bootstrapper;
     private IpfsClient _client;
     private bool _isRunning;
@@ -56,10 +59,17 @@ public class IpfsService : IIpfsService
         {
             _isRunning = value;
             PropertyChanged?.Invoke(this, new(nameof(IsRunning)));
+
+            if (value)
+                Started?.Invoke(this, this);
+            else
+                Stopped?.Invoke(this, this);
         }
     }
 
     public event PropertyChangedEventHandler PropertyChanged;
+    public event EventHandler<IIpfsService> Started;
+    public event EventHandler<IIpfsService> Stopped;
 
     public async Task ConnectOrBootstrapAsync(ISettingsService settings, ICommonPathManager paths, CancellationToken token = default)
     {
@@ -240,6 +250,8 @@ public class IpfsService : IIpfsService
         await foreach (SystemFolder folder in rootFolder.GetFoldersAsync())
             await SetAllFileAttributesRecursive(folder, transform);
     }
+
+    public async Task WaitForConnectionAsync() => await _connectionTask.Task;
 }
 
 public static class IIpfsServiceExtensions

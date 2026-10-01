@@ -1,36 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<TargetFramework>$(AppTargetFramework)</TargetFramework>
-		<TargetPlatformMinVersion>$(MinWindowsVersion)</TargetPlatformMinVersion>
-		<RootNamespace>OwlCore.WinUI</RootNamespace>
-		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
-		<Platforms>x86;x64;ARM64</Platforms>
-		<UseWinUI>true</UseWinUI>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>$(AppTargetFramework)</TargetFramework>
+        <TargetPlatformMinVersion>$(MinWindowsVersion)</TargetPlatformMinVersion>
+        <RootNamespace>OwlCore.WinUI</RootNamespace>
+        <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+        <Platforms>x86;x64;ARM64</Platforms>
+        <UseWinUI>true</UseWinUI>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.Labs.WinUI.Controls.MarkdownTextBlock" Version="0.1.260915-build.2673" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
-		<PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.1" />
-		<PackageReference Include="OwlCore" Version="0.7.0" />
-		
-		<ProjectReference Include="..\FluentStore.SDK.AbstractUI\FluentStore.SDK.AbstractUI.csproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="CommunityToolkit.Labs.WinUI.Controls.MarkdownTextBlock" Version="0.1.260915-build.2673" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
+        <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.1" />
+        <PackageReference Include="OwlCore" Version="0.7.0" />
 
-	<ItemGroup>
-		<None Remove="AbstractUI\Themes\AbstractFormStyle.xaml" />
-		<None Remove="AbstractUI\Themes\AbstractUIPresenterStyle.xaml" />
-		<PackageReference Update="NuGetizer" Version="1.5.1">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-		</PackageReference>
-		<Page Update="AbstractUI\Themes\AbstractUIPresenterStyle.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-		<Page Update="AbstractUI\Themes\AbstractFormStyle.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-	</ItemGroup>
+        <ProjectReference Include="..\FluentStore.SDK.AbstractUI\FluentStore.SDK.AbstractUI.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="AbstractUI\Themes\AbstractFormStyle.xaml" />
+        <None Remove="AbstractUI\Themes\AbstractUIPresenterStyle.xaml" />
+        <Page Update="AbstractUI\Themes\AbstractUIPresenterStyle.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+        <Page Update="AbstractUI\Themes\AbstractFormStyle.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
+    </ItemGroup>
 
 </Project>

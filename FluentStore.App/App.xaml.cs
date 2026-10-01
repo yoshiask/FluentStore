@@ -154,12 +154,6 @@ namespace FluentStore
             var appStartupService = Ioc.Default.GetRequiredService<AppStartupInfo>();
             var navService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
 
-            // Kick off update check in background
-            Window.DispatcherQueue.TryEnqueue(async () =>
-            {
-                await new AppUpdatePackageSource().CheckForUpdatesWithWindow();
-            });
-
             if (appStartupService.IsFirstLaunch)
             {
                 // Update last launched version
@@ -180,6 +174,12 @@ namespace FluentStore
                         _log?.LogError(ex, "Failed to connect to Kubo");
                     }
                 }
+
+                // Kick off update check in background
+                Window.DispatcherQueue.TryEnqueue(async () =>
+                {
+                    await new AppUpdatePackageSource().CheckForUpdatesWithWindow();
+                });
 
                 SDK.Downloads.AbstractStorageHelper.IpfsClient = ipfsService.Client;
 
@@ -221,6 +221,19 @@ namespace FluentStore
             /// Adapted from https://github.com/files-community/Files/blob/ace2f355ec87f4ca27975c25026636be8514f1e0/Files/App.xaml.cs#L432
 
             _log?.UnhandledException(ex, LogLevel.Critical);
+
+            var ipfsService = Services.GetService<IIpfsService>();
+            if (ipfsService?.IsRunning ?? false)
+            {
+                try
+                {
+                    ipfsService.StopAsync().Wait();
+                }
+                catch (Exception stopEx)
+                {
+                    _log?.LogError(stopEx, "Failed to stop IPFS service, Kubo process may be orphaned");
+                }
+            }
 
 #if DEBUG
             System.Diagnostics.Debugger.Launch();

@@ -4,7 +4,6 @@ using Chocolatey;
 using Chocolatey.Cli;
 using Chocolatey.Models;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace ChocolateyTests;
 

@@ -20,8 +20,4 @@
         <PackageReference Include="OwlCore.Kubo" Version="0.23.0" />
     </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Update="NuGetizer" Version="1.5.1" />
-    </ItemGroup>
-
 </Project>

@@ -1,10 +1,5 @@
 ﻿using Microsoft.Marketplace.Storefront.Contracts;
 using Microsoft.Marketplace.Storefront.Contracts.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WingetTests;
 
@@ -15,7 +10,7 @@ public class PackageHandler
     [Fact]
     public async Task GetFeatured()
     {
-        var collection = await _api.GetRecommendationCollection("TopFree", options: TestOptions);
+        var collection = await _api.GetRecommendationCollection("TopFree", "apps", options: TestOptions);
         Assert.NotNull(collection);
         Assert.NotNull(collection.Payload);
         Assert.NotEmpty(collection.Payload.Cards);

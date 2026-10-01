@@ -29,7 +29,6 @@
         <PackageReference Include="System.Management" Version="10.0.12" />
         <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
         <PackageReference Include="Vanara.PInvoke.Kernel32" Version="5.0.7" />
-        <PackageReference Update="NuGetizer" Version="1.5.1" />
 
         <ProjectReference Include="..\FluentStore.SDK.AbstractUI\FluentStore.SDK.AbstractUI.csproj" />
         <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />

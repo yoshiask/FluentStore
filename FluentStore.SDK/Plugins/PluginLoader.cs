@@ -27,7 +27,7 @@ namespace FluentStore.SDK.Plugins
     {
         private const string FLUENTSTORE_FEED = "ipns://ipfs.askharoun.com/FluentStore/Plugins/NuGet/index.json";
 
-        private static readonly NuGetFramework _targetFramework = NuGetFramework.Parse("net8.0-windows10.0.22621.0");
+        private static readonly NuGetFramework _targetFramework = NuGetFramework.Parse("net10.0-windows10.0.22621.0");
         private static readonly NuGetVersion _targetFrameworkVersion = new(_targetFramework.Version);
         private static readonly SourceRepository _fluentStoreRepo = FluentStoreNuGetProject.CreateAbstractStorageSourceRepository(FLUENTSTORE_FEED);
 
@@ -42,7 +42,7 @@ namespace FluentStore.SDK.Plugins
             new("System.Diagnostics.DiagnosticSource", _targetFrameworkVersion),
             new("System.Dynamic.Runtime", _targetFrameworkVersion),
             new("System.Runtime.Serialization.Primitives", _targetFrameworkVersion),
-            new("System.Text.Json", new(9, 0, 0)),
+            new("System.Text.Json", new(10, 0, 0)),
             new("Microsoft.CSharp", _targetFrameworkVersion),
             new("System.Reflection", _targetFrameworkVersion),
         ];

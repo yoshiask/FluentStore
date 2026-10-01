@@ -4,10 +4,6 @@
         <ProjectReference Include="..\..\FluentStore.SDK\FluentStore.SDK.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Update="NuGetizer" Version="1.5.1" />
-    </ItemGroup>
-
     <PropertyGroup>
         <Title>UWP Community</Title>
         <Version>$(FluentStoreMajorMinorVersion).0.3</Version>

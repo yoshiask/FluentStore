@@ -13,8 +13,4 @@
 		<ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <PackageReference Update="NuGetizer" Version="1.5.1" />
-	</ItemGroup>
-
 </Project>
