@@ -79,9 +79,15 @@ public class IpfsService : IIpfsService
 
     public async Task BootstrapAsync(ISettingsService settings, ICommonPathManager paths, CancellationToken token = default)
     {
+        await StopAsync();
+
         var kuboDir = paths.GetAppDataDirectory().CreateSubdirectory("Kubo");
         var kuboRepoDir = kuboDir.CreateSubdirectory("repo");
+        
+        // Force bootstrapper to download latest supported version
         var kuboBinDir = kuboDir.CreateSubdirectory("bin");
+        kuboBinDir.Delete(true);
+        kuboBinDir.Create();
 
         var kuboBinFolder = new SystemFolder(kuboBinDir);
 
@@ -99,8 +105,6 @@ public class IpfsService : IIpfsService
             }
             catch { }
         }
-
-        await StopAsync();
 
         _bootstrapper = new KuboBootstrapper(kuboRepoDir.FullName, new Version(0, 38, 2))
         {
@@ -179,7 +183,6 @@ public class IpfsService : IIpfsService
     {
         return [
             $"/ip4/{IPv4_ASKHAROUNCOM}/tcp/4001/p2p/{NODE_ID_ASKHAROUNCOM}",
-            $"/ip4/{IPv4_ASKHAROUNCOM}/udp/4001/quic/p2p/{NODE_ID_ASKHAROUNCOM}",
             $"/ip6/{IPv6_ASKHAROUNCOM}/tcp/4001/p2p/{NODE_ID_ASKHAROUNCOM}",
             $"/ip4/{IPv4_ASKHAROUNCOM}/udp/4001/quic-v1/p2p/{NODE_ID_ASKHAROUNCOM}",
             $"/ip6/{IPv6_ASKHAROUNCOM}/udp/4001/quic-v1/p2p/{NODE_ID_ASKHAROUNCOM}",
