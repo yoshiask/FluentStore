@@ -48,18 +48,15 @@ public class AbstractStorageFindPackageByIdResource : FindPackageByIdResource
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="file" /> is <see langword="null" />.</exception>
     public AbstractStorageFindPackageByIdResource(IReadOnlyList<Uri> baseUris, IFile file)
     {
-        if (baseUris == null)
-            throw new ArgumentNullException(nameof(baseUris));
+        ArgumentNullException.ThrowIfNull(baseUris, nameof(baseUris));
 
         if (baseUris.Count < 1)
             throw new ArgumentException("One or more URIs must be specified.", nameof(baseUris));
 
-        if (file is null)
-            throw new ArgumentNullException(nameof(file));
+        ArgumentNullException.ThrowIfNull(file, nameof(file));
 
-        _baseUris = baseUris
-            .Select(uri => uri.OriginalString.EndsWith("/", StringComparison.Ordinal) ? uri : new Uri(uri.OriginalString + "/"))
-            .ToList();
+        // Ensure all base URIs end with a trailing slash
+        _baseUris = [..baseUris.Select(uri => uri.OriginalString.EndsWith('/') ? uri : new Uri(uri.OriginalString + "/"))];
 
         _file = file;
     }
