@@ -25,14 +25,14 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <ListView x:Name="FeaturedCarousel" ItemsSource="{x:Bind ViewModel.CarouselItems}"
-                SelectedItem="{x:Bind ViewModel.SelectedCarouselItem, Mode=TwoWay}"
-                ManipulationMode="None" MinHeight="100"
-                x:Load="{x:Bind ViewModel.ShowCarousel, Mode=OneWay}">
+        <FlipView x:Name="FeaturedCarousel" ItemsSource="{x:Bind ViewModel.CarouselItems}"
+                  SelectedItem="{x:Bind ViewModel.SelectedCarouselItem, Mode=TwoWay}"
+                  ManipulationMode="None" MinHeight="100"
+                  x:Load="{x:Bind ViewModel.ShowCarousel, Mode=OneWay}">
 
-            <ListView.ItemTemplate>
+            <FlipView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:PackageViewModel">
-                    <Grid Padding="0,16">
+                    <Grid Padding="0,16" HorizontalAlignment="Center">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="100"/>
@@ -76,8 +76,8 @@
                         </Grid>
                     </Grid>
                 </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+            </FlipView.ItemTemplate>
+        </FlipView>
 
         <ScrollViewer Grid.Row="1">
             <ItemsControl ItemsSource="{x:Bind ViewModel.FeaturedPackages, Mode=OneWay}">

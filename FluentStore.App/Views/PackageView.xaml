@@ -402,10 +402,10 @@
                         Click="ScreenshotViewCloseButton_Click"/>
 
                 <FlipView ItemsSource="{x:Bind ViewModel.Screenshots}"
-                                     ItemTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"
-                                     SelectedItem="{x:Bind ViewModel.SelectedScreenshot, Mode=TwoWay}"
-                                     Grid.Row="1" Margin="0,4"
-                                     x:Name="ScreenshotViewCarousel"/>
+                          ItemTemplateSelector="{StaticResource DefaultImageBaseTemplateSelector}"
+                          SelectedItem="{x:Bind ViewModel.SelectedScreenshot, Mode=TwoWay}"
+                          Grid.Row="1" Margin="0,4"
+                          x:Name="ScreenshotViewCarousel"/>
 
                 <TextBlock Text="{x:Bind ViewModel.SelectedScreenshot.ToString()}"
                            FontSize="16" TextWrapping="Wrap" Grid.Row="2"
