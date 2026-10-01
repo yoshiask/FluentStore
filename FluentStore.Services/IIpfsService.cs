@@ -27,17 +27,14 @@ public interface IIpfsService : IDisposable, INotifyPropertyChanged
     Task TestAsync(CancellationToken token = default);
 
     Task StopAsync();
-
-    Task WaitForConnectionAsync();
 }
 
 public class IpfsService : IIpfsService
 {
+    // These constants are used to connect to a known reliable IPFS node that serves Fluent Store content
     private const string NODE_ID_ASKHAROUNCOM = "12D3KooWSMZxKCg9GgDiou1G2H7DPqNoDztKaGe3byq3T52CcsZR";
-    private const string IPv4_ASKHAROUNCOM = "31.97.213.1";
-    private const string IPv6_ASKHAROUNCOM = "2a02:4780:10:6cf7::1";
-
-    private TaskCompletionSource<bool> _connectionTask;
+    private const string DNS_ASKHAROUNCOM = "ipfs.askharoun.com";
+    
     private KuboBootstrapper _bootstrapper;
     private IpfsClient _client;
     private bool _isRunning;
@@ -192,10 +189,10 @@ public class IpfsService : IIpfsService
     public static IEnumerable<MultiAddress> GetKnownPeers()
     {
         return [
-            $"/ip4/{IPv4_ASKHAROUNCOM}/tcp/4001/p2p/{NODE_ID_ASKHAROUNCOM}",
-            $"/ip6/{IPv6_ASKHAROUNCOM}/tcp/4001/p2p/{NODE_ID_ASKHAROUNCOM}",
-            $"/ip4/{IPv4_ASKHAROUNCOM}/udp/4001/quic-v1/p2p/{NODE_ID_ASKHAROUNCOM}",
-            $"/ip6/{IPv6_ASKHAROUNCOM}/udp/4001/quic-v1/p2p/{NODE_ID_ASKHAROUNCOM}",
+            $"/dns4/{DNS_ASKHAROUNCOM}/tcp/4001/p2p/{NODE_ID_ASKHAROUNCOM}",
+            $"/dns6/{DNS_ASKHAROUNCOM}/tcp/4001/p2p/{NODE_ID_ASKHAROUNCOM}",
+            $"/dns4/{DNS_ASKHAROUNCOM}/udp/4001/quic-v1/p2p/{NODE_ID_ASKHAROUNCOM}",
+            $"/dns6/{DNS_ASKHAROUNCOM}/udp/4001/quic-v1/p2p/{NODE_ID_ASKHAROUNCOM}",
         ];
     }
 
@@ -250,8 +247,6 @@ public class IpfsService : IIpfsService
         await foreach (SystemFolder folder in rootFolder.GetFoldersAsync())
             await SetAllFileAttributesRecursive(folder, transform);
     }
-
-    public async Task WaitForConnectionAsync() => await _connectionTask.Task;
 }
 
 public static class IIpfsServiceExtensions
