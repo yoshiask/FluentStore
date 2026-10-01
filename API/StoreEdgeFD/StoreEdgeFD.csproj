@@ -17,4 +17,8 @@
         <ProjectReference Include="..\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Update="NuGetizer" Version="1.5.1" />
+    </ItemGroup>
+
 </Project>

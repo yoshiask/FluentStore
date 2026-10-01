@@ -29,9 +29,6 @@ namespace FluentStore.ViewModels
         private void CarouselItems_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             ShowCarousel = CarouselItems.Count > 0;
-
-            if (ShowCarousel && SelectedCarouselItemIndex < 0)
-                SelectedCarouselItemIndex = 0;
         }
 
         public async Task LoadAllFeaturedAsync()
@@ -105,13 +102,6 @@ namespace FluentStore.ViewModels
         {
             get => _CarouselItems;
             set => SetProperty(ref _CarouselItems, value);
-        }
-
-        private int _SelectedCarouselItemIndex = -1;
-        public int SelectedCarouselItemIndex
-        {
-            get => _SelectedCarouselItemIndex;
-            set => SetProperty(ref _SelectedCarouselItemIndex, value);
         }
 
         private PackageViewModel _SelectedCarouselItem;

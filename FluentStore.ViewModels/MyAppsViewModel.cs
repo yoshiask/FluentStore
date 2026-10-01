@@ -6,7 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using CommunityToolkit.WinUI.UI;
+using CommunityToolkit.WinUI.Collections;
 using System.Threading.Tasks;
 using System;
 using System.Collections;
@@ -25,6 +25,8 @@ namespace FluentStore.ViewModels
         private readonly NavigationServiceBase NavService = Ioc.Default.GetRequiredService<NavigationServiceBase>();
         private readonly PackageService PackageService = Ioc.Default.GetRequiredService<PackageService>();
 
+        // TODO: This class should not be dependent on a UI element.
+        // Expose the filter/predicate to the front-end
         private AdvancedCollectionView _Apps;
         public AdvancedCollectionView Apps
         {

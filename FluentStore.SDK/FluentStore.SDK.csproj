@@ -8,7 +8,7 @@
         <FileVersion>$(AssemblyVersion)</FileVersion>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <IsPackable>true</IsPackable>
-        
+
         <Version>$(FluentStoreVersion)</Version>
         <AssemblyVersion>$(Version)</AssemblyVersion>
         <PackageVersion>$(Version)-beta</PackageVersion>
@@ -16,22 +16,21 @@
 
     <ItemGroup>
         <PackageReference Include="FuzzySharp" Version="2.0.2" />
-        <PackageReference Include="Humanizer" Version="2.14.1" />
+        <PackageReference Include="Humanizer" Version="3.0.10" />
         <PackageReference Include="IdentityModel.OidcClient" Version="6.0.0" />
-        <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.5.0" />
-        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250205002" />
-        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
-        <PackageReference Include="NuGet.PackageManagement" Version="6.14.0" />
-        <PackageReference Include="NuGet.Packaging" Version="6.14.0" />
-        <PackageReference Include="NuGet.Protocol" Version="6.14.0" />
-        <PackageReference Include="OwlCore.Storage" Version="0.14.0" />
+        <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.6.6" />
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
+        <PackageReference Include="NuGet.PackageManagement" Version="7.9.0" />
+        <PackageReference Include="NuGet.Packaging" Version="7.9.0" />
+        <PackageReference Include="NuGet.Protocol" Version="7.9.0" />
+        <PackageReference Include="OwlCore.Storage" Version="0.15.1" />
         <PackageReference Include="PInvoke.User32" Version="0.7.124" />
-        <PackageReference Include="System.Management" Version="9.0.1" />
+        <PackageReference Include="System.Management" Version="10.0.12" />
         <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
-        <PackageReference Include="Vanara.PInvoke.Kernel32" Version="4.0.5" />
-    </ItemGroup>
+        <PackageReference Include="Vanara.PInvoke.Kernel32" Version="5.0.7" />
+        <PackageReference Update="NuGetizer" Version="1.5.1" />
 
-    <ItemGroup>
         <ProjectReference Include="..\FluentStore.SDK.AbstractUI\FluentStore.SDK.AbstractUI.csproj" />
         <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
     </ItemGroup>

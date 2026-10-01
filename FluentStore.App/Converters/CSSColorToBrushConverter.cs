@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using CommunityToolkit.WinUI.Helpers;
-using CommunityToolkit.WinUI.UI.Converters;
 using FluentStore.SDK.Models;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;

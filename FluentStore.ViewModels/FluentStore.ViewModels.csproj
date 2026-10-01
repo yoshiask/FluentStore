@@ -9,12 +9,18 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="CommunityToolkit.WinUI.Collections" Version="8.2.251219" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\API\FluentStoreAPI\FluentStoreAPI.csproj" />
         <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj" />
         <ProjectReference Include="..\FluentStore.Services\FluentStore.Services.csproj" />
         <ProjectReference Include="..\API\MicrosoftStore\Microsoft.Marketplace.Storefront.Contracts.csproj" />
+    </ItemGroup>
 
-        <PackageReference Include="CommunityToolkit.WinUI.UI" Version="7.1.2" />
+    <ItemGroup>
+      <PackageReference Update="NuGetizer" Version="1.5.1" />
     </ItemGroup>
 
 </Project>

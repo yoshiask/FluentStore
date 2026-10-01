@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     x:Class="OwlCore.WinUI.AbstractUI.Themes.AbstractRichTextBlockStyle"
     xmlns:convertvis="using:OwlCore.WinUI.Converters.Bools.Visible"
-    xmlns:tkcontrols="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:tkcontrols="using:CommunityToolkit.WinUI.Controls"
     xmlns:abstractUI="using:OwlCore.AbstractUI.ViewModels"
     xmlns:controls="using:OwlCore.WinUI.AbstractUI.Controls">
 

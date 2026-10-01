@@ -5,7 +5,7 @@
     xmlns:local="using:FluentStore.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:tkcontrols="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:tkcontrols="using:CommunityToolkit.WinUI.Controls"
     xmlns:viewmodels="using:FluentStore.ViewModels"
     xmlns:sdkmodels="using:FluentStore.SDK.Models"
     xmlns:controls="using:FluentStore.Controls"
@@ -25,16 +25,12 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <tkcontrols:Carousel x:Name="FeaturedCarousel" ItemsSource="{x:Bind ViewModel.CarouselItems}"
-                             SelectedIndex="{x:Bind ViewModel.SelectedCarouselItemIndex, Mode=TwoWay}"
-                             SelectedItem="{x:Bind ViewModel.SelectedCarouselItem, Mode=TwoWay}"
-                             ItemMargin="16" ItemDepth="200" ManipulationMode="None" MinHeight="100"
-                             x:Load="{x:Bind ViewModel.ShowCarousel, Mode=OneWay}">
-            <tkcontrols:Carousel.EasingFunction>
-                <CubicEase EasingMode="EaseOut" />
-            </tkcontrols:Carousel.EasingFunction>
+        <ListView x:Name="FeaturedCarousel" ItemsSource="{x:Bind ViewModel.CarouselItems}"
+                SelectedItem="{x:Bind ViewModel.SelectedCarouselItem, Mode=TwoWay}"
+                ManipulationMode="None" MinHeight="100"
+                x:Load="{x:Bind ViewModel.ShowCarousel, Mode=OneWay}">
 
-            <tkcontrols:Carousel.ItemTemplate>
+            <ListView.ItemTemplate>
                 <DataTemplate x:DataType="viewmodels:PackageViewModel">
                     <Grid Padding="0,16">
                         <Grid.RowDefinitions>
@@ -80,8 +76,8 @@
                         </Grid>
                     </Grid>
                 </DataTemplate>
-            </tkcontrols:Carousel.ItemTemplate>
-        </tkcontrols:Carousel>
+            </ListView.ItemTemplate>
+        </ListView>
 
         <ScrollViewer Grid.Row="1">
             <ItemsControl ItemsSource="{x:Bind ViewModel.FeaturedPackages, Mode=OneWay}">

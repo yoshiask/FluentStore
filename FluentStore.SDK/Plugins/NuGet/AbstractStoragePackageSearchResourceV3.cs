@@ -23,6 +23,9 @@ public class AbstractStoragePackageSearchResourceV3 : PackageSearchResource
         _endpoints = endpoints;
     }
 
+    /// <inheritdoc />
+    public override bool SupportsPackageTypeFiltering => false;
+
     public override async Task<IEnumerable<IPackageSearchMetadata>> SearchAsync(string searchTerm, SearchFilter filters,
         int skip, int take, ILogger log, CancellationToken token = default)
     {

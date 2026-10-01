@@ -5,6 +5,10 @@
         <ProjectReference Include="..\..\FluentStore.SDK\FluentStore.SDK.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Update="NuGetizer" Version="1.5.1" />
+    </ItemGroup>
+
     <PropertyGroup>
         <Title>Chocolatey</Title>
         <Version>$(FluentStoreMajorMinorVersion).1.0</Version>

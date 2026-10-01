@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:FluentStore.Controls"
     xmlns:helpers="using:FluentStore.Helpers"
-    xmlns:tkui="using:CommunityToolkit.WinUI.UI"
+    xmlns:tkui="using:CommunityToolkit.WinUI"
     xmlns:ocDiag="using:OwlCore.Diagnostics"
     mc:Ignorable="d">
 
