@@ -156,7 +156,7 @@ public class IpfsService : IIpfsService
         }
 
         // Fluent Store file to check availability
-        IpnsFolder testFolder = new("/ipns/ipfs.askharoun.com", Client);
+        IpnsFolder testFolder = new("/ipns/fluentstore.askharoun.com", Client);
         try
         {
             await testFolder
@@ -165,7 +165,7 @@ public class IpfsService : IIpfsService
         }
         catch (Exception ex)
         {
-            throw new Exception("Connected to IPFS, but was unable to reach ipfs.askharoun.com. Please notify the maintainers.", ex);
+            throw new Exception("Connected to IPFS, but was unable to find /ipns/fluentstore.askharoun.com. Please notify the maintainers.", ex);
         }
     }
 

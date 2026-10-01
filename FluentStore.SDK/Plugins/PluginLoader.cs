@@ -25,7 +25,7 @@ namespace FluentStore.SDK.Plugins
 {
     public class PluginLoader : IAsyncInit
     {
-        private const string FLUENTSTORE_FEED = "ipns://ipfs.askharoun.com/FluentStore/Plugins/NuGet/index.json";
+        private const string FLUENTSTORE_FEED = "ipns://fluentstore.askharoun.com/Plugins/NuGet/index.json";
 
         private static readonly NuGetFramework _targetFramework = NuGetFramework.Parse("net10.0-windows10.0.22621.0");
         private static readonly NuGetVersion _targetFrameworkVersion = new(_targetFramework.Version);

@@ -19,11 +19,15 @@ namespace FluentStore.Helpers.Updater;
 internal class AppUpdatePackageSource() : PackageHandlerBase(null)
 {
     //private const string LATEST_JSON_PATH = "file://E:\\Documents\\site\\ipfs\\FluentStore\\versions.json";
-    private const string LATEST_JSON_PATH = "ipns://ipfs.askharoun.com/FluentStore/versions.json";
-
-    private Dictionary<string, IOrderedEnumerable<OnlineVersionInfo>> _index;
+    private const string LATEST_JSON_PATH = "ipns://fluentstore.askharoun.com/versions.json";
 
     public const string NAMESPACE_FLUENTSTORE_DU = "fluentstore-du";
+
+    private Dictionary<string, IOrderedEnumerable<OnlineVersionInfo>> _index;
+    private readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        Converters = { new JsonStringEnumConverter() }
+    };
 
     public override HashSet<string> HandledNamespaces { get; } = [NAMESPACE_FLUENTSTORE_DU];
 
@@ -59,10 +63,7 @@ internal class AppUpdatePackageSource() : PackageHandlerBase(null)
             // Fetch the most up-to-date version information
             var latestJsonFile = AbstractStorageHelper.GetFileFromUrl(LATEST_JSON_PATH);
             using var stream = await latestJsonFile.SafeOpenStreamAsync(System.IO.FileAccess.Read);
-
-            var options = new JsonSerializerOptions();
-            options.Converters.Add(new JsonStringEnumConverter());
-            var versions = await JsonSerializer.DeserializeAsync<List<OnlineVersionInfo>>(stream, options);
+            var versions = await JsonSerializer.DeserializeAsync<List<OnlineVersionInfo>>(stream, _jsonOptions);
 
             _index = versions
                 .GroupBy(x => x.Version.Release)

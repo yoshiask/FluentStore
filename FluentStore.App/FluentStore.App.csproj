@@ -25,7 +25,7 @@
         <AppxBundle>Always</AppxBundle>
         <AppxBundlePlatforms>x86|x64</AppxBundlePlatforms>
         <HoursBetweenUpdateChecks>48</HoursBetweenUpdateChecks>
-        <AppInstallerUri>https://ipfs.askharoun.com/FluentStore/BetaInstaller/FluentStoreBeta.appinstaller</AppInstallerUri>
+        <AppInstallerUri>https://ipfs.askharoun.com/ipns/fluentstore.askharoun.com/BetaInstaller/FluentStoreBeta.appinstaller</AppInstallerUri>
     </PropertyGroup>
 
     <!-- General items -->
