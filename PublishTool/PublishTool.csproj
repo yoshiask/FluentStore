@@ -10,10 +10,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Remove="NuGetizer" />
+        
         <PackageReference Include="CliWrap" Version="3.10.5" />
         <PackageReference Include="Meziantou.Framework.CommandLine" Version="4.0.2" />
         <PackageReference Include="Microsoft.Build" Version="18.10.1" ExcludeAssets="runtime" />
-        <PackageReference Include="Microsoft.Build.Locator" Version="1.11.2" />
+        <PackageReference Include="Microsoft.Build.Locator" Version="1.10.12" />
         <PackageReference Include="Microsoft.Build.Runtime" Version="18.10.1" ExcludeAssets="runtime" />
         <PackageReference Include="Spectre.Console" Version="0.57.2" />
 
