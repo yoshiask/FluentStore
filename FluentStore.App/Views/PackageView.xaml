@@ -419,12 +419,12 @@
                 </TextBlock>
 
                 <!-- TODO: Use a slide-up animation, like the page transitions -->
-                <!--<animations:Implicit.ShowAnimations>
+                <animations:Implicit.ShowAnimations>
                     <animations:OpacityAnimation Duration="0:0:0.25" From="0.0" To="1.0" EasingMode="EaseOut" EasingType="Quadratic"/>
                 </animations:Implicit.ShowAnimations>
                 <animations:Implicit.HideAnimations>
                     <animations:OpacityAnimation Duration="0:0:0.25" From="1.0" To="0.0" EasingMode="EaseOut" EasingType="Quadratic"/>
-                </animations:Implicit.HideAnimations>-->
+                </animations:Implicit.HideAnimations>
             </Grid>
         </Grid>
 
