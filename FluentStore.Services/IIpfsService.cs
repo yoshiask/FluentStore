@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -113,7 +114,7 @@ public class IpfsService : IIpfsService
             catch { }
         }
 
-        _bootstrapper = new KuboBootstrapper(kuboRepoDir.FullName, new Version(0, 38, 2))
+        _bootstrapper = new KuboBootstrapper(kuboRepoDir.FullName, GetKuboBinaryFileAsync)
         {
             RoutingMode         = settings.RehostOnIpfs ? DhtRoutingMode.Auto : DhtRoutingMode.AutoClient,
             GatewayUri          = GetLocalUri(settings.IpfsGatewayPort),
@@ -197,6 +198,20 @@ public class IpfsService : IIpfsService
     }
 
     private static Uri GetLocalUri(int port) => new($"http://127.0.0.1:{port}");
+
+    private static async Task<IFile> GetKuboBinaryFileAsync(CancellationToken token = default)
+    {
+        // With the IPFS Shipyard dead, we need to redirect requests to a known-good gateway, such as Arlo's OwlCore gateway
+        var rewritingHandler = new RewritingHttpHandler(
+            new HttpClientHandler(),
+            [
+                new("https://dist.ipfs.tech/", "https://origin.owlcore.io/ipns/dist.ipfs.tech/")
+            ]
+        );
+        var httpClient = new HttpClient(rewritingHandler);
+
+        return await KuboDownloader.GetBinaryVersionAsync(httpClient, new Version(0, 38, 2), token);
+    }
 
     public static async Task<IpfsClient> TryConnectAsync(int port, CancellationToken token = default)
     {
