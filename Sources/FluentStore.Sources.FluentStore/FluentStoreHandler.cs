@@ -72,8 +72,9 @@ namespace FluentStore.Sources.FluentStore
 
                     collectionPack.Update(items);
 
-                    var authorProfile = await FSApi.GetCurrentUserProfileAsync();
-                    collectionPack.Update(authorProfile);
+                    var authorProfile = await FSApi.GetProfileAsync(collection.AuthorId);
+                    if (authorProfile is not null)
+                        collectionPack.Update(authorProfile);
 
                     collectionPack.Status = PackageStatus.Details;
                 }
