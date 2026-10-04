@@ -6,18 +6,18 @@ namespace FluentStore.Sources.FluentStore.Users
 {
     public class FluentStoreAccount : Account
     {
-        public FluentStoreAccount(Profile profile = null)
+        public FluentStoreAccount(UserInformation userInformation = null)
         {
-            if (profile != null)
-                Update(profile);
+            if (userInformation != null)
+                Update(userInformation);
         }
 
-        public void Update(Profile profile)
+        public void Update(UserInformation userInformation)
         {
-            Uuid = profile.Id;
-            Id = profile.Id.ToString();
-            DisplayName = profile.DisplayName;
-            Email = profile.Email;
+            Uuid = userInformation.Uid;
+            Id = userInformation.Uid.ToString();
+            DisplayName = userInformation.DisplayName;
+            Email = userInformation.Email;
         }
 
         public Guid Uuid { get; private set; }

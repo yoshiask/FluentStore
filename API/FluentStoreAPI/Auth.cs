@@ -60,15 +60,4 @@ public partial class FluentStoreApiClient
             Email = newEmail
         });
     }
-
-    public async Task UpdateDisplayNameAsync(string? displayName)
-    {
-        await _supabase.Auth.Update(new()
-        {
-            Data = new()
-            {
-                ["display_name"] = displayName ?? _supabase.Auth.CurrentUser!.Email!,
-            }
-        });
-    }
 }

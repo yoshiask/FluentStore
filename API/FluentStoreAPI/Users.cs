@@ -11,37 +11,63 @@ public partial class FluentStoreApiClient
     public async Task SignUpAndCreateProfileAsync(string email, string password, Profile profile)
     {
         await SignUpAsync(email, password);
-        await UpdateDisplayNameAsync(profile.DisplayName);
+        await UpdateUserProfileAsync(profile);
     }
 
-    public async Task<Profile?> GetCurrentUserProfileAsync() => await Task.Run(GetCurrentUserProfile);
-
-    public Profile? GetCurrentUserProfile()
+    public async Task<UserInformation?> GetCurrentUserInformationAsync()
     {
         var user = _supabase.Auth.CurrentUser;
 
-        if (user is null)
+        if (user is null || user.Id is null)
             return null;
 
-        Profile profile = new()
+        var uid = new Guid(user.Id);
+        UserInformation userInformation = new()
         {
-            Id = new(user.Id!),
-            Email = user.Email
+            Uid = uid,
+            Email = user.Email,
+            FirebaseId = user.Id,
         };
 
-        string? displayName = null;
-        if (_supabase.Auth.CurrentUser!.UserMetadata.TryGetValue("display_name", out var savedDisplayName))
-            displayName = savedDisplayName?.ToString();
+        var profile = await GetProfileAsync(uid);
+        if (profile is null)
+            return userInformation;
 
-        profile.DisplayName = displayName ?? profile.Email ?? user.Id!;
+        if (userInformation.DisplayName is null)
+        {
+            string? displayName = null;
+            if (user.UserMetadata.TryGetValue("display_name", out var savedDisplayName)
+                || user.UserMetadata.TryGetValue("name", out savedDisplayName)
+                || user.UserMetadata.TryGetValue("full_name", out savedDisplayName))
+                displayName = savedDisplayName?.ToString();
 
-        return profile;
+            userInformation.DisplayName = displayName ?? user.Email;
+        }
+
+        return userInformation;
     }
 
-    public async Task<bool> UpdateUserProfileAsync(Profile profile)
+    public async Task<Profile?> GetProfileAsync(Guid id, CancellationToken token = default)
     {
-        await UpdateDisplayNameAsync(profile.DisplayName);
-        return true;
+        var profileResponse = await _supabase.From<Profile>()
+            .Where(p => p.Uid == id)
+            .Get(token);
+
+        if (profileResponse.Model is not null && profileResponse.Model.DisplayName is null)
+            profileResponse.Model.DisplayName = id.ToString();
+
+        return profileResponse.Model;
+    }
+
+    public async Task<bool> UpdateUserProfileAsync(Profile profile, CancellationToken token = default)
+    {
+        if (profile.CreatedAt.Ticks == 0)
+            profile.CreatedAt = DateTimeOffset.Now;
+
+        profile.ModifiedAt = DateTimeOffset.Now;
+
+        var response = await _supabase.From<Profile>().Upsert(profile, cancellationToken: token);
+        return response.Model is not null;
     }
 
     public async Task<List<Collection>> GetCollectionsAsync(Guid userId)

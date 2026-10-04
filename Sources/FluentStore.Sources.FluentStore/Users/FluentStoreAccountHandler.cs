@@ -93,7 +93,7 @@ namespace FluentStore.Sources.FluentStore.Users
 
         protected override async Task<Account> UpdateCurrentUser()
         {
-            var profile = await _client.GetCurrentUserProfileAsync();
+            var profile = await _client.GetCurrentUserInformationAsync();
             return new FluentStoreAccount(profile);
         }
 
@@ -157,7 +157,7 @@ namespace FluentStore.Sources.FluentStore.Users
             }
         }
 
-        private void OnSupabaseAuthStateChanged(IGotrueClient<Supabase.Gotrue.User, Supabase.Gotrue.Session> sender, AuthState stateChanged)
+        private async void OnSupabaseAuthStateChanged(IGotrueClient<Supabase.Gotrue.User, Supabase.Gotrue.Session> sender, AuthState stateChanged)
         {
             switch (stateChanged)
             {
@@ -171,11 +171,11 @@ namespace FluentStore.Sources.FluentStore.Users
                     break;
 
                 case AuthState.UserUpdated:
-                    var profile = _client.GetCurrentUserProfile();
+                    var userInformation = await _client.GetCurrentUserInformationAsync();
 
-                    IsLoggedIn = profile is not null;
+                    IsLoggedIn = userInformation is not null;
                     CurrentUser = IsLoggedIn
-                        ? new FluentStoreAccount(profile)
+                        ? new FluentStoreAccount(userInformation)
                         : null;
                     break;
             }
