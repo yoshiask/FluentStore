@@ -24,16 +24,19 @@ public partial class FluentStoreApiClient
         var uid = new Guid(user.Id);
         UserInformation userInformation = new()
         {
-            Uid = uid,
             Email = user.Email,
-            FirebaseId = user.Id,
+            Profile = new Profile
+            {
+                Uid = uid,
+                FirebaseId = user.Id,
+            },
         };
 
         var profile = await GetProfileAsync(uid);
         if (profile is null)
             return userInformation;
 
-        if (userInformation.DisplayName is null)
+        if (profile.DisplayName is null)
         {
             string? displayName = null;
             if (user.UserMetadata.TryGetValue("display_name", out var savedDisplayName)
@@ -41,8 +44,10 @@ public partial class FluentStoreApiClient
                 || user.UserMetadata.TryGetValue("full_name", out savedDisplayName))
                 displayName = savedDisplayName?.ToString();
 
-            userInformation.DisplayName = displayName ?? user.Email;
+            profile.DisplayName = displayName ?? user.Email;
         }
+
+        userInformation.Profile = profile;
 
         return userInformation;
     }

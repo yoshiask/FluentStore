@@ -14,12 +14,15 @@ namespace FluentStore.Sources.FluentStore.Users
 
         public void Update(UserInformation userInformation)
         {
-            Uuid = userInformation.Uid;
-            Id = userInformation.Uid.ToString();
-            DisplayName = userInformation.DisplayName;
+            Profile = userInformation.Profile;
+
+            Id = Profile.Uid.ToString();
+            DisplayName = Profile.DisplayName;
             Email = userInformation.Email;
         }
 
-        public Guid Uuid { get; private set; }
+        public Guid Uuid => Profile?.Uid ?? Guid.Empty;
+
+        internal Profile Profile { get; private set; }
     }
 }

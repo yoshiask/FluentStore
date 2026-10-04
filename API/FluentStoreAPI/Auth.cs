@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Supabase.Gotrue;
+using System;
 using System.Threading.Tasks;
 
 namespace FluentStoreAPI;
@@ -32,10 +33,7 @@ public partial class FluentStoreApiClient
         return authState.Uri;
     }
 
-    public async Task CompleteSignInFromUrlAsync(Uri uri)
-    {
-        var session = await _supabase.Auth.GetSessionFromUrl(uri);
-    }
+    public async Task CompleteSignInFromUrlAsync(Uri uri) => await _supabase.Auth.GetSessionFromUrl(uri);
 
     /// <summary>
     /// Exchanges the <see cref="RefreshToken"/> to get new tokens.
@@ -47,10 +45,22 @@ public partial class FluentStoreApiClient
     /// Sends a password reset email.
     /// </summary>
     /// <returns>The user's email.</returns>
-    public async Task<string> RequestPasswordResetAsync(string email)
+    public async Task RequestPasswordResetAsync(string email, string? redirectUrl = null)
     {
-        await _supabase.Auth.ResetPasswordForEmail(email);
-        return email;
+        ResetPasswordForEmailOptions resetOptions = new(email)
+        {
+            RedirectTo = redirectUrl
+        };
+        await _supabase.Auth.ResetPasswordForEmail(resetOptions);
+    }
+
+    public async Task CompletePasswordResetAsync(Uri authUri, string newPassword)
+    {
+        await CompleteSignInFromUrlAsync(authUri);
+        await _supabase.Auth.Update(new()
+        {
+            Password = newPassword
+        });
     }
 
     public async Task ChangeEmailAsync(string newEmail)

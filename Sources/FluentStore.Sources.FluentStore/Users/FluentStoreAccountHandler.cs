@@ -9,14 +9,17 @@ using OwlCore.AbstractUI.Models;
 using Supabase.Gotrue.Exceptions;
 using Supabase.Gotrue.Interfaces;
 using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static Supabase.Gotrue.Constants;
 
 namespace FluentStore.Sources.FluentStore.Users
 {
-    public class FluentStoreAccountHandler : AccountHandlerBase<FluentStoreAccount>
+    public partial class FluentStoreAccountHandler : AccountHandlerBase<FluentStoreAccount>
     {
         private readonly FluentStoreApiClient _client;
+        private EmailPasswordForm _signInForm;
 
         public FluentStoreAccountHandler(FluentStoreApiClient client, IPasswordVaultService passwordVault, ICommonPathManager pathManager)
             : base(passwordVault)
@@ -31,7 +34,23 @@ namespace FluentStore.Sources.FluentStore.Users
 
         public override string DisplayName => "Fluent Store";
 
-        public override Task HandleAuthActivation(Url url) => Task.CompletedTask;
+        public override async Task HandleAuthActivation(Url url)
+        {
+            var resetPasswordButton = _signInForm.GetChildById($"{Id}_ResetPassword");
+
+            try
+            {
+                await _client.CompletePasswordResetAsync(url.ToUri(), _signInForm.GetPassword());
+            }
+            catch (GotrueException ex)
+            {
+                resetPasswordButton?.Subtitle = Constants.GotrueReasons[ex.Reason];
+            }
+            catch (Exception ex)
+            {
+                resetPasswordButton?.Subtitle = ex.Message;
+            }
+        }
 
         public override Task<bool> SignInAsync(CredentialBase credential) => Task.Run(SignIn);
 
@@ -66,7 +85,15 @@ namespace FluentStore.Sources.FluentStore.Users
 
         public override AbstractForm CreateSignInForm()
         {
-            return new EmailPasswordForm($"{Id}_SignInForm", "Sign in", OnSignInFormSubmitted);
+            EmailPasswordForm form = new($"{Id}_SignInForm", "Sign in", OnSignInFormSubmitted);
+
+            AbstractButton resetPasswordButton = new($"{Id}_ResetPassword", "Reset password", "\uE897");
+            resetPasswordButton.Clicked += ResetPasswordButton_Clicked;
+            form.Add(resetPasswordButton);
+
+            _signInForm = form;
+
+            return form;
         }
 
         public override AbstractForm CreateSignUpForm()
@@ -85,7 +112,7 @@ namespace FluentStore.Sources.FluentStore.Users
             AbstractForm form = new($"{Id}_ManageForm", onSubmit: OnManageAccountFormSubmitted);
 
             // Add display name box
-            AbstractTextBox displayNameBox = new($"{form.Id}_DisplayName", null, "Display name");
+            AbstractTextBox displayNameBox = new($"{form.Id}_DisplayName", CurrentUser.DisplayName, "Display name");
             form.Add(displayNameBox);
 
             return form;
@@ -95,6 +122,30 @@ namespace FluentStore.Sources.FluentStore.Users
         {
             var profile = await _client.GetCurrentUserInformationAsync();
             return new FluentStoreAccount(profile);
+        }
+
+        private async void ResetPasswordButton_Clicked(object sender, EventArgs e)
+        {
+            var button = sender as AbstractButton;
+            string email = _signInForm.GetEmail();
+            string password = _signInForm.GetPassword();
+
+            try
+            {
+                if (string.IsNullOrWhiteSpace(password))
+                    throw new Exception("Please enter your new password.");
+
+                await _client.RequestPasswordResetAsync(email, GetAuthProtocolUrl());
+                button?.Subtitle = "Password reset email sent. Please check your inbox.";
+            }
+            catch (GotrueException ex)
+            {
+                button?.Subtitle = Constants.GotrueReasons[ex.Reason];
+            }
+            catch (Exception ex)
+            {
+                button?.Subtitle = ex.Message;
+            }
         }
 
         private async void OnSignInFormSubmitted(object sender, EventArgs e)
@@ -146,14 +197,12 @@ namespace FluentStore.Sources.FluentStore.Users
 
             string displayName = form.GetChildById<AbstractTextBox>($"{form.Id}_DisplayName")?.Value;
 
-            Profile profile = new()
-            {
-                DisplayName = displayName
-            };
+            var profile = ((FluentStoreAccount)CurrentUser).Profile;
+            profile.DisplayName = displayName;
 
             if (await _client.UpdateUserProfileAsync(profile))
             {
-                await UpdateCurrentUser();
+                CurrentUser = await UpdateCurrentUser();
             }
         }
 
