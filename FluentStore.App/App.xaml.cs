@@ -211,19 +211,10 @@ namespace FluentStore
             /// Adapted from https://github.com/files-community/Files/blob/ace2f355ec87f4ca27975c25026636be8514f1e0/Files/App.xaml.cs#L432
 
             _log?.UnhandledException(ex, LogLevel.Critical);
+            _log?.Dispose();
 
             var ipfsService = Services.GetService<IIpfsService>();
-            if (ipfsService?.IsRunning ?? false)
-            {
-                try
-                {
-                    ipfsService.StopAsync().Wait();
-                }
-                catch (Exception stopEx)
-                {
-                    _log?.LogError(stopEx, "Failed to stop IPFS service, Kubo process may be orphaned");
-                }
-            }
+            ipfsService?.Dispose();
 
 #if DEBUG
             System.Diagnostics.Debugger.Launch();
