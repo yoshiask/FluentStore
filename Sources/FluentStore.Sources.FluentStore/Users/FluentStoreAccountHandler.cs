@@ -220,12 +220,16 @@ namespace FluentStore.Sources.FluentStore.Users
                     break;
 
                 case AuthState.UserUpdated:
-                    var userInformation = await _client.GetCurrentUserInformationAsync();
+                    try
+                    {
+                        var userInformation = await _client.GetCurrentUserInformationAsync();
 
-                    IsLoggedIn = userInformation is not null;
-                    CurrentUser = IsLoggedIn
-                        ? new FluentStoreAccount(userInformation)
-                        : null;
+                        IsLoggedIn = userInformation is not null;
+                        CurrentUser = IsLoggedIn
+                            ? new FluentStoreAccount(userInformation)
+                            : null;
+                    }
+                    catch { }
                     break;
             }
         }
