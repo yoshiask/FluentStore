@@ -86,18 +86,20 @@ namespace Installer
             if (confirm)
             {
                 // Confirm cancel
-                TaskDialogOptions config = new();
+                TaskDialogOptions config = new()
+                {
+                    Owner = this,
+                    Title = "Fluent Store Installer",
+                    MainInstruction = "Are you sure you want to cancel?",
+                    Content = "Setup is not complete. If you exit now, the app will not be installed.\r\n\r\n" +
+                        "You may run the setup again at another time to complete the installation.",
+                    CommonButtons = TaskDialogCommonButtons.YesNo,
+                    MainIcon = VistaTaskDialogIcon.Warning
+                };
 
-                config.Owner = this;
-                config.Title = "Fluent Store Installer";
-                config.MainInstruction = "Are you sure you want to cancel?";
-                config.Content = "Setup is not complete. If you exit now, the app will not be installed.\r\n\r\n" +
-                                 "You may run the setup again at another time to complete the installation.";
-                config.CommonButtons = TaskDialogCommonButtons.YesNo;
-                config.MainIcon = VistaTaskDialogIcon.Warning;
-
-                cancel = TaskDialog.Show(config).Result == TaskDialogSimpleResult.Yes;
+                cancel = TaskDialog.Show(config).Result is TaskDialogSimpleResult.Yes;
             }
+
             if (cancel)
             {
                 if (StepFrame.Content is Steps.S04_Installing installStep)
@@ -106,20 +108,22 @@ namespace Installer
             }
         }
 
-        public void ShowErrorMessage(string msg)
+        public void ShowErrorMessage(string msg, bool exitOnOk)
         {
-            TaskDialogOptions config = new();
+            TaskDialogOptions config = new()
+            {
+                Owner = this,
+                Title = "Fluent Store Installer",
+                MainInstruction = "Install failed",
+                Content = msg + "\r\n\r\n" +
+                    "You may run the setup again at another time to complete the installation.",
+                CommonButtons = TaskDialogCommonButtons.Close,
+                MainIcon = VistaTaskDialogIcon.Error
+            };
 
-            config.Owner = this;
-            config.Title = "Fluent Store Installer";
-            config.MainInstruction = "Install failed";
-            config.Content = msg + "\r\n\r\n" +
-                             "You may run the setup again at another time to complete the installation.";
-            config.CommonButtons = TaskDialogCommonButtons.Close;
-            config.MainIcon = VistaTaskDialogIcon.Error;
+            var result = TaskDialog.Show(config);
 
-            TaskDialogResult res = TaskDialog.Show(config);
-            if (res.Result == TaskDialogSimpleResult.Close)
+            if (exitOnOk && result.Result is TaskDialogSimpleResult.Close)
                 Cancel(false);
         }
     }

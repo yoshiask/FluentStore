@@ -117,7 +117,7 @@ namespace Installer.Steps
                 string message = ex.Data.Contains("RestrictedDescription")
                     ? ex.Data["RestrictedDescription"].ToString().Trim()
                     : ex.Message;
-                App.InstallerWindow.ShowErrorMessage(message);
+                App.InstallerWindow.ShowErrorMessage(message, false);
             });
         }
 

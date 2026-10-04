@@ -25,7 +25,7 @@ namespace Installer
 
         private void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            InstallerWindow.ShowErrorMessage(e.Exception.ToString());
+            InstallerWindow.ShowErrorMessage(e.Exception.ToString(), true);
         }
 
         public static Uri GetDotNetInstallerUri()
