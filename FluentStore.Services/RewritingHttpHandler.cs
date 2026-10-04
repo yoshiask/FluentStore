@@ -13,28 +13,46 @@ internal class RewritingHttpHandler(HttpMessageHandler next, IEnumerable<HttpReq
 #if NET5_0_OR_GREATER
     protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        request.RequestUri = new Uri(RewriteUri(request.RequestUri.ToString()));
+        var originalUri = request.RequestUri;
+
+        foreach (var uri in EnumerateUriRewrites(request.RequestUri.ToString()))
+        {
+            request.RequestUri = uri;
+            var response = base.Send(request, cancellationToken);
+            if (response.IsSuccessStatusCode)
+                return response;
+        }
+
+        request.RequestUri = originalUri;
         return base.Send(request, cancellationToken);
     }
 #endif
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        request.RequestUri = new Uri(RewriteUri(request.RequestUri.ToString()));
+        var originalUri = request.RequestUri;
+
+        foreach (var uri in EnumerateUriRewrites(request.RequestUri.ToString()))
+        {
+            request.RequestUri = uri;
+            var response = await base.SendAsync(request, cancellationToken);
+            if (response.IsSuccessStatusCode)
+                return response;
+        }
+
+        request.RequestUri = originalUri;
         return await base.SendAsync(request, cancellationToken);
     }
 
-    private string RewriteUri(string originalUri)
+    private IEnumerable<Uri> EnumerateUriRewrites(string originalUri)
     {
         foreach (var entry in RewriteEntries)
         {
             if (!originalUri.StartsWith(entry.OriginalPrefix, StringComparison.OrdinalIgnoreCase))
                 continue;
 
-            return entry.NewPrefix + originalUri.Substring(entry.OriginalPrefix.Length);
+            yield return new Uri(entry.NewPrefix + originalUri.Substring(entry.OriginalPrefix.Length));
         }
-
-        return originalUri;
     }
 }
 

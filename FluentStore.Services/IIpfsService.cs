@@ -35,7 +35,9 @@ public class IpfsService : IIpfsService
     // These constants are used to connect to a known reliable IPFS node that serves Fluent Store content
     private const string NODE_ID_ASKHAROUNCOM = "12D3KooWSMZxKCg9GgDiou1G2H7DPqNoDztKaGe3byq3T52CcsZR";
     private const string DNS_ASKHAROUNCOM = "ipfs.askharoun.com";
-    
+
+    private static Version _targetKuboVersion = new(0, 38, 2);
+
     private KuboBootstrapper _bootstrapper;
     private IpfsClient _client;
     private bool _isRunning;
@@ -91,13 +93,16 @@ public class IpfsService : IIpfsService
 
         var kuboDir = paths.GetAppDataDirectory().CreateSubdirectory("Kubo");
         var kuboRepoDir = kuboDir.CreateSubdirectory("repo");
-        
-        // Force bootstrapper to download latest supported version
         var kuboBinDir = kuboDir.CreateSubdirectory("bin");
-        kuboBinDir.Delete(true);
-        kuboBinDir.Create();
-
         var kuboBinFolder = new SystemFolder(kuboBinDir);
+
+        var installedKuboVersion = await GetCurrentKuboVersionAsync(kuboBinFolder, token);
+        if (installedKuboVersion is null || installedKuboVersion < _targetKuboVersion)
+        {
+            // Force bootstrapper to download latest supported version
+            kuboBinDir.Delete(true);
+            kuboBinDir.Create();
+        }
 
         var lockFile = kuboRepoDir
             .EnumerateFiles()
@@ -128,6 +133,8 @@ public class IpfsService : IIpfsService
         // Add peers that are known to reliably serve Fluent Store content
         foreach (var peer in GetKnownPeers())
             await _bootstrapper.Client.Bootstrap.AddAsync(peer, token);
+
+        await UpdateCurrentKuboVersionAsync(kuboBinFolder, _targetKuboVersion, token);
 
         Client = _bootstrapper.Client;
         IsRunning = true;
@@ -199,18 +206,42 @@ public class IpfsService : IIpfsService
 
     private static Uri GetLocalUri(int port) => new($"http://127.0.0.1:{port}");
 
+    private static async Task<Version> GetCurrentKuboVersionAsync(IFolder kuboBinFolder, CancellationToken token = default)
+    {
+        try
+        {
+            var kuboVersionStorable = await kuboBinFolder.GetFirstByNameAsync("version.txt", cancellationToken: token);
+            if (kuboVersionStorable is not IFile kuboVersionFile)
+                return null;
+
+            var versionString = await kuboVersionFile.ReadTextAsync(cancellationToken: token);
+            return Version.Parse(versionString.Trim());
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static async Task UpdateCurrentKuboVersionAsync(IFolder kuboBinFolder, Version version, CancellationToken token = default)
+    {
+        var kuboVersionFile = await kuboBinFolder.CreateFileByRelativePathAsync("version.txt", true, token);
+        await kuboVersionFile.WriteTextAsync(version.ToString(3), cancellationToken: token);
+    }
+
     private static async Task<IFile> GetKuboBinaryFileAsync(CancellationToken token = default)
     {
         // With the IPFS Shipyard dead, we need to redirect requests to a known-good gateway, such as Arlo's OwlCore gateway
         var rewritingHandler = new RewritingHttpHandler(
             new HttpClientHandler(),
             [
-                new("https://dist.ipfs.tech/", "https://origin.owlcore.io/ipns/dist.ipfs.tech/")
+                new("https://dist.ipfs.tech/", "https://ipfs.askharoun.com/ipns/dist.ipfs.tech/"),
+                new("https://dist.ipfs.tech/", "https://origin.owlcore.io/ipns/dist.ipfs.tech/"),
             ]
         );
         var httpClient = new HttpClient(rewritingHandler);
 
-        return await KuboDownloader.GetBinaryVersionAsync(httpClient, new Version(0, 38, 2), token);
+        return await KuboDownloader.GetBinaryVersionAsync(httpClient, _targetKuboVersion, token);
     }
 
     public static async Task<IpfsClient> TryConnectAsync(int port, CancellationToken token = default)
