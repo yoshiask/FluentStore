@@ -50,8 +50,6 @@ namespace FluentStore
         {
             this.InitializeComponent();
 
-            AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
-
             // Set up error reporting handlers
             AppDomain.CurrentDomain.FirstChanceException += (sender, e) => _log?.UnhandledException(e.Exception, LogLevel.Error);
             AppDomain.CurrentDomain.UnhandledException += (sender, e)
@@ -65,14 +63,6 @@ namespace FluentStore
 
             _singleInstanceApp = new SingleInstanceDesktopApp("FluentStoreBeta");
             _singleInstanceApp.Launched += OnSingleInstanceLaunched;
-        }
-
-        private void CurrentDomain_ProcessExit(object sender, EventArgs e)
-        {
-            Ioc.Default.GetService<IIpfsService>()?.Dispose();
-            Ioc.Default.GetService<LoggerService>()?.Dispose();
-
-            Exit();
         }
 
         /// <summary>

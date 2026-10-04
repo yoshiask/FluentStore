@@ -1,10 +1,12 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Messaging;
+using FluentStore.Services;
 using FluentStore.ViewModels.Messages;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using System;
-using DwmApi = Vanara.PInvoke.DwmApi;
 using WinUIEx;
-using Microsoft.UI.Windowing;
+using DwmApi = Vanara.PInvoke.DwmApi;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -21,6 +23,8 @@ namespace FluentStore
         public MainWindow()
         {
             this.InitializeComponent();
+
+            Closed += MainWindow_Closed;
 
             m_hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             
@@ -57,6 +61,12 @@ namespace FluentStore
                     DwmApi.DwmSetWindowAttribute(m_hwnd, (DwmApi.DWMWINDOWATTRIBUTE)20, (IntPtr)(&enableImmersiveDarkMode), sizeof(BOOL));
                 }
             }
+        }
+
+        private void MainWindow_Closed(object sender, WindowEventArgs args)
+        {
+            Ioc.Default.GetService<IIpfsService>()?.Dispose();
+            Ioc.Default.GetService<LoggerService>()?.Dispose();
         }
 
         public IntPtr Handle => m_hwnd;
