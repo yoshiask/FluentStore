@@ -17,8 +17,8 @@
 
     <PropertyGroup>
         <Title>Microsoft Store &amp; WinGet</Title>
-        <Version>0.4.0.5</Version>
-        <PackageVersion>$(Version)-beta</PackageVersion>
+        <Version>0.4.2.0</Version>
+        <PackageVersion>$(Version)-alpha</PackageVersion>
         <Description>Download or install apps and collections from the Microsoft Store and WinGet Community. Movies, arcade, and some games may not be supported.</Description>
     </PropertyGroup>
 

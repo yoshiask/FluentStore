@@ -7,8 +7,8 @@
 
     <PropertyGroup>
         <Title>GitHub</Title>
-        <Version>$(FluentStoreMajorMinorVersion).0.3</Version>
-        <PackageVersion>$(Version)-beta</PackageVersion>
+        <Version>$(FluentStoreMajorMinorVersion).2.0</Version>
+        <PackageVersion>$(Version)-alpha</PackageVersion>
         <Description>Provides support for viewing GitHub repositories as packages. Downloading and installing may be supported for some repositories. Searching for is not supported.</Description>
     </PropertyGroup>
 

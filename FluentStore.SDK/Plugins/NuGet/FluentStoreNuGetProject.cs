@@ -233,20 +233,18 @@ public class FluentStoreNuGetProject : NuGetProject
         var tfm = tfmReducer.GetNearest(TargetFramework, reader.GetSupportedFrameworks());
         if (tfm is null)
         {
-            // For some packages, the only supported framework that's compatible is .NET Standard,
-            // which doesn't seem to be included in reader.GetSupportedFrameworks().
+            // Special case for packages whose only supported & compatible framework is .NET Standard,
+            // which doesn't seem to be included in `reader.GetSupportedFrameworks()`.
             var refFrameworks = reader.GetItems("ref").Select(g => g.TargetFramework);
-            tfm = tfmReducer.GetNearest(TargetFramework, refFrameworks);
-
-            if (tfm is null)
-                throw new Exception($"{id} does not support {TargetFramework}");
+            tfm = tfmReducer.GetNearest(TargetFramework, refFrameworks)
+                ?? throw new PluginNotSupportedException(id, $"plugin does not support {TargetFramework}");
         }
 
         // Get list of dependencies
         var deps = GetDependencies(reader.GetPackageDependencies(), tfm);
 
         // Ensure compatible SDK version
-        var sdkDep = deps?.FirstOrDefault(d => d.Id == "FluentStore.SDK");
+        var sdkDep = deps?.FirstOrDefault(d => d.Id.Equals("FluentStore.SDK", StringComparison.Ordinal));
         if (sdkDep is not null && deps is not null && !sdkDep.VersionRange.Satisfies(CurrentSdkVersion))
             throw new PluginSdkNotSupportedException(id, sdkDep.VersionRange);
 
