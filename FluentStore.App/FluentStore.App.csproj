@@ -14,7 +14,7 @@
         <FileVersion>$(AssemblyVersion)</FileVersion>
 
         <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
-        <PackageCertificateThumbprint>F7731B4EADB0017947A65882F26EE334E2E334D6</PackageCertificateThumbprint>
+        <PackageCertificateThumbprint>D162D8BB9DAEFA5DDBB136AD5A05A38DA0DCB549</PackageCertificateThumbprint>
         <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
         <GenerateTemporaryStoreCertificate>False</GenerateTemporaryStoreCertificate>
         <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
@@ -22,6 +22,7 @@
         <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
         <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
         <GenerateTestArtifacts>False</GenerateTestArtifacts>
+        <GenerateAppxPackageOnBuild>true</GenerateAppxPackageOnBuild>
         <AppxBundle>Always</AppxBundle>
         <AppxBundlePlatforms>x86|x64</AppxBundlePlatforms>
         <HoursBetweenUpdateChecks>48</HoursBetweenUpdateChecks>
