@@ -11,49 +11,75 @@ using Spectre.Console;
 
 namespace PublishTool.Commands;
 
-public static class Plugin
+public class Plugin
 {
-    public static async Task BuildPlugins(CommandLineParser argParser)
+    private readonly IAnsiConsole _console;
+    private readonly string _sourcesDir;
+    private readonly string _pluginOutDir;
+    private readonly string? _pluginId;
+    private readonly string _repoPath;
+    private readonly bool _verbose;
+    private readonly bool _saveLogs;
+    private readonly bool _install;
+    private readonly bool _force;
+
+    public Plugin(CommandLineParser argParser, IAnsiConsole console) : this(
+        console,
+        pluginId: argParser.GetArgument("-id"),
+        repoPath: argParser.GetArgument("-repo") ?? Environment.CurrentDirectory,
+        verbose: argParser.HasArgument("v"),
+        saveLogs: argParser.HasArgument("-log"),
+        install: argParser.HasArgument("-install"),
+        force: argParser.HasArgument("f") || argParser.HasArgument("-force"))
     {
-        var pluginId = argParser.GetArgument("-id");
-        var repoPath = argParser.GetArgument("-repo") ?? Environment.CurrentDirectory;
-        bool verbose = argParser.HasArgument("v");
-        bool saveLogs = argParser.HasArgument("-log");
-        bool install = argParser.HasArgument("-install");
-        bool force = argParser.HasArgument("f") || argParser.HasArgument("-force");
+    }
+
+    public Plugin(IAnsiConsole console, string? pluginId, string repoPath, bool verbose, bool saveLogs, bool install, bool force)
+    {
+        _console = console;
 
         // Get folder containing plugin projects
-        string sourcesDir = Path.GetFullPath(Path.Combine(repoPath, "Sources"));
-        string pluginOutDir = Path.Combine(sourcesDir, "output");
+        _pluginId = pluginId;
+        _verbose = verbose;
+        _saveLogs = saveLogs;
+        _install = install;
+        _force = force;
 
+        _repoPath = repoPath;
+        _sourcesDir = Path.GetFullPath(Path.Combine(repoPath, "Sources"));
+        _pluginOutDir = Path.Combine(_sourcesDir, "output");
+    }
+
+    public async Task BuildPluginsAsync()
+    {
         MSBuildLocator.RegisterDefaults();
 
-        Directory.CreateDirectory(pluginOutDir);
+        Directory.CreateDirectory(_pluginOutDir);
 
         List<string> errors = [];
 
-        AnsiConsole.MarkupLine($"Searching for plugins in '[link]{sourcesDir}[/]'...");
+        _console.MarkupLine($"Searching for plugins in '[link]{_sourcesDir}[/]'...");
 
-        await AnsiConsole.Status()
+        await _console.Status()
             .StartAsync("Starting...", async (ctx) =>
             {
-                IEnumerable<string> pluginCsprojPaths = pluginId is not null
-                    ? [Path.Combine(sourcesDir, pluginId, $"{pluginId}.csproj")]
-                    : Directory.EnumerateFiles(sourcesDir, "*.csproj", SearchOption.AllDirectories);
+                IEnumerable<string> pluginCsprojPaths = _pluginId is not null
+                    ? [Path.Combine(_sourcesDir, _pluginId, $"{_pluginId}.csproj")]
+                    : Directory.EnumerateFiles(_sourcesDir, "*.csproj", SearchOption.AllDirectories);
 
                 foreach (var pluginCsprojPath in pluginCsprojPaths)
-                    await BuildPlugin(ctx, pluginOutDir, pluginCsprojPath, force, verbose, saveLogs, install);
+                    await BuildPluginAsync(ctx, _pluginOutDir, pluginCsprojPath, _force, _verbose, _saveLogs, _install);
             });
 
-        AnsiConsole.MarkupLine($"[green]Finished packaging plugins to '[link]{pluginOutDir}[/]'[/]");
+        _console.MarkupLine($"[green]Finished packaging plugins to '[link]{_pluginOutDir}[/]'[/]");
 
         foreach (var error in errors)
         {
-            AnsiConsole.WriteException(new Exception(error));
+            _console.WriteException(new Exception(error));
         }
     }
 
-    public static async Task BuildPlugin(StatusContext ctx, string pluginOutDir, string pluginCsprojPath, bool force, bool verbose, bool saveLogs, bool install)
+    public async Task BuildPluginAsync(StatusContext ctx, string pluginOutDir, string pluginCsprojPath, bool force, bool verbose, bool saveLogs, bool install)
     {
         ctx.Status($"Preparing plugin project...");
 
@@ -73,14 +99,14 @@ public static class Plugin
             Justification = Justify.Left,
             Border = BoxBorder.Ascii,
         };
-        AnsiConsole.Write(header);
+        _console.Write(header);
 
         var fileName = $"{identity}.nupkg";
         var nupkgFilePath = Path.Combine(pluginOutDir, fileName);
         if (!force && File.Exists(nupkgFilePath))
         {
-            AnsiConsole.MarkupLine("Skipping: Plugin package found in cache");
-            AnsiConsole.WriteLine();
+            _console.MarkupLine("Skipping: Plugin package found in cache");
+            _console.WriteLine();
             return;
         }
 
@@ -91,7 +117,7 @@ public static class Plugin
         {
             StreamReader reader = new(s);
             var text = await reader.ReadToEndAsync(t);
-            AnsiConsole.MarkupInterpolated($"[red]{text}[/]");
+            _console.MarkupInterpolated($"[red]{text}[/]");
         });
 
         if (verbose)
@@ -100,7 +126,7 @@ public static class Plugin
             {
                 StreamReader reader = new(s);
                 var text = await reader.ReadToEndAsync(t);
-                AnsiConsole.Write(text);
+                _console.Write(text);
             });
         }
         if (saveLogs)
@@ -121,11 +147,11 @@ public static class Plugin
             .ExecuteAsync();
         if (buildResult.ExitCode != 0)
         {
-            AnsiConsole.MarkupLine($"[red]Failed to pack {id} with exit code 0x{buildResult.ExitCode:X8}[/]");
+            _console.MarkupLine($"[red]Failed to pack {id} with exit code 0x{buildResult.ExitCode:X8}[/]");
             return;
         }
 
-        AnsiConsole.MarkupLine($"[green]Successfully packed {id}[/]");
+        _console.MarkupLine($"[green]Successfully packed {id}[/]");
 
         if (install)
         {
@@ -145,9 +171,9 @@ public static class Plugin
 
             await entries.WriteAsync(statusFile);
 
-            AnsiConsole.MarkupLine($"[green]Successfully installed {id}[/]");
+            _console.MarkupLine($"[green]Successfully installed {id}[/]");
         }
 
-        AnsiConsole.WriteLine();
+        _console.WriteLine();
     }
 }

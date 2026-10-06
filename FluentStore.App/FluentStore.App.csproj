@@ -13,7 +13,6 @@
         <AssemblyVersion>$(FluentStoreVersion)</AssemblyVersion>
         <FileVersion>$(AssemblyVersion)</FileVersion>
 
-        <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
         <PackageCertificateThumbprint>D162D8BB9DAEFA5DDBB136AD5A05A38DA0DCB549</PackageCertificateThumbprint>
         <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
         <GenerateTemporaryStoreCertificate>False</GenerateTemporaryStoreCertificate>

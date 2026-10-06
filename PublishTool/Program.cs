@@ -1,9 +1,6 @@
 ﻿using PublishTool.Commands;
 using Spectre.Console;
 
-// List architectures
-string[] archs = ["x64", "x86"];
-
 var argParser = Meziantou.Framework.CommandLineParser.Current;
 
 if (args.Length > 0 && !args[0].StartsWith('-'))
@@ -14,11 +11,11 @@ if (args.Length > 0 && !args[0].StartsWith('-'))
     switch (command)
     {
         case "PLUGINBUILD":
-            await Plugin.BuildPlugins(argParser);
+            await new Plugin(argParser, AnsiConsole.Console).BuildPluginsAsync();
             break;
 
         case "RELEASE":
-            await Release.PublishAsync(argParser);
+            await new Release(argParser, AnsiConsole.Console).PublishAsync();
             break;
 
         default:
