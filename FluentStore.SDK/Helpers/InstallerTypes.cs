@@ -57,7 +57,7 @@ namespace FluentStore.SDK.Helpers
 
         public static string GetExtension<TEnum>(this TEnum type) where TEnum : unmanaged, Enum
         {
-            return "." + type.ToString().ToLower();
+            return "." + type.ToString().ToLowerInvariant();
         }
 
         public static InstallerType FromExtension(string ext)

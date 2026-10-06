@@ -80,7 +80,7 @@ internal partial class AppUpdatePackage : PackageBase<OnlineVersionInfo>
 
         var fileName = srcFile.Name;
         if (!Path.HasExtension(fileName))
-            fileName = $"FluentStoreBeta_{Version}.{InstallerInfo.Type.ToString().ToLowerInvariant()}";
+            fileName = $"FluentStoreBeta_{Version}{InstallerInfo.Type.GetExtension()}";
 
         SystemFolder dstDir = new(folder);
         var dstFile = await dstDir.CreateCopyOfAsync(srcFile, true, fileName);
