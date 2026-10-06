@@ -1,11 +1,9 @@
-﻿using CliWrap;
-using Humanizer;
+﻿using Humanizer;
 using Meziantou.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Locator;
 using PublishTool.Support;
 using Spectre.Console;
-using System.Text;
 
 namespace PublishTool.Commands;
 
@@ -17,118 +15,55 @@ public static class Release
     {
         var repoPath = argParser.GetArgument("-repo") ?? @"E:\Repos\yoshiask\FluentStore";
         var ipfsRootDir = argParser.GetArgument("-root") ?? @"E:\Documents\site\ipfs_test";
-        var pfxPath = argParser.GetArgument("-pfx") ?? @"E:\ssh-keys\yoshiask_self2025.pfx";
-        var ipfsKeyName = argParser.GetArgument("-ipfsKey") ?? "askharoun";
+        var ipfsKeyName = argParser.GetArgument("-ipfsKey") ?? "fluent-store";
+        var configuration = argParser.GetArgument("-configuration") ?? "Release";
         bool verbose = argParser.HasArgument("v");
 
         var appVersion = FluentStore.SDK.Plugins.NuGet.FluentStoreNuGetProject.CurrentSdkVersion;
         var plainAppVersion = appVersion.Version;
-        var release = appVersion.Release.Titleize();
+        var releaseTag = appVersion.Release.Titleize();
 
-        var ipfsInstallerDir = Path.Combine(ipfsRootDir, "FluentStore", $"{release}Installer");
+        var ipfsInstallerDir = Path.Combine(ipfsRootDir, "FluentStore", $"{releaseTag}Installer");
         var ipfsVersionedInstallerDir = Path.Combine(ipfsInstallerDir, plainAppVersion.ToString(3));
 
         MSBuildLocator.RegisterDefaults();
 
-        var msixBundlePath = await BuildMsixBundle(repoPath, ipfsVersionedInstallerDir, plainAppVersion, release);
+        var msixBundlePath = await BuildMsixBundle(repoPath, ipfsVersionedInstallerDir, plainAppVersion, releaseTag, configuration);
     }
 
-    public static async Task<bool> BuildMsixBundle(string repoPath, string publishDir, Version appVersion, string release)
+    public static async Task<string?> BuildMsixBundle(string repoPath, string publishDir, Version appVersion, string releaseTag, string configuration)
     {
         var appCsprojPath = Path.Combine(repoPath, "FluentStore.App", "FluentStore.App.csproj");
         var versionStr = appVersion.ToString(4);
         Project appCsproj = new(appCsprojPath);
 
+        var packageDir = new DirectoryInfo(Path.Combine(publishDir, "packs"));
+        packageDir.Create();
+
         // Prepare project for building
-        var templateProjInstance = Microsoft.Build.Execution.BuildManager.DefaultBuildManager.GetProjectInstanceForBuild(appCsproj);
-        var configuration = "Release";
-        templateProjInstance.SetProperty("Configuration", configuration);
-        templateProjInstance.SetProperty("GenerateAppxPackageOnBuild", "true");
+        var projInstance = Microsoft.Build.Execution.BuildManager.DefaultBuildManager.GetProjectInstanceForBuild(appCsproj);
+        projInstance.SetProperty("Configuration", configuration);
+        projInstance.SetProperty("GenerateAppxPackageOnBuild", "true");
+        projInstance.SetProperty("AppxBundle", "Always");
+        projInstance.SetProperty("AppxPackageDir", packageDir.FullName);
+        // An architecture must be specified, but a bundle containing all architectures will be generated anyway
+        projInstance.SetProperty("Platform", _architectures[0]);
+        projInstance.SetProperty("RuntimeIdentifiers", $"win-{_architectures[0]}");
 
-        var packageDir = Path.Combine(publishDir, "packs");
-        Directory.CreateDirectory(packageDir);
-        AnsiConsoleMsbuildLogger logger = new();
-
-        // Build MSIX for each architecture
-        foreach (var arch in _architectures)
+        AnsiConsoleMsbuildLogger logger = new(AnsiConsole.Console);
+        var isSuccess = projInstance.Build(["Restore", "Build", "GenerateMsixPackage"], [logger]);
+        if (!isSuccess)
         {
-            var projInstance = templateProjInstance.DeepCopy();
-            projInstance.SetProperty("Platform", arch.ToString());
-            projInstance.SetProperty("RuntimeIdentifiers", $"win-{arch}");
-
-            var isSuccess = projInstance.Build(targets: ["restore", "build"], [logger]);
-            if (!isSuccess)
-            {
-                AnsiConsole.MarkupLineInterpolated($"[red]Failed to build package for {arch}[/]");
-                return false;
-            }
-
-            var packageSrcPath = Directory.GetFiles(
-                Path.Combine(projInstance.Directory, "bin", arch, configuration, "*", "AppPackages", $"FluentStore.App_{versionStr}_Test", "*.msix")
-            ).First();
-            var packageDstPath = Path.Combine(packageDir, $"FluentStore{release}_{versionStr}_{arch}.msix");
-            File.Copy(packageSrcPath, packageDstPath, true);
-
-            AnsiConsole.MarkupLine($"Built MSIX package, copied to {packageDstPath}");
+            AnsiConsole.MarkupLineInterpolated($"[red]Failed to build bundle[/]");
+            return null;
         }
 
-        // Create MSIX bundle
+        var packageSrcFile = packageDir.EnumerateFiles(Path.Combine($"FluentStore.App_{versionStr}_Test", "*.msixbundle")).First();
+        var packageDstPath = Path.Combine(packageDir.FullName, $"FluentStore{releaseTag}_{versionStr}.msixbundle");
+        packageSrcFile.CopyTo(packageDstPath, true);
 
-        throw new NotImplementedException();
+        AnsiConsole.MarkupLine($"[green]Built MSIX bundle at {packageDstPath}[/]");
+
+        return packageDstPath;
     }
-
-    public static async Task<bool> BuildMsixBundleViaCli(string repoPath, string publishDir, Version appVersion, string release)
-    {
-        var appCsprojPath = Path.Combine(repoPath, "FluentStore.App", "FluentStore.App.csproj");
-        var versionStr = appVersion.ToString(4);
-
-        // Locate msbuild
-        var msbuildPath = await LocateToolAsync("msbuild");
-
-        // Build MSIX for each architecture
-        var packageDir = Path.Combine(publishDir, "packs");
-        Directory.CreateDirectory(packageDir);
-        var configuration = "Release";
-        foreach (var arch in _architectures)
-        {
-            var buildCmd = Cli.Wrap(msbuildPath)
-                .WithArguments($"'{appCsprojPath}' /t:restore,build /p:Configuration={configuration} /p:Platform={arch} /p:RuntimeIdentifiers=win-{arch} /p:GenerateAppxPackageOnBuild=true")
-                .WithStandardOutputPipe(ToConsole());
-
-            var buildResult = await buildCmd.ExecuteAsync();
-            if (!buildResult.IsSuccess)
-            {
-                AnsiConsole.MarkupLineInterpolated($"[red]Failed to build package for {arch}[/]");
-                return false;
-            }
-
-            var packageSrcPath = Directory.GetFiles(
-                Path.Combine(repoPath, "FluentStore.App", "bin", arch, configuration, "*", "AppPackages", $"FluentStore.App_{versionStr}_Test", "*.msix")
-            ).First();
-            var packageDstPath = Path.Combine(publishDir, $"FluentStore{release}_{versionStr}_{arch}.msix");
-            File.Copy(packageSrcPath, packageDstPath, true);
-
-            AnsiConsole.MarkupLine($"Built MSIX package, copied to {packageDstPath}");
-        }
-
-        // Create MSIX bundle
-
-        throw new NotImplementedException();
-    }
-
-    private static async Task<string> LocateToolAsync(string name)
-    {
-        var whereOutput = new StringBuilder();
-        var whereCmd = Cli.Wrap("where.exe")
-            .WithArguments(name)
-            .WithStandardOutputPipe(PipeTarget.ToStringBuilder(whereOutput));
-
-        await whereCmd.ExecuteAsync();
-
-        return whereOutput.ToString()
-            .Split('\n', StringSplitOptions.TrimEntries)
-            .First();
-    }
-
-    private static PipeTarget ToConsole() => PipeTarget.ToDelegate(AnsiConsole.WriteLine);
 }
