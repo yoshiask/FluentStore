@@ -52,25 +52,14 @@ namespace FluentStore.Sources.FluentStore.Users
             }
         }
 
-        public override Task<bool> SignInAsync(CredentialBase credential) => Task.Run(SignIn);
-
-        /// <summary>
-        /// Sign in using the supplied token and refresh token.
-        /// </summary>
-        /// <remarks>
-        /// If <paramref name="token"/> is <see langword="null"/>,
-        /// then <paramref name="refreshToken"/> will be used to
-        /// get a new token.
-        /// </remarks>
-        /// <returns>Whether the sign-in succeeded.</returns>
-        protected bool SignIn()
+        public override async Task<bool> SignInAsync(CredentialBase credential)
         {
             try
             {
                 if (_client.SupabaseClient.Auth.CurrentSession is null)
                 {
                     // Attempt to load previous session
-                    _client.SupabaseClient.Auth.LoadSession();
+                    await _client.SupabaseClient.Auth.LoadSessionAsync();
                 }
             }
             catch
@@ -112,7 +101,7 @@ namespace FluentStore.Sources.FluentStore.Users
             AbstractForm form = new($"{Id}_ManageForm", onSubmit: OnManageAccountFormSubmitted);
 
             // Add display name box
-            AbstractTextBox displayNameBox = new($"{form.Id}_DisplayName", CurrentUser.DisplayName, "Display name");
+            AbstractTextBox displayNameBox = new($"{form.Id}_DisplayName", CurrentUser?.DisplayName, "Display name");
             form.Add(displayNameBox);
 
             return form;
@@ -220,16 +209,8 @@ namespace FluentStore.Sources.FluentStore.Users
                     break;
 
                 case AuthState.UserUpdated:
-                    try
-                    {
-                        var userInformation = await _client.GetCurrentUserInformationAsync();
-
-                        IsLoggedIn = userInformation is not null;
-                        CurrentUser = IsLoggedIn
-                            ? new FluentStoreAccount(userInformation)
-                            : null;
-                    }
-                    catch { }
+                    CurrentUser = await UpdateCurrentUser();
+                    IsLoggedIn = true;
                     break;
             }
         }
