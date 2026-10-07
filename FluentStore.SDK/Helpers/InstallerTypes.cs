@@ -29,7 +29,7 @@ namespace FluentStore.SDK.Helpers
         {
             InstallerType typeReduced = type.Reduce();
             string extDesc;
-            if (typeReduced == InstallerType.Msix)
+            if (typeReduced is InstallerType.Msix)
             {
                 extDesc = "Windows App " + (type.HasFlag(InstallerType.Bundle) ? "Bundle" : "Package");
 
@@ -55,9 +55,36 @@ namespace FluentStore.SDK.Helpers
             return extDesc;
         }
 
-        public static string GetExtension<TEnum>(this TEnum type) where TEnum : unmanaged, Enum
+        public static string GetExtension(this InstallerType type)
         {
-            return "." + type.ToString().ToLowerInvariant();
+            InstallerType typeReduced = type.Reduce();
+            string ext;
+            if (type.HasFlag(InstallerType.AppInstaller))
+            {
+                ext = "appinstaller";
+            }
+            else if (typeReduced is InstallerType.Msix)
+            {
+                ext = type.HasFlag(InstallerType.AppX) ? "appx" : "msix";
+
+                if (type.HasFlag(InstallerType.Bundle))
+                    ext += "bundle";
+                
+                if (type.HasFlag(InstallerType.Encrypted))
+                    ext = $"e{ext}";
+            }
+            else
+            {
+                ext = type switch
+                {
+                    InstallerType.Msi => "msi",
+                    _ when typeReduced is InstallerType.Win32 => "exe",
+
+                    _ => type.ToString().ToLowerInvariant()
+                };
+            }
+
+            return $".{ext}";
         }
 
         public static InstallerType FromExtension(string ext)
