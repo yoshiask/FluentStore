@@ -1,7 +1,10 @@
-﻿using Humanizer;
+﻿using FluentStore.SDK.Models;
+using Humanizer;
 using Meziantou.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Locator;
+using Microsoft.Msix.Utils.AppxPackaging;
+using Microsoft.Msix.Utils.AppxPackagingInterop;
 using NuGet.Versioning;
 using PublishTool.Support;
 using Spectre.Console;
@@ -24,6 +27,7 @@ public class Release
     private readonly string _releaseTag;
 
     private readonly string _versionedOutputPath;
+    private readonly string _dependenciesOutputPath;
 
     public Release(CommandLineParser argParser, IAnsiConsole console)
     {
@@ -41,17 +45,38 @@ public class Release
 
         var ipfsInstallerDir = Path.Combine(_ipfsRootDir, "FluentStore", $"{_releaseTag}Installer");
         _versionedOutputPath = Path.Combine(ipfsInstallerDir, _plainAppVersion.ToString(3));
+        _dependenciesOutputPath = Path.Combine(_ipfsRootDir, "Dependencies");
     }
 
     public async Task PublishAsync()
     {
-        MSBuildLocator.RegisterDefaults();
+        // Build and sign the main bundle
+        var msixBundlePath = @"E:\Documents\site\ipfs_test\FluentStore\AlphaInstaller\0.4.2\packs\FluentStoreAlpha_0.4.2.0.msixbundle";
+        //var msixBundlePath = await BuildMsixBundle();
+        if (msixBundlePath is null)
+            return;
 
-        var msixBundlePath = await BuildMsixBundle();
+        // Locate MSIX dependencies
+        HashSet<PackageIdentity> dependencies = [.. GetMsixBundleDependencies(msixBundlePath)];
+
+        // Pack plugins
+        Plugin pluginCommand = new(_console,
+            pluginId: null,
+            repoPath: _repoPath,
+            configuration: _configuration,
+            verbose: _verbose,
+            saveLogs: false,
+            install: false,
+            force: true);
+        var pluginsPackedSuccessfully = await pluginCommand.BuildPluginsAsync();
+        if (!pluginsPackedSuccessfully)
+            return;
     }
 
     public async Task<string?> BuildMsixBundle()
     {
+        MSBuildLocator.RegisterDefaults();
+
         var appCsprojPath = Path.Combine(_repoPath, "FluentStore.App", "FluentStore.App.csproj");
         var versionStr = _plainAppVersion.ToString(4);
         Project appCsproj = new(appCsprojPath);
@@ -90,5 +115,70 @@ public class Release
         _console.MarkupLine($"[green]Built MSIX bundle at {packageDstPath}[/]");
 
         return packageDstPath;
+    }
+
+    public IEnumerable<PackageIdentity> GetMsixBundleDependencies(string msixBundlePath)
+    {
+        var metadata = new AppxBundleMetadata(msixBundlePath);
+        var appxFactory = (IAppxFactory)new AppxFactory();
+
+        // The APPX enumerator COM interfaces behave differently than C#'s `IEnumerator`.
+        // For reference, see https://github.com/microsoft/MSIX-Toolkit/blob/ec2244a54530c3173e6e5a93ec1a2a525c8c6aeb/AppInstallerFileBuilder/AppInstallerFileBuilderLib/AppxPackaging/AppxMetadata.cs#L60-L68
+
+        var packageEnumerator = metadata.AppxBundleReader.GetPayloadPackages();
+        while (packageEnumerator.GetHasCurrent())
+        {
+            var package = packageEnumerator.GetCurrent();
+            var packageReader = appxFactory.CreatePackageReader(package.GetStream());
+            var packageManifest = packageReader.GetManifest();
+
+            foreach (var dependency in GetMsixDependencies(packageManifest))
+                yield return dependency;
+
+            packageEnumerator.MoveNext();
+        }
+    }
+
+    public IEnumerable<PackageIdentity> GetMsixDependencies(IAppxManifestReader packageManifest)
+    {
+        var packageArchitecture = GetArchitectureFromAppx(packageManifest.GetPackageId().GetArchitecture());
+
+        var dependencyEnumerator = packageManifest.GetPackageDependencies();
+        while (dependencyEnumerator.GetHasCurrent())
+        {
+            var packageDependency = dependencyEnumerator.GetCurrent();
+            var packageVersion = GetVersionFromULong(packageDependency.GetMinVersion());
+
+            yield return new PackageIdentity(
+                packageDependency.GetName(),
+                packageVersion,
+                packageArchitecture,
+                packageDependency.GetPublisher());
+
+            dependencyEnumerator.MoveNext();
+        }
+    }
+
+    private static Version GetVersionFromULong(ulong value)
+    {
+        var major = (int)(value >> 48) & 0xFFFF;
+        var minor = (int)(value >> 32) & 0xFFFF;
+        var build = (int)(value >> 16) & 0xFFFF;
+        var revision = (int)value & 0xFFFF;
+        return new(major, minor, build, revision);
+    }
+
+    private static Architecture GetArchitectureFromAppx(APPX_PACKAGE_ARCHITECTURE architecture)
+    {
+        return architecture switch
+        {
+            APPX_PACKAGE_ARCHITECTURE.APPX_PACKAGE_ARCHITECTURE_X86 or
+            APPX_PACKAGE_ARCHITECTURE.APPX_PACKAGE_ARCHITECTURE_X86A64 => Architecture.x86,
+            APPX_PACKAGE_ARCHITECTURE.APPX_PACKAGE_ARCHITECTURE_X64 => Architecture.x64,
+            APPX_PACKAGE_ARCHITECTURE.APPX_PACKAGE_ARCHITECTURE_ARM => Architecture.Arm,
+            APPX_PACKAGE_ARCHITECTURE.APPX_PACKAGE_ARCHITECTURE_ARM64 => Architecture.Arm64,
+            APPX_PACKAGE_ARCHITECTURE.APPX_PACKAGE_ARCHITECTURE_NEUTRAL => Architecture.Neutral,
+            _ => Architecture.Unknown
+        };
     }
 }
