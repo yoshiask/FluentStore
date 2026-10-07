@@ -9,6 +9,7 @@ using FluentStore.SDK.Models;
 using Garfoot.Utilities.FluentUrn;
 using NuGet.Packaging;
 using NuGet.Protocol.Core.Types;
+using NuGet.Versioning;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -76,30 +77,46 @@ public partial class NuGetPluginPackage : PluginPackageBase
     public override async Task<bool> InstallAsync()
     {
         DownloadResourceResult downloadItem;
-        try
-        {
-            WeakReferenceMessenger.Default.Send(new PackageDownloadStartedMessage(this));
-            downloadItem = await GetResourceAsync();
-            WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPluginDownloadCompleted(NuGetId));
-        }
-        catch (Exception ex)
-        {
-            WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, this, ErrorType.PluginDownloadFailed));
-            return false;
-        }
-
+        NuGetVersion packageVersion = null;
         PluginInstallStatus status = PluginInstallStatus.Failed;
-        try
-        {
-            WeakReferenceMessenger.Default.Send(new PackageInstallStartedMessage(this));
-            status = await _pluginLoader.InstallPlugin(downloadItem, true);
-        }
-        catch (Exception ex)
-        {
-            WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, this, ErrorType.PluginInstallFailed));
-        }
 
-        DisposeResource();
+        // TODO: TEST THIS
+        // Keep trying to download and install older and older versions
+        // until we find one that works or run out of versions to try
+        do
+        {
+            try
+            {
+                WeakReferenceMessenger.Default.Send(new PackageDownloadStartedMessage(this));
+                downloadItem = await GetResourceAsync(packageVersion);
+                packageVersion = downloadItem.PackageReader.GetIdentity().Version;
+                WeakReferenceMessenger.Default.Send(SuccessMessage.CreateForPluginDownloadCompleted(NuGetId));
+            }
+            catch (Exception ex)
+            {
+                WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, this, ErrorType.PluginDownloadFailed));
+                continue;
+            }
+            finally
+            {
+                DisposeResource();
+            }
+
+            try
+            {
+                WeakReferenceMessenger.Default.Send(new PackageInstallStartedMessage(this));
+                status = await _pluginLoader.InstallPlugin(downloadItem, true);
+            }
+            catch (Exception ex)
+            {
+                WeakReferenceMessenger.Default.Send(new ErrorMessage(ex, this, ErrorType.PluginInstallFailed));
+            }
+            finally
+            {
+                DisposeResource();
+            }
+        } while (status.IsLessThan(PluginInstallStatus.NoAction) && packageVersion is not null);
+
 
         if (status.IsGreaterThan(PluginInstallStatus.Failed))
         {
@@ -190,11 +207,16 @@ public partial class NuGetPluginPackage : PluginPackageBase
         }
     }
 
-    private async Task<DownloadResourceResult> GetResourceAsync()
+    private async Task<DownloadResourceResult> GetResourceAsync(NuGetVersion highestVersion = null)
     {
         if (_downloadItem is not null)
             return _downloadItem;
-        return _downloadItem = await _pluginLoader.Project.DownloadPackageAsync(NuGetId);
+
+        VersionRange versionRange = highestVersion is not null
+            ? new VersionRange(maxVersion: highestVersion, includeMaxVersion: false)
+            : null;
+
+        return _downloadItem = await _pluginLoader.Project.DownloadPackageAsync(NuGetId, versionRange);
     }
 
     private void DisposeResource()
