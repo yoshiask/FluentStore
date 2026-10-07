@@ -7,7 +7,7 @@
     <PropertyGroup>
         <Title>UWP Community</Title>
         <Version>$(FluentStoreMajorMinorVersion).2.0</Version>
-        <PackageVersion>$(Version)-alpha</PackageVersion>
+        <PackageVersion>$(Version)-$(FluentStoreReleaseTag)</PackageVersion>
         <Description>Experience projects from the UWP Community, including the annual Launch event.</Description>
         <PackageTags>$(PackageTags) Windows App Community</PackageTags>
     </PropertyGroup>
