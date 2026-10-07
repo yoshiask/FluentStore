@@ -8,7 +8,22 @@ namespace FluentStore.SDK.Models;
 public sealed record PackageIdentity(string Name, Version Version, Architecture Architecture, string Publisher)
     : IEquatable<PackageIdentity>, IEquatable<PackageFamilyName>
 {
-    public PackageFamilyName ToPackageFamilyName() => new(Name, GetPublisherId(Publisher));
+    public string PublisherId { get; } = GetPublisherId(Publisher);
+
+    public PackageFamilyName ToPackageFamilyName() => new(Name, PublisherId);
+
+    public PackageFullName ToPackageFullName(string resourceId) => new(Name, Version, Architecture, resourceId, PublisherId);
+
+    public override string ToString() => $"{Name}_{Version}_{Architecture}_{PublisherId}";
+
+    public bool Equals(PackageFamilyName other)
+    {
+        if (other is null)
+            return false;
+
+        return Name.Equals(other.Name, StringComparison.Ordinal)
+            && PublisherId.Equals(other.PublisherId, StringComparison.Ordinal);
+    }
 
     private static string GetPublisherId(string publisher)
     {
@@ -19,14 +34,5 @@ public sealed record PackageIdentity(string Name, Version Version, Architecture 
         var binaryString = string.Concat(encoded.Take(8).Select(c => Convert.ToString(c, 2).PadLeft(8, '0'))) + '0'; // representing 65-bits = 13 * 5
         var encodedPublisherId = string.Concat(Enumerable.Range(0, binaryString.Length / 5).Select(i => "0123456789abcdefghjkmnpqrstvwxyz".Substring(Convert.ToInt32(binaryString.Substring(i * 5, 5), 2), 1)));
         return encodedPublisherId;
-    }
-
-    public bool Equals(PackageFamilyName other)
-    {
-        if (other is null)
-            return false;
-
-        return Name.Equals(other.Name, StringComparison.Ordinal)
-            && GetPublisherId(Publisher).Equals(other.PublisherId, StringComparison.Ordinal);
     }
 }

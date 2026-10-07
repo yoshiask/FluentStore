@@ -8,16 +8,19 @@ using Microsoft.Msix.Utils.AppxPackagingInterop;
 using NuGet.Versioning;
 using PublishTool.Support;
 using Spectre.Console;
+using System.Text;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace PublishTool.Commands;
 
-public class Release
+public partial class Release
 {
     private static readonly string[] _architectures = ["x64", "x86"];
 
     private readonly IAnsiConsole _console;
-    private readonly string _repoPath;
-    private readonly string _ipfsRootDir;
+    private readonly string _repoDir;
+    private readonly PathRoot _outRootDir;
     private readonly string _ipfsKeyName;
     private readonly string _configuration;
     private readonly bool _verbose;
@@ -26,15 +29,18 @@ public class Release
     private readonly Version _plainAppVersion;
     private readonly string _releaseTag;
 
-    private readonly string _versionedOutputPath;
-    private readonly string _dependenciesOutputPath;
+    private readonly PathRoot _ipnsRootUri;
+    private readonly PathRoot _dependenciesOutputPath;
+
+    private readonly PathFragment _taggedOutputPath;
+    private readonly PathFragment _versionedOutputPath;
 
     public Release(CommandLineParser argParser, IAnsiConsole console)
     {
         _console = console;
 
-        _repoPath = argParser.GetArgument("-repo") ?? @"E:\Repos\yoshiask\FluentStore";
-        _ipfsRootDir = argParser.GetArgument("-root") ?? @"E:\Documents\site\ipfs_test";
+        _repoDir = argParser.GetArgument("-repo") ?? @"E:\Repos\yoshiask\FluentStore";
+        _outRootDir = argParser.GetArgument("-root") ?? @"E:\Documents\site\ipfs_test\FluentStore";
         _ipfsKeyName = argParser.GetArgument("-ipfsKey") ?? "fluent-store";
         _configuration = argParser.GetArgument("-configuration") ?? "Release";
         _verbose = argParser.HasArgument("v");
@@ -43,9 +49,11 @@ public class Release
         _plainAppVersion = _appVersion.Version;
         _releaseTag = _appVersion.Release.Titleize();
 
-        var ipfsInstallerDir = Path.Combine(_ipfsRootDir, "FluentStore", $"{_releaseTag}Installer");
-        _versionedOutputPath = Path.Combine(ipfsInstallerDir, _plainAppVersion.ToString(3));
-        _dependenciesOutputPath = Path.Combine(_ipfsRootDir, "Dependencies");
+        _dependenciesOutputPath = _outRootDir / "Dependencies";
+        _ipnsRootUri = new Uri("ipns://fluentstore.askharoun.com");
+
+        _taggedOutputPath = $"{_releaseTag}Installer";
+        _versionedOutputPath = _taggedOutputPath / _plainAppVersion.ToString(3);
     }
 
     public async Task PublishAsync()
@@ -57,12 +65,20 @@ public class Release
             return;
 
         // Locate MSIX dependencies
-        HashSet<PackageIdentity> dependencies = [.. GetMsixBundleDependencies(msixBundlePath)];
+        var mainBundleMetadata = new AppxBundleMetadata(msixBundlePath);
+        HashSet<PackageIdentity> dependencies = [.. GetMsixBundleDependencies(mainBundleMetadata.AppxBundleReader)];
+        foreach (var dep in dependencies)
+            _console.WriteLine($"Found dependency {dep}");
+
+        // Write `.appinstaller` file
+        var appInstallerPath = await WriteAppInstallerAsync(mainBundleMetadata, dependencies);
+
+        return;
 
         // Pack plugins
         Plugin pluginCommand = new(_console,
             pluginId: null,
-            repoPath: _repoPath,
+            repoPath: _repoDir,
             configuration: _configuration,
             verbose: _verbose,
             saveLogs: false,
@@ -77,11 +93,11 @@ public class Release
     {
         MSBuildLocator.RegisterDefaults();
 
-        var appCsprojPath = Path.Combine(_repoPath, "FluentStore.App", "FluentStore.App.csproj");
+        var appCsprojPath = Path.Combine(_repoDir, "FluentStore.App", "FluentStore.App.csproj");
         var versionStr = _plainAppVersion.ToString(4);
         Project appCsproj = new(appCsprojPath);
 
-        var packageDir = new DirectoryInfo(Path.Combine(_versionedOutputPath, "packs"));
+        var packageDir = new DirectoryInfo(_outRootDir / (_versionedOutputPath / "packs"));
         packageDir.Create();
 
         // Prepare project for building
@@ -117,15 +133,14 @@ public class Release
         return packageDstPath;
     }
 
-    public IEnumerable<PackageIdentity> GetMsixBundleDependencies(string msixBundlePath)
+    public IEnumerable<PackageIdentity> GetMsixBundleDependencies(IAppxBundleReader bundleReader)
     {
-        var metadata = new AppxBundleMetadata(msixBundlePath);
         var appxFactory = (IAppxFactory)new AppxFactory();
 
         // The APPX enumerator COM interfaces behave differently than C#'s `IEnumerator`.
         // For reference, see https://github.com/microsoft/MSIX-Toolkit/blob/ec2244a54530c3173e6e5a93ec1a2a525c8c6aeb/AppInstallerFileBuilder/AppInstallerFileBuilderLib/AppxPackaging/AppxMetadata.cs#L60-L68
 
-        var packageEnumerator = metadata.AppxBundleReader.GetPayloadPackages();
+        var packageEnumerator = bundleReader.GetPayloadPackages();
         while (packageEnumerator.GetHasCurrent())
         {
             var package = packageEnumerator.GetCurrent();
@@ -157,6 +172,62 @@ public class Release
 
             dependencyEnumerator.MoveNext();
         }
+    }
+
+    public async Task<string?> WriteAppInstallerAsync(AppxBundleMetadata mainBundleMetadata, IEnumerable<PackageIdentity> dependencies)
+    {
+        var appInstallerPathFrag = _taggedOutputPath / $"FluentStore{_releaseTag}.appinstaller";
+
+        XDocument xDoc = new();
+        {
+            XNamespace nsAppInstaller = XNamespace.Get("http://schemas.microsoft.com/appx/appinstaller/2017");
+            XNamespace nsFluent2610 = XNamespace.Get("http://fluentstore.askharoun.com/appx/appinstaller/2610");
+
+            XElement xAppInstaller = new(nsAppInstaller + "AppInstaller",
+                new XAttribute("xmlns", nsAppInstaller),
+                new XAttribute(XNamespace.Xmlns + "fluent2610", nsFluent2610));
+            xAppInstaller.SetAttributeValue("Version", mainBundleMetadata.Version);
+            xAppInstaller.SetAttributeValue("Uri", _ipnsRootUri / appInstallerPathFrag);
+            xDoc.Add(xAppInstaller);
+
+            XElement xMainPackage = new(nsAppInstaller + "MainBundle");
+            xMainPackage.SetAttributeValue("Name", mainBundleMetadata.PackageName);
+            xMainPackage.SetAttributeValue("Publisher", mainBundleMetadata.Publisher);
+            xMainPackage.SetAttributeValue("Version", mainBundleMetadata.Version);
+            xAppInstaller.Add(xMainPackage);
+
+            PathFragment dependenciesPath = "Dependencies";
+            XElement xDependencies = new(nsAppInstaller + "Dependencies");
+            xAppInstaller.Add(xDependencies);
+            foreach (var dependency in dependencies)
+            {
+                XElement xDependency = new(nsAppInstaller + "Package");
+                xDependency.SetAttributeValue("Name", dependency.Name);
+                xDependency.SetAttributeValue("Version", dependency.Version);
+                xDependency.SetAttributeValue("ProcessorArchitecture", dependency.Architecture);
+                xDependency.SetAttributeValue("Publisher", dependency.Publisher);
+                // TODO: Generate this file after adding the deps to IPFS so we can use the more stable CID
+                xDependency.SetAttributeValue("Uri", _ipnsRootUri / (dependenciesPath / $"{dependency}.msix"));
+                xDependencies.Add(xDependency);
+            }
+        }
+
+        // TODO: Add custom element declaring dependency on .NET runtime
+
+        var appInstallerFilePath = _outRootDir / appInstallerPathFrag;
+        await using FileStream stream = new(appInstallerFilePath, FileMode.Create);
+        await using var xmlWriter = XmlWriter.Create(stream, new XmlWriterSettings
+        {
+            Async = true,
+            Indent = true,
+            IndentChars = "    ",
+            NewLineOnAttributes = true,
+            NamespaceHandling = NamespaceHandling.OmitDuplicates,
+            Encoding = Encoding.UTF8,
+        });
+        await xDoc.WriteToAsync(xmlWriter, default);
+
+        return appInstallerFilePath;
     }
 
     private static Version GetVersionFromULong(ulong value)
