@@ -323,7 +323,7 @@ namespace FluentStore.SDK.Helpers
             };
         }
 
-        public static string GetPackageFamilyName(Stream stream, bool isBundle)
+        public static PackageIdentity GetPackageFamilyName(Stream stream, bool isBundle)
         {
             Guard.IsNotNull(stream, nameof(stream));
 
@@ -343,8 +343,19 @@ namespace FluentStore.SDK.Helpers
             const string d = "default";
             nsmgr.AddNamespace(d, defaultNs);
 
-            var nameNode = manifest.SelectSingleNode($"//{d}:Identity/@Name", nsmgr);
-            return nameNode.Value;
+            var identityNode = manifest.SelectSingleNode($"//{d}:Identity", nsmgr);
+            var name = identityNode.Attributes["Name"].Value;
+            var publisher = identityNode.Attributes["Publisher"].Value;
+
+            var versionStr = identityNode.Attributes["Version"].Value;
+            if (!Version.TryParse(versionStr, out Version version))
+                throw new InvalidDataException($"Invalid package version: {versionStr}");
+
+            var architectureStr = identityNode.Attributes["ProcessorArchitecture"].Value;
+            if (!Enum.TryParse(architectureStr, true, out Architecture architecture))
+                throw new InvalidDataException($"Invalid package architecture: {architectureStr}");
+
+            return new PackageIdentity(name, version, architecture, publisher);
         }
     }
 }
