@@ -35,6 +35,8 @@ public partial class Release
     private readonly PathFragment _taggedOutputPath;
     private readonly PathFragment _versionedOutputPath;
 
+    private readonly HashSet<string> _ipfsPathsToPin = [];
+
     public Release(CommandLineParser argParser, IAnsiConsole console)
     {
         _console = console;
@@ -59,16 +61,37 @@ public partial class Release
     public async Task PublishAsync()
     {
         // Build and sign the main bundle
-        var msixBundlePath = @"E:\Documents\site\ipfs_test\FluentStore\AlphaInstaller\0.4.2\packs\FluentStoreAlpha_0.4.2.0.msixbundle";
-        //var msixBundlePath = await BuildMsixBundle();
+        //var msixBundlePath = @"E:\Documents\site\ipfs_test\FluentStore\AlphaInstaller\0.4.2\FluentStoreAlpha_0.4.2.0.msixbundle";
+        var msixBundlePath = await BuildMsixBundle();
         if (msixBundlePath is null)
             return;
 
-        // Locate MSIX dependencies
+        // Locate and copy MSIX dependencies
         var mainBundleMetadata = new AppxBundleMetadata(msixBundlePath);
         HashSet<PackageIdentity> dependencies = [.. GetMsixBundleDependencies(mainBundleMetadata.AppxBundleReader)];
+
+        Directory.CreateDirectory(_dependenciesOutputPath.Value);
+        var allDepsDownloaded = true;
         foreach (var dep in dependencies)
-            _console.WriteLine($"Found dependency {dep}");
+        {
+            _console.Write($"Dependency {dep}:");
+
+            var depMsixPath = Directory
+                .EnumerateFiles(_outRootDir / _versionedOutputPath, "*", SearchOption.AllDirectories)
+                .FirstOrDefault(f => f.EndsWith($"\\{dep.Architecture}\\{dep.Name}.msix"));
+            if (depMsixPath is null)
+            {
+                allDepsDownloaded = false;
+                _console.MarkupLine("\t[yellow]Could not locate.[/]");
+                continue;
+            }
+
+            File.Copy(depMsixPath, _dependenciesOutputPath / $"{dep}.msix", true);
+            _console.MarkupLine("\t[green]Found and copied.[/]");
+        }
+
+        if (!allDepsDownloaded)
+            _console.MarkupLine($"[yellow]Some dependencies couldn't be automatically located. Publish pipeline will require manual intervention.[/]");
 
         // Write `.appinstaller` file
         var appInstallerPath = await WriteAppInstallerAsync(mainBundleMetadata, dependencies);
@@ -97,7 +120,7 @@ public partial class Release
         var versionStr = _plainAppVersion.ToString(4);
         Project appCsproj = new(appCsprojPath);
 
-        var packageDir = new DirectoryInfo(_outRootDir / (_versionedOutputPath / "packs"));
+        var packageDir = new DirectoryInfo(_outRootDir / _versionedOutputPath);
         packageDir.Create();
 
         // Prepare project for building
@@ -226,6 +249,8 @@ public partial class Release
             Encoding = Encoding.UTF8,
         });
         await xDoc.WriteToAsync(xmlWriter, default);
+
+        _console.MarkupLineInterpolated($"[green]Generated App Installer file at {appInstallerFilePath}[/]");
 
         return appInstallerFilePath;
     }
