@@ -18,6 +18,7 @@ public class Plugin
     private readonly string _pluginOutDir;
     private readonly string? _pluginId;
     private readonly string _repoPath;
+    private readonly string _configuration;
     private readonly bool _verbose;
     private readonly bool _saveLogs;
     private readonly bool _install;
@@ -26,6 +27,7 @@ public class Plugin
     public Plugin(CommandLineParser argParser, IAnsiConsole console) : this(
         console,
         pluginId: argParser.GetArgument("-id"),
+        configuration: argParser.GetArgument("-configuration") ?? "Debug",
         repoPath: argParser.GetArgument("-repo") ?? Environment.CurrentDirectory,
         verbose: argParser.HasArgument("v"),
         saveLogs: argParser.HasArgument("-log"),
@@ -34,12 +36,13 @@ public class Plugin
     {
     }
 
-    public Plugin(IAnsiConsole console, string? pluginId, string repoPath, bool verbose, bool saveLogs, bool install, bool force)
+    public Plugin(IAnsiConsole console, string? pluginId, string repoPath, string configuration, bool verbose, bool saveLogs, bool install, bool force)
     {
         _console = console;
 
         // Get folder containing plugin projects
         _pluginId = pluginId;
+        _configuration = configuration;
         _verbose = verbose;
         _saveLogs = saveLogs;
         _install = install;
@@ -50,16 +53,17 @@ public class Plugin
         _pluginOutDir = Path.Combine(_sourcesDir, "output");
     }
 
-    public async Task BuildPluginsAsync()
+    public string PluginOutDir => _pluginOutDir;
+
+    public async Task<bool> BuildPluginsAsync()
     {
         MSBuildLocator.RegisterDefaults();
 
         Directory.CreateDirectory(_pluginOutDir);
 
-        List<string> errors = [];
-
         _console.MarkupLine($"Searching for plugins in '[link]{_sourcesDir}[/]'...");
 
+        var success = true;
         await _console.Status()
             .StartAsync("Starting...", async (ctx) =>
             {
@@ -68,18 +72,14 @@ public class Plugin
                     : Directory.EnumerateFiles(_sourcesDir, "*.csproj", SearchOption.AllDirectories);
 
                 foreach (var pluginCsprojPath in pluginCsprojPaths)
-                    await BuildPluginAsync(ctx, _pluginOutDir, pluginCsprojPath, _force, _verbose, _saveLogs, _install);
+                    success &= await BuildPluginAsync(ctx, pluginCsprojPath);
             });
 
         _console.MarkupLine($"[green]Finished packaging plugins to '[link]{_pluginOutDir}[/]'[/]");
-
-        foreach (var error in errors)
-        {
-            _console.WriteException(new Exception(error));
-        }
+        return success;
     }
 
-    public async Task BuildPluginAsync(StatusContext ctx, string pluginOutDir, string pluginCsprojPath, bool force, bool verbose, bool saveLogs, bool install)
+    public async Task<bool> BuildPluginAsync(StatusContext ctx, string pluginCsprojPath)
     {
         ctx.Status($"Preparing plugin project...");
 
@@ -92,8 +92,6 @@ public class Plugin
         var title = csproj.GetPropertyValue("Title");
         var version = csproj.GetPropertyValue("PackageVersion");
 
-        var identity = $"{id}.{version}";
-
         Rule header = new($"{title} [grey]({id}, {version})[/]")
         {
             Justification = Justify.Left,
@@ -101,13 +99,13 @@ public class Plugin
         };
         _console.Write(header);
 
-        var fileName = $"{identity}.nupkg";
-        var nupkgFilePath = Path.Combine(pluginOutDir, fileName);
-        if (!force && File.Exists(nupkgFilePath))
+        var fileName = $"{id}.{version}.nupkg";
+        var nupkgFilePath = Path.Combine(_pluginOutDir, fileName);
+        if (!_force && File.Exists(nupkgFilePath))
         {
             _console.MarkupLine("Skipping: Plugin package found in cache");
             _console.WriteLine();
-            return;
+            return true;
         }
 
         ctx.Status($"Packing {header.Title}...");
@@ -120,7 +118,7 @@ public class Plugin
             _console.MarkupInterpolated($"[red]{text}[/]");
         });
 
-        if (verbose)
+        if (_verbose)
         {
             buildLogOutPipe = PipeTarget.Create(async (s, t) =>
             {
@@ -129,17 +127,17 @@ public class Plugin
                 _console.Write(text);
             });
         }
-        if (saveLogs)
+        if (_saveLogs)
         {
-            var buildLogOutPath = Path.Combine(pluginOutDir, $"{fileName}_out.txt");
-            var buildLogErrPath = Path.Combine(pluginOutDir, $"{fileName}_err.txt");
+            var buildLogOutPath = Path.Combine(_pluginOutDir, $"{fileName}_out.txt");
+            var buildLogErrPath = Path.Combine(_pluginOutDir, $"{fileName}_err.txt");
 
             buildLogOutPipe = PipeTarget.Merge(buildLogOutPipe, PipeTarget.ToFile(buildLogOutPath));
             buildLogErrPipe = PipeTarget.Merge(buildLogErrPipe, PipeTarget.ToFile(buildLogErrPath));
         }
 
         var buildResult = await Cli.Wrap("dotnet")
-            .WithArguments(["pack", "-c", "Debug", "-o", pluginOutDir])
+            .WithArguments(["pack", "-c", _configuration, "-o", _pluginOutDir])
             .WithWorkingDirectory(pluginSrcDir)
             .WithValidation(CommandResultValidation.None)
             .WithStandardOutputPipe(buildLogOutPipe)
@@ -148,12 +146,12 @@ public class Plugin
         if (buildResult.ExitCode != 0)
         {
             _console.MarkupLine($"[red]Failed to pack {id} with exit code 0x{buildResult.ExitCode:X8}[/]");
-            return;
+            return false;
         }
 
         _console.MarkupLine($"[green]Successfully packed {id}[/]");
 
-        if (install)
+        if (_install)
         {
             var mainDrive = Directory.GetParent(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles));
             var appDataDir = Path.Combine(mainDrive?.FullName ?? "C:", "ProgramData", "FluentStoreBeta");
@@ -162,7 +160,7 @@ public class Plugin
             var statusFile = await pluginDir.GetFirstByNameAsync("status.tsv") as IFile;
             var entries = await PluginStatusRecord.ReadAsync(statusFile);
 
-            SystemFolder outputDir = new(pluginOutDir);
+            SystemFolder outputDir = new(_pluginOutDir);
             var pluginFile = await outputDir.GetFirstByNameAsync(fileName) as IFile;
             await pluginDir.CreateCopyOfAsync(pluginFile!, true);
 
@@ -175,5 +173,7 @@ public class Plugin
         }
 
         _console.WriteLine();
+
+        return true;
     }
 }
