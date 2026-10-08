@@ -60,6 +60,8 @@ public partial class Release
 
     public async Task PublishAsync()
     {
+        MSBuildLocator.RegisterDefaults();
+
         // Build and sign the main bundle
         //var msixBundlePath = @"E:\Documents\site\ipfs_test\FluentStore\AlphaInstaller\0.4.2\FluentStoreAlpha_0.4.2.0.msixbundle";
         var msixBundlePath = await BuildMsixBundle();
@@ -114,8 +116,6 @@ public partial class Release
 
     public async Task<string?> BuildMsixBundle()
     {
-        MSBuildLocator.RegisterDefaults();
-
         var appCsprojPath = Path.Combine(_repoDir, "FluentStore.App", "FluentStore.App.csproj");
         var versionStr = _plainAppVersion.ToString(4);
         Project appCsproj = new(appCsprojPath);
