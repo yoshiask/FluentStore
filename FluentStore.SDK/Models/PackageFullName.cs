@@ -11,12 +11,15 @@ public sealed partial record PackageFullName(string Name, Version Version, Archi
 
     public PackageFamilyName ToPackageFamilyName() => new(Name, PublisherId);
 
-    public static PackageFullName Parse(string packageFullName)
+    public static bool TryParse(string packageFullName, [NotNullWhen(true)] out PackageFullName pfn)
     {
         var rx = PackageFullNameRegex();
         var match = rx.Match(packageFullName);
         if (!match.Success)
-            throw new FormatException();
+        {
+            pfn = null;
+            return false;
+        }
 
         var name = match.Groups["name"].Value;
         var version = Version.Parse(match.Groups["ver"].Value);
@@ -24,7 +27,15 @@ public sealed partial record PackageFullName(string Name, Version Version, Archi
         var resourceId = match.Groups["rsrc"].Value;
         var publisherId = match.Groups["pub"].Value;
 
-        return new(name, version, architecture, resourceId, publisherId);
+        pfn = new(name, version, architecture, resourceId, publisherId);
+        return true;
+    }
+
+    public static PackageFullName Parse(string packageFullName)
+    {
+        if (!TryParse(packageFullName, out var pfn))
+            throw new FormatException();
+        return pfn;
     }
 
     [GeneratedRegex($"^{RxName}_{RxVersion}_{RxArchitecture}_{RxResourceId}_{RxPublisherId}$", RegexOptions.IgnoreCase)]

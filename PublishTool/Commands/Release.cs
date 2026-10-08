@@ -1,10 +1,14 @@
 ﻿using FluentStore.SDK.Models;
 using Humanizer;
+using Ipfs;
+using Ipfs.CoreApi;
+using Ipfs.Http;
 using Meziantou.Framework;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Locator;
 using Microsoft.Msix.Utils.AppxPackaging;
 using Microsoft.Msix.Utils.AppxPackagingInterop;
+using NuGet.Packaging;
 using NuGet.Versioning;
 using PublishTool.Support;
 using Spectre.Console;
@@ -17,6 +21,7 @@ namespace PublishTool.Commands;
 public partial class Release
 {
     private static readonly string[] _architectures = ["x64", "x86"];
+    private const string _fluentstoreIpns = "fluentstore.askharoun.com";
 
     private readonly IAnsiConsole _console;
     private readonly string _repoDir;
@@ -29,7 +34,9 @@ public partial class Release
     private readonly Version _plainAppVersion;
     private readonly string _releaseTag;
 
-    private readonly PathRoot _ipnsRootUri;
+    private readonly PathRoot _ipfsPath = new($"/ipfs", '/');
+    private readonly PathRoot _fluentstoreIpnsPath = new($"/ipns/{_fluentstoreIpns}", '/');
+    private readonly PathRoot _ipfsGatewayRootUri = new Uri("https://ipfs.askharoun.com");
     private readonly PathRoot _dependenciesOutputPath;
 
     private readonly PathFragment _taggedOutputPath;
@@ -52,7 +59,6 @@ public partial class Release
         _releaseTag = _appVersion.Release.Titleize();
 
         _dependenciesOutputPath = _outRootDir / "Dependencies";
-        _ipnsRootUri = new Uri("ipns://fluentstore.askharoun.com");
 
         _taggedOutputPath = $"{_releaseTag}Installer";
         _versionedOutputPath = _taggedOutputPath / _plainAppVersion.ToString(3);
@@ -60,43 +66,35 @@ public partial class Release
 
     public async Task PublishAsync()
     {
-        MSBuildLocator.RegisterDefaults();
-
         // Build and sign the main bundle
-        //var msixBundlePath = @"E:\Documents\site\ipfs_test\FluentStore\AlphaInstaller\0.4.2\FluentStoreAlpha_0.4.2.0.msixbundle";
-        var msixBundlePath = await BuildMsixBundle();
+        MSBuildLocator.RegisterDefaults();
+        var msixBundlePath = @"E:\Documents\site\ipfs_test\FluentStore\AlphaInstaller\0.4.2\FluentStoreAlpha_0.4.2.0.msixbundle";
+        //var msixBundlePath = await BuildMsixBundle();
         if (msixBundlePath is null)
             return;
 
-        // Locate and copy MSIX dependencies
-        var mainBundleMetadata = new AppxBundleMetadata(msixBundlePath);
-        HashSet<PackageIdentity> dependencies = [.. GetMsixBundleDependencies(mainBundleMetadata.AppxBundleReader)];
+        IpfsClient ipfsClient = new();
 
-        Directory.CreateDirectory(_dependenciesOutputPath.Value);
-        var allDepsDownloaded = true;
-        foreach (var dep in dependencies)
+        // Pin main MSIX bundle to IPFS. The `.appinstaller` file needs all the CIDs ahead of time
+        AppxBundleMetadata mainBundleMetadata = new(msixBundlePath);
+        var mainBundleCid = await _console.Status().StartAsync("Pinning MSIX bundle file to IPFS...", async ctx =>
         {
-            _console.Write($"Dependency {dep}:");
-
-            var depMsixPath = Directory
-                .EnumerateFiles(_outRootDir / _versionedOutputPath, "*", SearchOption.AllDirectories)
-                .FirstOrDefault(f => f.EndsWith($"\\{dep.Architecture}\\{dep.Name}.msix"));
-            if (depMsixPath is null)
+            var mainBundleIpfsNode = await ipfsClient.FileSystem.AddFileAsync(msixBundlePath, new AddFileOptions
             {
-                allDepsDownloaded = false;
-                _console.MarkupLine("\t[yellow]Could not locate.[/]");
-                continue;
-            }
+                PinName = $"{mainBundleMetadata.PackageFullName}.msixbundle",
+                Progress = new Progress<TransferProgress>(p => ctx.Status(new ByteSize(p.Bytes).Humanize()))
+            });
+            return mainBundleIpfsNode.Id;
+        });
+        var mainBundleIpfsPath = _ipfsPath / mainBundleCid;
+        _ipfsPathsToPin.Add(mainBundleIpfsPath);
+        _console.MarkupLineInterpolated($"[green]Pinned main bundle as {mainBundleCid}[/]");
 
-            File.Copy(depMsixPath, _dependenciesOutputPath / $"{dep}.msix", true);
-            _console.MarkupLine("\t[green]Found and copied.[/]");
-        }
-
-        if (!allDepsDownloaded)
-            _console.MarkupLine($"[yellow]Some dependencies couldn't be automatically located. Publish pipeline will require manual intervention.[/]");
+        // Identify and pin MSIX dependencies to IPFS
+        var dependencies = await PinMsixDependencies(ipfsClient, mainBundleMetadata);
 
         // Write `.appinstaller` file
-        var appInstallerPath = await WriteAppInstallerAsync(mainBundleMetadata, dependencies);
+        var appInstallerPath = await WriteAppInstallerAsync(mainBundleMetadata, mainBundleIpfsPath, dependencies);
 
         return;
 
@@ -113,7 +111,6 @@ public partial class Release
         if (!pluginsPackedSuccessfully)
             return;
     }
-
     public async Task<string?> BuildMsixBundle()
     {
         var appCsprojPath = Path.Combine(_repoDir, "FluentStore.App", "FluentStore.App.csproj");
@@ -197,9 +194,74 @@ public partial class Release
         }
     }
 
-    public async Task<string?> WriteAppInstallerAsync(AppxBundleMetadata mainBundleMetadata, IEnumerable<PackageIdentity> dependencies)
+    public async Task<Dictionary<PackageIdentity, string>> PinMsixDependencies(IpfsClient ipfsClient, AppxBundleMetadata mainBundleMetadata)
     {
-        var appInstallerPathFrag = _taggedOutputPath / $"FluentStore{_releaseTag}.appinstaller";
+        Dictionary<PackageIdentity, string> dependencies = [];
+
+        PinListOptions pinListOptions = new() { Names = true, Stream = true, Type = PinType.Recursive };
+        Dictionary<PackageFullName, Cid> existingPinnedDependencies = [];
+        await foreach (var pin in ipfsClient.Pin.ListAsync(pinListOptions))
+        {
+            var pinName = pin.Name;
+            if (pinName is null)
+                continue;
+
+            if (pinName.EndsWith(".appx") || pinName.EndsWith(".msix"))
+                pinName = pinName[..^5];
+
+            if (!PackageFullName.TryParse(pinName, out var pfn))
+                continue;
+
+            existingPinnedDependencies[pfn] = pin.Cid;
+        }
+
+        foreach (var dep in GetMsixBundleDependencies(mainBundleMetadata.AppxBundleReader))
+        {
+            _console.WriteLine($"Dependency {dep}:");
+
+            var depPfn = dep.ToPackageFullName(string.Empty);
+
+            if (existingPinnedDependencies.TryGetValue(depPfn, out var depCid))
+            {
+                dependencies[dep] = depCid;
+                _console.MarkupLineInterpolated($"    [green]Already pinned as {depCid}.[/]");
+                continue;
+            }
+
+            var depMsixPath = Directory
+                .EnumerateFiles(_outRootDir / _versionedOutputPath, "*", SearchOption.AllDirectories)
+                .FirstOrDefault(f => f.EndsWith($"\\{dep.Architecture}\\{dep.Name}.msix"));
+            if (depMsixPath is null)
+            {
+                _console.MarkupLine("    [yellow]Could not locate.[/]");
+                var depCidStr = await _console.AskAsync<string>($"CID? ");
+                dependencies[dep] = depCidStr;
+                continue;
+            }
+
+            _console.MarkupLine("    [green]Found dependency file.[/]");
+
+            var ipfsNode = await _console.Status().StartAsync("    Pinning dependency MSIX file to IPFS...", async ctx =>
+            {
+                return await ipfsClient.FileSystem.AddFileAsync(depMsixPath, new AddFileOptions
+                {
+                    PinName = $"{depPfn}.msix",
+                    Progress = new Progress<TransferProgress>(p => ctx.Status(new ByteSize(p.Bytes).Humanize()))
+                });
+            });
+
+            dependencies[dep] = _ipfsPath / ipfsNode.Id;
+
+            _console.MarkupLineInterpolated($"    [green]Pinned as {ipfsNode.Id}.[/]");
+        }
+
+        _ipfsPathsToPin.AddRange(dependencies.Values);
+        return dependencies;
+    }
+
+    public async Task<string?> WriteAppInstallerAsync(AppxBundleMetadata mainBundleMetadata, string mainBundleIpfsPath, IDictionary<PackageIdentity, string> dependencies)
+    {
+        var appInstallerPath = _taggedOutputPath / $"FluentStore{_releaseTag}.appinstaller";
 
         XDocument xDoc = new();
         {
@@ -209,35 +271,39 @@ public partial class Release
             XElement xAppInstaller = new(nsAppInstaller + "AppInstaller",
                 new XAttribute("xmlns", nsAppInstaller),
                 new XAttribute(XNamespace.Xmlns + "fluent2610", nsFluent2610));
+
             xAppInstaller.SetAttributeValue("Version", mainBundleMetadata.Version);
-            xAppInstaller.SetAttributeValue("Uri", _ipnsRootUri / appInstallerPathFrag);
+            xAppInstaller.SetAttributeValue("Uri", _ipfsGatewayRootUri / (_fluentstoreIpnsPath / appInstallerPath));
+            xAppInstaller.SetAttributeValue(nsFluent2610 + "IpfsPath", _fluentstoreIpnsPath / appInstallerPath);
             xDoc.Add(xAppInstaller);
 
             XElement xMainPackage = new(nsAppInstaller + "MainBundle");
             xMainPackage.SetAttributeValue("Name", mainBundleMetadata.PackageName);
             xMainPackage.SetAttributeValue("Publisher", mainBundleMetadata.Publisher);
             xMainPackage.SetAttributeValue("Version", mainBundleMetadata.Version);
+            xMainPackage.SetAttributeValue("Uri", _ipfsGatewayRootUri / mainBundleIpfsPath);
+            xMainPackage.SetAttributeValue(nsFluent2610 + "IpfsPath", mainBundleIpfsPath);
             xAppInstaller.Add(xMainPackage);
 
-            PathFragment dependenciesPath = "Dependencies";
             XElement xDependencies = new(nsAppInstaller + "Dependencies");
             xAppInstaller.Add(xDependencies);
-            foreach (var dependency in dependencies)
+            foreach ((var dependency, var depCid) in dependencies)
             {
+                var depIpfsPath = _ipfsPath / depCid;
                 XElement xDependency = new(nsAppInstaller + "Package");
                 xDependency.SetAttributeValue("Name", dependency.Name);
                 xDependency.SetAttributeValue("Version", dependency.Version);
                 xDependency.SetAttributeValue("ProcessorArchitecture", dependency.Architecture);
                 xDependency.SetAttributeValue("Publisher", dependency.Publisher);
-                // TODO: Generate this file after adding the deps to IPFS so we can use the more stable CID
-                xDependency.SetAttributeValue("Uri", _ipnsRootUri / (dependenciesPath / $"{dependency}.msix"));
+                xDependency.SetAttributeValue("Uri", _ipfsGatewayRootUri / depIpfsPath);
+                xDependency.SetAttributeValue(nsFluent2610 + "IpfsPath", depIpfsPath);
                 xDependencies.Add(xDependency);
             }
         }
 
         // TODO: Add custom element declaring dependency on .NET runtime
 
-        var appInstallerFilePath = _outRootDir / appInstallerPathFrag;
+        var appInstallerFilePath = _outRootDir / appInstallerPath;
         await using FileStream stream = new(appInstallerFilePath, FileMode.Create);
         await using var xmlWriter = XmlWriter.Create(stream, new XmlWriterSettings
         {
