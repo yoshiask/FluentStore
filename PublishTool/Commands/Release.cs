@@ -5,15 +5,15 @@ using Ipfs;
 using Ipfs.CoreApi;
 using Ipfs.Http;
 using Meziantou.Framework;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Locator;
 using Microsoft.Msix.Utils.AppxPackaging;
 using Microsoft.Msix.Utils.AppxPackagingInterop;
+using Newtonsoft.Json.Linq;
 using NuGet.Packaging;
 using NuGet.Versioning;
 using PublishTool.Support;
+using Sleet;
 using Spectre.Console;
-using System.Security;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -69,8 +69,9 @@ public partial class Release
     {
         // Build and sign the main bundle
         if (!MSBuildLocator.IsRegistered)
-        MSBuildLocator.RegisterDefaults();
-        var msixBundlePath = await BuildMsixBundle();
+            MSBuildLocator.RegisterDefaults();
+        var msixBundlePath = @"E:\Documents\site\ipfs_test\FluentStore\AlphaInstaller\FluentStoreAlpha_0.4.2.0.msixbundle";
+        //var msixBundlePath = await BuildMsixBundle();
         if (msixBundlePath is null)
             return;
 
@@ -97,8 +98,6 @@ public partial class Release
         // Write `.appinstaller` file
         var appInstallerPath = await WriteAppInstallerAsync(mainBundleMetadata, mainBundleIpfsPath, dependencies);
 
-        return;
-
         // Pack plugins
         Plugin pluginCommand = new(_console,
             pluginId: null,
@@ -108,9 +107,11 @@ public partial class Release
             saveLogs: false,
             install: false,
             force: true);
-        var pluginsPackedSuccessfully = await pluginCommand.BuildPluginsAsync();
+        var pluginsPackedSuccessfully = true;// await pluginCommand.BuildPluginsAsync();
         if (!pluginsPackedSuccessfully)
             return;
+
+        await UpdatePluginFeedAsync();
     }
 
     public async Task<string?> BuildMsixBundle()
@@ -130,6 +131,7 @@ public partial class Release
                 "--cert", @"E:\ssh-keys\yoshiask_self2027.pfx",
                 "--cert-password", certPassword,
                 "--output", msixBundlePath,
+                //"--no-build", // This fails, for some reason?
             ])
             .WithWorkingDirectory(appProjDir)
             .WithValidation(CommandResultValidation.None)
@@ -312,6 +314,40 @@ public partial class Release
         _console.MarkupLineInterpolated($"[green]Generated App Installer file at {appInstallerFilePath}[/]");
 
         return appInstallerFilePath;
+    }
+
+    public async Task UpdatePluginFeedAsync()
+    {
+        var feedDirPath = (PathFragment)"Plugins" / "NuGet";
+        JObject feedConfigJson = new() {
+            ["sources"] = new JArray
+            {
+                new JObject
+                {
+                    ["name"] = "fluentStoreIpfs",
+                    ["type"] = "local",
+                    ["path"] = _outRootDir / feedDirPath,
+                    ["baseURI"] = _ipfsGatewayRootUri / (_fluentstoreIpnsPath / feedDirPath),
+                }
+            }
+        };
+        var feedConfig = LocalSettings.Load(feedConfigJson);
+
+        AnsiConsoleNuGetLogger log = new(_console, _verbose);
+
+        using var cache = new LocalCache();
+        var fileSystem = await FileSystemFactory.CreateFileSystemAsync(feedConfig, cache, "fluentStoreIpfs", log)
+            ?? throw new InvalidOperationException("Unable to find source 'fluentStoreIpfs'.");
+
+        var success = await PushCommand.RunAsync(
+            feedConfig,
+            fileSystem,
+            [Path.Combine(_repoDir, "Sources", "output")],
+            force: false,
+            skipExisting: true,
+            log);
+        if (!success)
+            throw new Exception();
     }
 
     private static Version GetVersionFromULong(ulong value)

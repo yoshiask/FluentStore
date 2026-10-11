@@ -19,6 +19,7 @@
         <PackageReference Include="Microsoft.Build.Locator" Version="1.10.12" />
         <PackageReference Include="Microsoft.Build.Runtime" Version="18.10.1" ExcludeAssets="runtime" />
         <PackageReference Include="Microsoft.Msix.Utils" Version="2.1.1" />
+        <PackageReference Include="SleetLib" Version="7.2.0" />
         <PackageReference Include="Spectre.Console" Version="0.57.2" />
 
         <ProjectReference Include="..\FluentStore.SDK\FluentStore.SDK.csproj" />
