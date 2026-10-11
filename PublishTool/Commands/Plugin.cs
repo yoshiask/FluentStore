@@ -7,6 +7,7 @@ using NuGet.Frameworks;
 using NuGet.Versioning;
 using OwlCore.Storage;
 using OwlCore.Storage.System.IO;
+using PublishTool.Support;
 using Spectre.Console;
 
 namespace PublishTool.Commands;
@@ -110,38 +111,18 @@ public class Plugin
 
         ctx.Status($"Packing {header.Title}...");
 
-        PipeTarget buildLogOutPipe = PipeTarget.Null;
-        PipeTarget buildLogErrPipe = PipeTarget.Create(async (s, t) =>
-        {
-            StreamReader reader = new(s);
-            var text = await reader.ReadToEndAsync(t);
-            _console.MarkupInterpolated($"[red]{text}[/]");
-        });
-
-        if (_verbose)
-        {
-            buildLogOutPipe = PipeTarget.Create(async (s, t) =>
-            {
-                StreamReader reader = new(s);
-                var text = await reader.ReadToEndAsync(t);
-                _console.Write(text);
-            });
-        }
+        string? logOutDir = null, logName = null;
         if (_saveLogs)
         {
-            var buildLogOutPath = Path.Combine(_pluginOutDir, $"{fileName}_out.txt");
-            var buildLogErrPath = Path.Combine(_pluginOutDir, $"{fileName}_err.txt");
-
-            buildLogOutPipe = PipeTarget.Merge(buildLogOutPipe, PipeTarget.ToFile(buildLogOutPath));
-            buildLogErrPipe = PipeTarget.Merge(buildLogErrPipe, PipeTarget.ToFile(buildLogErrPath));
+            logOutDir = _pluginOutDir;
+            logName = fileName;
         }
 
         var buildResult = await Cli.Wrap("dotnet")
             .WithArguments(["pack", "-c", _configuration, "-o", _pluginOutDir])
             .WithWorkingDirectory(pluginSrcDir)
             .WithValidation(CommandResultValidation.None)
-            .WithStandardOutputPipe(buildLogOutPipe)
-            .WithStandardErrorPipe(buildLogErrPipe)
+            .WithStandardLogPipes(_console, _verbose, logOutDir, logName)
             .ExecuteAsync();
         if (buildResult.ExitCode != 0)
         {

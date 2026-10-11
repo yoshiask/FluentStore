@@ -23,8 +23,8 @@ internal class AnsiConsoleMsbuildLogger(IAnsiConsole console) : ILogger
             eventSource.ErrorRaised += EventSource_ErrorRaised;
             eventSource.BuildStarted += EventSource_AnyEventRaised;
             eventSource.BuildFinished += EventSource_AnyEventRaised;
-            eventSource.ProjectStarted += EventSource_AnyEventRaised;
-            eventSource.ProjectFinished += EventSource_AnyEventRaised;
+            eventSource.TargetStarted += EventSource_AnyEventRaised;
+            eventSource.TargetFinished += EventSource_AnyEventRaised;
         }
     }
 
@@ -36,8 +36,25 @@ internal class AnsiConsoleMsbuildLogger(IAnsiConsole console) : ILogger
 
     private void EventSource_AnyEventRaised(object sender, BuildEventArgs e)
     {
-        if (e.Message is not null)
-            console.MarkupLineInterpolated($"{e.Message}");
+        switch (e)
+        {
+            case TargetStartedEventArgs targetStartedEvent:
+                console.WriteLine($"Building target {targetStartedEvent.TargetName} for '{targetStartedEvent.ProjectFile}'...");
+                break;
+
+            case TargetFinishedEventArgs targetFinishedEvent:
+                var slug = $"Target {targetFinishedEvent.TargetName} for '{targetFinishedEvent.ProjectFile}'";
+                if (targetFinishedEvent.Succeeded)
+                    console.MarkupLineInterpolated($"[green]{slug} succeeded[/]");
+                else
+                    console.MarkupLineInterpolated($"[red]{slug} failed[/]");
+                break;
+
+            default:
+                if (e.Message is not null)
+                    console.MarkupLineInterpolated($"{e.Message}");
+                break;
+        }
     }
 
     public void Shutdown()
@@ -54,8 +71,8 @@ internal class AnsiConsoleMsbuildLogger(IAnsiConsole console) : ILogger
             _eventSource.ErrorRaised -= EventSource_ErrorRaised;
             _eventSource.BuildStarted -= EventSource_AnyEventRaised;
             _eventSource.BuildFinished -= EventSource_AnyEventRaised;
-            _eventSource.ProjectStarted -= EventSource_AnyEventRaised;
-            _eventSource.ProjectFinished -= EventSource_AnyEventRaised;
+            _eventSource.TargetStarted -= EventSource_AnyEventRaised;
+            _eventSource.TargetFinished -= EventSource_AnyEventRaised;
         }
     }
 }

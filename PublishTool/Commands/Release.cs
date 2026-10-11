@@ -1,4 +1,5 @@
-﻿using FluentStore.SDK.Models;
+﻿using CliWrap;
+using FluentStore.SDK.Models;
 using Humanizer;
 using Ipfs;
 using Ipfs.CoreApi;
@@ -12,6 +13,7 @@ using NuGet.Packaging;
 using NuGet.Versioning;
 using PublishTool.Support;
 using Spectre.Console;
+using System.Security;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -29,6 +31,7 @@ public partial class Release
     private readonly string _ipfsKeyName;
     private readonly string _configuration;
     private readonly bool _verbose;
+    private readonly bool _saveLogs = false;
 
     private readonly NuGetVersion _appVersion;
     private readonly Version _plainAppVersion;
@@ -40,7 +43,6 @@ public partial class Release
     private readonly PathRoot _dependenciesOutputPath;
 
     private readonly PathFragment _taggedOutputPath;
-    private readonly PathFragment _versionedOutputPath;
 
     private readonly HashSet<string> _ipfsPathsToPin = [];
 
@@ -61,15 +63,13 @@ public partial class Release
         _dependenciesOutputPath = _outRootDir / "Dependencies";
 
         _taggedOutputPath = $"{_releaseTag}Installer";
-        _versionedOutputPath = _taggedOutputPath / _plainAppVersion.ToString(3);
     }
 
     public async Task PublishAsync()
     {
         // Build and sign the main bundle
         MSBuildLocator.RegisterDefaults();
-        var msixBundlePath = @"E:\Documents\site\ipfs_test\FluentStore\AlphaInstaller\0.4.2\FluentStoreAlpha_0.4.2.0.msixbundle";
-        //var msixBundlePath = await BuildMsixBundle();
+        var msixBundlePath = await BuildMsixBundle();
         if (msixBundlePath is null)
             return;
 
@@ -111,46 +111,38 @@ public partial class Release
         if (!pluginsPackedSuccessfully)
             return;
     }
+
     public async Task<string?> BuildMsixBundle()
     {
-        var appCsprojPath = Path.Combine(_repoDir, "FluentStore.App", "FluentStore.App.csproj");
-        var versionStr = _plainAppVersion.ToString(4);
-        Project appCsproj = new(appCsprojPath);
+        var appProjDir = Path.Combine(_repoDir, "FluentStore.App");
+        var msixBundlePath = _outRootDir / (_taggedOutputPath / $"FluentStore{_releaseTag}_{_plainAppVersion.ToString(4)}.msixbundle");
 
-        var packageDir = new DirectoryInfo(_outRootDir / _versionedOutputPath);
-        packageDir.Create();
+        var certPassword = await _console.PromptAsync(new TextPrompt<string>("Certificate password: ").Secret());
 
-        // Prepare project for building
-        var projInstance = Microsoft.Build.Execution.BuildManager.DefaultBuildManager.GetProjectInstanceForBuild(appCsproj);
-        projInstance.SetProperty("Configuration", _configuration);
-        projInstance.SetProperty("GenerateAppxPackageOnBuild", "true");
-        projInstance.SetProperty("AppxBundle", "Always");
-        projInstance.SetProperty("AppxPackageDir", packageDir.FullName);
-        // An architecture must be specified, but a bundle containing all architectures will be generated anyway
-        projInstance.SetProperty("Platform", _architectures[0]);
-        projInstance.SetProperty("RuntimeIdentifiers", $"win-{_architectures[0]}");
-
-        AnsiConsoleMsbuildLogger logger = new(_console)
+        var buildResult = await Cli.Wrap("winapp")
+            .WithArguments([
+                "package", "FluentStore.App.csproj",
+                // Workaround until https://github.com/microsoft/winappCli/pull/1032 is merged
+                "-p", "IsRidAgnostic=false",
+                .._architectures.SelectMany<string, string>(a => ["--arch", a]),
+                "-c", _configuration,
+                "--cert", @"E:\ssh-keys\yoshiask_self2027.pfx",
+                "--cert-password", certPassword,
+                "--output", msixBundlePath,
+            ])
+            .WithWorkingDirectory(appProjDir)
+            .WithValidation(CommandResultValidation.None)
+            .WithStandardLogPipes(_console, true, null, null)
+            .ExecuteAsync();
+        if (buildResult.ExitCode is not 0)
         {
-            Verbosity = _verbose
-                ? Microsoft.Build.Framework.LoggerVerbosity.Diagnostic
-                : Microsoft.Build.Framework.LoggerVerbosity.Normal,
-        };
-
-        var isSuccess = projInstance.Build(["Restore", "Build", "GenerateMsixPackage"], [logger]);
-        if (!isSuccess)
-        {
-            _console.MarkupLineInterpolated($"[red]Failed to build bundle[/]");
+            _console.MarkupLine($"[red]Failed to build MSIX bundle with exit code 0x{buildResult.ExitCode:X8}[/]");
             return null;
         }
 
-        var packageSrcFile = packageDir.EnumerateFiles(Path.Combine($"FluentStore.App_{versionStr}_Test", "*.msixbundle")).First();
-        var packageDstPath = Path.Combine(packageDir.FullName, $"FluentStore{_releaseTag}_{versionStr}.msixbundle");
-        packageSrcFile.CopyTo(packageDstPath, true);
+        _console.MarkupLine($"[green]Successfully built MSIX bundle[/]");
 
-        _console.MarkupLine($"[green]Built MSIX bundle at {packageDstPath}[/]");
-
-        return packageDstPath;
+        return msixBundlePath;
     }
 
     public IEnumerable<PackageIdentity> GetMsixBundleDependencies(IAppxBundleReader bundleReader)
@@ -229,7 +221,7 @@ public partial class Release
             }
 
             var depMsixPath = Directory
-                .EnumerateFiles(_outRootDir / _versionedOutputPath, "*", SearchOption.AllDirectories)
+                .EnumerateFiles(_outRootDir / _taggedOutputPath, "*", SearchOption.AllDirectories)
                 .FirstOrDefault(f => f.EndsWith($"\\{dep.Architecture}\\{dep.Name}.msix"));
             if (depMsixPath is null)
             {
