@@ -58,7 +58,8 @@ public class Plugin
 
     public async Task<bool> BuildPluginsAsync()
     {
-        MSBuildLocator.RegisterDefaults();
+        if (!MSBuildLocator.IsRegistered)
+            MSBuildLocator.RegisterDefaults();
 
         Directory.CreateDirectory(_pluginOutDir);
 

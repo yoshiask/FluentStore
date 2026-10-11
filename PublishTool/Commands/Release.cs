@@ -68,6 +68,7 @@ public partial class Release
     public async Task PublishAsync()
     {
         // Build and sign the main bundle
+        if (!MSBuildLocator.IsRegistered)
         MSBuildLocator.RegisterDefaults();
         var msixBundlePath = await BuildMsixBundle();
         if (msixBundlePath is null)
